@@ -1,5 +1,5 @@
 # CIRRUS
-<u>**C**<u>omputational <u>**I**<u>nfrastructure for <u>**R**econfigurable <u>**R**egimes and <u>**U**nified <u>**S**olvers. 
+<u>**C**</u>omputational <u>**I**</u>nfrastructure for <u>**R**</u>econfigurable <u>**R**</u>egimes and <u>**U**</u>nified <u>**S**</u>olvers. 
 
 A package working with energy transport in fluid and heat transfer regimes. The main diver for the solver and problem implementation is in c++ with auxiliary scripts for plotting in python.
 
