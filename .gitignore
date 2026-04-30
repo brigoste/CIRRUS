@@ -67,3 +67,40 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+
+# =========================
+# CIRRUS simulation output
+# =========================
+output/
+results/
+data/
+post/
+plots/
+*.csv
+*.vtk
+*.vtu
+*.dat
+*.h5
+*.plt
+
+# =========================
+# Python
+# =========================
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# =========================
+# IDE
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# OS
+# =========================
+.DS_Store
+Thumbs.db
