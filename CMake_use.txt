@@ -1,6 +1,11 @@
-I have found it can be difficult to fully build projects, as I am not a computer scientist and haven't had any formal education on this front. I am including this set of instructions on how to compile this code using CMake and have it run. I automated the process slightly, but it still doens't work how I want. In the future, hopefully I can include the directories in such a way that exectuing the code via VSCode will pull the correct build files, compile, and execute the code for me and then do so without needing to build. I already include a clean build option so I don't have to rebuild from scratch every time.
+I have found it can be difficult to fully build projects, as I am not a computer scientist and haven't had any formal education on this front. 
+I am including this set of instructions on how to compile this code using CMake and have it run. 
+I automated the process slightly, but it still doens't work how I want. 
+In the future, hopefully I can include the directories in such a way that exectuing the code via VSCode will pull the correct build files, compile, 
+and execute the code for me and then do so without needing to build. I already include a clean build option so I don't have to rebuild from scratch every time.
 
-As a note, this will only work if the files listed in CMakeLists.txt are compatible with your system. Make sure, for example, to change the file path for your system to know which Python and C++ scripts you want to it to reference.
+As a note, this will only work if the files listed in CMakeLists.txt are compatible with your system. 
+Make sure, for example, to change the file path for your system to know which Python and C++ scripts you want to it to reference.
 
 Instructions:
 1. Navigate in termainal/commandPrompt/etc. to the project folder.
