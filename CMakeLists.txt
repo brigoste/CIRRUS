@@ -17,7 +17,7 @@ include_directories(
 # Source files
 # --------------------------------------------------
 add_executable(HT_CFD_Package
-    main.cpp
+    src/main.cpp
 
     system/HeatSystem1D.cpp
     mesh/Mesh1D.cpp
@@ -30,6 +30,8 @@ add_executable(HT_CFD_Package
     bc/BoundaryFace.hpp
 
     solver/TDMA.cpp
+
+    src/Plot.py
 )
 
 target_compile_definitions(HT_CFD_Package PRIVATE
