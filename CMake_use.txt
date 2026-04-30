@@ -1,0 +1,16 @@
+I have found it can be difficult to fully build projects, as I am not a computer scientist and haven't had any formal education on this front. I am including this set of instructions on how to compile this code using CMake and have it run. I automated the process slightly, but it still doens't work how I want. In the future, hopefully I can include the directories in such a way that exectuing the code via VSCode will pull the correct build files, compile, and execute the code for me and then do so without needing to build. I already include a clean build option so I don't have to rebuild from scratch every time.
+
+Instructions:
+1. Navigate in termainal/commandPrompt/etc. to the project folder.
+2. Enter Build folder.
+3. Run "cmake --build . --clean-first"
+4. Run "HT_CFD_Package.exe"
+
+
+If you want to rebiuld from scratch (no cleaning) then do the following (for CommandPrompt/Windows PowerShell):
+    * Note -> "cmd -" just indicates to run this in the terminal. Don't actually type those in for the command.
+1. Remove the build directory (cmd - "rmdir /s /q build")
+2. Create build directory (cmd - "mkdir build")
+3. Enter build directory (cmd - "cd build")
+4. Make project (cmd "cmake --build .")
+5. Run "HT_CFD_Package.exe"
