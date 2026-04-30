@@ -16,6 +16,7 @@ Instructions:
 
 If you want to rebiuld from scratch (no cleaning) then do the following (for CommandPrompt/Windows PowerShell):
     * Note -> "cmd -" just indicates to run this in the terminal. Don't actually type those in for the command.
+
 1. Remove the build directory (cmd - "rmdir /s /q build")
 2. Create build directory (cmd - "mkdir build")
 3. Enter build directory (cmd - "cd build")
