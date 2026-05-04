@@ -1,0 +1,12 @@
+===== CIRRUS BUILD LOG ===== 
+Build started: Mon 05/04/2026  9:18:38.98 
+[1/10] Building CXX object CMakeFiles/CIRRUS.dir/mesh/Mesh1D.cpp.obj
+[2/10] Building CXX object CMakeFiles/CIRRUS.dir/discretization/Discretization1D.cpp.obj
+[3/10] Building CXX object CMakeFiles/CIRRUS.dir/coeffs/Coefficients1D.cpp.obj
+[4/10] Building CXX object CMakeFiles/CIRRUS.dir/bc/DirichletBC.cpp.obj
+[5/10] Building CXX object CMakeFiles/CIRRUS.dir/bc/NeumannBC.cpp.obj
+[6/10] Building CXX object CMakeFiles/CIRRUS.dir/bc/ConvectiveBC.cpp.obj
+[7/10] Building CXX object CMakeFiles/CIRRUS.dir/system/HeatSystem1D.cpp.obj
+[8/10] Building CXX object CMakeFiles/CIRRUS.dir/solver/TDMA.cpp.obj
+[9/10] Building CXX object CMakeFiles/CIRRUS.dir/src/main.cpp.obj
+[10/10] Linking CXX executable CIRRUS.exe
