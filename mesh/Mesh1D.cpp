@@ -1,21 +1,24 @@
-#include "mesh/Mesh1D.hpp"
+#pragma once
 #include "bc/BoundaryFace.hpp"
+#include <stdexcept>
 
-BoundaryFace Mesh1D::faceType(int i) const
-{
-    if (i == 0) return BoundaryFace::Left;
-    if (i == n - 1) return BoundaryFace::Right;
-    return BoundaryFace::Interior;
-}
+#include <vector>
 
-Mesh1D::Mesh1D(int n_, double L_, double A_, double k_)
-    : n(n_), L(L_), A(A_), k(k_)
-{
-    dx = L / static_cast<double>(n - 1);
+struct Mesh1D {
+    // --- grid definition ---
+    int n;          // number of nodes
+    double L;       // domain length
+    double dx;      // uniform spacing
 
-    x.resize(n);
+    // --- material / physics properties ---
+    double A;       // cross-sectional area
+    double k;       // thermal conductivity
 
-    for (int i = 0; i < n; ++i) {
-        x[i] = i * dx;
-    }
-}
+    // --- geometry ---
+    std::vector<double> x;
+
+    // --- constructor ---
+    Mesh1D(int n_, double L_, double A_, double k_);
+
+    BoundaryFace faceType(int i) const;
+};
