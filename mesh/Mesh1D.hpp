@@ -1,5 +1,6 @@
 #pragma once
 #include "bc/BoundaryFace.hpp"
+#include <stdexcept>
 
 #include <vector>
 
