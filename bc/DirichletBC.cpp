@@ -1,22 +1,16 @@
-#include "bc/DirichletBC.hpp"
-#include "mesh/Mesh1D.hpp"
-#include "coeffs/Coefficients1D.hpp"
+#include "DirichletBC.hpp"
+#include "system/LinearSystem.hpp"
+#include <iostream> //debugging
 
-DirichletBC::DirichletBC(int i, double T)
-    : i_(i), T_(T) {}
+DirichletBC::DirichletBC(int face, double value)
+    : face_(face), value_(value) {}
 
-void DirichletBC::apply(
-    const Mesh1D& mesh,
-    Coefficients1D& c
-) const
+void DirichletBC::apply([[maybe_unused]] const Mesh1D& m, LinearSystem& sys, [[maybe_unused]] double k, [[maybe_unused]] double A) const
 {
-    int i = i_;
+    int i = face_;
 
-    // -------------------------------------------------
-    // Strong Dirichlet enforcement (row replacement)
-    // -------------------------------------------------
-    c.aP[i] = 1.0;
-    c.aW[i] = 0.0;
-    c.aE[i] = 0.0;
-    c.b[i]  = T_;
+    sys.aP[i] = 1.0;
+    sys.aW[i] = 0.0;
+    sys.aE[i] = 0.0;
+    sys.b[i]  = value_;
 }
