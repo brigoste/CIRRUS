@@ -8,6 +8,7 @@ project(CIRRUS LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(PYTHON_EXECUTABLE "C:/Users/E40112856/.julia/conda/3/x86_64/python.exe")
 
 # -----------------------------
 # Build type
@@ -65,3 +66,14 @@ target_compile_options(CIRRUS PRIVATE
     -Wextra
     -Wpedantic
 )
+
+target_include_directories(CIRRUS PRIVATE ${CMAKE_BINARY_DIR})
+
+configure_file(
+    ${CMAKE_SOURCE_DIR}/config.h.in
+    ${CMAKE_BINARY_DIR}/config.h
+)
+
+# target_compile_definitions(CIRRUS PRIVATE
+#     PYTHON_EXECUTABLE="${PYTHON_EXECUTABLE}"
+# )
