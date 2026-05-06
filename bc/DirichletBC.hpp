@@ -1,15 +1,13 @@
 #pragma once
-
 #include "BoundaryCondition.hpp"
 
 class DirichletBC : public BoundaryCondition {
-public:
-    DirichletBC(int i, double T);
+    public:
+        DirichletBC(int face, double value);
 
-    void apply(const Mesh1D& mesh,
-               Coefficients1D& c) const override;
+        void apply(const Mesh1D& m, LinearSystem& sys, double k, double A) const override;
 
-private:
-    int i_;
-    double T_;
+    private:
+        int face_;
+        double value_;
 };
