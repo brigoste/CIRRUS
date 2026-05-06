@@ -12,7 +12,7 @@
 #include "bc/ConvectiveBC.hpp"
 #include "bc/NeumannBC.hpp"
 
-#include "config.h.in"
+#include "config.h"
 
 
 #ifdef _WIN32
@@ -44,6 +44,9 @@ bool runPythonProcess(
     si.cb = sizeof(si);
 
     PROCESS_INFORMATION pi{};
+
+    // std::wcout << L"CMD: " << cmd << L"\n";
+    // std::wcout << L"PY: " << wPython << L"\n";
 
     BOOL ok = CreateProcessW(
         nullptr,
