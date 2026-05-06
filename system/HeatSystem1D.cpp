@@ -1,118 +1,51 @@
 #include "HeatSystem1D.hpp"
 #include "discretization/Discretization1D.hpp"
+#include <functional>
+#include "Solver/SolverMethod.hpp"
+#include <iostream>
+
 
 HeatSystem1D::HeatSystem1D(int n, double L, double A, double k)
-    : mesh_(n, L, A, k),
-      coeffs_(n)
+    : mesh_(n, L),
+      sys_(n),
+      A_(A),
+      k_(k)
+{}
+void HeatSystem1D::assemble()
 {
-}
+    sys_.reset();
 
-// ----------------------------------------------------
-// Add boundary condition
-// ----------------------------------------------------
+    discretize_1D(mesh_, sys_, k_, A_);
+
+    for (const auto& bc : bcs_)
+    {
+        bc->apply(mesh_, sys_, k_, A_);
+    }
+}
+void HeatSystem1D::setSource(
+    std::function<double(double)> Su_func,
+    std::function<double(double)> Sp_func)
+{
+    sys_.setSource(Su_func, Sp_func, mesh_.x);
+}
 void HeatSystem1D::addBC(std::unique_ptr<BoundaryCondition> bc)
 {
     bcs_.push_back(std::move(bc));
 }
-
-// ----------------------------------------------------
-// Assemble linear system
-// ----------------------------------------------------
-void HeatSystem1D::assemble()
+std::vector<double> HeatSystem1D::solve(SolverMethod method, int iter, double tol, double omega)
 {
-    const Mesh1D& mesh = mesh_;
-    Coefficients1D& c = coeffs_;
+    // std::cout << "Entering solve()\n";
 
-    int n = mesh.n;
-    double dx = mesh.dx;
-    double A  = mesh.A;
-    double k  = mesh.k;
-
-    // -------------------------------------------------
-    // 1. RESET COEFFICIENTS
-    // -------------------------------------------------
-    for (int i = 0; i < n; ++i) {
-        c.aP[i] = 0.0;
-        c.aE[i] = 0.0;
-        c.aW[i] = 0.0;
-        c.b[i]  = 0.0;
+    switch (method)
+    {
+        case SolverMethod::TDMA:
+            return TDMA(sys_);
+        case SolverMethod::GS:
+            return GaussSeidel(sys_, iter, tol);
+        case SolverMethod::SOR:
+            return SOR(sys_, iter, tol, omega);
+        default:
+            throw std::runtime_error("Unknown solver method");
     }
 
-    // -------------------------------------------------
-    // 2. INTERIOR DISCRETIZATION (1D diffusion)
-    // -------------------------------------------------
-    double aw = k * A / dx;
-    double ae = k * A / dx;
-
-    for (int i = 1; i < n - 1; ++i) {
-        c.aW[i] = aw;
-        c.aE[i] = ae;
-        c.aP[i] = aw + ae;
-        c.b[i]  = 0.0;
-    }
-    // -------------------------------------------------
-    // 3. APPLY SOURCE TERMS (Linearized)
-    // -------------------------------------------------
-    for (int i = 0; i < n; ++i) {
-        c.aP[i] -= c.Sp[i];
-        c.b[i]  += c.Su[i];
-    }
-
-    // -------------------------------------------------
-    // 4. APPLY BOUNDARY CONDITIONS
-    // -------------------------------------------------
-    for (const auto& bc : bcs_) {
-        bc->apply(mesh, c);
-    }
-}
-
-// ----------------------------------------------------
-// Solve system using TDMA
-// ----------------------------------------------------
-std::vector<double> HeatSystem1D::solve()
-{
-    return TDMA(coeffs_);
-}
-
-// ----------------------------------------------------
-// Accessors
-// ----------------------------------------------------
-const Mesh1D& HeatSystem1D::mesh() const {
-    return mesh_;
-}
-
-const Coefficients1D& HeatSystem1D::coeffs() const {
-    return coeffs_;
-}
-
-void HeatSystem1D::setSource(std::function<double(double)> Su_func,
-                             std::function<double(double)> Sp_func)
-{
-    int n = mesh_.n;
-
-    for (int i = 0; i < n; ++i) {
-        double x = mesh_.x[i];
-        coeffs_.Su[i] = Su_func ? Su_func(x) : 0.0;
-        coeffs_.Sp[i] = Sp_func ? Sp_func(x) : 0.0;
-    }
-}
-
-void HeatSystem1D::setConstantSource(double Su, double Sp)
-{
-    int n = mesh_.n;
-
-    for (int i = 0; i < n; ++i) {
-        coeffs_.Su[i] = Su;
-        coeffs_.Sp[i] = Sp;
-    }
-}
-
-void HeatSystem1D::clearSource()
-{
-    int n = mesh_.n;
-
-    for (int i = 0; i < n; ++i) {
-        coeffs_.Su[i] = 0.0;
-        coeffs_.Sp[i] = 0.0;
-    }
 }
