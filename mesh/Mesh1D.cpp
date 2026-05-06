@@ -8,14 +8,9 @@ BoundaryFace Mesh1D::faceType(int i) const
     return BoundaryFace::Interior;
 }
 
-Mesh1D::Mesh1D(int n_, double L_, double A_, double k_)
-    : n(n_), L(L_), A(A_), k(k_)
+Mesh1D::Mesh1D(int n_, double L_)
+    : n(n_), L(L_), dx(L_ / (n_ - 1)), x(n_)
 {
-    dx = L / static_cast<double>(n - 1);
-
-    x.resize(n);
-
-    for (int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i)
         x[i] = i * dx;
-    }
 }
