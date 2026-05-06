@@ -1,15 +1,14 @@
 #pragma once
-
 #include "BoundaryCondition.hpp"
+#include "mesh/Mesh1D.hpp"
 
 class NeumannBC : public BoundaryCondition {
-public:
-    NeumannBC(int i, double q);
+    public:
+        NeumannBC(int face, double q);
 
-    void apply(const Mesh1D& mesh,
-               Coefficients1D& c) const override;
+        void apply(const Mesh1D& m, LinearSystem& sys, double k, double A) const override;
 
-private:
-    int i_;
-    double q_;
+    private:
+        int face_;
+        double q_;
 };
