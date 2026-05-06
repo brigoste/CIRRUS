@@ -12,6 +12,8 @@
 #include "bc/ConvectiveBC.hpp"
 #include "bc/NeumannBC.hpp"
 
+#include "config.h.in"
+
 
 #ifdef _WIN32
 #include <windows.h>
@@ -101,8 +103,8 @@ int main()
     // Boundary conditions
     // -------------------------
     system.addBC(std::make_unique<DirichletBC>(0, 100.0));
-    // system.addBC(std::make_unique<DirichletBC>(n - 1, 200.0));
-    system.addBC(std::make_unique<ConvectiveBC>(n-1,1.5,273.15));
+    system.addBC(std::make_unique<DirichletBC>(n - 1, 200.0));
+    // system.addBC(std::make_unique<ConvectiveBC>(n-1,1.5,273.15));
 
     // -------------------------
     // Assemble system
@@ -114,7 +116,7 @@ int main()
     // -------------------------
     // Solver selection (TDMA, GS, SOR)
     // -------------------------
-    SolverMethod method = SolverMethod::SOR;
+    SolverMethod method = SolverMethod::TDMA;
 
     int iter = 5000;
     double tol = 1e-4;
