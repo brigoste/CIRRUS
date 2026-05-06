@@ -1,37 +1,51 @@
-#include <memory>
 #include <iostream>
 #include <fstream>
 #include <filesystem>
-#include <cstdlib>
-#include <string>
-#include <windows.h>
+#include <memory>
+#include <functional>
+#include <cmath>
+
 #include "system/HeatSystem1D.hpp"
+#include "Solver/SolverMethod.hpp"
+#include "utils/StringConvert.hpp"
 #include "bc/DirichletBC.hpp"
 #include "bc/ConvectiveBC.hpp"
 #include "bc/NeumannBC.hpp"
 
-#ifdef _WIN32
 
-bool runPythonProcess(const std::wstring& pythonExe,
-                      const std::wstring& script,
-                      const std::wstring& arg)
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
+// ------------------------------------------------------------
+// Python runner (unchanged except cleaned usage)
+// ------------------------------------------------------------
+#ifdef _WIN32
+bool runPythonProcess(
+    const std::string& pythonExe,
+    const std::string& script,
+    const std::string& data,
+    const std::string& solver)
 {
+    std::wstring wPython = to_wstring(pythonExe);
+    std::wstring wScript = to_wstring(script);
+    std::wstring wData   = to_wstring(data);
+    std::wstring wSolver = to_wstring(solver);
+
     std::wstring cmd =
-        L"\"" + pythonExe + L"\" \"" +
-        script + L"\" \"" +
-        arg + L"\"";
+        L"\"" + wPython + L"\" \"" +
+        wScript + L"\" \"" +
+        wData + L"\" \"" +
+        wSolver + L"\"";
 
     STARTUPINFOW si{};
     si.cb = sizeof(si);
 
     PROCESS_INFORMATION pi{};
 
-    std::vector<wchar_t> buffer(cmd.begin(), cmd.end());
-    buffer.push_back(L'\0');
-
     BOOL ok = CreateProcessW(
         nullptr,
-        buffer.data(),
+        cmd.data(),
         nullptr,
         nullptr,
         FALSE,
@@ -54,96 +68,99 @@ bool runPythonProcess(const std::wstring& pythonExe,
 
     return true;
 }
-
 #endif
-
-// To run in terminal, go to root directory (CIRRUS) and run build_and_run.bat
 
 namespace fs = std::filesystem;
 
-inline std::string runPython(const std::string& script,
-                             const std::string& arg)
+// ------------------------------------------------------------
+// Main
+// ------------------------------------------------------------
+int main()
 {
-    return "\"" + std::string(PYTHON_EXECUTABLE) + "\" \"" + script + "\" \"" + arg + "\"";
-}
+    std::cout << "================ INITIALIZING SYSTEM ================\n";
 
-int main() {
-    std::cout << "Program started\n";
-
-    std::cout << "================== INTIALIZING PROBLEM SPACE =========================" << std::endl;
-
-    int n = 15;
-    double L = 5.0;
-    double A = 1.0;
-    double k = 100.0;
-
-    double h = 10.0;
-    double T_inf = 200.0;
-
-    // ADD VARIABLE AREA for non-1D scenarios
+    // -------------------------
+    // Problem setup
+    // -------------------------
+    const int n = 15;
+    const double L = 5.0;
+    const double A = 1.0;
+    const double k = 100.0;
 
     HeatSystem1D system(n, L, A, k);
 
-    auto& c = system.coeffs();   // correct
+    // -------------------------
+    // Source terms
+    // -------------------------
+    // system.setSource(
+    //     [](double x) { return 0.0; },
+    //     [](double x) { return 0.0; }
+    // );
 
-    system.setSource(
-        [](double x) { return -0.0; },   // Su
-        [](double x) { return -0.0; }       // Sp
-    );
-
-    // Left boundary (node 0)
+    // -------------------------
+    // Boundary conditions
+    // -------------------------
     system.addBC(std::make_unique<DirichletBC>(0, 100.0));
+    // system.addBC(std::make_unique<DirichletBC>(n - 1, 200.0));
+    system.addBC(std::make_unique<ConvectiveBC>(n-1,1.5,273.15));
 
-    // Middle boundary (for fun?)
-    // system.addBC(std::make_unique<DirichletBC>(n/2, -5));
-
-    // Right boundary (node n-1 = 19)
-    // system.addBC(std::make_unique<ConvectiveBC>(n-1, h, T_inf));
-    // system.addBC(std::make_unique<NeumannBC>(n-1, 1.0e4));
-    system.addBC(std::make_unique<DirichletBC>(n-1,200.0));
-    
+    // -------------------------
+    // Assemble system
+    // -------------------------
     system.assemble();
 
-    std::cout << "======================== RUNNING SOLVER ===============================" << std::endl;
-    auto T = system.solve();
+    std::cout << "================ SOLVING ================\n";
 
-    for (auto Ti : T) {
-        std::cout << Ti << "\n";
-    }
-    std::cout << "T_0 = " << T[0] << std::endl;
-    std::cout << "T_f = " << T[-1] << std::endl;
+    // -------------------------
+    // Solver selection (TDMA, GS, SOR)
+    // -------------------------
+    SolverMethod method = SolverMethod::SOR;
+
+    int iter = 5000;
+    double tol = 1e-4;
+    // double omega = 1.2;
+
+    double omega = 1/(1+sin(3.141926/n)); //"Optimal" (?) omega
+
+
+    std::vector<double> T;
+
+    T = system.solve(method, iter, tol, omega);
+
+    // -------------------------
+    // Output
+    // -------------------------
     const auto& mesh = system.mesh();
 
-    std::cout << "=================== SAVING OUTPUT TO EXTERNAL FILE ===================" << std::endl;
-    auto root = std::filesystem::current_path().parent_path();
-    auto outDir = root / "output";
-    std::filesystem::create_directories(outDir);
-    // std::filesystem::create_directories("../output");
-    auto outFile = outDir / "solution.csv";
-    std::ofstream file(outFile);
+    fs::path outDir = "../output";
+    fs::create_directories(outDir);
 
+    std::ofstream file(outDir / "solution.csv");
+
+    file << "# solver=" << to_string(method) << "\n";
     file << "x,T\n";
-    for (int i = 0; i < mesh.n; ++i) {
+
+    for (int i = 0; i < n; ++i)
+    {
         file << mesh.x[i] << "," << T[i] << "\n";
     }
+
     file.close();
 
-    // ---- Python call (clean + deterministic) ----
-    //std::filesystem::path root = std::filesystem::current_path().parent_path();
-    // std::filesystem::path script = std::filesystem::absolute("plot.py");
-    // std::filesystem::path data   = std::filesystem::absolute("output/solution.csv");
+    std::cout << "Solution written.\n";
 
-    std::filesystem::path pythonExe = PYTHON_EXECUTABLE;
-    std::filesystem::path script    = root / "scripts" / "Plot.py";
-    std::filesystem::path data      = outDir / "solution.csv";
+    // -------------------------
+    // Python visualization
+    // -------------------------
+    fs::path pythonExe = PYTHON_EXECUTABLE;
+    fs::path script    = fs::current_path().parent_path() / "scripts" / "Plot.py";
+    fs::path data      = fs::current_path().parent_path() / "output" / "solution.csv";
 
-    std::cout << "Data saved to: " << data << std::endl;
-
-    std::cout << "=================== Plotting Data ===================" << std::endl;
     runPythonProcess(
-        pythonExe.wstring(),
-        script.wstring(),
-        std::filesystem::absolute(data).wstring()
+        pythonExe.string(),
+        script.string(),
+        data.string(),
+        to_string(method)
     );
 
     return 0;
