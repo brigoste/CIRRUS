@@ -1,50 +1,22 @@
 #include "ConvectiveBC.hpp"
+#include "system/LinearSystem.hpp"
 #include "mesh/Mesh1D.hpp"
-#include "coeffs/Coefficients1D.hpp"
-#include <stdexcept>
 
-ConvectiveBC::ConvectiveBC(int i, double h, double Tinf)
-    : i_(i), h_(h), Tinf_(Tinf) {}
+ConvectiveBC::ConvectiveBC(int face, double h, double Tinf)
+    : face_(face), h_(h), Tinf_(Tinf) {}
 
-void ConvectiveBC::apply(
-    const Mesh1D& mesh,
-    Coefficients1D& c
-) const
+void ConvectiveBC::apply(const Mesh1D& m, LinearSystem& sys, double k, double A) const
 {
-    int i = i_;
-    int N = mesh.n;
+    int i = face_;
 
-    double k  = mesh.k;
-    double A  = mesh.A;
-    double dx = mesh.dx;
+    double dx = m.dx;
 
-    double diff = k * A / dx;   // conduction coefficient
-    double beta = h_ * A;       // convection coefficient
+    double a_cond = k * A / dx;
+    double a_conv = h_ * A;
 
-    // -----------------------------------
-    // LEFT boundary (i = 0)
-    // -----------------------------------
-    if (i == 0)
-    {
-        c.aP[i] = diff + beta;
-        c.aW[i] = 0.0;
-        c.aE[i] = diff;
-        c.b[i] += beta * Tinf_;
-    }
-    // -----------------------------------
-    // RIGHT boundary (i = N-1)
-    // -----------------------------------
-    else if (i == N - 1)
-    {
-        c.aP[i] = diff + beta;
-        c.aE[i] = 0.0;
-        c.aW[i] = diff;
-        c.b[i] += beta * Tinf_;
-    }
-    else
-    {
-        throw std::runtime_error(
-            "ConvectiveBC must be applied only on boundaries (i=0 or i=N-1)."
-        );
-    }
+    sys.aP[i] = a_cond + a_conv;
+    sys.aW[i] = 0.0;
+    sys.aE[i] = 0.0;
+
+    sys.b[i] = h_*A*Tinf_;
 }
