@@ -1,44 +1,21 @@
 #include "NeumannBC.hpp"
+#include "system/LinearSystem.hpp"
 #include "mesh/Mesh1D.hpp"
-#include "coeffs/Coefficients1D.hpp"
 
-NeumannBC::NeumannBC(int i, double q)
-    : i_(i), q_(q) {}
+NeumannBC::NeumannBC(int face, double q)
+    : face_(face), q_(q) {}
 
-void NeumannBC::apply(
-    const Mesh1D& mesh,
-    Coefficients1D& c
-) const
+void NeumannBC::apply(const Mesh1D& m, LinearSystem& sys, double k, double A) const
 {
-    int i = i_;
-    int N = mesh.n;  
+    int i = face_;
+    double dx = m.dx; 
 
-    double k  = mesh.k;
-    double A  = mesh.A;
-    double dx = mesh.dx;
+    // Neumann:  -k dT/dx = q
+    // dT/dx ≈ (T_i - T_im1)/dx
 
-    double diff = k * A / dx;  // face conductivity
+    double flux_term = q_ * A * dx / k;
 
-    // Left boundary (i = 0)
-    if (i == 0)
-    {
-        c.aP[i] = diff;
-        c.aW[i] = 0.0;
-        c.aE[i] = diff;
-        c.b[i] += q_ * A;
-    }
-    // Right boundary (i = N-1)
-    else if (i == N - 1)
-    {
-        c.aP[i] = diff;
-        c.aE[i] = 0.0;
-        c.aW[i] = diff;
-        c.b[i] += q_ * A;
-    }
-    else
-    {
-        throw std::runtime_error(
-            "NeumannBC can only be applied to boundary nodes (0 or N-1)."
-        );
-    }
+    sys.b[i] += flux_term;
+    // sys.aW[i] = -1.0;
+    // sys.aP[i] =  1.0;
 }
