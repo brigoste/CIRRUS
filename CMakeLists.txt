@@ -1,54 +1,67 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.20)
 
 project(CIRRUS LANGUAGES CXX)
 
+# -----------------------------
+# C++ standard
+# -----------------------------
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(PYTHON_EXECUTABLE "C:/Users/E40112856/.julia/conda/3/x86_64/python.exe")
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-# --------------------------------------------------
+# -----------------------------
+# Build type
+# -----------------------------
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
+# -----------------------------
 # Include directories
-# --------------------------------------------------
+# -----------------------------
 include_directories(
     ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/system
+    ${CMAKE_SOURCE_DIR}/bc
+    ${CMAKE_SOURCE_DIR}/mesh
+    ${CMAKE_SOURCE_DIR}/discretization
+    ${CMAKE_SOURCE_DIR}/Solver
+    ${CMAKE_SOURCE_DIR}/utils
 )
 
-# --------------------------------------------------
+# -----------------------------
 # Source files
-# --------------------------------------------------
-add_executable(CIRRUS
+# -----------------------------
+set(SOURCES
     src/main.cpp
 
+    system/HeatSystemBase.cpp
     system/HeatSystem1D.cpp
-    mesh/Mesh1D.cpp
-    coeffs/Coefficients1D.cpp
+    system/LinearSystem.cpp
+
     discretization/Discretization1D.cpp
+    mesh/Mesh1D.cpp
 
     bc/DirichletBC.cpp
     bc/NeumannBC.cpp
     bc/ConvectiveBC.cpp
-    bc/BoundaryFace.hpp
 
-    solver/TDMA.cpp
-)
-target_include_directories(CIRRUS PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/src
-    ${CMAKE_CURRENT_SOURCE_DIR}/system
-    ${CMAKE_CURRENT_SOURCE_DIR}/mesh
-    ${CMAKE_CURRENT_SOURCE_DIR}/coeffs
-    ${CMAKE_CURRENT_SOURCE_DIR}/discretization
-    ${CMAKE_CURRENT_SOURCE_DIR}/bc
-    ${CMAKE_CURRENT_SOURCE_DIR}/solver
+    Solver/TDMA.cpp
+    Solver/GaussSeidel.cpp
+    Solver/SOR.cpp
 )
 
-target_compile_definitions(CIRRUS PRIVATE
-    PYTHON_EXECUTABLE="${PYTHON_EXECUTABLE}"
+# -----------------------------
+# Executable
+# -----------------------------
+add_executable(CIRRUS ${SOURCES})
+
+# -----------------------------
+# Compiler warnings
+# -----------------------------
+target_compile_options(CIRRUS PRIVATE
+    -Wall
+    -Wextra
+    -Wpedantic
 )
-target_compile_definitions(CIRRUS PRIVATE
-    PYTHON_EXECUTABLE="${PYTHON_EXECUTABLE}"
-)
-# add_custom_command(TARGET CIRRUS POST_BUILD
-#     COMMAND ${CMAKE_COMMAND} -E copy
-#     ${CMAKE_SOURCE_DIR}/plot.py
-#     ${CMAKE_BINARY_DIR}/plot.py
-# )
