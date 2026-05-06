@@ -13,26 +13,56 @@ print("Running Python:", sys.executable)
 # ============================================================
 # Data loading
 # ============================================================
+from pathlib import Path
+import numpy as np
+
 def load_data():
     script_dir = Path(__file__).resolve().parent
     project_root = script_dir.parent
-    file_name = "solution.csv"
-    data_file = project_root / "output" / file_name
+    data_file = project_root / "output" / "solution.csv"
 
-    print("Reading:", file_name)
+    metadata = {}
 
-    data = np.loadtxt(data_file, delimiter=',', skiprows=1)
+    data_lines = []
+    header = None
 
-    if data.ndim == 1:
-        data = data[np.newaxis, :]
+    with open(data_file, "r") as f:
+        for line in f:
+            line = line.strip()
+
+            # -------------------------
+            # 1. Metadata lines
+            # -------------------------
+            if line.startswith("#"):
+                line = line[1:].strip()
+                if "=" in line:
+                    key, value = line.split("=", 1)
+                    metadata[key.strip()] = value.strip()
+                continue
+
+            # -------------------------
+            # 2. Header line
+            # -------------------------
+            if header is None:
+                header = line
+                continue
+
+            # -------------------------
+            # 3. Data lines
+            # -------------------------
+            if line:
+                data_lines.append(line)
+
+    # Convert numeric block
+    from io import StringIO
+    data = np.loadtxt(StringIO("\n".join(data_lines)), delimiter=",")
 
     x = data[:, 0]
     T = data[:, 1]
 
-    # If you later add area, this will already work
     A = np.ones_like(x)
 
-    return x, T, A
+    return x, T, A, metadata
 
 
 # ============================================================
@@ -72,55 +102,72 @@ def interpolate_field(x, T, x_new):
 # ============================================================
 # 1D rendering (your current case)
 # ============================================================
-def render_1d(x, T, A):
-    plt.figure(figsize=(8, 5))
+def render_1d(x, T, A, solver_name):
 
-    plt.plot(x, T, label='TDMA', lw=2)
-    plt.scatter(x, T, s=20)
+    fig, ax = plt.subplots(figsize=(8, 5))
 
-    plt.xlabel('x (m)')
-    plt.ylabel(r'T ($^\circ$C)')
-    plt.title('1D Heat Transfer: TDMA')
-    plt.legend()
-    plt.grid(True)
+    # -----------------------------
+    # Pseudo-2D contour overlay
+    # -----------------------------
+    max_T = np.max(T)
+    min_T = np.min(T)
+    diff_T = max_T - min_T
+    mid_T = (max_T + min_T)/2
+
+    thickness = 0.05*diff_T
+    y_l = mid_T - thickness
+    y_u = mid_T + thickness
+
+    x_2d = np.vstack((x, x))
+    y_2d = np.vstack((
+        y_l * np.ones_like(x),
+        y_u * np.ones_like(x)
+    ))
+    T_2d = np.vstack((T, T))
+
+    cf = ax.contourf(x_2d, y_2d, T_2d, cmap='plasma', alpha=0.8)
+    # ax.contour(x_2d, y_2d, T_2d, colors='k', linewidths=0.5)
+
+    # -----------------------------
+    # Line + scatter (1D solution)
+    # -----------------------------
+    ax.plot(x, T, label=solver_name, lw=2, color='k')
+    ax.scatter(x, T, s=20,color='k')
+
+    # -----------------------------
+    # Formatting
+    # -----------------------------
+    ax.set_xlabel("x (m)")
+    ax.set_ylabel(r"T ($^\circ$C)")
+    ax.set_title(f"1D Heat Transfer: {solver_name}")
+    ax.legend()
+    # ax.set_yticks([])
+
+    fig.colorbar(cf, ax=ax, label=r"Temperature ($^\circ$C)")
 
     plt.tight_layout()
-
-    diff = 0.45*(np.max(T) - np.min(T))
-    min_y_contour = diff + np.min(T)
-    max_y_contour = np.max(T) - diff
-
-    # plt.figure(figsize=(8,5))
-    x_2d = np.vstack((x,x))
-    y_2d_l = min_y_contour*np.ones(np.size(x))*(A/np.max(A));
-    y_2d_u = max_y_contour*np.ones(np.size(x))*(A/np.max(A));
-    y_2d = np.vstack((y_2d_l,y_2d_u));
-    T_s = np.vstack((T,T))
-    plt.contourf(x_2d,y_2d,T_s,cmap='plasma')
-    c = plt.colorbar()
-    c.set_label('Temperature ($^\circ$C)')
-    plt.contour(x_2d,y_2d,T_s,cmap='plasma')
-
     plt.show()
-
-
 # ============================================================
 # Main pipeline
 # ============================================================
 def main():
 
-    x, T, A = load_data()
+    solver_name = "Unknown"
 
-    # --------------------------------------------------------
-    # Preprocessing stage (future-proofed)
-    # --------------------------------------------------------
+    # -------------------------
+    # Load data + metadata
+    # -------------------------
+    x, T, A, meta = load_data()
+
+    # metadata from file
+    file_solver = meta.get("solver", "Unknown")
+    data_file = sys.argv[1]
+    solver_name = sys.argv[2] if len(sys.argv) > 2 else "Unknown"
+
     x_s, A_s = smooth_geometry(x, A)
     T_s = interpolate_field(x, T, x_s)
 
-    # --------------------------------------------------------
-    # Render stage
-    # --------------------------------------------------------
-    render_1d(x_s, T_s, A_s)
+    render_1d(x_s, T_s, A_s, solver_name)
 
 
 if __name__ == "__main__":
