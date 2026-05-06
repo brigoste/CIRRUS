@@ -1,29 +1,35 @@
-#include "solver/TDMA.hpp"
-#include<cmath>
-#include<string>
-#include<stdexcept>
+#include "TDMA.hpp"
+#include <vector>
+#include <stdexcept>
+#include <cmath>
+#include <iostream>
 
-std::vector<double> TDMA(const Coefficients1D& c) {
-    int n = c.aP.size();
-    std::vector<double> P(n), Q(n), phi(n);
+std::vector<double> TDMA(const LinearSystem& sys)
+{
+    const int n = sys.aP.size();
 
-    P[0] = c.aE[0] / c.aP[0];
-    Q[0] = c.b[0]  / c.aP[0];
+    std::vector<double> c(n, 0.0);
+    std::vector<double> d(n, 0.0);
+    std::vector<double> x(n, 0.0);
 
-    for (int i = 1; i < n; i++) {
-        double denom = c.aP[i] - c.aW[i] * P[i-1];
-        if (std::abs(c.aP[i]) < 1e-14)
-            throw std::runtime_error("Zero diagonal at i = " + std::to_string(i));
-        if (c.aP[i] <= 0.0) {
-            throw std::runtime_error("Non-positive diagonal at i = " + std::to_string(i));
-        }
-        P[i] = c.aE[i] / denom;
-        Q[i] = (c.b[i] + c.aW[i] * Q[i-1]) / denom;
+    // boundary already enforced in sys
+    c[0] = sys.aE[0] / sys.aP[0];
+    d[0] = sys.b[0]  / sys.aP[0];
+
+    for (int i = 1; i < n; ++i)
+    {
+        double denom = sys.aP[i] - sys.aW[i] * c[i - 1];
+
+        c[i] = sys.aE[i] / denom;
+        d[i] = (sys.b[i] - sys.aW[i] * d[i - 1]) / denom;
     }
 
-    phi[n-1] = Q[n-1];
-    for (int i = n-2; i >= 0; --i)
-        phi[i] = P[i]*phi[i+1] + Q[i];
+    x[n - 1] = d[n - 1];
 
-    return phi;
+    for (int i = n - 2; i >= 0; --i)
+    {
+        x[i] = d[i] - c[i] * x[i + 1];
+    }
+
+    return x;
 }
