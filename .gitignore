@@ -38,6 +38,7 @@
 *.exe
 *.out
 *.app
+*.bat
 
 # Build directories
 build/
@@ -104,3 +105,8 @@ venv/
 # =========================
 .DS_Store
 Thumbs.db
+
+# =========================
+# OTHER
+# =========================
+*.ptxt
