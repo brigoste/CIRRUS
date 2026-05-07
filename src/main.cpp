@@ -20,7 +20,7 @@
 #endif
 
 // ------------------------------------------------------------
-// Python runner (unchanged except cleaned usage)
+// Python runner 
 // ------------------------------------------------------------
 #ifdef _WIN32
 bool runPythonProcess(
@@ -87,27 +87,38 @@ int main()
     // -------------------------
     // Problem setup
     // -------------------------
-    const int n = 15;
-    const double L = 5.0;
-    const double A = 1.0;
+    const int n = 1500;
+    const double L = 500.0;
+    const double A = 3.0;
     const double k = 100.0;
+    
+    bool output = false;        // to see iteration output for GS and SOR
 
-    HeatSystem1D system(n, L, A, k);
+    // Valid setups, output is an overloaded variable with parameters defaulted to true.
+    // HeatSystem1D system(n, L, A, k);
+
+    // -------------------------
+    // Instantiate System
+    // -------------------------
+    HeatSystem1D system(n, L, A, k, output);
 
     // -------------------------
     // Source terms
     // -------------------------
-    // system.setSource(
-    //     [](double x) { return 0.0; },
-    //     [](double x) { return 0.0; }
-    // );
+    system.setSource(
+        [](double x) { return 0.0*x; },
+        [](double x) { return 0.0*x; }
+    );
 
     // -------------------------
     // Boundary conditions
     // -------------------------
-    system.addBC(std::make_unique<DirichletBC>(0, 100.0));
-    system.addBC(std::make_unique<DirichletBC>(n - 1, 200.0));
-    // system.addBC(std::make_unique<ConvectiveBC>(n-1,1.5,273.15));
+    system.addBC(std::make_unique<DirichletBC>(0, 300.0));
+    system.addBC(std::make_unique<DirichletBC>(n - 1, 400.0));
+    // system.addBC(std::make_unique<NeumannBC>(n-1, 100));
+    // system.addBC(std::make_unique<ConvectiveBC>(n-1,150,273.15));
+
+    // ConvectiveBC doesn't seem to work.
 
     // -------------------------
     // Assemble system
@@ -119,14 +130,13 @@ int main()
     // -------------------------
     // Solver selection (TDMA, GS, SOR)
     // -------------------------
-    SolverMethod method = SolverMethod::TDMA;
+    SolverMethod method = SolverMethod::SOR;
 
-    int iter = 5000;
-    double tol = 1e-4;
-    // double omega = 1.2;
+    int iter = 1250000;
+    double tol = 5e-6;
+    double omega = 1.2;
 
-    double omega = 1/(1+sin(3.141926/n)); //"Optimal" (?) omega
-
+    // double omega = 1/(1+sin(3.141926/n)); //"Optimal" (?) omega
 
     std::vector<double> T;
 
