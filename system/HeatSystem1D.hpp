@@ -15,7 +15,7 @@
 class HeatSystem1D
 {
     public:
-        HeatSystem1D(int n, double L, double A, double k);
+        HeatSystem1D(int n, double L, double A, double k, bool output=true);
 
         void addBC(std::unique_ptr<BoundaryCondition> bc);
 
@@ -46,4 +46,6 @@ class HeatSystem1D
 
         double A_;
         double k_;
+
+        bool output_;
 };
