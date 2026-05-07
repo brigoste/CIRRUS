@@ -7,10 +7,12 @@ std::vector<double> SOR(
     LinearSystem& sys,
     int iter,
     double tol,
-    double omega
+    double omega,
+    bool output
 )
 {
     const int N = sys.aP.size();
+    int max_iter = 0;
 
     if (omega <= 0.0 || omega >= 2.0)
     {
@@ -55,10 +57,18 @@ std::vector<double> SOR(
 
             sys.x_old[i] = sys.x[i];
         }
+        max_iter++;
 
         if (maxDiff < tol)
             break;
     }
-
+    
+    if(output){
+        if(max_iter < iter)
+            std::cout << "Solution converged after " << max_iter << " iterations." << std::endl;
+        else
+            std::cout << "Maximum iterations" << std::endl;
+    }
+    
     return sys.x;
 }
