@@ -5,11 +5,12 @@
 #include <iostream>
 
 
-HeatSystem1D::HeatSystem1D(int n, double L, double A, double k)
+HeatSystem1D::HeatSystem1D(int n, double L, double A, double k, bool output)
     : mesh_(n, L),
       sys_(n),
       A_(A),
-      k_(k)
+      k_(k),
+      output_(output)
 {}
 void HeatSystem1D::assemble()
 {
@@ -41,9 +42,9 @@ std::vector<double> HeatSystem1D::solve(SolverMethod method, int iter, double to
         case SolverMethod::TDMA:
             return TDMA(sys_);
         case SolverMethod::GS:
-            return GaussSeidel(sys_, iter, tol);
+            return GaussSeidel(sys_, iter, tol, output_);
         case SolverMethod::SOR:
-            return SOR(sys_, iter, tol, omega);
+            return SOR(sys_, iter, tol, omega, output_);
         default:
             throw std::runtime_error("Unknown solver method");
     }
