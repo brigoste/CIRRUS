@@ -15,7 +15,12 @@ void NeumannBC::apply(const Mesh1D& m, LinearSystem& sys, double k, double A) co
 
     double flux_term = q_ * A * dx / k;
 
+    if(i == 0)
+        sys.aE[i] = -1.0;
+    else if(i == m.n-1)
+        sys.aW[i] = -1.0;
+
+    sys.aP[i] = 1.0;
+    
     sys.b[i] += flux_term;
-    // sys.aW[i] = -1.0;
-    // sys.aP[i] =  1.0;
 }
