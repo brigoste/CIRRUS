@@ -87,12 +87,12 @@ int main()
     // -------------------------
     // Problem setup
     // -------------------------
-    const int n = 1500;
+    const int n = 250;
     const double L = 500.0;
     const double A = 3.0;
     const double k = 100.0;
     
-    bool output = false;        // to see iteration output for GS and SOR
+    bool output = true;        // to see iteration output for GS and SOR
 
     // Valid setups, output is an overloaded variable with parameters defaulted to true.
     // HeatSystem1D system(n, L, A, k);
@@ -130,11 +130,24 @@ int main()
     // -------------------------
     // Solver selection (TDMA, GS, SOR)
     // -------------------------
-    SolverMethod method = SolverMethod::SOR;
+    SolverMethod method = SolverMethod::GS;
 
-    int iter = 1250000;
+    int iter = 500000;        // ~15xn for SOR and 20xn for GS
     double tol = 5e-6;
     double omega = 1.2;
+
+    // In a way to determine how n affects the number of iterations:
+
+    //            |___________GS___________|__________SOR__________|  
+    //     n      |   10     100      250  |    10    100      250 |
+    // iterations |  133  11,329    60,066 |    88   7821   41,744 |
+    //   iter/n   | 11.3  113.29   240.264 |   8.8  78.21  166.976 |
+
+    //        |_______n_______|_____iterations____|________iter/n_________|
+    //    GS  |  10  100  250 | 133  11329  60066 | 11.3  113.29  240.264 | 
+    //   SOR  |  10  100  250 |  88   7821  41744 |  8.8   78.21  166.976 |
+
+    // There is non-linear growth in the ratio of iterations to number of nodes
 
     // double omega = 1/(1+sin(3.141926/n)); //"Optimal" (?) omega
 
