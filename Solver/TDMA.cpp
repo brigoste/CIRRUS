@@ -1,35 +1,57 @@
-#include "TDMA.hpp"
-#include <vector>
-#include <stdexcept>
-#include <cmath>
+#include "Solver/TDMA.hpp"
 #include <iostream>
 
-std::vector<double> TDMA(const LinearSystem& sys)
+std::vector<double> TDMA(
+    LinearSystem& sys,
+    int N,
+    bool output
+)
 {
-    const int n = sys.aP.size();
+    std::vector<double> a(N), b(N), c(N), d(N);
+    std::vector<double> c_star(N), d_star(N);
 
-    std::vector<double> c(n, 0.0);
-    std::vector<double> d(n, 0.0);
-    std::vector<double> x(n, 0.0);
-
-    // boundary already enforced in sys
-    c[0] = sys.aE[0] / sys.aP[0];
-    d[0] = sys.b[0]  / sys.aP[0];
-
-    for (int i = 1; i < n; ++i)
+    // -----------------------------
+    // Extract tridiagonal system
+    // -----------------------------
+    for (int i = 0; i < N; ++i)
     {
-        double denom = sys.aP[i] - sys.aW[i] * c[i - 1];
+        const double diag = sys.diagonal()[i];
+        const auto& row = sys.row(i);
 
-        c[i] = sys.aE[i] / denom;
-        d[i] = (sys.b[i] - sys.aW[i] * d[i - 1]) / denom;
+        d[i] = sys.rhs()[i];
+        b[i] = diag;
+
+        a[i] = (i > 0)     ? sys.coeff(i, i - 1) : 0.0;
+        c[i] = (i < N - 1) ? sys.coeff(i, i + 1) : 0.0;
     }
 
-    x[n - 1] = d[n - 1];
+    // -----------------------------
+    // Forward sweep
+    // -----------------------------
+    c_star[0] = c[0] / b[0];
+    d_star[0] = d[0] / b[0];
 
-    for (int i = n - 2; i >= 0; --i)
+    for (int i = 1; i < N; ++i)
     {
-        x[i] = d[i] - c[i] * x[i + 1];
+        double m = 1.0 / (b[i] - a[i] * c_star[i - 1]);
+        c_star[i] = (i < N - 1) ? c[i] * m : 0.0;
+        d_star[i] = (d[i] - a[i] * d_star[i - 1]) * m;
     }
+
+    // -----------------------------
+    // Back substitution
+    // -----------------------------
+    std::vector<double> x(N);
+
+    x[N - 1] = d_star[N - 1];
+
+    for (int i = N - 2; i >= 0; --i)
+        x[i] = d_star[i] - c_star[i] * x[i + 1];
+
+    sys.setSolution(x);
+
+    if (output)
+        std::cout << "TDMA solved 1D system of size " << N << "\n";
 
     return x;
 }
