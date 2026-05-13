@@ -8,7 +8,7 @@ void NeumannBC::apply(
     LinearSystem& sys,
     const BoundaryContext& ctx) const
 {
-    int i = ctx.node;
+    int i = ctx.owner;
 
     double A = ctx.area;
 
