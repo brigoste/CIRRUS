@@ -7,6 +7,7 @@
 
 std::vector<double> SOR(
     LinearSystem& sys,
+    [[maybe_unused]]const MeshBase& mesh,
     int iter,
     double tol,
     double omega,
