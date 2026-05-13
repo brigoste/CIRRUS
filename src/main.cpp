@@ -1,195 +1,75 @@
 #include <iostream>
-#include <fstream>
-#include <filesystem>
 #include <memory>
-#include <functional>
-#include <cmath>
 
+#include "system/HeatCase1D.hpp"
 #include "system/HeatSystem1D.hpp"
+#include "mesh/Mesh1D.hpp"
 #include "Solver/SolverMethod.hpp"
-#include "utils/StringConvert.hpp"
-#include "bc/DirichletBC.hpp"
-#include "bc/ConvectiveBC.hpp"
-#include "bc/NeumannBC.hpp"
+#include "system/SimulationConfig.hpp"
 
-#include "config.h"
-
-
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
-// ------------------------------------------------------------
-// Python runner 
-// ------------------------------------------------------------
-#ifdef _WIN32
-bool runPythonProcess(
-    const std::string& pythonExe,
-    const std::string& script,
-    const std::string& data,
-    const std::string& solver)
-{
-    std::wstring wPython = to_wstring(pythonExe);
-    std::wstring wScript = to_wstring(script);
-    std::wstring wData   = to_wstring(data);
-    std::wstring wSolver = to_wstring(solver);
-
-    std::wstring cmd =
-        L"\"" + wPython + L"\" \"" +
-        wScript + L"\" \"" +
-        wData + L"\" \"" +
-        wSolver + L"\"";
-
-    STARTUPINFOW si{};
-    si.cb = sizeof(si);
-
-    PROCESS_INFORMATION pi{};
-
-    // std::wcout << L"CMD: " << cmd << L"\n";
-    // std::wcout << L"PY: " << wPython << L"\n";
-
-    BOOL ok = CreateProcessW(
-        nullptr,
-        cmd.data(),
-        nullptr,
-        nullptr,
-        FALSE,
-        0,
-        nullptr,
-        nullptr,
-        &si,
-        &pi
-    );
-
-    if (!ok) {
-        std::wcerr << L"CreateProcess failed: " << GetLastError() << L"\n";
-        return false;
-    }
-
-    WaitForSingleObject(pi.hProcess, INFINITE);
-
-    CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);
-
-    return true;
-}
-#endif
-
-namespace fs = std::filesystem;
-
-// ------------------------------------------------------------
-// Main
-// ------------------------------------------------------------
 int main()
 {
-    std::cout << "================ INITIALIZING SYSTEM ================\n";
+    std::cout << "\n================ INITIALIZING SYSTEM ================\n";
 
-    // -------------------------
-    // Problem setup
-    // -------------------------
-    const int n = 250;
-    const double L = 500.0;
-    const double A = 3.0;
-    const double k = 100.0;
-    
-    bool output = true;        // to see iteration output for GS and SOR
+    // -----------------------------
+    // 1. Physics definition
+    // -----------------------------
+    HeatCase1D physics;
 
-    // Valid setups, output is an overloaded variable with parameters defaulted to true.
-    // HeatSystem1D system(n, L, A, k);
+    // Define Geometry and material
+    physics.n = 80;
+    physics.L = 0.5;
+    physics.A = 0.01;
+    physics.k = 100.0;
 
-    // -------------------------
-    // Instantiate System
-    // -------------------------
-    HeatSystem1D system(n, L, A, k, output);
+    // Define Source Terms
+    physics.Su = 1000.0;
+    physics.Sp = 0.0;
 
-    // -------------------------
-    // Source terms
-    // -------------------------
-    system.setSource(
-        [](double x) { return 0.0*x; },
-        [](double x) { return 0.0*x; }
+    // Apply Boundary Conditions
+    physics.bcs.push_back(
+    BoundaryConditionDescriptor::Dirichlet(BoundaryFace::Left, 300.0)
     );
 
-    // -------------------------
-    // Boundary conditions
-    // -------------------------
-    system.addBC(std::make_unique<DirichletBC>(0, 300.0));
-    system.addBC(std::make_unique<DirichletBC>(n - 1, 400.0));
-    // system.addBC(std::make_unique<NeumannBC>(n-1, 100));
-    // system.addBC(std::make_unique<ConvectiveBC>(n-1,150,273.15));
+    physics.bcs.push_back(
+        BoundaryConditionDescriptor::Neumann(BoundaryFace::Right, 0.0)
+    );
 
-    // ConvectiveBC doesn't seem to work.
+    SimulationConfig cfg;
 
-    // -------------------------
-    // Assemble system
-    // -------------------------
+    cfg.method = SolverMethod::CG;
+    cfg.iter   = 5000;
+    cfg.tol    = 1e-8;
+    cfg.omega  = 1.2;
+
+    // -----------------------------
+    // 2. Mesh
+    // -----------------------------
+    Mesh1D mesh(physics.n, physics.L);
+
+    // -----------------------------
+    // 3. System
+    // -----------------------------
+    HeatSystem1D system(mesh, physics);
+
+    // -----------------------------
+    // 4. Assembly
+    // -----------------------------
     system.assemble();
 
-    std::cout << "================ SOLVING ================\n";
+    std::cout << "\n================ SOLVING ================\n";
 
-    // -------------------------
-    // Solver selection (TDMA, GS, SOR)
-    // -------------------------
-    SolverMethod method = SolverMethod::GS;
-
-    int iter = 500000;        // ~15xn for SOR and 20xn for GS
-    double tol = 5e-6;
-    double omega = 1.2;
-
-    // In a way to determine how n affects the number of iterations:
-
-    //            |___________GS___________|__________SOR__________|  
-    //     n      |   10     100      250  |    10    100      250 |
-    // iterations |  133  11,329    60,066 |    88   7821   41,744 |
-    //   iter/n   | 11.3  113.29   240.264 |   8.8  78.21  166.976 |
-
-    //        |_______n_______|_____iterations____|________iter/n_________|
-    //    GS  |  10  100  250 | 133  11329  60066 | 11.3  113.29  240.264 | 
-    //   SOR  |  10  100  250 |  88   7821  41744 |  8.8   78.21  166.976 |
-
-    // There is non-linear growth in the ratio of iterations to number of nodes
-
-    // double omega = 1/(1+sin(3.141926/n)); //"Optimal" (?) omega
-
-    std::vector<double> T;
-
-    T = system.solve(method, iter, tol, omega);
-
-    // -------------------------
-    // Output
-    // -------------------------
-    const auto& mesh = system.mesh();
-
-    fs::path outDir = "../output";
-    fs::create_directories(outDir);
-
-    std::ofstream file(outDir / "solution.csv");
-
-    file << "# solver=" << to_string(method) << "\n";
-    file << "x,T\n";
-
-    for (int i = 0; i < n; ++i)
-    {
-        file << mesh.x[i] << "," << T[i] << "\n";
-    }
-
-    file.close();
-
-    std::cout << "Solution written.\n";
-
-    // -------------------------
-    // Python visualization
-    // -------------------------
-    fs::path pythonExe = PYTHON_EXECUTABLE;
-    fs::path script    = fs::current_path().parent_path() / "scripts" / "Plot.py";
-    fs::path data      = fs::current_path().parent_path() / "output" / "solution.csv";
-
-    runPythonProcess(
-        pythonExe.string(),
-        script.string(),
-        data.string(),
-        to_string(method)
+    // -----------------------------
+    // 5. Solve
+    // -----------------------------
+    auto T = system.solve(
+        cfg.method,
+        cfg.iter,
+        cfg.tol,
+        cfg.omega
     );
+
+    std::cout << "Solution computed.\n";
 
     return 0;
 }
