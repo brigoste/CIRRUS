@@ -1,11 +1,13 @@
 #pragma once
 
-#include "system/LinearSystem.hpp"
+#include "linear_system/LinearSystem.hpp"
+#include "mesh/MeshBase.hpp"
 #include <vector>
 
 std::vector<double> GaussSeidel(
     LinearSystem& sys,
+    const MeshBase& mesh,
     int iter = 1000,
-    double tol = 1e-5,
+    double tol = 1e-8,
     bool output = false
 );
