@@ -1,7 +1,9 @@
 #include "Solver/SOR.hpp"
+#include "linear_system/LinearSystem.hpp"
 #include <cmath>
-#include <algorithm>
 #include <iostream>
+#include <stdexcept>
+#include <algorithm>
 
 std::vector<double> SOR(
     LinearSystem& sys,
@@ -11,17 +13,15 @@ std::vector<double> SOR(
     bool output
 )
 {
-    const int N = sys.aP.size();
-    int max_iter = 0;
+    const int N = sys.size();
 
-    if (omega <= 0.0 || omega >= 2.0)
-    {
-        std::cerr << "SOR: omega out of bounds (0,2)\n";
-        return {};
-    }
+    auto& x = sys.solution();
+    const auto& b = sys.rhs();
 
-    std::fill(sys.x.begin(), sys.x.end(), 0.0);
-    std::fill(sys.x_old.begin(), sys.x_old.end(), 0.0);
+    if ((int)x.size() != N || (int)b.size() != N)
+        throw std::runtime_error("SOR: size mismatch");
+
+    std::fill(x.begin(), x.end(), 0.0);
 
     for (int it = 0; it < iter; ++it)
     {
@@ -29,46 +29,42 @@ std::vector<double> SOR(
 
         for (int i = 0; i < N; ++i)
         {
-            const double aP = sys.aP[i];
+            const double diag = sys.diag(i);
 
-            if (std::abs(aP) < 1e-14)
+            if (std::abs(diag) < 1e-14)
+                throw std::runtime_error("SOR: zero diagonal");
+
+            double sum = 0.0;
+
+            // graph-based off-diagonal sum
+            for (const auto& [j, aij] : sys.row(i))
             {
-                std::cerr << "SOR: zero diagonal at i=" << i << "\n";
-                return {};
+                sum += aij * x[j];
             }
 
-            const double old = sys.x[i];
+            const double gs = (b[i] - sum) / diag;
 
-            double rhs = sys.b[i];
+            const double x_new =
+                (1.0 - omega) * x[i] + omega * gs;
 
-            if (i > 0)
-                rhs -= sys.aW[i] * sys.x[i - 1];
-
-            if (i < N - 1)
-                rhs -= sys.aE[i] * sys.x_old[i + 1];
-
-            // Gauss-Seidel update
-            const double gs = rhs / aP;
-
-            // SOR relaxation
-            sys.x[i] = (1.0 - omega) * old + omega * gs;
-
-            maxDiff = std::max(maxDiff, std::abs(sys.x[i] - old));
-
-            sys.x_old[i] = sys.x[i];
+            maxDiff = std::max(maxDiff, std::abs(x_new - x[i]));
+            x[i] = x_new;
         }
-        max_iter++;
+
+        if (output)
+            std::cout << "SOR iter " << it
+                      << " maxDiff=" << maxDiff << "\n";
 
         if (maxDiff < tol)
-            break;
+        {
+            if (output)
+                std::cout << "SOR converged in " << it << " iterations\n";
+            return x;
+        }
     }
-    
-    if(output){
-        if(max_iter < iter)
-            std::cout << "Solution converged after " << max_iter << " iterations." << std::endl;
-        else
-            std::cout << "Maximum iterations" << std::endl;
-    }
-    
-    return sys.x;
+
+    if (output)
+        std::cout << "SOR reached max iterations\n";
+
+    return x;
 }
