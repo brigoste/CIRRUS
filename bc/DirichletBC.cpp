@@ -1,16 +1,18 @@
-#include "DirichletBC.hpp"
-#include "system/LinearSystem.hpp"
-#include <iostream> //debugging
+#include "bc/DirichletBC.hpp"
 
-DirichletBC::DirichletBC(int face, double value)
-    : face_(face), value_(value) {}
+DirichletBC::DirichletBC(double value)
+    : value_(value)
+{}
 
-void DirichletBC::apply([[maybe_unused]] const Mesh1D& m, LinearSystem& sys, [[maybe_unused]] double k, [[maybe_unused]] double A) const
+void DirichletBC::apply(
+    LinearSystem& sys,
+    const BoundaryContext& ctx) const
 {
-    int i = face_;
+    int i = ctx.node;
 
-    sys.aP[i] = 1.0;
-    sys.aW[i] = 0.0;
-    sys.aE[i] = 0.0;
-    sys.b[i]  = value_;
+    sys.clearRow(i);
+
+    // enforce u = value
+    sys.addDiag(i, 1.0);
+    sys.setRHS(i, value_);
 }
