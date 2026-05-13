@@ -3,5 +3,7 @@
 enum class BoundaryFace {
     Left,
     Right,
-    Interior
+    Interior,
+    Top,
+    Bottom
 };
