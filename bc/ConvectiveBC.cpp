@@ -1,22 +1,21 @@
-#include "ConvectiveBC.hpp"
-#include "system/LinearSystem.hpp"
-#include "mesh/Mesh1D.hpp"
+#include "bc/ConvectiveBC.hpp"
 
-ConvectiveBC::ConvectiveBC(int face, double h, double Tinf)
-    : face_(face), h_(h), Tinf_(Tinf) {}
+ConvectiveBC::ConvectiveBC(double h, double Tinf)
+    : h_(h), Tinf_(Tinf)
+{}
 
-void ConvectiveBC::apply(const Mesh1D& m, LinearSystem& sys, double k, double A) const
+void ConvectiveBC::apply(
+    LinearSystem& sys,
+    const BoundaryContext& ctx) const
 {
-    int i = face_;
+    int i = ctx.node;
 
-    double dx = m.dx;
+    double A = ctx.area;
 
-    double a_cond = k * A / dx;
-    double a_conv = h_ * A;
+    // Robin formulation:
+    // adds h*A to diagonal
+    sys.addDiag(i, h_ * A);
 
-    sys.aP[i] = a_cond + a_conv;
-    sys.aW[i] = 0.0;
-    sys.aE[i] = 0.0;
-
-    sys.b[i] = h_*A*Tinf_;
+    // adds h*A*Tinf to RHS
+    sys.addRHS(i, h_ * A * Tinf_);
 }
