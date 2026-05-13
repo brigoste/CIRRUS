@@ -1,10 +1,29 @@
 #include <iostream>
 #include <memory>
+#include <filesystem>
 
-#include "system/HeatCase1D.hpp"
-#include "system/HeatSystem1D.hpp"
+#include "io/FieldWriter.hpp"
+#include "io/VTKWriter.hpp"
+
 #include "mesh/Mesh1D.hpp"
 #include "Solver/SolverMethod.hpp"
+
+// HT SOLVERS
+#include "system/HeatCase1D.hpp"
+#include "system/HeatSystem1D.hpp"
+// #include "system/HeatCase2D.hpp" 
+// #include "system/HeatSystem2D.hpp"
+// #include "system/HeatCase3D.hpp"
+// #include "system/HeatSystem3D.hpp"
+
+// FLUID SOLVERS - need to implment
+// #include "system/FluidCase1D.hpp"        
+// #include "system/FluidSystem1D.hpp"
+// #include "system/FluidCase2D.hpp"
+// #include "system/FluidSystem2D.hpp"
+// #include "system/FluidCase3D.hpp"
+// #include "system/FluidSystem3D.hpp"
+
 #include "system/SimulationConfig.hpp"
 
 int main()
@@ -37,9 +56,9 @@ int main()
 
     SimulationConfig cfg;
 
-    cfg.method = SolverMethod::CG;
-    cfg.iter   = 5000;
-    cfg.tol    = 1e-8;
+    cfg.method = SolverMethod::TDMA;
+    cfg.iter   = 10000;
+    cfg.tol    = 1e-5;
     cfg.omega  = 1.2;
 
     // -----------------------------
@@ -62,14 +81,21 @@ int main()
     // -----------------------------
     // 5. Solve
     // -----------------------------
-    auto T = system.solve(
-        cfg.method,
-        cfg.iter,
-        cfg.tol,
-        cfg.omega
+    auto phi = system.solve(
+        cfg.method,     // solver method
+        cfg.iter,       // n-iterations
+        cfg.tol,        // convergence tolerance
+        cfg.omega       // relaxation factor
     );
 
-    std::cout << "Solution computed.\n";
+    std::cout << "\nSolution computed.\n";
+
+    std::cout << "\n============================================\n";
+
+    std::filesystem::path out = "../output/solution.vtu";
+    VTKWriter::writeVTU(mesh, phi, out);
+
+    std::cout << "\nSolution written to VTK\n\n";
 
     return 0;
 }
