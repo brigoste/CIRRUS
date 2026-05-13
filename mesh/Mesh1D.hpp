@@ -35,14 +35,16 @@ public:
     double distance(int p, int q) const override;
 
     // ❌ REMOVE THIS (see note below)
-    // double edgeArea(int p, int q) const override;
+    double edgeArea(int p, int q) const override;
+    std::vector<int> faceNodes(BoundaryFace face) const override;
 
     // -----------------------------
     // boundary (FACE-based)
     // -----------------------------
     std::vector<BoundaryFace> boundaryFaces() const override;
 
-    BoundaryContext boundaryContext(BoundaryFace face) const override;
+    BoundaryContext boundaryContext(int owner, BoundaryFace face) const override;
+    int faceOwner(BoundaryFace face) const override;
 
 private:
     int n_;
