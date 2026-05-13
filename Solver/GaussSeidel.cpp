@@ -1,7 +1,9 @@
 #include "Solver/GaussSeidel.hpp"
+#include "linear_system/LinearSystem.hpp"
 #include <cmath>
-#include <algorithm>
 #include <iostream>
+#include <stdexcept>
+#include <algorithm>
 
 std::vector<double> GaussSeidel(
     LinearSystem& sys,
@@ -10,58 +12,55 @@ std::vector<double> GaussSeidel(
     bool output
 )
 {
-    const int N = sys.aP.size();
+    const int N = sys.size();
 
-    std::fill(sys.x.begin(), sys.x.end(), 0.0);
-    std::fill(sys.x_old.begin(), sys.x_old.end(), 0.0);
-    int n_iter = 0;
+    auto& x = sys.solution();
+    const auto& b = sys.rhs();
+
+    if ((int)x.size() != N || (int)b.size() != N)
+        throw std::runtime_error("GaussSeidel: size mismatch");
+
+    std::fill(x.begin(), x.end(), 0.0);
 
     for (int it = 0; it < iter; ++it)
     {
         double maxDiff = 0.0;
-        n_iter++;
 
         for (int i = 0; i < N; ++i)
         {
-            const double aP = sys.aP[i];
+            const double diag = sys.diag(i);
 
-            if (std::abs(aP) < 1e-14)
+            if (std::abs(diag) < 1e-14)
+                throw std::runtime_error("GaussSeidel: zero diagonal");
+
+            double sum = 0.0;
+
+            // off-diagonal contributions
+            for (const auto& [j, aij] : sys.row(i))
             {
-                std::cerr << "GaussSeidel: zero diagonal at i=" << i << "\n";
-                return {};
+                sum += aij * x[j];
             }
 
-            const double old = sys.x[i];
+            const double x_new = (b[i] - sum) / diag;
 
-            double rhs = sys.b[i];
-
-            if (i > 0)
-                rhs -= sys.aW[i] * sys.x[i - 1];
-
-            if (i < N - 1)
-                rhs -= sys.aE[i] * sys.x_old[i + 1];
-
-            sys.x[i] = rhs / aP;
-
-            maxDiff = std::max(maxDiff, std::abs(sys.x[i] - old));
-
-            sys.x_old[i] = sys.x[i]; // keep sync
+            maxDiff = std::max(maxDiff, std::abs(x_new - x[i]));
+            x[i] = x_new;
         }
 
-        if (maxDiff < tol){
-            if(output)
-                std::cout << "Hit tolerance." << std::endl;
-            break;
-        }
-    }
-    if(output){
-        if(n_iter < iter){
-            std::cout << "Exited after " << n_iter << " iterations." << std::endl; 
-        }
-        else{
-            std::cout << "Exited after maximum iterations." << std::endl; 
+        if (output)
+            std::cout << "GS iter " << it
+                      << " maxDiff=" << maxDiff << "\n";
+
+        if (maxDiff < tol)
+        {
+            if (output)
+                std::cout << "GS converged in " << it << " iterations\n";
+            return x;
         }
     }
 
-    return sys.x;
+    if (output)
+        std::cout << "GS reached max iterations\n";
+
+    return x;
 }
