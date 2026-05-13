@@ -1,14 +1,15 @@
 #pragma once
 
-#include "mesh/Mesh1D.hpp"
-#include "system/LinearSystem.hpp"
+#include "linear_system/LinearSystem.hpp"
+#include "bc/BoundaryContext.hpp"
 
-class BoundaryCondition {
+class BoundaryCondition
+{
 public:
     virtual ~BoundaryCondition() = default;
 
-    virtual void apply(const Mesh1D& mesh,
-                       LinearSystem& sys,
-                       double k,
-                       double A) const = 0;
+    virtual void apply(
+        LinearSystem& sys,
+        const BoundaryContext& ctx
+    ) const = 0;
 };
