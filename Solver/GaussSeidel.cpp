@@ -1,5 +1,6 @@
 #include "Solver/GaussSeidel.hpp"
 #include "linear_system/LinearSystem.hpp"
+#include "mesh/MeshBase.hpp"
 #include <cmath>
 #include <iostream>
 #include <stdexcept>
@@ -7,6 +8,7 @@
 
 std::vector<double> GaussSeidel(
     LinearSystem& sys,
+    [[maybe_unused]]const MeshBase& mesh,
     int iter,
     double tol,
     bool output
