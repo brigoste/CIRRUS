@@ -1,26 +1,17 @@
-#include "NeumannBC.hpp"
-#include "system/LinearSystem.hpp"
-#include "mesh/Mesh1D.hpp"
+#include "bc/NeumannBC.hpp"
 
-NeumannBC::NeumannBC(int face, double q)
-    : face_(face), q_(q) {}
+NeumannBC::NeumannBC(double flux)
+    : flux_(flux)
+{}
 
-void NeumannBC::apply(const Mesh1D& m, LinearSystem& sys, double k, double A) const
+void NeumannBC::apply(
+    LinearSystem& sys,
+    const BoundaryContext& ctx) const
 {
-    int i = face_;
-    double dx = m.dx; 
+    int i = ctx.node;
 
-    // Neumann:  -k dT/dx = q
-    // dT/dx ≈ (T_i - T_im1)/dx
+    double A = ctx.area;
 
-    double flux_term = q_ * A * dx / k;
-
-    if(i == 0)
-        sys.aE[i] = -1.0;
-    else if(i == m.n-1)
-        sys.aW[i] = -1.0;
-
-    sys.aP[i] = 1.0;
-    
-    sys.b[i] += flux_term;
+    // flux enters RHS as source term
+    sys.addRHS(i, flux_ * A);
 }
