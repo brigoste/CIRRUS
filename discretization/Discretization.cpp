@@ -32,7 +32,7 @@ void discretize(
         sys.addDiag(p, ap);
 
         // NOTE: placeholder physics source term (should be model-driven later)
-        double V = mesh.volume(p);
+        // double V = mesh.volume(p);
         sys.addRHS(p, 0.0); // explicit placeholder, no fake physics injection
     }
 }
