@@ -154,3 +154,8 @@ double LinearSystem::coeff(int i, int j) const
 
     return 0.0;
 }
+
+void LinearSystem::setSolution(const std::vector<double>& x)
+{
+    x_ = x;
+}
