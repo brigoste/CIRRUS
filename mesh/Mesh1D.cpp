@@ -98,32 +98,47 @@ std::vector<BoundaryFace> Mesh1D::boundaryFaces() const
     return {BoundaryFace::Left, BoundaryFace::Right};
 }
 
-BoundaryContext Mesh1D::boundaryContext(BoundaryFace face) const
+BoundaryContext Mesh1D::boundaryContext(int owner, BoundaryFace face) const
 {
     BoundaryContext ctx{};
 
+    ctx.owner = owner;
+    ctx.neighbor = -1;
+
+    ctx.area = 1.0;
+    ctx.distance = dx_ / 2.0;
+
     if (face == BoundaryFace::Left)
-    {
-        ctx.owner = 0;
-        ctx.neighbor = -1;
-
-        ctx.area = 1.0;
-        ctx.distance = dx_ / 2.0;
         ctx.normalDir = NeighborDir::W;
-    }
     else if (face == BoundaryFace::Right)
-    {
-        ctx.owner = n_ - 1;
-        ctx.neighbor = -1;
-
-        ctx.area = 1.0;
-        ctx.distance = dx_ / 2.0;
         ctx.normalDir = NeighborDir::E;
-    }
     else
-    {
-        throw std::runtime_error("Invalid BoundaryFace in Mesh1D");
-    }
+        throw std::runtime_error("Invalid BoundaryFace");
 
     return ctx;
+}
+
+double Mesh1D::edgeArea(int, int) const
+{
+    return 1.0;
+}
+std::vector<int> Mesh1D::faceNodes(BoundaryFace face) const
+{
+    if (face == BoundaryFace::Left)
+        return {0};
+
+    if (face == BoundaryFace::Right)
+        return {n_ - 1};
+
+    return {};
+}
+int Mesh1D::faceOwner(BoundaryFace face) const
+{
+    if (face == BoundaryFace::Left)
+        return 0;
+
+    if (face == BoundaryFace::Right)
+        return n_ - 1;
+
+    throw std::runtime_error("Invalid BoundaryFace in Mesh1D");
 }
