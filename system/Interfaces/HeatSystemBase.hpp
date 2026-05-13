@@ -2,50 +2,38 @@
 
 #include <vector>
 #include <memory>
-#include <functional>
 
+#include "mesh/MeshBase.hpp"
+#include "linear_system/LinearSystem.hpp"
 #include "bc/BoundaryCondition.hpp"
-#include "system/LinearSystem.hpp"
-#include "mesh/Mesh1D.hpp"
 #include "Solver/SolverMethod.hpp"
-#include "Solver/TDMA.hpp"
-#include "Solver/GaussSeidel.hpp"
 
-class HeatSystemBase {
+class HeatSystemBase
+{
 public:
     virtual ~HeatSystemBase() = default;
 
-    // -----------------------------------------
-    // Core workflow
-    // -----------------------------------------
+    // -----------------------------
+    // lifecycle
+    // -----------------------------
     virtual void assemble() = 0;
 
-    std::vector<double> solve(SolverMethod method,
-                              int max_iter = 5000,
-                              double tol = 1e-10,
-                              double omega = 1.0);
+    virtual std::vector<double> solve(
+        SolverMethod method,
+        int max_iter,
+        double tol,
+        double omega = 1.0) = 0;
 
-    // -----------------------------------------
-    // BC management
-    // -----------------------------------------
-    void addBC(std::unique_ptr<BoundaryCondition> bc) {
-        bcs_.push_back(std::move(bc));
-    }
+    // -----------------------------
+    // system access
+    // -----------------------------
+    virtual const MeshBase& mesh() const = 0;
+    virtual const LinearSystem& system() const = 0;
 
-    // -----------------------------------------
-    // Source management
-    // -----------------------------------------
-    void setSource(std::function<double(double)> Su_func,
-                   std::function<double(double)> Sp_func);
+    virtual int size() const = 0;
 
-    void clearSource(const std::vector<double>& x);
-
-protected:
-    std::vector<std::unique_ptr<BoundaryCondition>> bcs_;
-
-    // -----------------------------------------
-    // Derived classes MUST give access to mesh & system
-    // -----------------------------------------
-    virtual Mesh1D& mesh() = 0;
-    virtual LinearSystem& system() = 0;
+    // -----------------------------
+    // BC interface
+    // -----------------------------
+    // virtual void addBC(std::unique_ptr<BoundaryCondition>) = 0;
 };
