@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include "mesh/MeshBase.hpp"
 
 struct HeatEquationModel
 {
@@ -8,6 +9,6 @@ struct HeatEquationModel
     double Su;
     double Sp;
 
-    std::function<double(const MeshPoint&)> Su = nullptr;
-    std::function<double(const MeshPoint&)> Sp = nullptr;
+    // std::function<double(const MeshPoint&)> Su = nullptr;
+    // std::function<double(const MeshPoint&)> Sp = nullptr;
 };
