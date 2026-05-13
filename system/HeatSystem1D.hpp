@@ -1,51 +1,49 @@
 #pragma once
 
-#include <vector>
-#include <memory>
-#include <functional>  
-#include "mesh/Mesh1D.hpp"
-#include "system/LinearSystem.hpp"
-#include "bc/BoundaryCondition.hpp"
+#include "system/Interfaces/HeatSystemBase.hpp"
+#include "mesh/MeshBase.hpp"
+#include "linear_system/LinearSystem.hpp"
+#include "system/HeatCase1D.hpp"
+#include "physics/HeatEquationModel.hpp"
+#include "bc/BoundaryContext.hpp"
+#include "bc/BoundaryConditionDescriptor.hpp"
 #include "Solver/SolverMethod.hpp"
-#include "Solver/TDMA.hpp"
-#include "Solver/SOR.hpp"
-#include "Solver/GaussSeidel.hpp"
 
-
-class HeatSystem1D
+class HeatSystem1D : public HeatSystemBase
 {
-    public:
-        HeatSystem1D(int n, double L, double A, double k, bool output=true);
+public:
+    HeatSystem1D(const MeshBase& mesh,
+                 const HeatCase1D& problem);
 
-        void addBC(std::unique_ptr<BoundaryCondition> bc);
+    // lifecycle
+    void assemble() override;
 
-        double getCoordinate(int i) const;
+    std::vector<double> solve(
+        SolverMethod method,
+        int max_iter,
+        double tol,
+        double omega = 1.0
+    ) override;
 
-        void assemble();
+    // base interface
+    const MeshBase& mesh() const override;
+    const LinearSystem& system() const override;
+    int size() const override;
 
-        std::vector<double> solve(
-            SolverMethod method,
-            int iter=1000,
-            double tol=1e-5,
-            double omega = 1.2
-        );
+    // void addBC(std::unique_ptr<BoundaryCondition>) override;
 
-        void setSource(
-            std::function<double(double)> Su_func,
-            std::function<double(double)> Sp_func
-        );
+private:
+    void applyDirichlet(const BoundaryConditionDescriptor& bc,
+                        const BoundaryContext& ctx);
 
-        const Mesh1D& mesh() const        { return mesh_; }
-        LinearSystem& system()            { return sys_; }
-        const LinearSystem& system() const { return sys_; }
+    void applyNeumann(const BoundaryConditionDescriptor& bc,
+                      const BoundaryContext& ctx);
 
-    private:
-        Mesh1D mesh_;
-        LinearSystem sys_;
-        std::vector<std::unique_ptr<BoundaryCondition>> bcs_;
+    void applyConvective(const BoundaryConditionDescriptor& bc,
+                         const BoundaryContext& ctx);
 
-        double A_;
-        double k_;
-
-        bool output_;
+private:
+    const MeshBase& mesh_;
+    LinearSystem sys_;
+    const HeatCase1D& problem_;
 };
