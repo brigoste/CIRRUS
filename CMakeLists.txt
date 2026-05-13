@@ -33,6 +33,7 @@ file(GLOB_RECURSE CIRRUS_SOURCES
     ${PROJECT_SOURCE_DIR}/main.cpp
     ${PROJECT_SOURCE_DIR}/bc/*.cpp
     ${PROJECT_SOURCE_DIR}/discretization/*.cpp
+    ${PROJECT_SOURCE_DIR}/io/*.cpp
     ${PROJECT_SOURCE_DIR}/linear_system/*.cpp
     ${PROJECT_SOURCE_DIR}/mesh/*.cpp
     ${PROJECT_SOURCE_DIR}/physics/*.cpp
