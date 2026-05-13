@@ -1,6 +1,11 @@
 #pragma once
 
-#include "system/LinearSystem.hpp"
+#include "linear_system/LinearSystem.hpp"
 #include <vector>
 
-std::vector<double> TDMA(const LinearSystem& sys);
+// 1D-only solver (tridiagonal system)
+std::vector<double> TDMA(
+    LinearSystem& sys,
+    int N,
+    bool output = false
+);
