@@ -35,9 +35,9 @@ public:
     // -----------------------------
     // Boundary
     // -----------------------------
-    BoundaryFace faceType(int p) const override;
-    BoundaryContext boundaryContext(int p) const override;
-    std::vector<int> boundaryNodes(BoundaryFace face) const override;
+    virtual BoundaryFace faceType(int p) const = 0;
+    virtual BoundaryContext boundaryContext(int owner, BoundaryFace face) const override;
+    virtual std::vector<int> boundaryNodes(BoundaryFace face) const = 0;
     double edgeArea(int p, int q) const override;
 
     // reserved hook for unstructured meshes
