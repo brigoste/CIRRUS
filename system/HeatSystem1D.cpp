@@ -28,7 +28,7 @@ HeatSystem1D::HeatSystem1D(const MeshBase& mesh,
 void HeatSystem1D::applyDirichlet(const BoundaryConditionDescriptor& bc,
                                   const BoundaryContext& ctx)
 {
-    int i = ctx.node;
+    int i = ctx.owner;
 
     sys_.clearRow(i);
     sys_.addDiag(i, 1.0);
@@ -38,14 +38,14 @@ void HeatSystem1D::applyDirichlet(const BoundaryConditionDescriptor& bc,
 void HeatSystem1D::applyNeumann(const BoundaryConditionDescriptor& bc,
                                 const BoundaryContext& ctx)
 {
-    int i = ctx.node;
+    int i = ctx.owner;
     sys_.addRHS(i, bc.flux * ctx.area);
 }
 
 void HeatSystem1D::applyConvective(const BoundaryConditionDescriptor& bc,
                                    const BoundaryContext& ctx)
 {
-    int i = ctx.node;
+    int i = ctx.owner;  //Should this be neighbor?
 
     sys_.addDiag(i, bc.h * ctx.area);
     sys_.addRHS(i, bc.h * bc.Tinf * ctx.area);
@@ -67,25 +67,37 @@ void HeatSystem1D::assemble()
     FiniteVolumeOperator::assemble(mesh_, model, sys_);
 
     // -------------------------
-    // boundary faces (NEW)
+    // boundary faces
     // -------------------------
-    for (const auto& bc : problem_.bcs)
+    for (const auto face : mesh_.boundaryFaces())
     {
-        BoundaryContext ctx = mesh_.boundaryContext(bc.face);
+        int owner = mesh_.faceOwner(face);
 
-        switch (bc.type)
+        BoundaryContext ctx = mesh_.boundaryContext(owner, face);
+
+        // match BC to this face
+        for (const auto& bc : problem_.bcs)
         {
-            case BCType::Dirichlet:
-                applyDirichlet(bc, ctx);
-                break;
+            if (bc.face != face)
+                continue;
 
-            case BCType::Neumann:
-                applyNeumann(bc, ctx);
-                break;
+            switch (bc.type)
+            {
+                case BCType::Dirichlet:
+                    applyDirichlet(bc, ctx);
+                    break;
 
-            case BCType::Convective:
-                applyConvective(bc, ctx);
-                break;
+                case BCType::Neumann:
+                    applyNeumann(bc, ctx);
+                    break;
+
+                case BCType::Convective:
+                    applyConvective(bc, ctx);
+                    break;
+
+                default:
+                    throw std::runtime_error("Unknown BC type");
+            }
         }
     }
 }
