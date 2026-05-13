@@ -16,7 +16,7 @@ std::vector<double> TDMA(
     for (int i = 0; i < N; ++i)
     {
         const double diag = sys.diagonal()[i];
-        const auto& row = sys.row(i);
+        // const auto& row = sys.row(i);
 
         d[i] = sys.rhs()[i];
         b[i] = diag;
