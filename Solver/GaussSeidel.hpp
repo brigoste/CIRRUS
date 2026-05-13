@@ -6,7 +6,7 @@
 
 std::vector<double> GaussSeidel(
     LinearSystem& sys,
-    const MeshBase& mesh,
+    [[maybe_unused]]const MeshBase& mesh,
     int iter = 1000,
     double tol = 1e-8,
     bool output = false
