@@ -47,10 +47,11 @@ public:
     virtual std::vector<BoundaryFace> boundaryFaces() const = 0;
 
     // full geometric + topological info for a boundary face
-    virtual BoundaryContext boundaryContext(BoundaryFace face) const = 0;
+    virtual BoundaryContext boundaryContext(int owner, BoundaryFace face) const = 0;
 
     // optional helper: map face → owner cell(s)
     virtual std::vector<int> faceNodes(BoundaryFace face) const = 0;
+    virtual int faceOwner(BoundaryFace face) const = 0;
 
     // -----------------------------
     // future hook
