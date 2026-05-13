@@ -1,24 +1,54 @@
 #pragma once
-#include "bc/BoundaryFace.hpp"
-#include <stdexcept>
 
+#include "mesh/MeshBase.hpp"
 #include <vector>
 
-struct Mesh1D {
-    // --- grid definition ---
-    int n;          // number of nodes
-    double L;       // domain length
-    double dx;      // uniform spacing
+class Mesh1D : public MeshBase
+{
+public:
+    Mesh1D(int n, double L);
 
-    // --- material / physics properties ---
-    double A;       // cross-sectional area
-    double k;       // thermal conductivity
+    // -----------------------------
+    // core
+    // -----------------------------
+    int size() const override;
+    int dim() const override;
 
-    // --- geometry ---
-    std::vector<double> x;
+    MeshPoint point(int p) const override;
 
-    // --- constructor ---
-    Mesh1D(int n_, double L_, double A_, double k_);
+    // -----------------------------
+    // connectivity
+    // -----------------------------
+    const std::vector<int>& neighbors(int p) const override;
 
-    BoundaryFace faceType(int i) const;
+    int neighbor(int p, NeighborDir dir) const override;
+    bool hasNeighbor(int p, NeighborDir dir) const override;
+    int numNeighbors(int p) const override;
+
+    // -----------------------------
+    // geometry
+    // -----------------------------
+    double volume(int p) const override;
+
+    double faceArea(int p, NeighborDir dir) const override;
+
+    double distance(int p, int q) const override;
+
+    // ❌ REMOVE THIS (see note below)
+    // double edgeArea(int p, int q) const override;
+
+    // -----------------------------
+    // boundary (FACE-based)
+    // -----------------------------
+    std::vector<BoundaryFace> boundaryFaces() const override;
+
+    BoundaryContext boundaryContext(BoundaryFace face) const override;
+
+private:
+    int n_;
+    double L_;
+    double dx_;
+
+    std::vector<double> x_;
+    std::vector<std::vector<int>> nbrs_;
 };
