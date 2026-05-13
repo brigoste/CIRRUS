@@ -97,9 +97,13 @@ int Mesh2D::neighbor(int p, NeighborDir dir) const
         case NeighborDir::E: return (i < nx_ - 1) ? idx(i + 1, j) : p;
         case NeighborDir::S: return (j > 0) ? idx(i, j - 1) : p;
         case NeighborDir::N: return (j < ny_ - 1) ? idx(i, j + 1) : p;
+
+        case NeighborDir::T:
+        case NeighborDir::B:
+            throw std::runtime_error("Invalid NeighborDir for Mesh2D (T/B not supported)");
     }
 
-    throw std::runtime_error("Invalid NeighborDir");
+    throw std::runtime_error("Unknown NeighborDir");
 }
 
 bool Mesh2D::hasNeighbor(int p, NeighborDir dir) const
@@ -113,6 +117,10 @@ bool Mesh2D::hasNeighbor(int p, NeighborDir dir) const
         case NeighborDir::E: return i < nx_ - 1;
         case NeighborDir::S: return j > 0;
         case NeighborDir::N: return j < ny_ - 1;
+
+        case NeighborDir::T:
+        case NeighborDir::B:
+            throw std::runtime_error("Invalid NeighborDir for Mesh2D (T/B not supported)");
     }
 
     return false;
@@ -171,48 +179,46 @@ BoundaryFace Mesh2D::faceType(int p) const
     return BoundaryFace::Interior;
 }
 
-BoundaryContext Mesh2D::boundaryContext(int p) const
+BoundaryContext Mesh2D::boundaryContext(int p, BoundaryFace face) const
 {
     BoundaryContext ctx;
+
+    ctx.owner = p;
 
     int i, j;
     ij(p, i, j);
 
-    ctx.node = p;
-    ctx.volume = dx_ * dy_;
-
-    // default safe values (should never be used in interior)
     ctx.area = 0.0;
     ctx.distance = 0.0;
 
-    if (i == 0)
+    switch (face)
     {
-        ctx.area = dy_;
-        ctx.distance = dx_;
-        ctx.normalDir = NeighborDir::W;
-    }
-    else if (i == nx_ - 1)
-    {
-        ctx.area = dy_;
-        ctx.distance = dx_;
-        ctx.normalDir = NeighborDir::E;
-    }
-    else if (j == 0)
-    {
-        ctx.area = dx_;
-        ctx.distance = dy_;
-        ctx.normalDir = NeighborDir::S;
-    }
-    else if (j == ny_ - 1)
-    {
-        ctx.area = dx_;
-        ctx.distance = dy_;
-        ctx.normalDir = NeighborDir::N;
-    }
-    else
-    {
-        // safety: should never happen if SimulationCase is correct
-        assert(false && "boundaryContext called on interior node");
+        case BoundaryFace::Left:   // W
+            ctx.area = dy_;
+            ctx.distance = dx_;
+            ctx.normalDir = NeighborDir::W;
+            break;
+
+        case BoundaryFace::Right:  // E
+            ctx.area = dy_;
+            ctx.distance = dx_;
+            ctx.normalDir = NeighborDir::E;
+            break;
+
+        case BoundaryFace::Bottom: // S
+            ctx.area = dx_;
+            ctx.distance = dy_;
+            ctx.normalDir = NeighborDir::S;
+            break;
+
+        case BoundaryFace::Top:    // N
+            ctx.area = dx_;
+            ctx.distance = dy_;
+            ctx.normalDir = NeighborDir::N;
+            break;
+
+        default:
+            assert(false && "Invalid boundary face");
     }
 
     return ctx;
