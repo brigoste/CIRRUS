@@ -8,7 +8,7 @@ class DirichletBC : public BoundaryCondition
         DirichletBC(double value);
 
         void apply(LinearSystem& sys,
-                const BoundaryContext& ctx) const override;
+                const Face& face) const override;
 
     private:
         double value_;
