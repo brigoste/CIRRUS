@@ -1,38 +1,66 @@
 #include "discretization/Discretization.hpp"
+#include <limits>
+
+// static constexpr std::size_t INVALID =
+//     std::numeric_limits<std::size_t>::max();
 
 void discretize(
     const MeshBase& mesh,
     LinearSystem& sys,
-    double k
-)
+    double k)
 {
-    const int N = mesh.size();
+    const std::size_t C = mesh.ncells();
 
-    for (int p = 0; p < N; ++p)
+    // ---------------------------------------------------------
+    // FACE-BASED DIFFUSION (FV STANDARD)
+    // ---------------------------------------------------------
+    for (std::size_t f = 0; f < mesh.nFaces(); ++f)
     {
-        double ap = 0.0;
+        const Face& face = mesh.face(f);
 
-        const auto& nbrs = mesh.neighbors(p);
+        const std::size_t P = face.owner;
+        const std::size_t N = face.neighbor;
 
-        for (int q : nbrs)
+        const double d = face.centroidDistance;
+        const double D = k * face.area / d;
+
+        // interior face
+        if (N != INVALID)
         {
-            double d = mesh.distance(p, q);
+            sys.addCoeff(P, P,  D);
+            sys.addCoeff(P, N, -D);
 
-            if (d <= 0.0)
-                continue;
-
-            // graph-based diffusion coefficient
-            double A = mesh.edgeArea(p, q); // must now be "effective interface area"
-            double a = k * A / d;
-
-            sys.addCoeff(p, q, a);
-            ap += a;
+            sys.addCoeff(N, N,  D);
+            sys.addCoeff(N, P, -D);
         }
+        else
+        {
+            // boundary face
+            const BoundaryConditionDescriptor& bc = face.bc;
 
-        sys.addDiag(p, ap);
+            if (bc.type == BCType::Dirichlet)
+            {
+                sys.addCoeff(P, P, D);
+                sys.addRHS(P, 2.0 * D * bc.value);
+            }
+            else if (bc.type == BCType::Neumann)
+            {
+                sys.addRHS(P, bc.flux * face.area);
+            }
+            else if (bc.type == BCType::Convective)
+            {
+                const double hA = bc.h * face.area;
+                sys.addCoeff(P, P, hA);
+                sys.addRHS(P, hA * bc.Tinf);
+            }
+        }
+    }
 
-        // NOTE: placeholder physics source term (should be model-driven later)
-        // double V = mesh.volume(p);
-        sys.addRHS(p, 0.0); // explicit placeholder, no fake physics injection
+    // ---------------------------------------------------------
+    // SOURCE TERMS (cell-centered placeholder)
+    // ---------------------------------------------------------
+    for (std::size_t c = 0; c < C; ++c)
+    {
+        sys.addRHS(c, 0.0);
     }
 }
