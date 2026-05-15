@@ -1,58 +1,53 @@
 #pragma once
 
 #include "mesh/MeshBase.hpp"
+#include "config/BoundaryConfig.hpp"
+#include "mesh/Face.hpp"
 #include <vector>
+#include <optional>
+#include <stdexcept>
 
 class Mesh2D : public MeshBase
 {
 public:
-    Mesh2D(int nx, int ny, double Lx, double Ly);
+    Mesh2D(int Nx, int Ny, double Lx, double Ly);
 
-    // -----------------------------
-    // Core
-    // -----------------------------
-    int size() const override;
-    int dim() const override;
+    std::size_t ncells() const override;
+    std::size_t nnodes() const override;
 
-    MeshPoint point(int p) const override;
+    Point cellCenter(std::size_t i) const override;
+    Point node(std::size_t i) const override;
 
-    // -----------------------------
-    // Connectivity (GRAPH-BASED)
-    // -----------------------------
-    const std::vector<int>& neighbors(int p) const override;
+    std::size_t cellNodeCount(std::size_t i) const override;
+    std::size_t cellNode(std::size_t icell, std::size_t k) const override;
 
-    int neighbor(int p, NeighborDir dir) const override;
-    bool hasNeighbor(int p, NeighborDir dir) const override;
-    int numNeighbors(int p) const override;
+    double cellVolume(std::size_t i) const override;
 
-    // -----------------------------
-    // Geometry
-    // -----------------------------
-    double volume(int p) const override;
-    double faceArea(int p, NeighborDir dir) const override;
-    double distance(int p, int q) const override;
+    int leftNeighbor(std::size_t i) const;
+    int rightNeighbor(std::size_t i) const;
 
-    // -----------------------------
-    // Boundary
-    // -----------------------------
-    virtual BoundaryFace faceType(int p) const = 0;
-    virtual BoundaryContext boundaryContext(int owner, BoundaryFace face) const override;
-    virtual std::vector<int> boundaryNodes(BoundaryFace face) const = 0;
-    double edgeArea(int p, int q) const override;
+    std::size_t dim() const override { return 2; }
 
-    // reserved hook for unstructured meshes
-    void buildConnectivity() override {}
+    // =========================================================
+    // FACE SYSTEM
+    // =========================================================
+    std::size_t nFaces() const override;
+    const Face& face(std::size_t f) const override;
 
 private:
-    int nx_, ny_;
+    std::vector<std::size_t> Mesh2D::boundaryFaceIndices(BoundaryFace f) const;
+    const std::vector<std::size_t>& cellFaces(std::size_t c) const;
+    virtual std::vector<Face>::const_iterator Mesh2D::facesBegin() const override;
+    virtual std::vector<Face>::const_iterator Mesh2D::facesEnd() const override;
+
+    int Nx_, Ny_;
     double Lx_, Ly_;
     double dx_, dy_;
 
-    std::vector<double> x_, y_;
+    std::vector<Point> centers_;
+    std::vector<Face> faces_;
+    std::vector<std::vector<std::size_t>> cellFaces_;
 
-    // graph adjacency
-    std::vector<std::vector<int>> nbrs_;
-
-    void ij(int p, int& i, int& j) const;
-    int idx(int i, int j) const;
+    int idx(int i, int j) const { return i + Nx_ * j; }
+    void ij(int id, int& i, int& j) const;
 };
