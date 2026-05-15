@@ -1,7 +1,7 @@
 #pragma once
 
 #include "linear_system/LinearSystem.hpp"
-#include "bc/BoundaryContext.hpp"
+#include "mesh/MeshBase.hpp" // for face
 
 class BoundaryCondition
 {
@@ -10,6 +10,6 @@ public:
 
     virtual void apply(
         LinearSystem& sys,
-        const BoundaryContext& ctx
+        const Face& face
     ) const = 0;
 };
