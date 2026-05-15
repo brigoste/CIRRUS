@@ -24,78 +24,78 @@
 // #include "system/FluidCase3D.hpp"
 // #include "system/FluidSystem3D.hpp"
 
-#include "system/SimulationConfig.hpp"
+#include "linear_system/Residual.hpp"
+
+// JSON includes
+#include "config/SimulationConfigLoader.hpp"
+#include "config/SimulationConfig.hpp"
+
 
 int main()
 {
     std::cout << "\n================ INITIALIZING SYSTEM ================\n";
 
+    bool useJSON = false;
+
+    SimulationConfig cfg = defaultConfig(); 
+
+    if (useJSON)
+    {
+        std::cout << "Loading JSON config...\n";
+        cfg = loadConfig("C:/Users/E40112856/Packages/CIRRUS/output/metadata.json");
+    }
+    else
+    {
+        std::cout << "Using default config...\n";
+    }
+
     // -----------------------------
-    // 1. Physics definition
+    // Build physics from config
     // -----------------------------
     HeatCase1D physics;
 
-    // Define Geometry and material
-    physics.n = 80;
-    physics.L = 0.5;
-    physics.A = 0.01;
-    physics.k = 100.0;
+    physics.n = cfg.mesh.n;
+    physics.L = cfg.mesh.L;
 
-    // Define Source Terms
-    physics.Su = 1000.0;
-    physics.Sp = 0.0;
+    physics.k = cfg.physics.k;
+    physics.A = cfg.physics.A;
 
-    // Apply Boundary Conditions
-    physics.bcs.push_back(
-    BoundaryConditionDescriptor::Dirichlet(BoundaryFace::Left, 300.0)
-    );
+    physics.Su = [Su0 = cfg.source.Su](const Point&) { return Su0; };
+    physics.Sp = [Sp0 = cfg.source.Sp](const Point&) { return Sp0; };
 
-    physics.bcs.push_back(
-        BoundaryConditionDescriptor::Neumann(BoundaryFace::Right, 0.0)
-    );
-
-    SimulationConfig cfg;
-
-    cfg.method = SolverMethod::TDMA;
-    cfg.iter   = 10000;
-    cfg.tol    = 1e-5;
-    cfg.omega  = 1.2;
+    // physics.bcs = buildBoundaryContexts(cfg.bcs, cfg.mesh);
 
     // -----------------------------
-    // 2. Mesh
+    // Mesh + system
     // -----------------------------
-    Mesh1D mesh(physics.n, physics.L);
-
-    // -----------------------------
-    // 3. System
-    // -----------------------------
+    Mesh1D mesh(cfg.mesh.n, cfg.mesh.L);
     HeatSystem1D system(mesh, physics);
 
     // -----------------------------
-    // 4. Assembly
+    // Solve
     // -----------------------------
     system.assemble();
 
-    std::cout << "\n================ SOLVING ================\n";
-
-    // -----------------------------
-    // 5. Solve
-    // -----------------------------
     auto phi = system.solve(
-        cfg.method,     // solver method
-        cfg.iter,       // n-iterations
-        cfg.tol,        // convergence tolerance
-        cfg.omega       // relaxation factor
+        cfg.solver.type,
+        cfg.solver.max_iter,
+        cfg.solver.tol,
+        cfg.solver.omega
     );
 
-    std::cout << "\nSolution computed.\n";
+    std::cout << "\n================ SOLVING COMPLETE ================\n";
 
-    std::cout << "\n============================================\n";
+    auto r = computeResidual(system.system(), phi);
 
-    std::filesystem::path out = "../output/solution.vtu";
-    VTKWriter::writeVTU(mesh, phi, out);
+    VTKWriter::writeVTU(mesh, phi, "../output/solution.vtu");
 
-    std::cout << "\nSolution written to VTK\n\n";
+    FieldWriter::writeCSVDebug(
+        mesh,
+        phi,
+        system.system().rhs(),
+        r,
+        "../output/solution.csv"
+    );
 
     return 0;
 }
