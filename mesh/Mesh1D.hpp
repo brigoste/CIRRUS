@@ -1,56 +1,53 @@
 #pragma once
 
 #include "mesh/MeshBase.hpp"
+#include "mesh/Face.hpp"
+#include "config/BoundaryConfig.hpp"
+
 #include <vector>
+#include <cstddef>
 
 class Mesh1D : public MeshBase
 {
 public:
-    Mesh1D(int n, double L);
+    Mesh1D(std::size_t N, double L);
 
-    // -----------------------------
-    // core
-    // -----------------------------
-    int size() const override;
-    int dim() const override;
+    // =========================================================
+    // MeshBase interface
+    // =========================================================
+    std::size_t ncells() const override;
+    std::size_t nnodes() const override;
 
-    MeshPoint point(int p) const override;
+    Point cellCenter(std::size_t i) const override;
+    Point node(std::size_t i) const override;
 
-    // -----------------------------
-    // connectivity
-    // -----------------------------
-    const std::vector<int>& neighbors(int p) const override;
+    std::size_t cellNodeCount(std::size_t i) const override;
+    std::size_t cellNode(std::size_t icell, std::size_t k) const override;
 
-    int neighbor(int p, NeighborDir dir) const override;
-    bool hasNeighbor(int p, NeighborDir dir) const override;
-    int numNeighbors(int p) const override;
+    double cellVolume(std::size_t i) const override;
 
-    // -----------------------------
-    // geometry
-    // -----------------------------
-    double volume(int p) const override;
+    std::size_t dim() const override;
 
-    double faceArea(int p, NeighborDir dir) const override;
+    // =========================================================
+    // Face access (core FV abstraction)
+    // =========================================================
+    std::size_t nFaces() const;
+    const Face& face(std::size_t f) const;
 
-    double distance(int p, int q) const override;
-
-    // ❌ REMOVE THIS (see note below)
-    double edgeArea(int p, int q) const override;
-    std::vector<int> faceNodes(BoundaryFace face) const override;
-
-    // -----------------------------
-    // boundary (FACE-based)
-    // -----------------------------
-    std::vector<BoundaryFace> boundaryFaces() const override;
-
-    BoundaryContext boundaryContext(int owner, BoundaryFace face) const override;
-    int faceOwner(BoundaryFace face) const override;
+    // =========================================================
+    // Boundary condition binding (ONLY entry point)
+    // =========================================================
+    void applyBoundaryConfig(const std::vector<BoundaryConfig>& bcs);
 
 private:
-    int n_;
+    std::size_t N_;
     double L_;
     double dx_;
 
-    std::vector<double> x_;
-    std::vector<std::vector<int>> nbrs_;
+    std::vector<Point> centers_;
+    std::vector<Face> faces_;
+
+    
+    virtual std::vector<Face>::const_iterator Mesh1D::facesBegin() const override;
+    virtual std::vector<Face>::const_iterator Mesh1D::facesEnd() const override;
 };
