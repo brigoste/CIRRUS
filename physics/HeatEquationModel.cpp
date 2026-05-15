@@ -1,10 +1,9 @@
 #include "physics/HeatEquationModel.hpp"
 
-// intentionally minimal
-// physics layer is just data + optional lambdas
-// struct HeatEquationModel
-// {
-//     double k = 0.0;
-//     double Su = 0.0;
-//     double Sp = 0.0;
-// };
+HeatEquationModel makeConstantSource(double su, double sp)
+{
+    HeatEquationModel m;
+    m.Su = [=](const Point&) { return su; };
+    m.Sp = [=](const Point&) { return sp; };
+    return m;
+}
