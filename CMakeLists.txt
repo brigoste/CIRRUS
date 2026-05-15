@@ -31,6 +31,7 @@ include_directories(${PROJECT_BINARY_DIR})
 # ----------------------------------------
 file(GLOB_RECURSE CIRRUS_SOURCES
     ${PROJECT_SOURCE_DIR}/main.cpp
+    ${PROJECT_SOURCE_DIR}/config/*.cpp
     ${PROJECT_SOURCE_DIR}/bc/*.cpp
     ${PROJECT_SOURCE_DIR}/discretization/*.cpp
     ${PROJECT_SOURCE_DIR}/io/*.cpp
@@ -41,6 +42,27 @@ file(GLOB_RECURSE CIRRUS_SOURCES
     ${PROJECT_SOURCE_DIR}/system/*.cpp
     ${PROJECT_SOURCE_DIR}/utils/*.cpp
 )
+
+# ----------------------------------------
+# JSON implmentation for problem configuration
+# ----------------------------------------
+
+# ----------------------------------------
+# nlohmann_json (MSYS2 / system package)
+# ----------------------------------------
+find_path(NLOHMANN_JSON_INCLUDE_DIR
+    nlohmann/json.hpp
+    PATHS
+        /usr/include
+        /usr/local/include
+        /mingw64/include
+        /ucrt64/include
+    REQUIRED
+)
+
+message(STATUS "nlohmann_json include dir: ${NLOHMANN_JSON_INCLUDE_DIR}")
+
+include_directories(${NLOHMANN_JSON_INCLUDE_DIR})
 
 # ----------------------------------------
 # Executable
