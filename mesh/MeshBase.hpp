@@ -1,60 +1,45 @@
 #pragma once
 
+#include <cstddef>
+#include <limits>
 #include <vector>
-#include "bc/BoundaryFace.hpp"
-#include "bc/BoundaryContext.hpp"
-#include "mesh/NeighborDir.hpp"
+#include <optional>
+#include "mesh/Point.hpp"
+// #include "bc/BoundaryConditionDescriptor.hpp"
+// #include "bc/BoundaryContext.hpp"
+#include "mesh/BoundaryPatchSystem.hpp"
+#include "mesh/Face.hpp"
 
-struct MeshPoint
-{
-    std::vector<double> x;
-};
+static constexpr std::size_t INVALID = std::numeric_limits<std::size_t>::max();
 
 class MeshBase
 {
 public:
     virtual ~MeshBase() = default;
 
-    // -----------------------------
     // topology
-    // -----------------------------
-    virtual int size() const = 0;
-    virtual int dim() const = 0;
+    virtual std::size_t ncells() const = 0;
+    virtual std::size_t nnodes() const = 0;
 
-    // -----------------------------
     // geometry
-    // -----------------------------
-    virtual MeshPoint point(int p) const = 0;
-    virtual double volume(int p) const = 0;
+    virtual Point cellCenter(std::size_t i) const = 0;
+    virtual double cellVolume(std::size_t i) const = 0;
 
-    // -----------------------------
-    // interior connectivity
-    // -----------------------------
-    virtual const std::vector<int>& neighbors(int p) const = 0;
-    virtual int neighbor(int p, NeighborDir dir) const = 0;
-    virtual bool hasNeighbor(int p, NeighborDir dir) const = 0;
-    virtual int numNeighbors(int p) const = 0;
+    // nodes
+    virtual Point node(std::size_t i) const = 0;
+    virtual std::size_t cellNodeCount(std::size_t i) const = 0;
+    virtual std::size_t cellNode(std::size_t c, std::size_t k) const = 0;
 
-    virtual double distance(int p, int q) const = 0;
-    virtual double faceArea(int p, NeighborDir dir) const = 0;
-    virtual double edgeArea(int p, int q) const = 0;
+    // faces
+    virtual std::size_t nFaces() const = 0;
+    virtual const Face& face(std::size_t f) const = 0;
+    
+    virtual std::size_t dim() const = 0;
 
-    // -----------------------------
-    // boundary (FACE-BASED ONLY)
-    // -----------------------------
+    const std::vector<std::size_t>& cellFaces(std::size_t c) const;
+    // const std::vector<Face>& faces() const;
 
-    // list of physical boundary faces in the mesh
-    virtual std::vector<BoundaryFace> boundaryFaces() const = 0;
-
-    // full geometric + topological info for a boundary face
-    virtual BoundaryContext boundaryContext(int owner, BoundaryFace face) const = 0;
-
-    // optional helper: map face → owner cell(s)
-    virtual std::vector<int> faceNodes(BoundaryFace face) const = 0;
-    virtual int faceOwner(BoundaryFace face) const = 0;
-
-    // -----------------------------
-    // future hook
-    // -----------------------------
-    virtual void buildConnectivity() {}
+    // NEW: iterator-style access
+    virtual std::vector<Face>::const_iterator facesBegin() const = 0;
+    virtual std::vector<Face>::const_iterator facesEnd() const = 0;
 };
