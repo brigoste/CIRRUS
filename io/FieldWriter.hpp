@@ -11,4 +11,11 @@ public:
         const MeshBase& mesh,
         const std::vector<double>& field,
         const std::string& filename);
+
+    static void writeCSVDebug(
+        const MeshBase& mesh,
+        const std::vector<double>& phi,
+        const std::vector<double>& rhs,
+        const std::vector<double>& residual,
+        const std::string& filename);
 };
