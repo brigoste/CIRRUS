@@ -1,68 +1,73 @@
 #include "discretization/FiniteVolumeOperator.hpp"
-
-#include "mesh/MeshBase.hpp"
-#include "linear_system/LinearSystem.hpp"
-#include "physics/HeatEquationModel.hpp"
-
+#include "mesh/Face.hpp"
+#include <limits>
 #include <vector>
+#include <cmath>
 #include <stdexcept>
 
-// ------------------------------------------------------------
-// Finite Volume Assembly (general diffusion + source/reaction)
-// ------------------------------------------------------------
+// static constexpr std::size_t INVALID = std::numeric_limits<std::size_t>::max();
+
+// static double distance(const Point& a, const Point& b)
+// {
+//     double dx = a.x[0] - b.x[0];
+//     double dy = a.x[1] - b.x[1];
+//     return std::sqrt(dx*dx + dy*dy);
+// }
+
+#include "discretization/FiniteVolumeOperator.hpp"
+#include <stdexcept>
+
 void FiniteVolumeOperator::assemble(
     const MeshBase& mesh,
     const HeatEquationModel& model,
     LinearSystem& sys)
 {
-    const int N = mesh.size();
+    const std::size_t N = mesh.ncells();
+    const auto INVALID = std::numeric_limits<std::size_t>::max();
 
-    sys.resize(N);
+    std::vector<double> ap(N, 0.0);
 
-    for (int i = 0; i < N; ++i)
+    for (auto it = mesh.facesBegin(); it != mesh.facesEnd(); ++it)
     {
-        double V = mesh.volume(i);
+        const Face& f = *it;
 
-        double aP = 0.0;
-        double bP = 0.0;
+        const double a = model.k * f.area / f.centroidDistance;
 
-        // -----------------------------
-        // Source terms (constant model)
-        // -----------------------------
-        double Su = model.Su;
-        double Sp = model.Sp;
+        const std::size_t o = f.owner;
+        const std::size_t n = f.neighbor;
 
-        bP += Su * V;
-        aP += -Sp * V;
-
-        // -----------------------------
-        // Diffusion (neighbor stencil)
-        // -----------------------------
-        const auto& nbrs = mesh.neighbors(i);
-
-        for (int j : nbrs)
+        if (n != INVALID)
         {
-            if (j < 0 || j == i)
-                continue;
+            sys.addCoeff(o, n, -a);
+            sys.addCoeff(n, o, -a);
 
-            double dij = mesh.distance(i, j);
-
-            if (dij <= 0.0)
-                throw std::runtime_error("Invalid mesh distance");
-
-            // 1D placeholder: face area = 1
-            double Aij = mesh.faceArea(i, (j < i) ? NeighborDir::W : NeighborDir::E);
-
-            double D = model.k * Aij / dij;
-
-            sys.addCoeff(i, j, -D);
-            aP += D;
+            ap[o] += a;
+            ap[n] += a;
         }
+        else
+        {
+            switch (f.bcType)
+            {
+                case BCType::Dirichlet:
+                    ap[o] += a;
+                    sys.addRHS(o, a * f.value);
+                    break;
 
-        // -----------------------------
-        // diagonal + RHS
-        // -----------------------------
-        sys.addDiag(i, aP);
-        sys.setRHS(i, bP);
+                case BCType::Neumann:
+                    sys.addRHS(o, f.flux * f.area);
+                    break;
+
+                case BCType::Convective:
+                {
+                    double hA = f.h * f.area;
+                    ap[o] += hA;
+                    sys.addRHS(o, hA * f.Tinf);
+                    break;
+                }
+            }
+        }
     }
+
+    for (std::size_t c = 0; c < N; ++c)
+        sys.addDiag(c, ap[c]);
 }
