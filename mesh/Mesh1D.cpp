@@ -1,144 +1,195 @@
 #include "mesh/Mesh1D.hpp"
+#include "bc/BCType.hpp"
 #include <stdexcept>
-#include <cmath>
 
-// -----------------------------
+// =========================================================
 // Constructor
-// -----------------------------
-Mesh1D::Mesh1D(int n, double L)
-    : n_(n),
-      L_(L),
-      dx_(L / (n - 1)),
-      x_(n),
-      nbrs_(n)
+// =========================================================
+Mesh1D::Mesh1D(std::size_t N, double L)
+    : N_(N), L_(L)
 {
-    for (int i = 0; i < n_; ++i)
+    if (N_ == 0)
+        throw std::runtime_error("Mesh1D: N must be > 0");
+
+    dx_ = L_ / static_cast<double>(N_);
+
+    // ---------------------------------------------------------
+    // Cell centers
+    // ---------------------------------------------------------
+    centers_.resize(N_);
+
+    for (std::size_t i = 0; i < N_; ++i)
     {
-        x_[i] = i * dx_;
+        centers_[i].x[0] = (i + 0.5) * dx_;
+        centers_[i].x[1] = 0.0;
+        centers_[i].x[2] = 0.0;
+    }
 
-        if (i > 0)
-            nbrs_[i].push_back(i - 1);
+    // ---------------------------------------------------------
+    // Build faces (N + 1 faces)
+    // ---------------------------------------------------------
+    faces_.resize(N_ + 1);
 
-        if (i < n_ - 1)
-            nbrs_[i].push_back(i + 1);
+    for (std::size_t f = 0; f <= N_; ++f)
+    {
+        Face& face = faces_[f];
+
+        face.center.x[0] = f * dx_;
+        face.center.x[1] = 0.0;
+        face.center.x[2] = 0.0;
+
+        face.area = 1.0;
+
+        face.normal.x[0] = 1.0;
+        face.normal.x[1] = 0.0;
+        face.normal.x[2] = 0.0;
+
+        // -----------------------------------------------------
+        // Boundary faces
+        // -----------------------------------------------------
+        if (f == 0)
+        {
+            face.isBoundary = true;
+            face.owner = 0;
+            face.neighbor = INVALID;
+
+            face.normal.x[0] = -1.0;
+            face.centroidDistance = 0.5 * dx_;
+
+            // default BC (can be overwritten by applyBoundaryConfig)
+            face.bcType = BCType::Dirichlet;
+            face.value = 0.0;
+        }
+        else if (f == N_)
+        {
+            face.isBoundary = true;
+            face.owner = N_ - 1;
+            face.neighbor = INVALID;
+
+            face.normal.x[0] = 1.0;
+            face.centroidDistance = 0.5 * dx_;
+
+            face.bcType = BCType::Dirichlet;
+            face.value = 0.0;
+        }
+        else
+        {
+            // -------------------------------------------------
+            // Interior face
+            // -------------------------------------------------
+            face.isBoundary = false;
+            face.owner = f - 1;
+            face.neighbor = f;
+
+            face.centroidDistance = dx_;
+        }
     }
 }
 
-// -----------------------------
-// Core
-// -----------------------------
-int Mesh1D::size() const { return n_; }
+// =========================================================
+// Core API
+// =========================================================
 
-int Mesh1D::dim() const { return 1; }
-
-// -----------------------------
-// Geometry
-// -----------------------------
-MeshPoint Mesh1D::point(int p) const
+std::size_t Mesh1D::ncells() const
 {
-    return MeshPoint{{x_[p]}};
+    return N_;
 }
 
-// -----------------------------
-// Connectivity
-// -----------------------------
-const std::vector<int>& Mesh1D::neighbors(int p) const
+std::size_t Mesh1D::nnodes() const
 {
-    return nbrs_[p];
+    return N_ + 1;
 }
 
-int Mesh1D::neighbor(int p, NeighborDir dir) const
+Point Mesh1D::cellCenter(std::size_t i) const
 {
-    if (dir == NeighborDir::W)
-        return (p > 0) ? p - 1 : p;
-
-    if (dir == NeighborDir::E)
-        return (p < n_ - 1) ? p + 1 : p;
-
-    throw std::runtime_error("Invalid NeighborDir in Mesh1D");
+    return centers_.at(i);
 }
 
-bool Mesh1D::hasNeighbor(int p, NeighborDir dir) const
+Point Mesh1D::node(std::size_t i) const
 {
-    if (dir == NeighborDir::W) return p > 0;
-    if (dir == NeighborDir::E) return p < n_ - 1;
-    return false;
+    Point p;
+    p.x[0] = i * dx_;
+    p.x[1] = 0.0;
+    p.x[2] = 0.0;
+    return p;
 }
 
-int Mesh1D::numNeighbors(int) const
+std::size_t Mesh1D::cellNodeCount(std::size_t) const
 {
     return 2;
 }
 
-// -----------------------------
-// Geometry metrics
-// -----------------------------
-double Mesh1D::volume(int) const
+std::size_t Mesh1D::cellNode(std::size_t c, std::size_t k) const
+{
+    if (k == 0) return c;
+    if (k == 1) return c + 1;
+    throw std::runtime_error("Mesh1D::cellNode invalid index");
+}
+
+double Mesh1D::cellVolume(std::size_t) const
 {
     return dx_;
 }
 
-double Mesh1D::faceArea(int, NeighborDir) const
+// =========================================================
+// Face API
+// =========================================================
+
+std::size_t Mesh1D::nFaces() const
 {
-    // 1D convention: face area = 1
-    return 1.0;
+    return faces_.size();
 }
 
-double Mesh1D::distance(int p, int q) const
+const Face& Mesh1D::face(std::size_t f) const
 {
-    return std::abs(x_[p] - x_[q]);
+    return faces_.at(f);
 }
 
-// =====================================================
-// BOUNDARY (ONLY IMPLEMENTED INTERFACE)
-// =====================================================
+// =========================================================
+// Dimension
+// =========================================================
 
-std::vector<BoundaryFace> Mesh1D::boundaryFaces() const
+std::size_t Mesh1D::dim() const
 {
-    return {BoundaryFace::Left, BoundaryFace::Right};
+    return 1;
 }
 
-BoundaryContext Mesh1D::boundaryContext(int owner, BoundaryFace face) const
+// =========================================================
+// Apply boundary conditions (ONLY valid BC entry point)
+// =========================================================
+void Mesh1D::applyBoundaryConfig(const std::vector<BoundaryConfig>& bcs)
 {
-    BoundaryContext ctx{};
+    for (const auto& bc : bcs)
+    {
+        Face* f = nullptr;
 
-    ctx.owner = owner;
-    ctx.neighbor = -1;
+        if (bc.face == BoundaryFace::Left)
+        {
+            f = &faces_.front();
+        }
+        else if (bc.face == BoundaryFace::Right)
+        {
+            f = &faces_.back();
+        }
+        else
+        {
+            throw std::runtime_error("Invalid boundary face for Mesh1D");
+        }
 
-    ctx.area = 1.0;
-    ctx.distance = dx_ / 2.0;
+        f->isBoundary = true;
+        f->bcType = bc.type;
 
-    if (face == BoundaryFace::Left)
-        ctx.normalDir = NeighborDir::W;
-    else if (face == BoundaryFace::Right)
-        ctx.normalDir = NeighborDir::E;
-    else
-        throw std::runtime_error("Invalid BoundaryFace");
-
-    return ctx;
+        f->value = bc.value;
+        f->flux  = bc.flux;
+        f->h     = bc.h;
+        f->Tinf  = bc.Tinf;
+    }
 }
-
-double Mesh1D::edgeArea(int, int) const
+std::vector<Face>::const_iterator Mesh1D::facesBegin() const
 {
-    return 1.0;
+    return faces_.begin();
 }
-std::vector<int> Mesh1D::faceNodes(BoundaryFace face) const
+std::vector<Face>::const_iterator Mesh1D::facesEnd() const
 {
-    if (face == BoundaryFace::Left)
-        return {0};
-
-    if (face == BoundaryFace::Right)
-        return {n_ - 1};
-
-    return {};
-}
-int Mesh1D::faceOwner(BoundaryFace face) const
-{
-    if (face == BoundaryFace::Left)
-        return 0;
-
-    if (face == BoundaryFace::Right)
-        return n_ - 1;
-
-    throw std::runtime_error("Invalid BoundaryFace in Mesh1D");
+    return faces_.end();
 }
