@@ -1,255 +1,263 @@
 #include "mesh/Mesh2D.hpp"
+#include "bc/BCType.hpp"
 #include <stdexcept>
-#include <cmath>
-#include <cassert>
 
-// -----------------------------
+// =========================================================
 // Constructor
-// -----------------------------
-Mesh2D::Mesh2D(int nx, int ny, double Lx, double Ly)
-    : nx_(nx),
-      ny_(ny),
-      Lx_(Lx),
-      Ly_(Ly),
-      dx_(Lx / (nx - 1)),
-      dy_(Ly / (ny - 1)),
-      x_(nx),
-      y_(ny),
-      nbrs_(nx * ny)
+// =========================================================
+Mesh2D::Mesh2D(int Nx, int Ny, double Lx, double Ly)
+    : Nx_(Nx), Ny_(Ny), Lx_(Lx), Ly_(Ly)
 {
-    for (int i = 0; i < nx_; ++i)
-        x_[i] = i * dx_;
+    if (Nx_ <= 0 || Ny_ <= 0)
+        throw std::runtime_error("Mesh2D: invalid grid size");
 
-    for (int j = 0; j < ny_; ++j)
-        y_[j] = j * dy_;
+    dx_ = Lx_ / Nx_;
+    dy_ = Ly_ / Ny_;
 
-    // -----------------------------
-    // Build adjacency graph
-    // -----------------------------
-    for (int j = 0; j < ny_; ++j)
+    // ---------------------------------------------------------
+    // Cell centers
+    // ---------------------------------------------------------
+    centers_.resize(Nx_ * Ny_);
+
+    for (int j = 0; j < Ny_; ++j)
     {
-        for (int i = 0; i < nx_; ++i)
+        for (int i = 0; i < Nx_; ++i)
         {
-            int p = idx(i, j);
+            std::size_t c = idx(i, j);
 
-            if (i > 0)     nbrs_[p].push_back(idx(i - 1, j));
-            if (i < nx_ - 1) nbrs_[p].push_back(idx(i + 1, j));
-            if (j > 0)     nbrs_[p].push_back(idx(i, j - 1));
-            if (j < ny_ - 1) nbrs_[p].push_back(idx(i, j + 1));
+            centers_[c].x[0] = (i + 0.5) * dx_;
+            centers_[c].x[1] = (j + 0.5) * dy_;
+            centers_[c].x[2] = 0.0;
+        }
+    }
+
+    // ---------------------------------------------------------
+    // Faces (ONLY source of connectivity)
+    // ---------------------------------------------------------
+    faces_.clear();
+    faces_.reserve((Nx_ + 1) * Ny_ + (Ny_ + 1) * Nx_);
+
+    auto cell = [&](int i, int j) -> std::size_t
+    {
+        return static_cast<std::size_t>(j * Nx_ + i);
+    };
+
+    // =========================================================
+    // VERTICAL FACES (x-normal)
+    // =========================================================
+    for (int j = 0; j < Ny_; ++j)
+    {
+        for (int i = 0; i <= Nx_; ++i)
+        {
+            Face f{};
+
+            f.area = dy_;
+            f.centroidDistance = (i == 0 || i == Nx_) ? 0.5 * dx_ : dx_;
+
+            f.center.x[0] = i * dx_;
+            f.center.x[1] = (j + 0.5) * dy_;
+            f.center.x[2] = 0.0;
+
+            f.normal = {1.0, 0.0, 0.0};
+
+            f.isBoundary = false;
+
+            if (i == 0)
+            {
+                f.isBoundary = true;
+                f.owner = cell(0, j);
+                f.neighbor = INVALID;
+                f.normal.x[0] = -1.0;
+
+                f.bcType = BCType::Dirichlet;
+                f.value = 300.0;                // Assuming this is the set condition
+            }
+            else if (i == Nx_)
+            {
+                f.isBoundary = true;
+                f.owner = cell(Nx_ - 1, j);
+                f.neighbor = INVALID;
+
+                f.bcType = BCType::Dirichlet;
+                f.value = 100.0;                // Assuming this is the set condition
+            }
+            else
+            {
+                f.owner = cell(i - 1, j);
+                f.neighbor = cell(i, j);
+            }
+
+            faces_.push_back(f);
+        }
+    }
+
+    // =========================================================
+    // HORIZONTAL FACES (y-normal)
+    // =========================================================
+    for (int i = 0; i < Nx_; ++i)
+    {
+        for (int j = 0; j <= Ny_; ++j)
+        {
+            Face f{};
+
+            f.area = dx_;
+            f.centroidDistance = (j == 0 || j == Ny_) ? 0.5 * dy_ : dy_;
+
+            f.center.x[0] = (i + 0.5) * dx_;
+            f.center.x[1] = j * dy_;
+            f.center.x[2] = 0.0;
+
+            f.normal = {0.0, 1.0, 0.0};
+
+            f.isBoundary = false;
+
+            if (j == 0)
+            {
+                f.isBoundary = true;
+                f.owner = cell(i, 0);
+                f.neighbor = INVALID;
+                f.normal.x[1] = -1.0;
+
+                f.bcType = BCType::Neumann;
+                f.flux = 0.0;                // Assuming this is the set condition
+
+                // CONVECTIVE
+                // f.bcType = BCType::Convective;
+                // f.h = h;
+                // f.Tinf = Tinf;                // Assuming this is the set condition
+            }
+            else if (j == Ny_)
+            {
+                f.isBoundary = true;
+                f.owner = cell(i, Ny_ - 1);
+                f.neighbor = INVALID;
+
+                f.bcType = BCType::Dirichlet;
+                f.value = 300.0;                // Assuming this is the set condition
+            }
+            else
+            {
+                f.owner = cell(i, j - 1);
+                f.neighbor = cell(i, j);
+            }
+
+            faces_.push_back(f);
         }
     }
 }
 
-// -----------------------------
-// Core
-// -----------------------------
-int Mesh2D::size() const
+// =========================================================
+// Basic mesh queries
+// =========================================================
+
+std::size_t Mesh2D::ncells() const
 {
-    return nx_ * ny_;
+    return centers_.size();
 }
 
-int Mesh2D::dim() const
+std::size_t Mesh2D::nnodes() const
 {
-    return 2;
+    return (Nx_ + 1) * (Ny_ + 1);
 }
 
-// -----------------------------
-// Helpers
-// -----------------------------
-int Mesh2D::idx(int i, int j) const
+Point Mesh2D::cellCenter(std::size_t i) const
 {
-    return j * nx_ + i;
+    return centers_.at(i);
 }
 
-void Mesh2D::ij(int p, int& i, int& j) const
+Point Mesh2D::node(std::size_t i) const
 {
-    i = p % nx_;
-    j = p / nx_;
+    int nxN = Nx_ + 1;
+    int j = i / nxN;
+    int i0 = i % nxN;
+
+    return Point{{i0 * dx_, j * dy_, 0.0}};
 }
 
-// -----------------------------
-// Geometry
-// -----------------------------
-MeshPoint Mesh2D::point(int p) const
-{
-    int i, j;
-    ij(p, i, j);
-
-    return MeshPoint{{x_[i], y_[j]}};
-}
-
-// -----------------------------
-// Connectivity
-// -----------------------------
-const std::vector<int>& Mesh2D::neighbors(int p) const
-{
-    return nbrs_[p];
-}
-
-int Mesh2D::neighbor(int p, NeighborDir dir) const
-{
-    int i, j;
-    ij(p, i, j);
-
-    switch (dir)
-    {
-        case NeighborDir::W: return (i > 0) ? idx(i - 1, j) : p;
-        case NeighborDir::E: return (i < nx_ - 1) ? idx(i + 1, j) : p;
-        case NeighborDir::S: return (j > 0) ? idx(i, j - 1) : p;
-        case NeighborDir::N: return (j < ny_ - 1) ? idx(i, j + 1) : p;
-
-        case NeighborDir::T:
-        case NeighborDir::B:
-            throw std::runtime_error("Invalid NeighborDir for Mesh2D (T/B not supported)");
-    }
-
-    throw std::runtime_error("Unknown NeighborDir");
-}
-
-bool Mesh2D::hasNeighbor(int p, NeighborDir dir) const
-{
-    int i, j;
-    ij(p, i, j);
-
-    switch (dir)
-    {
-        case NeighborDir::W: return i > 0;
-        case NeighborDir::E: return i < nx_ - 1;
-        case NeighborDir::S: return j > 0;
-        case NeighborDir::N: return j < ny_ - 1;
-
-        case NeighborDir::T:
-        case NeighborDir::B:
-            throw std::runtime_error("Invalid NeighborDir for Mesh2D (T/B not supported)");
-    }
-
-    return false;
-}
-
-int Mesh2D::numNeighbors(int) const
+std::size_t Mesh2D::cellNodeCount(std::size_t) const
 {
     return 4;
 }
 
-// -----------------------------
-// Geometry metrics
-// -----------------------------
-double Mesh2D::volume(int) const
+std::size_t Mesh2D::cellNode(std::size_t c, std::size_t k) const
+{
+    int i = c % Nx_;
+    int j = c / Nx_;
+
+    int nxN = Nx_ + 1;
+
+    switch (k)
+    {
+        case 0: return j * nxN + i;
+        case 1: return j * nxN + i + 1;
+        case 2: return (j + 1) * nxN + i + 1;
+        case 3: return (j + 1) * nxN + i;
+        default:
+            throw std::runtime_error("Invalid cellNode index");
+    }
+}
+
+double Mesh2D::cellVolume(std::size_t) const
 {
     return dx_ * dy_;
 }
 
-double Mesh2D::faceArea(int, NeighborDir dir) const
+// =========================================================
+// Face access
+// =========================================================
+
+std::size_t Mesh2D::nFaces() const
 {
-    // orthogonal structured grid
-    if (dir == NeighborDir::W || dir == NeighborDir::E)
-        return dy_;
-
-    if (dir == NeighborDir::S || dir == NeighborDir::N)
-        return dx_;
-
-    return 0.0;
+    return faces_.size();
 }
 
-double Mesh2D::distance(int p, int q) const
+const Face& Mesh2D::face(std::size_t f) const
 {
-    int i1, j1, i2, j2;
-    ij(p, i1, j1);
-    ij(q, i2, j2);
-
-    double dx = (i1 - i2) * dx_;
-    double dy = (j1 - j2) * dy_;
-
-    return std::sqrt(dx*dx + dy*dy);
+    return faces_.at(f);
 }
 
-// -----------------------------
-// Boundary
-// -----------------------------
-BoundaryFace Mesh2D::faceType(int p) const
+// =========================================================
+// Helpers
+// =========================================================
+
+void Mesh2D::ij(int id, int& i, int& j) const
 {
-    int i, j;
-    ij(p, i, j);
-
-    if (i == 0) return BoundaryFace::Left;
-    if (i == nx_ - 1) return BoundaryFace::Right;
-    if (j == 0) return BoundaryFace::Bottom;
-    if (j == ny_ - 1) return BoundaryFace::Top;
-
-    return BoundaryFace::Interior;
+    i = id % Nx_;
+    j = id / Nx_;
 }
 
-BoundaryContext Mesh2D::boundaryContext(int p, BoundaryFace face) const
+// Optional BC indexing helper (kept if you still use it elsewhere)
+std::vector<std::size_t>
+Mesh2D::boundaryFaceIndices(BoundaryFace f) const
 {
-    BoundaryContext ctx;
+    std::vector<std::size_t> result;
 
-    ctx.owner = p;
-
-    int i, j;
-    ij(p, i, j);
-
-    ctx.area = 0.0;
-    ctx.distance = 0.0;
-
-    switch (face)
+    if (f == BoundaryFace::Left)
     {
-        case BoundaryFace::Left:   // W
-            ctx.area = dy_;
-            ctx.distance = dx_;
-            ctx.normalDir = NeighborDir::W;
-            break;
-
-        case BoundaryFace::Right:  // E
-            ctx.area = dy_;
-            ctx.distance = dx_;
-            ctx.normalDir = NeighborDir::E;
-            break;
-
-        case BoundaryFace::Bottom: // S
-            ctx.area = dx_;
-            ctx.distance = dy_;
-            ctx.normalDir = NeighborDir::S;
-            break;
-
-        case BoundaryFace::Top:    // N
-            ctx.area = dx_;
-            ctx.distance = dy_;
-            ctx.normalDir = NeighborDir::N;
-            break;
-
-        default:
-            assert(false && "Invalid boundary face");
+        for (int j = 0; j < Ny_; ++j)
+            result.push_back(j * (Nx_ + 1));
     }
-
-    return ctx;
-}
-
-std::vector<int> Mesh2D::boundaryNodes(BoundaryFace face) const
-{
-    std::vector<int> nodes;
-
-    for (int p = 0; p < size(); ++p)
+    else if (f == BoundaryFace::Right)
     {
-        int i, j;
-        ij(p, i, j);
-
-        if (face == BoundaryFace::Left   && i == 0) nodes.push_back(p);
-        if (face == BoundaryFace::Right  && i == nx_ - 1) nodes.push_back(p);
-        if (face == BoundaryFace::Bottom && j == 0) nodes.push_back(p);
-        if (face == BoundaryFace::Top    && j == ny_ - 1) nodes.push_back(p);
+        for (int j = 0; j < Ny_; ++j)
+            result.push_back(j * (Nx_ + 1) + Nx_);
     }
-
-    return nodes;
-}
-
-double Mesh2D::edgeArea(int p, int q) const
-{
-    int i1, j1, i2, j2;
-    ij(p, i1, j1);
-    ij(q, i2, j2);
-
-    if (i1 != i2)
-        return dy_; // vertical face
+    else if (f == BoundaryFace::Bottom)
+    {
+        int offset = (Nx_ + 1) * Ny_;
+        for (int i = 0; i < Nx_; ++i)
+            result.push_back(offset + i);
+    }
+    else if (f == BoundaryFace::Top)
+    {
+        int offset = (Nx_ + 1) * Ny_ + Nx_ * (Ny_ + 1);
+        for (int i = 0; i < Nx_; ++i)
+            result.push_back(offset + i);
+    }
     else
-        return dx_; // horizontal face
+    {
+        throw std::runtime_error("Invalid BoundaryFace");
+    }
+
+    return result;
 }
