@@ -8,7 +8,7 @@ class ConvectiveBC : public BoundaryCondition
         ConvectiveBC(double h, double Tinf);
 
         void apply(LinearSystem& sys,
-                const BoundaryContext& ctx) const override;
+                const Face& face) const override;
 
     private:
         double h_;
