@@ -5,8 +5,7 @@
 #include "linear_system/LinearSystem.hpp"
 #include "system/HeatCase1D.hpp"
 #include "physics/HeatEquationModel.hpp"
-#include "bc/BoundaryContext.hpp"
-#include "bc/BoundaryConditionDescriptor.hpp"
+#include "config/BoundaryConfig.hpp"
 #include "Solver/SolverMethod.hpp"
 
 class HeatSystem1D : public HeatSystemBase
@@ -33,13 +32,13 @@ public:
     // void addBC(std::unique_ptr<BoundaryCondition>) override;
 
 private:
-    void applyDirichlet(const BoundaryConditionDescriptor& bc,
+    void applyDirichlet(const BoundaryConfig& bc,
                         const BoundaryContext& ctx);
 
-    void applyNeumann(const BoundaryConditionDescriptor& bc,
+    void applyNeumann(const BoundaryConfig& bc,
                       const BoundaryContext& ctx);
 
-    void applyConvective(const BoundaryConditionDescriptor& bc,
+    void applyConvective(const BoundaryConfig& bc,
                          const BoundaryContext& ctx);
 
 private:
