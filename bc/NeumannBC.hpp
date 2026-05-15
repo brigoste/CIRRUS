@@ -8,7 +8,7 @@ class NeumannBC : public BoundaryCondition
         NeumannBC(double flux);
 
         void apply(LinearSystem& sys,
-                const BoundaryContext& ctx) const override;
+                const Face& face) const override;
 
     private:
         double flux_;
