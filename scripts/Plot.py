@@ -1,27 +1,87 @@
+import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-data = np.genfromtxt("output/solution.csv", delimiter=",", skip_header=1)
 
-x = data[:, 0]
-y = data[:, 1]
-z = data[:, 2]
-value = data[:, 3]
-
-# detect dimension automatically
-if df["y"].isna().all():
-    # 1D
-    plt.plot(df["x"], df["value"])
+def plot_1d(df):
+    plt.figure()
+    plt.plot(df["x"], df["phi"])
     plt.xlabel("x")
-    plt.ylabel("T")
+    plt.ylabel("phi")
+    plt.title("1D Finite Volume Solution")
+    plt.grid()
     plt.show()
 
-elif df["z"].isna().all():
-    # 2D scatter
-    plt.scatter(df["x"], df["y"], c=df["value"])
-    plt.colorbar(label="T")
+
+def plot_2d(df):
+    # infer structured grid size
+    x_unique = np.unique(df["x"])
+    y_unique = np.unique(df["y"])
+
+    nx = len(x_unique)
+    ny = len(y_unique)
+
+    # safety check (important for debugging silent mesh issues)
+    if nx * ny != len(df):
+        raise ValueError("Data is not a structured grid (nx*ny mismatch)")
+
+    Z = df["phi"].values.reshape(ny, nx)
+
+    plt.figure()
+    plt.imshow(
+        Z,
+        origin="lower",
+        aspect="auto",
+        extent=[
+            df["x"].min(),
+            df["x"].max(),
+            df["y"].min(),
+            df["y"].max()
+        ]
+    )
+    plt.colorbar(label="phi")
+    plt.xlabel("x")
+    plt.ylabel("y")
+    plt.title("2D Finite Volume Solution")
     plt.show()
 
-else:
-    # 3D (placeholder)
-    print("3D not implemented yet")
+def plot_debug(df):
+    import matplotlib.pyplot as plt
+
+    if "y" in df.columns:
+        # 2D residual heatmap
+        x = np.unique(df["x"])
+        y = np.unique(df["y"])
+
+        Z = df["residual"].values.reshape(len(y), len(x))
+
+        plt.imshow(Z, origin="lower", cmap="coolwarm")
+        plt.colorbar(label="Residual")
+        plt.title("FV Residual Field")
+        plt.show()
+    else:
+        plt.plot(df["x"], df["residual"])
+        plt.title("Residual (1D)")
+        plt.grid()
+        plt.show()
+
+def main(filename="solution.csv"):
+    df = pd.read_csv(filename)
+
+    cols = set(df.columns)
+
+    if {"x", "phi"} <= cols:
+        plot_1d(df)
+
+    elif {"x", "y", "phi"} <= cols:
+        plot_2d(df)
+
+    elif "residual" in df.columns:
+        plot_debug(df)
+
+    else:
+        raise ValueError(f"Unknown CSV format: columns = {df.columns}")
+
+
+if __name__ == "__main__":
+    main()
