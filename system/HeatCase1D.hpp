@@ -4,18 +4,19 @@
 #include <functional>
 
 #include "Solver/SolverMethod.hpp"
-#include "bc/BoundaryConditionDescriptor.hpp"
 #include "physics/HeatEquationModel.hpp"
+#include "config/BoundaryConfig.hpp"
 
 struct HeatCase1D
 {
-    int n;
+    std::size_t n;
     double L;
     double A;
     double k;
 
-    double Su;
-    double Sp;
+    std::function<double(const Point&)> Su = nullptr;
+    std::function<double(const Point&)> Sp = nullptr;
 
-    std::vector<BoundaryConditionDescriptor> bcs;
+    // ✔ PURE INPUT LAYER (no mesh dependency)
+    std::vector<BoundaryConfig> bcs;
 };
