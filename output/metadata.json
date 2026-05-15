@@ -1,0 +1,37 @@
+{
+  "mesh": {
+    "type": "1D",
+    "n": 80,
+    "L": 0.5
+  },
+
+  "physics": {
+    "k": 100.0,
+    "A": 0.01
+  },
+
+  "source": {
+    "Su": 1000.0,
+    "Sp": 0.0
+  },
+
+  "boundary_conditions": [
+    {
+      "face": "Left",
+      "type": "Dirichlet",
+      "value": 300.0
+    },
+    {
+      "face": "Right",
+      "type": "Neumann",
+      "flux": 0.0
+    }
+  ],
+
+  "solver": {
+    "type": "SOR",
+    "tol": 1e-8,
+    "max_iter": 5000,
+    "omega": 1.2
+  }
+}
