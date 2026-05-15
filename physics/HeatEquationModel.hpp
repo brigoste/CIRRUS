@@ -1,14 +1,15 @@
 #pragma once
 
 #include <functional>
-#include "mesh/MeshBase.hpp"
+#include "mesh/Point.hpp"
 
 struct HeatEquationModel
 {
     double k = 1.0;
-    double Su;
-    double Sp;
+    bool hasConvection = false;
 
-    // std::function<double(const MeshPoint&)> Su = nullptr;
-    // std::function<double(const MeshPoint&)> Sp = nullptr;
+    // volumetric source decomposition:
+    std::function<double(const Point&)> Su = nullptr;
+    std::function<double(const Point&)> Sp = nullptr;
+
 };
