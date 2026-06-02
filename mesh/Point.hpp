@@ -10,3 +10,7 @@ struct Point
 
     std::size_t dim() const { return 3; }
 };
+
+inline Point operator+(const Point& a, const Point& b);
+inline Point operator-(const Point& a, const Point& b);
+inline Point operator*(double s, const Point& a);
