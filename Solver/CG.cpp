@@ -8,76 +8,76 @@
 #include <stdexcept>
 #include <algorithm>
 
-std::vector<double> CG(
-    LinearSystem& sys,
-    int iter,
-    double tol
-)
+static std::vector<double> matVec(const LinearSystem sys, const std::vector<double>& x)
 {
-    const int N = sys.size();
+    const std::size_t N = sys.size();
+    std::vector<double> y(N, 0.0);
 
-    auto& x = sys.solution();
-    const auto& b = sys.rhs();
+    for (std::size_t i = 0; i < N; ++i)
+    {
+        const auto& row = sys.row(i);
 
-    if ((int)x.size() != N || (int)b.size() != N)
-        throw std::runtime_error("CG: size mismatch");
+        for (const auto& [j, aij] : row)
+            y[i] += aij * x[j];
+    }
 
-    std::vector<double> r(N, 0.0);
-    std::vector<double> p(N, 0.0);
-    std::vector<double> Ap(N, 0.0);
+    return y;
+}
 
-    // -----------------------------
-    // Initial guess: x = 0
-    // -----------------------------
-    std::fill(x.begin(), x.end(), 0.0);
+std::vector<double> CG(
+    const LinearSystem sys,
+    int max_iter,
+    double tol)
+{
+    const std::size_t N = sys.size();
+
+    std::vector<double> x(N, 0.0);
+    std::vector<double> r(N), p(N), Ap(N);
 
     // r = b - A x
-    LA::matvec(sys, x, Ap);
+    Ap = matVec(sys, x);
 
-    for (int i = 0; i < N; ++i)
+    for (std::size_t i = 0; i < N; ++i)
     {
-        r[i] = b[i] - Ap[i];
+        r[i] = sys.rhs(i) - Ap[i];
         p[i] = r[i];
     }
 
-    double rsold = LA::dot(r, r);
+    double rs_old = 0.0;
+    for (double v : r) rs_old += v * v;
 
-    // -----------------------------
-    // CG iteration
-    // -----------------------------
-    for (int it = 0; it < iter; ++it)
+    for (int iter = 0; iter < max_iter; ++iter)
     {
-        LA::matvec(sys, p, Ap);
+        Ap = matVec(sys, p);
 
-        double pAp = LA::dot(p, Ap);
+        double alpha_num = rs_old;
+        double alpha_den = 0.0;
 
-        if (std::abs(pAp) < 1e-14)
+        for (std::size_t i = 0; i < N; ++i)
+            alpha_den += p[i] * Ap[i];
+
+        if (std::abs(alpha_den) < 1e-14)
+            break;
+
+        double alpha = alpha_num / alpha_den;
+
+        double rs_new = 0.0;
+
+        for (std::size_t i = 0; i < N; ++i)
         {
-            std::cerr << "CG breakdown: p^T A p ~ 0\n";
-            return x;
+            x[i] += alpha * p[i];
+            r[i] -= alpha * Ap[i];
+            rs_new += r[i] * r[i];
         }
 
-        double alpha = rsold / pAp;
+        if (std::sqrt(rs_new) < tol)
+            break;
 
-        LA::axpy(alpha, p, x);
-        LA::axpy(-alpha, Ap, r);
+        for (std::size_t i = 0; i < N; ++i)
+            p[i] = r[i] + (rs_new / rs_old) * p[i];
 
-        double rsnew = LA::dot(r, r);
-
-        if (std::sqrt(rsnew) < tol)
-        {
-            std::cout << "CG converged in " << it << " iterations\n";
-            return x;
-        }
-
-        double beta = rsnew / rsold;
-
-        for (int i = 0; i < N; ++i)
-            p[i] = r[i] + beta * p[i];
-
-        rsold = rsnew;
+        rs_old = rs_new;
     }
 
-    std::cout << "CG reached max iterations\n";
     return x;
 }
