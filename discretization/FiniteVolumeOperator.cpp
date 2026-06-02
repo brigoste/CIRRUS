@@ -1,73 +1,71 @@
 #include "discretization/FiniteVolumeOperator.hpp"
+
+#include "mesh/MeshBase.hpp"
 #include "mesh/Face.hpp"
+
+#include "physics/HeatEquationModel.hpp"
+#include "linear_system/LinearSystem.hpp"
+
 #include <limits>
-#include <vector>
-#include <cmath>
 #include <stdexcept>
+#include <iostream>
 
-// static constexpr std::size_t INVALID = std::numeric_limits<std::size_t>::max();
-
-// static double distance(const Point& a, const Point& b)
-// {
-//     double dx = a.x[0] - b.x[0];
-//     double dy = a.x[1] - b.x[1];
-//     return std::sqrt(dx*dx + dy*dy);
-// }
-
-#include "discretization/FiniteVolumeOperator.hpp"
-#include <stdexcept>
+// =========================================================
+// Core assembly
+// =========================================================
 
 void FiniteVolumeOperator::assemble(
-    const MeshBase& mesh,
-    const HeatEquationModel& model,
+    // const MeshBase& mesh,
+    // const HeatEquationModel& model,
+    const FluxAccumulator& flux,
     LinearSystem& sys)
 {
-    const std::size_t N = mesh.ncells();
-    const auto INVALID = std::numeric_limits<std::size_t>::max();
+    sys.clear();
 
-    std::vector<double> ap(N, 0.0);
-
-    for (auto it = mesh.facesBegin(); it != mesh.facesEnd(); ++it)
+    // =========================================================
+    // 1. DIFFUSION
+    // =========================================================
+    for (const auto& f : flux.diffusion())
     {
-        const Face& f = *it;
+        const auto P = f.P;
+        const auto N = f.N;
+        const double D = f.D;
 
-        const double a = model.k * f.area / f.centroidDistance;
-
-        const std::size_t o = f.owner;
-        const std::size_t n = f.neighbor;
-
-        if (n != INVALID)
-        {
-            sys.addCoeff(o, n, -a);
-            sys.addCoeff(n, o, -a);
-
-            ap[o] += a;
-            ap[n] += a;
-        }
-        else
-        {
-            switch (f.bcType)
-            {
-                case BCType::Dirichlet:
-                    ap[o] += a;
-                    sys.addRHS(o, a * f.value);
-                    break;
-
-                case BCType::Neumann:
-                    sys.addRHS(o, f.flux * f.area);
-                    break;
-
-                case BCType::Convective:
-                {
-                    double hA = f.h * f.area;
-                    ap[o] += hA;
-                    sys.addRHS(o, hA * f.Tinf);
-                    break;
-                }
-            }
-        }
+        sys.addCoeff(P, P,  D);
+        sys.addCoeff(P, N, -D);
+        sys.addCoeff(N, N,  D);
+        sys.addCoeff(N, P, -D);
     }
 
-    for (std::size_t c = 0; c < N; ++c)
-        sys.addDiag(c, ap[c]);
+    // =========================================================
+    // 2. CONVECTION (verify this later if unstable)
+    // =========================================================
+    for (const auto& f : flux.convection())
+    {
+        const auto P = f.P;
+        const auto N = f.N;
+        const double F = f.F;
+
+        const double Fp = std::max(F, 0.0);
+        const double Fm = std::max(-F, 0.0);
+
+        sys.addCoeff(P, P,  Fp);
+        sys.addCoeff(P, N, -Fp);
+
+        sys.addCoeff(N, N,  Fm);
+        sys.addCoeff(N, P, -Fm);
+    }
+
+    // =========================================================
+    // 3. SOURCES + BCs (ONLY place they should exist now)
+    // =========================================================
+    for (std::size_t c = 0; c < flux.size(); ++c)
+    {
+        const auto& cell = flux[c];
+
+        sys.addRHS(c, cell.Su);
+        sys.addCoeff(c, c, -cell.Sp);
+    }
+
+    // std::cout << "[DEBUG] assembling system, size = " << sys.size() << "\n";
 }
