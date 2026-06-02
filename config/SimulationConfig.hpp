@@ -3,14 +3,22 @@
 #include <vector>
 #include <string>
 #include <filesystem>
+#include <functional>
 
 #include "Solver/SolverMethod.hpp"
-// #include "bc/BoundaryConditionDescriptor.hpp"
-#include "config/BoundaryConfig.hpp"
+#include "mesh/Point.hpp"
+#include "mesh/BoundaryPatchSystem.hpp"
 
-// ============================================================
-// MESH CONFIGURATION
-// ============================================================
+// -----------------------------
+// Forward-safe definitions
+// -----------------------------
+
+struct BoundaryConfig
+{
+    std::size_t faceIndex;
+    BoundaryPatchSystem::Condition condition;
+};
+
 struct MeshConfig
 {
     std::string type = "uniform";
@@ -18,50 +26,33 @@ struct MeshConfig
     double L = 0.0;
 };
 
-// ============================================================
-// PHYSICS PARAMETERS
-// ============================================================
 struct PhysicsConfig
 {
     double k = 0.0;
-    double A = 1.0;
 };
 
-// ============================================================
-// SOURCE TERMS
-// ============================================================
 struct SourceConfig
 {
-    double Su = 0.0;
-    double Sp = 0.0;
+    std::function<double(const Point&)> Su;
+    std::function<double(const Point&)> Sp;
 };
 
-// ============================================================
-// SOLVER SETTINGS
-// ============================================================
-struct SolverConfig
-{
-    SolverMethod type = SolverMethod::TDMA;
-    double tol = 1e-8;
-    int max_iter = 5000;
-    double omega = 1.0;
-};
-
-// ============================================================
-// GLOBAL SIMULATION CONFIG
-// ============================================================
 struct SimulationConfig
 {
     MeshConfig mesh;
     PhysicsConfig physics;
-    SourceConfig source;
-    SolverConfig solver;
+    SourceConfig source;              // <-- REQUIRED FIX
+    std::vector<BoundaryConfig> boundary;  // <-- ALSO FIXED (was single object)
 
-    std::vector<BoundaryConfig> bcs;
+    struct SolverConfig
+    {
+        solver::Method method;
+        int max_iter;
+        double tol;
+        double omega;
+    } solver;
 };
 
-// ============================================================
-// FREE FUNCTIONS (NOT MEMBERS)
-// ============================================================
+// factories
 SimulationConfig defaultConfig();
 SimulationConfig loadConfig(const std::filesystem::path& path);
