@@ -15,15 +15,16 @@ inline void matvec(const LinearSystem& sys,
                    const std::vector<double>& x,
                    std::vector<double>& y)
 {
-    const int N = sys.size();
+    const std::size_t N = sys.size();
 
-    if ((int)x.size() != N || (int)y.size() != N)
+    if (x.size() != N || y.size() != N)
         throw std::runtime_error("matvec: dimension mismatch");
 
-    for (int i = 0; i < N; ++i)
+    for (std::size_t i = 0; i < N; ++i)
     {
-        double sum = sys.diag(i) * x[i];
+        double sum = 0.0;
 
+        // Iterate over all non-zeros in row i
         for (const auto& [j, aij] : sys.row(i))
         {
             sum += aij * x[j];
@@ -84,16 +85,16 @@ inline void residual(const LinearSystem& sys,
                      const std::vector<double>& x,
                      std::vector<double>& r)
 {
-    const int N = sys.size();
+    const std::size_t N = sys.size();
 
-    if ((int)x.size() != N || (int)r.size() != N)
+    if (x.size() != N || r.size() != N)
         throw std::runtime_error("residual: dimension mismatch");
 
-    const auto& b = sys.rhs();
+    const auto& b = sys.RHS();
 
-    for (int i = 0; i < N; ++i)
+    for (std::size_t i = 0; i < N; ++i)
     {
-        double Ax = sys.diag(i) * x[i];
+        double Ax = 0.0;
 
         for (const auto& [j, aij] : sys.row(i))
             Ax += aij * x[j];
