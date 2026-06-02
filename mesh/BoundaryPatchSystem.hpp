@@ -1,27 +1,34 @@
 #pragma once
-#include <string>
-#include <vector>
+
+#include <unordered_map>
 #include <functional>
-#include "mesh/Point.hpp"
 
-struct BoundaryPatch
+#include "bc/BCType.hpp"
+#include "mesh/Face.hpp"
+#include "linear_system/LinearSystem.hpp"
+
+class BoundaryPatchSystem
 {
-    std::string name;
-
-    // indices of faces belonging to this patch
-    std::vector<std::size_t> faces;
-
-    enum class Type
+public:
+    struct Condition
     {
-        Dirichlet,
-        Neumann,
-        Convective,
-        Mixed
-    } type;
+        double value = 0.0;
+        double flux  = 0.0;
+        double h     = 0.0;
+        double Tinf  = 0.0;
 
-    // spatially varying value support
-    std::function<double(const Point&)> value;
-    std::function<double(const Point&)> flux;
-    std::function<double(const Point&)> h;
-    std::function<double(const Point&)> Tinf;
+        bc::Type type = bc::Type::None;
+    };
+
+    // -----------------------------
+    // registration (by face index)
+    // -----------------------------
+    void set(std::size_t faceIndex, const Condition& bc);
+
+    bool has(std::size_t faceIndex) const;
+
+    const Condition* get(std::size_t faceIndex) const;
+
+private:
+    std::unordered_map<std::size_t, Condition> bcMap_;
 };
