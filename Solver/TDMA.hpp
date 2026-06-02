@@ -5,7 +5,5 @@
 
 // 1D-only solver (tridiagonal system)
 std::vector<double> TDMA(
-    LinearSystem& sys,
-    int N,
-    bool output = false
+    LinearSystem sys
 );
