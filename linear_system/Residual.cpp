@@ -7,9 +7,11 @@ std::vector<double> computeResidual(
 {
     std::vector<double> r(sys.size(), 0.0);
 
-    const auto& b = sys.rhs();
+    const auto& b = sys.RHS();
 
-    for (int i = 0; i < sys.size(); ++i)
+    const auto n_ = sys.size();
+
+    for (std::size_t i = 0; i < n_; ++i)
     {
         r[i] = b[i];
 
