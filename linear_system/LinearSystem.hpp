@@ -1,62 +1,53 @@
 #pragma once
 
 #include <vector>
-#include <utility>
+#include <unordered_map>
+#include <cstddef>
+#include <stdexcept>
+
+// ============================================================
+// Sparse FV linear system (row-based hash sparse matrix)
+// ============================================================
 
 class LinearSystem
 {
 public:
-    explicit LinearSystem(int N = 0);
+    LinearSystem() = default;
+    explicit LinearSystem(std::size_t n);
 
-    void resize(int N);
+    void resize(std::size_t n);
+    std::size_t size() const;
 
-    int size() const;
+    // -------------------------
+    // Matrix assembly
+    // -------------------------
+    void addCoeff(std::size_t i, std::size_t j, double val);
 
-    // -----------------------------
-    // Assembly
-    // -----------------------------
-    void addCoeff(int i, int j, double a);
-    void addDiag(int i, double aP);
+    // RHS
+    void addRHS(std::size_t i, double val);
+    void setRHS(std::size_t i, double val);
 
-    void setRHS(int i, double b);
-    void addRHS(int i, double b);
+    // access  -- Scalar solvers only
+    double rhs(std::size_t i) const;
+    double coeff(std::size_t i, std::size_t j) const;
 
-    void clearRow(int i);
+    // solver interface -- Assembly + vector math
+    std::vector<double>& RHS();
+    const std::vector<double>& RHS() const;
 
-    // -----------------------------
-    // Sparse structure access
-    // -----------------------------
-    const std::vector<std::pair<int,double>>& row(int i) const;
+    void clear();
 
-    double diag(int i) const;
+    // direct matrix access for solvers (GS/SOR/CG)
+    const std::unordered_map<std::size_t, double>& row(std::size_t i) const;
 
-    const std::vector<int>& neighbors(int i) const;
-
-    // -----------------------------
-    // Solution vectors
-    // -----------------------------
-    std::vector<double>& rhs();
-    const std::vector<double>& rhs() const;
-
-    std::vector<double>& solution();
-    const std::vector<double>& solution() const;
-
-    std::vector<double>& solutionOld();
-
-    // --- compatibility layer for solvers ---
-    double coeff(int i, int j) const;
-    const std::vector<double>& diagonal() const;
-
-    void setSolution(const std::vector<double>& x);
 
 private:
-    int N_;
+    std::size_t n_ = 0;
 
-    std::vector<double> aP_;
+    // A stored as: row -> (col -> value)
+    std::vector<std::unordered_map<std::size_t, double>> A_;
+
     std::vector<double> b_;
-    std::vector<double> x_;
-    std::vector<double> x_old_;
 
-    std::vector<std::vector<std::pair<int,double>>> A_;
-    std::vector<std::vector<int>> nbrs_;
+
 };
