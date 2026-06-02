@@ -9,93 +9,110 @@
 #include "Solver/SolverMethod.hpp"
 
 // HT SOLVERS
-#include "system/HeatCase1D.hpp"
 #include "system/HeatSystem1D.hpp"
-// #include "system/HeatCase2D.hpp" 
 // #include "system/HeatSystem2D.hpp"
-// #include "system/HeatCase3D.hpp"
 // #include "system/HeatSystem3D.hpp"
 
 // FLUID SOLVERS - need to implment
-// #include "system/FluidCase1D.hpp"        
 // #include "system/FluidSystem1D.hpp"
-// #include "system/FluidCase2D.hpp"
 // #include "system/FluidSystem2D.hpp"
-// #include "system/FluidCase3D.hpp"
 // #include "system/FluidSystem3D.hpp"
 
 #include "linear_system/Residual.hpp"
 
+#include "simulation/Simulation.hpp"
+
 // JSON includes
-#include "config/SimulationConfigLoader.hpp"
+// #include "config/SimulationConfigLoader.hpp"
 #include "config/SimulationConfig.hpp"
 
 
+// TODO:
+//      Get our Python Plotting working
+//      We have it working on the other laptop, but I can't get pandas on this one
+//      As such, we just need to get the code to github after we copy over the python
+//      scripting.
+
 int main()
 {
-    std::cout << "\n================ INITIALIZING SYSTEM ================\n";
-
-    bool useJSON = false;
-
-    SimulationConfig cfg = defaultConfig(); 
-
-    if (useJSON)
+    try
     {
-        std::cout << "Loading JSON config...\n";
-        cfg = loadConfig("C:/Users/E40112856/Packages/CIRRUS/output/metadata.json");
+        std::cout.flush();
+        std::cout << "\n\n================ INITIALIZING SYSTEM ================\n\n";
+
+        bool useJSON = true;
+
+        SimulationConfig cfg;
+
+        if (useJSON)
+        {
+            std::cout << "Loading JSON config...\n";
+            cfg = loadConfig("C:/Users/E40112856/Packages/CIRRUS/output/metadata.json");
+        }
+        else
+        {
+            std::cout << "Using default config...\n";
+            cfg = defaultConfig();
+
+            // -----------------------------
+            // Source terms (constant example)
+            // -----------------------------
+            cfg.source.Su = [](const Point&) { return 1000.0; };
+            cfg.source.Sp = [](const Point&) { return 0.0; };
+        }
+
+        // std::cout << "BEFORE SIM\n";
+
+        Simulation sim(cfg);
+
+        // std::cout << "AFTER SIM\n";
+
+        sim.assemble();
+
+        // std::cout << "AFTER ASSEMBLE\n";
+
+        double sumA = 0.0;
+        for (std::size_t i = 0; i < sim.system().size(); ++i)
+        {
+            for (const auto& [j, aij] : sim.system().row(i))
+                sumA += std::abs(aij);
+        }
+
+        // std::cout << "[DEBUG] matrix L1 norm = " << sumA << "\n";
+
+        std::cout << "ncells=" << sim.mesh().ncells()
+            << "\nnfaces=" << sim.mesh().nfaces() << "\n";
+
+        std::cout << "Solver: " << solver::to_string(cfg.solver.method);
+
+        auto phi = sim.solve();
+
+        std::cout << "\n\n================ SOLVER COMPLETE ================\n\n";
+
+        auto r = computeResidual(sim.system(), phi);
+
+        VTKWriter::writeVTU(
+            sim.mesh(),
+            phi,
+            "../output/solution.vtu"
+        );
+
+        FieldWriter::writeCSVDebug(
+            sim.mesh(),
+            phi,
+            sim.system().RHS(),
+            r,
+            "../output/solution.csv"
+        );
     }
-    else
+    catch (const std::exception& e)
     {
-        std::cout << "Using default config...\n";
+        std::cerr << "EXCEPTION: " << e.what() << "\n";
     }
-
-    // -----------------------------
-    // Build physics from config
-    // -----------------------------
-    HeatCase1D physics;
-
-    physics.n = cfg.mesh.n;
-    physics.L = cfg.mesh.L;
-
-    physics.k = cfg.physics.k;
-    physics.A = cfg.physics.A;
-
-    physics.Su = [Su0 = cfg.source.Su](const Point&) { return Su0; };
-    physics.Sp = [Sp0 = cfg.source.Sp](const Point&) { return Sp0; };
-
-    // physics.bcs = buildBoundaryContexts(cfg.bcs, cfg.mesh);
-
-    // -----------------------------
-    // Mesh + system
-    // -----------------------------
-    Mesh1D mesh(cfg.mesh.n, cfg.mesh.L);
-    HeatSystem1D system(mesh, physics);
-
-    // -----------------------------
-    // Solve
-    // -----------------------------
-    system.assemble();
-
-    auto phi = system.solve(
-        cfg.solver.type,
-        cfg.solver.max_iter,
-        cfg.solver.tol,
-        cfg.solver.omega
-    );
-
-    std::cout << "\n================ SOLVING COMPLETE ================\n";
-
-    auto r = computeResidual(system.system(), phi);
-
-    VTKWriter::writeVTU(mesh, phi, "../output/solution.vtu");
-
-    FieldWriter::writeCSVDebug(
-        mesh,
-        phi,
-        system.system().rhs(),
-        r,
-        "../output/solution.csv"
-    );
+    catch (...)
+    {
+        std::cerr << "UNKNOWN EXCEPTION\n";
+    }
 
     return 0;
 }
