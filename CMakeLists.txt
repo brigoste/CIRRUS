@@ -36,11 +36,16 @@ file(GLOB_RECURSE CIRRUS_SOURCES
     ${PROJECT_SOURCE_DIR}/discretization/*.cpp
     ${PROJECT_SOURCE_DIR}/io/*.cpp
     ${PROJECT_SOURCE_DIR}/linear_system/*.cpp
-    ${PROJECT_SOURCE_DIR}/mesh/*.cpp
+    # ${PROJECT_SOURCE_DIR}/mesh/*.cpp
     ${PROJECT_SOURCE_DIR}/physics/*.cpp
     ${PROJECT_SOURCE_DIR}/Solver/*.cpp
     ${PROJECT_SOURCE_DIR}/system/*.cpp
     ${PROJECT_SOURCE_DIR}/utils/*.cpp
+    ${PROJECT_SOURCE_DIR}/simulation/*.cpp
+
+    ${PROJECT_SOURCE_DIR}/mesh/Mesh1D.cpp
+    ${PROJECT_SOURCE_DIR}/mesh/BoundaryPatchSystem.cpp
+    ${PROJECT_SOURCE_DIR}/mesh/Point.cpp
 )
 
 # ----------------------------------------
