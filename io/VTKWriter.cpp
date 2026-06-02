@@ -1,14 +1,8 @@
 #include "io/VTKWriter.hpp"
 #include <fstream>
 #include <stdexcept>
-#include <cmath>
-#include "mesh/PointsUtils.hpp"
-
-// static void ensureOpen(const std::ofstream& f, const std::string& path)
-// {
-//     if (!f.is_open())
-//         throw std::runtime_error("Failed to open VTU file: " + path);
-// }
+#include <filesystem>
+#include <vector>
 
 // --------------------------------------------------
 // MAIN WRITER
@@ -23,25 +17,25 @@ void VTKWriter::writeVTU(
     if (!f.is_open())
         throw std::runtime_error("Failed to open VTU file");
 
-    const std::size_t Nnodes = mesh.nnodes();
+    const std::size_t Nnodes = mesh.nfaces();
     const std::size_t Ncells = mesh.ncells();
 
     f << "<?xml version=\"1.0\"?>\n";
     f << "<VTKFile type=\"UnstructuredGrid\" version=\"1.0\">\n";
     f << "<UnstructuredGrid>\n";
 
-    // =========================================================
-    // POINTS
-    // =========================================================
     f << "<Piece NumberOfPoints=\"" << Nnodes
       << "\" NumberOfCells=\"" << Ncells << "\">\n";
 
+    // =========================================================
+    // POINTS
+    // =========================================================
     f << "<Points>\n";
     f << "<DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\">\n";
 
     for (std::size_t i = 0; i < Nnodes; ++i)
     {
-        Point p = mesh.node(i);
+        const Point& p = mesh.node(i);
 
         f << p.x[0] << " "
           << p.x[1] << " "
@@ -54,38 +48,55 @@ void VTKWriter::writeVTU(
     // =========================================================
     // CELLS
     // =========================================================
-    f << "<Cells>\n";
+    std::vector<std::size_t> connectivity;
+    std::vector<std::size_t> offsets;
+    std::vector<int> types;
 
-    f << "<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n";
+    connectivity.reserve(Ncells * 8); // safe upper bound
+    offsets.reserve(Ncells);
+    types.reserve(Ncells);
 
-    int nodesPerCell = mesh.cellNodeCount(0);
+    std::size_t runningOffset = 0;
 
     for (std::size_t c = 0; c < Ncells; ++c)
     {
-        for (int k = 0; k < nodesPerCell; ++k)
-        {
-            f << mesh.cellNode(c, k) << " ";
-        }
-        f << "\n";
+        std::vector<std::size_t> nodes;
+        mesh.cellNodes(c, nodes);
+
+        int vtkType = mesh.vtkCellType(c);
+
+        for (auto n : nodes)
+            connectivity.push_back(n);
+
+        runningOffset += nodes.size();
+        offsets.push_back(runningOffset);
+        types.push_back(vtkType);
     }
 
-    f << "</DataArray>\n";
+    // -------------------------
+    // Connectivity
+    // -------------------------
+    f << "<Cells>\n";
 
+    f << "<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n";
+    for (auto n : connectivity)
+        f << n << " ";
+    f << "\n</DataArray>\n";
+
+    // -------------------------
+    // Offsets
+    // -------------------------
     f << "<DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">\n";
-    for (std::size_t c = 0; c < Ncells; ++c)
-        f << (c + 1) * nodesPerCell << "\n";
+    for (auto o : offsets)
+        f << o << "\n";
     f << "</DataArray>\n";
 
+    // -------------------------
+    // Types
+    // -------------------------
     f << "<DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\">\n";
-
-    int vtkType =
-        (nodesPerCell == 2) ? 3 :   // line
-        (nodesPerCell == 4) ? 9 :   // quad
-        7;                          // polygon fallback
-
-    for (std::size_t c = 0; c < Ncells; ++c)
-        f << vtkType << "\n";
-
+    for (auto t : types)
+        f << t << "\n";
     f << "</DataArray>\n";
 
     f << "</Cells>\n";
@@ -97,9 +108,7 @@ void VTKWriter::writeVTU(
     f << "<DataArray type=\"Float64\" Name=\"field\" format=\"ascii\">\n";
 
     for (std::size_t c = 0; c < Ncells; ++c)
-    {
         f << field[c] << "\n";
-    }
 
     f << "</DataArray>\n";
     f << "</CellData>\n";
