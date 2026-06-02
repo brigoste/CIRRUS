@@ -1,68 +1,50 @@
-#include "Solver/GaussSeidel.hpp"
 #include "linear_system/LinearSystem.hpp"
-#include "mesh/MeshBase.hpp"
+#include <vector>
 #include <cmath>
-#include <iostream>
 #include <stdexcept>
-#include <algorithm>
+
+// static double rowDot(
+//     const std::unordered_map<std::size_t, double>& row,
+//     const std::vector<double>& x);
 
 std::vector<double> GaussSeidel(
-    LinearSystem& sys,
-    [[maybe_unused]]const MeshBase& mesh,
-    int iter,
-    double tol,
-    bool output
-)
+    const LinearSystem sys,
+    int max_iter,
+    double tol)
 {
-    const int N = sys.size();
+    const std::size_t N = sys.size();
 
-    auto& x = sys.solution();
-    const auto& b = sys.rhs();
+    std::vector<double> x(N, 0.0);
 
-    if ((int)x.size() != N || (int)b.size() != N)
-        throw std::runtime_error("GaussSeidel: size mismatch");
-
-    std::fill(x.begin(), x.end(), 0.0);
-
-    for (int it = 0; it < iter; ++it)
+    for (int iter = 0; iter < max_iter; ++iter)
     {
-        double maxDiff = 0.0;
+        double maxRes = 0.0;
 
-        for (int i = 0; i < N; ++i)
+        for (std::size_t i = 0; i < N; ++i)
         {
-            const double diag = sys.diag(i);
+            const auto& row = sys.row(i);
 
-            if (std::abs(diag) < 1e-14)
-                throw std::runtime_error("GaussSeidel: zero diagonal");
-
+            double diag = 0.0;
             double sum = 0.0;
 
-            // off-diagonal contributions
-            for (const auto& [j, aij] : sys.row(i))
+            for (const auto& [j, aij] : row)
             {
-                sum += aij * x[j];
+                if (j == i) diag = aij;
+                else sum += aij * x[j];
             }
 
-            const double x_new = (b[i] - sum) / diag;
+            if (std::abs(diag) < 1e-14)
+                throw std::runtime_error("Zero diagonal in GS");
 
-            maxDiff = std::max(maxDiff, std::abs(x_new - x[i]));
+            double x_new = (sys.rhs(i) - sum) / diag;
+
+            maxRes = std::max(maxRes, std::abs(x_new - x[i]));
             x[i] = x_new;
         }
 
-        if (output)
-            std::cout << "GS iter " << it
-                      << " maxDiff=" << maxDiff << "\n";
-
-        if (maxDiff < tol)
-        {
-            if (output)
-                std::cout << "GS converged in " << it << " iterations\n";
-            return x;
-        }
+        if (maxRes < tol)
+            break;
     }
-
-    if (output)
-        std::cout << "GS reached max iterations\n";
 
     return x;
 }
