@@ -1,161 +1,75 @@
 #include "linear_system/LinearSystem.hpp"
-#include <stdexcept>
-#include <algorithm>
 
-// -----------------------------
-// Constructor
-// -----------------------------
-LinearSystem::LinearSystem(int N)
-    : N_(N),
-      aP_(N, 0.0),
-      b_(N, 0.0),
-      x_(N, 0.0),
-      x_old_(N, 0.0),
-      A_(N),
-      nbrs_(N)
-{}
-
-// -----------------------------
-int LinearSystem::size() const
+LinearSystem::LinearSystem(std::size_t n)
 {
-    return N_;
+    resize(n);
 }
 
-// -----------------------------
-void LinearSystem::resize(int N)
+void LinearSystem::resize(std::size_t n)
 {
-    N_ = N;
-
-    aP_.assign(N, 0.0);
-    b_.assign(N, 0.0);
-    x_.assign(N, 0.0);
-    x_old_.assign(N, 0.0);
-
-    A_.assign(N, {});
-    nbrs_.assign(N, {});
+    n_ = n;
+    A_.assign(n, {});
+    b_.assign(n, 0.0);
 }
 
-// -----------------------------
-// Sparse assembly
-// -----------------------------
-void LinearSystem::addCoeff(int i, int j, double a)
+std::size_t LinearSystem::size() const
 {
-    if (i < 0 || i >= N_ || j < 0 || j >= N_)
-        throw std::runtime_error("addCoeff: index out of range");
-
-    for (auto& [col, val] : A_[i])
-    {
-        if (col == j)
-        {
-            val += a;
-            return;
-        }
-    }
-
-    A_[i].push_back({j, a});
-    nbrs_[i].push_back(j);
+    return n_;
 }
 
-// -----------------------------
-void LinearSystem::addDiag(int i, double aP)
-{
-    if (i < 0 || i >= N_)
-        throw std::runtime_error("addDiag: index out of range");
+// ============================================================
+// MATRIX ASSEMBLY
+// ============================================================
 
-    aP_[i] += aP;
+void LinearSystem::addCoeff(std::size_t i, std::size_t j, double val)
+{
+    A_[i][j] += val;   // IMPORTANT: FV accumulation semantics
 }
 
-// -----------------------------
-void LinearSystem::setRHS(int i, double b)
+void LinearSystem::addRHS(std::size_t i, double val)
 {
-    if (i < 0 || i >= N_)
-        throw std::runtime_error("setRHS: index out of range");
-
-    b_[i] = b;
+    b_[i] += val;
 }
 
-void LinearSystem::addRHS(int i, double b)
+void LinearSystem::setRHS(std::size_t i, double val)
 {
-    if (i < 0 || i >= N_)
-        throw std::runtime_error("addRHS: index out of range");
-
-    b_[i] += b;
+    b_[i] = val;
 }
 
-// -----------------------------
-void LinearSystem::clearRow(int i)
-{
-    if (i < 0 || i >= N_)
-        throw std::runtime_error("clearRow: index out of range");
+// ============================================================
+// ACCESSORS
+// ============================================================
 
-    A_[i].clear();
-    nbrs_[i].clear();
-    aP_[i] = 0.0;
-    b_[i] = 0.0;
+double LinearSystem::rhs(std::size_t i) const
+{
+    return b_[i];
 }
 
-// -----------------------------
-// Access
-// -----------------------------
-const std::vector<std::pair<int,double>>& LinearSystem::row(int i) const
+double LinearSystem::coeff(std::size_t i, std::size_t j) const
+{
+    auto it = A_[i].find(j);
+    return (it != A_[i].end()) ? it->second : 0.0;
+}
+
+std::vector<double>& LinearSystem::RHS()
+{
+    return b_;
+}
+
+const std::vector<double>& LinearSystem::RHS() const
+{
+    return b_;
+}
+
+const std::unordered_map<std::size_t, double>& LinearSystem::row(std::size_t i) const
 {
     return A_[i];
 }
 
-double LinearSystem::diag(int i) const
+void LinearSystem::clear()
 {
-    return aP_[i];
-}
+    for (auto& row : A_)
+        row.clear();
 
-const std::vector<int>& LinearSystem::neighbors(int i) const
-{
-    return nbrs_[i];
-}
-
-// -----------------------------
-// Vectors
-// -----------------------------
-std::vector<double>& LinearSystem::rhs()
-{
-    return b_;
-}
-
-const std::vector<double>& LinearSystem::rhs() const
-{
-    return b_;
-}
-
-std::vector<double>& LinearSystem::solution()
-{
-    return x_;
-}
-
-const std::vector<double>& LinearSystem::solution() const
-{
-    return x_;
-}
-
-std::vector<double>& LinearSystem::solutionOld()
-{
-    return x_old_;
-}
-const std::vector<double>& LinearSystem::diagonal() const
-{
-    return aP_;
-}
-double LinearSystem::coeff(int i, int j) const
-{
-    if (i < 0 || i >= N_ || j < 0 || j >= N_)
-        throw std::runtime_error("coeff: index out of range");
-
-    for (const auto& [col, val] : A_[i])
-        if (col == j)
-            return val;
-
-    return 0.0;
-}
-
-void LinearSystem::setSolution(const std::vector<double>& x)
-{
-    x_ = x;
+    std::fill(b_.begin(), b_.end(), 0.0);
 }
