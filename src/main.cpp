@@ -26,12 +26,14 @@
 // #include "config/SimulationConfigLoader.hpp"
 #include "config/SimulationConfig.hpp"
 
+#include <locale>   // for setlocale
+#include <codecvt>  // for UTF-8 conversion (C++11/14/17)
+#include <algorithm>
+#include <cmath>
+
 
 // TODO:
-//      Get our Python Plotting working
-//      We have it working on the other laptop, but I can't get pandas on this one
-//      As such, we just need to get the code to github after we copy over the python
-//      scripting.
+//      Get our Python Plotting to work
 
 int main()
 {
@@ -71,25 +73,40 @@ int main()
 
         // std::cout << "AFTER ASSEMBLE\n";
 
-        double sumA = 0.0;
-        for (std::size_t i = 0; i < sim.system().size(); ++i)
-        {
-            for (const auto& [j, aij] : sim.system().row(i))
-                sumA += std::abs(aij);
-        }
+        // double sumA = 0.0;
+        // for (std::size_t i = 0; i < sim.system().size(); ++i)
+        // {
+        //     for (const auto& [j, aij] : sim.system().row(i))
+        //         sumA += std::abs(aij);
+        // }
 
         // std::cout << "[DEBUG] matrix L1 norm = " << sumA << "\n";
 
-        std::cout << "ncells=" << sim.mesh().ncells()
-            << "\nnfaces=" << sim.mesh().nfaces() << "\n";
-
-        std::cout << "Solver: " << solver::to_string(cfg.solver.method);
+        std::cout << "# of cells = " << sim.mesh().ncells()
+            << "\n# of faces = " << sim.mesh().nfaces() << "\n";
 
         auto phi = sim.solve();
 
-        std::cout << "\n\n================ SOLVER COMPLETE ================\n\n";
+        std::cout << "\n================ SOLVER COMPLETE ================\n\n";
+
+        auto minIt = std::min_element(phi.begin(), phi.end());
+        auto maxIt = std::max_element(phi.begin(), phi.end());
+
+        std::cout << "Min Value: " << *minIt << "\n";
+        std::cout << "Max Value: " << *maxIt << "\n";
 
         auto r = computeResidual(sim.system(), phi);
+
+        double maxAbsResidual = 0.0;
+
+        for (double ri : r)
+        {
+            maxAbsResidual = std::max(maxAbsResidual, std::abs(ri));
+        }
+
+        std::cout << "Max |Residual|: "
+                << maxAbsResidual
+                << "\n";
 
         VTKWriter::writeVTU(
             sim.mesh(),
