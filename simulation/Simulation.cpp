@@ -1,7 +1,7 @@
 #include "Simulation.hpp"
 
 #include "mesh/Mesh1D.hpp"
-#include "mesh/Mesh2D.hpp"
+// #include "mesh/Mesh2D.hpp"
 #include "discretization/FiniteVolumeOperator.hpp"
 #include "discretization/FluxBuilder.hpp"
 
@@ -15,6 +15,11 @@ Simulation::Simulation(const SimulationConfig& cfg)
     : cfg_(cfg)
 {
     // std::cout << "ctor: entered\n";
+    std::cout
+        << "\n================ SOLVER ================\n\n"
+        << "Method: "
+        << solver::to_string(cfg_.solver.method)
+        << "\n\n";
 
     if (cfg.mesh.type == "1D")
     {
