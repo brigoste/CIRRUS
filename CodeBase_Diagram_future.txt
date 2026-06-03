@@ -1,0 +1,26 @@
+                ┌────────────────────┐
+                │ Simulation Core    │
+                │ (orchestrator only)│
+                └────────┬───────────┘
+                         │
+     ┌───────────────────┼───────────────────┐
+     ▼                   ▼                   ▼
+┌───────────┐   ┌──────────────┐   ┌────────────────┐
+│ Physics   │   │ Discretizer  │   │ BoundaryPlugin │
+│ Plugin    │   │ Plugin       │   │                │
+└────┬──────┘   └────┬─────────┘   └──────┬─────────┘
+     │               │                    │
+     ▼               ▼                    ▼
+ Heat / LES /   FV / FEM / DG     Dirichlet / Mixed / etc.
+ Multiphysics
+
+                         ▼
+              ┌──────────────────────┐
+              │ Assembly Engine      │
+              │ (FluxBuilder-like)   │
+              └────────┬─────────────┘
+                       ▼
+              ┌──────────────────────┐
+              │ Linear System Plugin │
+              │ CG / GMRES / TDMA    │
+              └──────────────────────┘
