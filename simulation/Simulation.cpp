@@ -12,69 +12,59 @@
 // ============================================================
 
 Simulation::Simulation(const SimulationConfig& cfg)
-    : cfg_(cfg)
+    : cfg_(cfg),
+      assembled_(false)
 {
-    // std::cout << "ctor: entered\n";
-    std::cout
-        << "\n================ SOLVER ================\n\n"
-        << "Method: "
-        << solver::to_string(cfg_.solver.method)
-        << "\n\n";
+    // -------------------------
+    // 1. Build physics model FIRST
+    // -------------------------
+    model_ = PhysicsFactory::create(cfg.physics);
 
+    // -------------------------
+    // 2. Mesh
+    // -------------------------
     if (cfg.mesh.type == "1D")
     {
-        // std::cout << "ctor: creating mesh\n";
         mesh_ = std::make_unique<Mesh1D>(cfg.mesh.n, cfg.mesh.L);
-        // std::cout << "ctor: mesh created\n";
     }
     else
     {
         throw std::runtime_error("Unsupported mesh");
     }
 
-    // std::cout << "ctor: resizing system\n";
-    sys_.resize(mesh_->ncells());
-    // std::cout << "ctor: system resized\n";
-
-    // std::cout << "ctor: creating flux\n";
+    // -------------------------
+    // 3. Allocate solver data
+    // -------------------------
     flux_ = std::make_unique<FluxAccumulator>(mesh_->ncells());
-    // std::cout << "ctor: flux created\n";
+    sys_.resize(mesh_->ncells());
 
-    // std::cout << "ctor: binding BCs\n";
+    // -------------------------
+    // 4. Boundary conditions
+    // -------------------------
     bindBoundaryConditions(cfg);
-    // std::cout << "ctor: BCs bound\n";
-
-    // std::cout << "ctor: finished\n";
 }
 
 // ============================================================
-// Assembly
+// Assemble (external responsibility)
 // ============================================================
+
 
 void Simulation::assemble()
 {
-    // std::cout << ">>> REAL Simulation::assemble() CALLED <<<\n";
-    // std::cout << "[Simulation] assemble start\n";
+    flux_->reset();
+    sys_.clear();
 
-    const HeatEquationModel model{
-        cfg_.physics.k,
-        false,
-        cfg_.source.Su,
-        cfg_.source.Sp
-    };
-
-    const MeshBase& mesh = *mesh_;
-
-    FluxBuilder::buildFlux(mesh, model, boundary_, *flux_);
-    // std::cout << "[Simulation] after buildFlux\n";
+    FluxBuilder::buildFlux(
+        *mesh_,
+        *model_,
+        boundary_,
+        *flux_);
 
     FiniteVolumeOperator::assemble(
-        // mesh,
-        // model,
         *flux_,
         sys_);
 
-    // std::cout << "[Simulation] after FV assemble\n";
+    assembled_ = true;
 }
 
 // ============================================================
@@ -84,6 +74,11 @@ void Simulation::assemble()
 std::vector<double> Simulation::solve()
 {
     const auto& solverCfg = cfg_.solver;
+    if (!assembled_)
+        throw std::runtime_error("System not assembled");
+
+    std::cout << "System Type: " << cfg_.physics.type << "\n";
+    std::cout << "Solver: " << to_string(cfg_.solver.method) << "\n";
 
     switch (solverCfg.method)
     {
