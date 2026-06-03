@@ -1,20 +1,17 @@
 #pragma once
 
-#include "mesh/MeshBase.hpp"
 #include <vector>
 #include <string>
+#include "postprocessing/BoundaryReconstructor.hpp"
+
+class MeshBase;
+struct Point;   // forward-declare if Point is only used by reference internally
 
 class FieldWriter
 {
 public:
-    static void writeCSV(
-        const MeshBase& mesh,
-        const std::vector<double>& field,
-        const std::string& filename);
-
     static void writeCSVDebug(
-        const MeshBase& mesh,
-        const std::vector<double>& phi,
+        const Field1D& field,
         const std::vector<double>& rhs,
         const std::vector<double>& residual,
         const std::string& filename);
