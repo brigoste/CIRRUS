@@ -2,14 +2,15 @@
 #include "discretization/FluxAccumulator.hpp"
 #include "mesh/MeshBase.hpp"
 #include "mesh/BoundaryPatchSystem.hpp"
-#include "physics/HeatEquationModel.hpp"
+#include "physics/PhysicsModel.hpp"
+#include "utils/LinearAlgebraUtils.hpp"
 
 class FluxBuilder
 {
 public:
     static void buildFlux(
         const MeshBase& mesh,
-        const HeatEquationModel& model,
-        const BoundaryPatchSystem& bc,
+        const PhysicsModel& model,
+        const BoundaryPatchSystem& boundary,
         FluxAccumulator& flux);
 };
