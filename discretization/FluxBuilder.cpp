@@ -1,23 +1,22 @@
 #include "discretization/FluxAccumulator.hpp"
 #include "mesh/MeshBase.hpp"
-#include "physics/HeatEquationModel.hpp"
+#include "mesh/MeshGeometry.hpp"
+#include "physics/PhysicsModel.hpp"
+#include "physics/HeatPhysicsModel.hpp"
 #include "mesh/BoundaryPatchSystem.hpp"
 #include "discretization/FluxBuilder.hpp"
+#include "utils/LinearAlgebraUtils.hpp"
 #include <limits>
+#include <cmath>
+
+// Look at the chatGPT thread. We may need to add a geometry helper class.
 
 void FluxBuilder::buildFlux(
     const MeshBase& mesh,
-    const HeatEquationModel& model,
+    const PhysicsModel& model,
     const BoundaryPatchSystem& boundary,
     FluxAccumulator& flux)
 {
-    const std::size_t INVALID = MeshTypes::INVALID;
-
-    // =========================================================
-    // DO NOT reallocate or reconstruct flux here
-    // =========================================================
-
-    // Optional safety check (recommended)
     if (flux.size() != mesh.ncells())
         throw std::runtime_error("FluxAccumulator size mismatch with mesh");
 
@@ -31,25 +30,35 @@ void FluxBuilder::buildFlux(
         const std::size_t P = face.owner;
         const std::size_t N = face.neighbor;
 
-        const double D = model.k * face.area / face.d;
-
-        // -------------------------
-        // Interior face
-        // -------------------------
-        if (N != INVALID)
+        // -----------------------------------------------------
+        // INTERIOR FACE
+        // -----------------------------------------------------
+        if (N != Face::INVALID)
         {
+            const double d = face.dPN;
+            const double D = model.diffusionCoeff(face, d);
+
             flux.addDiffusion(P, N, D);
+
+            // optional convection
+            double faceFlux = 0.0;
+            flux.addConvection(P, N, model.convectionCoeff(faceFlux));
         }
-        // -------------------------
-        // Boundary face
-        // -------------------------
+
+        // -----------------------------------------------------
+        // BOUNDARY FACE
+        // -----------------------------------------------------
         else
         {
             const auto* bc = boundary.get(f);
-
             if (!bc)
-                throw std::runtime_error(
-                    "Missing BC for face " + std::to_string(f));
+                throw std::runtime_error("Missing BC for face " + std::to_string(f));
+
+            // boundary diffusion closure
+            const double d = MeshGeometry::faceDistance(mesh, face, P);
+            const double D = model.diffusionCoeff(face, d);
+
+            flux.addDiffusion(P, P, D);  // enforce diagonal contribution
 
             switch (bc->type)
             {
@@ -67,16 +76,22 @@ void FluxBuilder::buildFlux(
                     flux.addSource(P, hA * bc->Tinf, -hA);
                     break;
                 }
-
                 default:
-                    throw std::runtime_error("Unknown BC type");
+                    break;
             }
         }
     }
 
+    // =========================================================
+    // 2. CELL SOURCES
+    // =========================================================
+    for (std::size_t c = 0; c < mesh.ncells(); ++c)
+    {
+        model.addCellSources(mesh, c, flux);
+    }
 
     // =========================================================
-    // 2. DEBUG CHECKS
+    // 3. DEBUG
     // =========================================================
 #ifdef DEBUG
     for (std::size_t i = 0; i < flux.size(); ++i)
@@ -86,12 +101,8 @@ void FluxBuilder::buildFlux(
         if (!std::isfinite(c.Su) || !std::isfinite(c.Sp))
             throw std::runtime_error("Non-finite flux source term");
 
-        // important diagnostic: ensures no accidental zero diagonals
-        if (std::abs(c.Sp) < 1e-14)
-        {
-            std::cerr << "[WARN] Cell " << i
-                      << " has near-zero Sp\n";
-        }
+        if (std::abs(c.Sp) > 1e12)
+            std::cerr << "[WARN] stiff source at cell " << i << "\n";
     }
 #endif
 }
