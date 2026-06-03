@@ -1,5 +1,5 @@
 #include "config/SimulationConfig.hpp"
-#include "mesh/Point.hpp"
+// #include "mesh/Point.hpp"
 
 #include <iostream>
 #include <stdexcept>
@@ -27,12 +27,6 @@ SimulationConfig defaultConfig()
     // Physics defaults
     // -------------------------
     cfg.physics.k = 1.0;
-
-    // -------------------------
-    // Source defaults
-    // -------------------------
-    cfg.source.Su = [](const Point&) { return 0.0; };
-    cfg.source.Sp = [](const Point&) { return 0.0; };
 
     // -------------------------
     // Solver defaults
@@ -70,17 +64,8 @@ SimulationConfig loadConfig(const std::filesystem::path& path)
     // -------------------------
     // Physics
     // -------------------------
+    cfg.physics.type = j.at("physics").at("type").get<std::string>();
     cfg.physics.k = j.at("physics").at("k").get<double>();
-
-    // -------------------------
-    // Source
-    // -------------------------
-    SourceConfig source;
-    const double Su0 = j.at("source").at("Su").get<double>();
-    const double Sp0 = j.at("source").at("Sp").get<double>();
-
-    cfg.source.Su = [Su0](const Point&) { return Su0; };
-    cfg.source.Sp = [Sp0](const Point&) { return Sp0; };
 
     // -------------------------
     // Solver
