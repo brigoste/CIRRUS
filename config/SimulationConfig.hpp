@@ -28,20 +28,15 @@ struct MeshConfig
 
 struct PhysicsConfig
 {
-    double k = 0.0;
-};
+    std::string type;   // "heat", "navier-stokes", etc.
 
-struct SourceConfig
-{
-    std::function<double(const Point&)> Su;
-    std::function<double(const Point&)> Sp;
+    double k = 0.0;
 };
 
 struct SimulationConfig
 {
     MeshConfig mesh;
     PhysicsConfig physics;
-    SourceConfig source;              // <-- REQUIRED FIX
     std::vector<BoundaryConfig> boundary;  // <-- ALSO FIXED (was single object)
 
     struct SolverConfig
