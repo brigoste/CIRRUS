@@ -18,6 +18,8 @@ public:
     // geometry
     const Point& node(std::size_t i) const override;
     const Point& cellCenter(std::size_t c) const override;
+    double faceDistance(std::size_t f) const override;
+    double distance(const Point& a, const Point& b) const override;
 
     // connectivity (canonical FV + VTK interface)
     void cellNodes(std::size_t c, std::vector<std::size_t>& nodes) const override;
@@ -27,6 +29,10 @@ public:
     const Face& face(std::size_t f) const override;
     std::vector<Face>::const_iterator facesBegin() const override;
     std::vector<Face>::const_iterator facesEnd() const override;
+
+    // queries
+    std::size_t leftBoundaryFace() const;
+    std::size_t rightBoundaryFace() const;
 
 private:
     std::size_t N_;
