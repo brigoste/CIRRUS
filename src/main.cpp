@@ -5,11 +5,16 @@
 #include "io/FieldWriter.hpp"
 #include "io/VTKWriter.hpp"
 
+#include "postprocessing/BoundaryReconstructor.hpp"
+#include "postprocessing/DerivedFields.hpp"
+#include "postprocessing/ErrorNorms.hpp"
+#include "postprocessing/Field1D.hpp"
+
 #include "mesh/Mesh1D.hpp"
 #include "Solver/SolverMethod.hpp"
 
 // HT SOLVERS
-#include "system/HeatSystem1D.hpp"
+// #include "system/HeatSystem1D.hpp"
 // #include "system/HeatSystem2D.hpp"
 // #include "system/HeatSystem3D.hpp"
 
@@ -35,6 +40,12 @@
 // TODO:
 //      Get our Python Plotting to work
 
+void runPlot(const std::string& file)
+{
+    std::string cmd = "python ./scripts/Plot.py " + file;
+    std::system(cmd.c_str());
+}
+
 int main()
 {
     try
@@ -55,12 +66,6 @@ int main()
         {
             std::cout << "Using default config...\n";
             cfg = defaultConfig();
-
-            // -----------------------------
-            // Source terms (constant example)
-            // -----------------------------
-            cfg.source.Su = [](const Point&) { return 1000.0; };
-            cfg.source.Sp = [](const Point&) { return 0.0; };
         }
 
         // std::cout << "BEFORE SIM\n";
@@ -69,21 +74,23 @@ int main()
 
         // std::cout << "AFTER SIM\n";
 
-        sim.assemble();
-
-        // std::cout << "AFTER ASSEMBLE\n";
-
-        // double sumA = 0.0;
-        // for (std::size_t i = 0; i < sim.system().size(); ++i)
-        // {
-        //     for (const auto& [j, aij] : sim.system().row(i))
-        //         sumA += std::abs(aij);
-        // }
-
-        // std::cout << "[DEBUG] matrix L1 norm = " << sumA << "\n";
+        sim.assemble();        
 
         std::cout << "# of cells = " << sim.mesh().ncells()
             << "\n# of faces = " << sim.mesh().nfaces() << "\n";
+
+        // for (std::size_t i = 0; i < sim.system().size(); ++i)
+        // {
+        //     double w = sim.system().coeff(i, i > 0 ? i - 1 : i);
+        //     double p = sim.system().coeff(i, i);
+        //     double e = sim.system().coeff(i, i + 1 < sim.system().size() ? i + 1 : i);
+
+        //     std::cout << i
+        //             << " W=" << w
+        //             << " P=" << p
+        //             << " E=" << e
+        //             << "\n";
+        // }
 
         auto phi = sim.solve();
 
@@ -106,7 +113,7 @@ int main()
 
         std::cout << "Max |Residual|: "
                 << maxAbsResidual
-                << "\n";
+                << "\n\n";
 
         VTKWriter::writeVTU(
             sim.mesh(),
@@ -114,13 +121,23 @@ int main()
             "../output/solution.vtu"
         );
 
-        FieldWriter::writeCSVDebug(
+        // std::cout << "[DEBUG] writing output files...\n";
+
+        auto field = BoundaryReconstructor::reconstruct(
             sim.mesh(),
-            phi,
+            sim.boundary(),
+            sim.model(),
+            phi);
+
+        FieldWriter::writeCSVDebug(
+            field,
             sim.system().RHS(),
             r,
             "../output/solution.csv"
         );
+        
+        bool plot_solution_field = false;       // placeholder. In the end, it should plot by default.
+        if (plot_solution_field) {runPlot("../output/solution.csv");}  // Doesn't work if you don't have python
     }
     catch (const std::exception& e)
     {
