@@ -1,6 +1,7 @@
 #pragma once
 
 #include "linear_system/LinearSystem.hpp"
+#include "mesh/Point.hpp"
 #include <vector>
 #include <cmath>
 #include <stdexcept>
@@ -49,6 +50,13 @@ inline double dot(const std::vector<double>& a,
         s += a[i] * b[i];
 
     return s;
+}
+
+inline double dot(const Point& a, const Point& b)
+{
+    return a.x[0] * b.x[0]
+         + a.x[1] * b.x[1]
+         + a.x[2] * b.x[2];
 }
 
 // --------------------------------------------------
