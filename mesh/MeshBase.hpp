@@ -17,6 +17,8 @@ public:
     // geometry
     virtual const Point& node(std::size_t i) const = 0;
     virtual const Point& cellCenter(std::size_t c) const = 0;
+    virtual double faceDistance(std::size_t f) const = 0;
+    virtual double distance(const Point& a, const Point& b) const = 0;
 
     // connectivity (canonical)
     virtual void cellNodes(
@@ -29,4 +31,5 @@ public:
     virtual const Face& face(std::size_t f) const = 0;
     virtual std::vector<Face>::const_iterator facesBegin() const = 0;
     virtual std::vector<Face>::const_iterator facesEnd() const = 0;
+
 };
