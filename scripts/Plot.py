@@ -1,11 +1,11 @@
-import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
 
 def plot_1d(df):
     plt.figure()
-    plt.plot(df["x"], df["phi"])
+    plt.scatter(df[:,0], df[:,1])
+    plt.plot(df[:,0], df[:,1])
     plt.xlabel("x")
     plt.ylabel("phi")
     plt.title("1D Finite Volume Solution")
@@ -65,19 +65,17 @@ def plot_debug(df):
         plt.grid()
         plt.show()
 
-def main(filename="solution.csv"):
-    df = pd.read_csv(filename)
+def main(filename="C:\\Users\\E40112856\\Packages\\CIRRUS\\output\\solution.csv"):
+    # df = pd.read_csv(filename)
+    df = np.loadtxt(filename, delimiter=",", skiprows=1)
 
-    cols = set(df.columns)
+    ncols = df.shape[1]
 
-    if {"x", "phi"} <= cols:
+    if ncols == 4:
         plot_1d(df)
 
-    elif {"x", "y", "phi"} <= cols:
+    elif ncols == 5:
         plot_2d(df)
-
-    elif "residual" in df.columns:
-        plot_debug(df)
 
     else:
         raise ValueError(f"Unknown CSV format: columns = {df.columns}")
