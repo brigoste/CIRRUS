@@ -7,7 +7,9 @@
 #include "config/SimulationConfig.hpp"
 #include "mesh/MeshBase.hpp"
 #include "mesh/BoundaryPatchSystem.hpp"
-#include "physics/HeatEquationModel.hpp"
+#include "physics/PhysicsModel.hpp"
+#include "physics/PhysicsFactory.hpp"
+#include "physics/HeatPhysicsModel.hpp"
 #include "linear_system/LinearSystem.hpp"
 #include "bc/BoundaryFace.hpp"
 #include "discretization/FluxBuilder.hpp"
@@ -35,6 +37,7 @@ public:
     const MeshBase& mesh() const { return *mesh_; }
     const LinearSystem& system() const { return sys_; }
     const BoundaryPatchSystem& boundary() const { return boundary_; }
+    const PhysicsModel& model() const noexcept { return *model_; }
 
     void printMesh() const
     {
@@ -55,8 +58,9 @@ private:
     std::unique_ptr<MeshBase> mesh_;
 
     BoundaryPatchSystem boundary_;
-    HeatEquationModel model_;
+    std::unique_ptr<PhysicsModel> model_;
     LinearSystem sys_;
     std::unique_ptr<FluxAccumulator> flux_;
     SimulationConfig cfg_;
+    bool assembled_;
 };
