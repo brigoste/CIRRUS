@@ -1,15 +1,23 @@
 #include "HeatPhysicsModel.hpp"
-#include "mesh/Face.hpp"
+#include "mesh/primitives/Face.hpp"
+#include "utils/LinearAlgebraUtils.hpp"
 
-double HeatPhysicsModel::diffusionCoeff(const Face& face, double d) const
+double HeatPhysicsModel::diffusionCoeff(const Face& face) const
 {
-    return k_ * face.area / d;
+    double d_eff = std::abs(LA::dot(face.dPN, face.normal));
+    if (d_eff <= 0.0)
+    {
+        throw std::runtime_error(
+            "Invalid face spacing: d_eff = " +
+            std::to_string(d_eff));
+    }
+    return k_ * face.area / d_eff;
 }
-
 double HeatPhysicsModel::convectionCoeff(double flux) const
 {
     return flux;   // 0 if no convection
 }
+
 double HeatPhysicsModel::reconstructBoundaryValue(
                                                 const BoundaryPatchSystem::Condition& bc,
                                                 double phiCell,
