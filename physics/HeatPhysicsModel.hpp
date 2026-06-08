@@ -1,7 +1,8 @@
 #pragma once
 
 #include "PhysicsModel.hpp"
-#include "mesh/Face.hpp"
+#include "mesh/primitives/Face.hpp"
+#include "utils/LinearAlgebraUtils.hpp"
 
 class HeatPhysicsModel : public PhysicsModel
 {
@@ -13,7 +14,7 @@ public:
     {
         return k_;
     }
-    double diffusionCoeff(const Face& face, double d) const;
+    double diffusionCoeff(const Face& face) const;
     double convectionCoeff(double flux) const;
     double reconstructBoundaryValue(const BoundaryPatchSystem::Condition& bc,
                                             double phiCell,
