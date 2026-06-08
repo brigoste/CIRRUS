@@ -15,7 +15,8 @@ void FluxBuilder::buildFlux(
     const MeshBase& mesh,
     const PhysicsModel& model,
     const BoundaryPatchSystem& boundary,
-    FluxAccumulator& flux)
+    FluxAccumulator& flux,
+    const VerificationCase* verificationCase = nullptr)
 {
     if (flux.size() != mesh.ncells())
         throw std::runtime_error("FluxAccumulator size mismatch");
@@ -61,8 +62,22 @@ void FluxBuilder::buildFlux(
             switch (bc->type)
             {
                 case bc::Type::Dirichlet:
-                    flux.addBoundaryDiffusion(P, D, bc->value);
+                {
+                    double value = bc->value;
+
+                    if (verificationCase)
+                    {
+                        const auto& xc = mesh.cellCenter(P); // or face centroid (better)
+
+                        double x = xc.x[0];
+                        double y = xc.x[1];
+
+                        value = verificationCase->exact(x, y);
+                    }
+
+                    flux.addBoundaryDiffusion(P, D, value);
                     break;
+                }
 
                 case bc::Type::Neumann:
                     flux.addSource(P, bc->flux * face.area, 0.0);
@@ -86,7 +101,21 @@ void FluxBuilder::buildFlux(
     // =====================================================
     for (std::size_t c = 0; c < mesh.ncells(); ++c)
     {
-        model.addCellSources(mesh, c, flux);
+        if (verificationCase)
+        {
+            const auto& xc = mesh.cellCenter(c);
+
+            const double x = xc.x[0];
+            const double y = xc.x[1];
+
+            const double S = verificationCase->source(x, y);
+
+            flux.addSource(c, S * mesh.cellVolume(c), 0.0);
+        }
+        else
+        {
+            model.addCellSources(mesh, c, flux);
+        }
     }
 
 
