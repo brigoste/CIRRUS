@@ -1,11 +1,8 @@
 #pragma once
 
 #include <unordered_map>
-#include <functional>
-
 #include "bc/BCType.hpp"
-#include "mesh/Face.hpp"
-#include "linear_system/LinearSystem.hpp"
+// #include "config/SimulationConfig.hpp"
 
 class BoundaryPatchSystem
 {
@@ -20,15 +17,10 @@ public:
         bc::Type type = bc::Type::None;
     };
 
-    // -----------------------------
-    // registration (by face index)
-    // -----------------------------
-    void set(std::size_t faceIndex, const Condition& bc);
-
-    bool has(std::size_t faceIndex) const;
-
-    const Condition* get(std::size_t faceIndex) const;
+    // assign BC to a group (LEFT, RIGHT, TOP, etc.)
+    void setGroup(std::size_t group, const Condition& bc);
+    const Condition* getGroup(std::size_t group) const;
 
 private:
-    std::unordered_map<std::size_t, Condition> bcMap_;
+    std::unordered_map<std::size_t, Condition> groupBC_;
 };
