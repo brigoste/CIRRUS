@@ -37,6 +37,11 @@ Simulation::Simulation(const SimulationConfig& cfg)
         throw std::runtime_error("Unsupported mesh");
     }
 
+    if (cfg.verification.enabled)
+    {
+        verificationCase_ = verificationRegistry_.instance().create(cfg.verification);
+    }
+
     // -------------------------
     // 3. Allocate solver data
     // -------------------------
@@ -59,11 +64,24 @@ void Simulation::assemble()
     flux_->reset();
     sys_.clear();
 
-    FluxBuilder::buildFlux(
-        *mesh_,
-        *model_,
-        boundary_,
-        *flux_);
+    if (verificationCase_)
+    {
+        FluxBuilder::buildFlux(
+            *mesh_,
+            *model_,
+            boundary_,
+            *flux_,
+            verificationCase_.get());
+    }
+    else
+    {
+        FluxBuilder::buildFlux(
+            *mesh_,
+            *model_,
+            boundary_,
+            *flux_,
+            nullptr);
+    }
 
     FiniteVolumeOperator::assemble(
         *flux_,
