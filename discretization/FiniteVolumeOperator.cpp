@@ -1,7 +1,7 @@
 #include "discretization/FiniteVolumeOperator.hpp"
 
 #include "mesh/MeshBase.hpp"
-#include "mesh/Face.hpp"
+#include "mesh/primitives/Face.hpp"
 
 #include "physics/PhysicsModel.hpp"
 #include "linear_system/LinearSystem.hpp"
