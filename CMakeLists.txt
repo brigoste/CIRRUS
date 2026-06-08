@@ -41,12 +41,15 @@ file(GLOB_RECURSE CIRRUS_SOURCES
     ${PROJECT_SOURCE_DIR}/utils/*.cpp
     ${PROJECT_SOURCE_DIR}/simulation/*.cpp
     ${PROJECT_SOURCE_DIR}/postprocessing/*.cpp
+    ${PROJECT_SOURCE_DIR}/tests/verification/*.cpp
+    ${PROJECT_SOURCE_DIR}/tests/verification/ManufacturedCases/*.cpp
 
     # Update as we get 2D/3D meshes working
     # ${PROJECT_SOURCE_DIR}/mesh/*.cpp
     ${PROJECT_SOURCE_DIR}/mesh/Mesh1D.cpp
+    ${PROJECT_SOURCE_DIR}/mesh/QuadMesh2D.cpp
     ${PROJECT_SOURCE_DIR}/mesh/BoundaryPatchSystem.cpp
-    ${PROJECT_SOURCE_DIR}/mesh/Point.cpp
+    ${PROJECT_SOURCE_DIR}/mesh/primitives/Point.cpp
     ${PROJECT_SOURCE_DIR}/mesh/MeshGeometry.cpp
 
     # Outdated:
