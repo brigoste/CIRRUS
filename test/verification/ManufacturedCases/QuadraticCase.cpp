@@ -1,20 +1,6 @@
 #include "tests/verification/ManufacturedCases/QuadraticCase.hpp"
+#include "tests/verification/VerificationAutoRegister.hpp"
 #include "tests/verification/VerificationRegistry.hpp"
-
-namespace
-{
-    const bool registered = []()
-    {
-        VerificationRegistry::instance().registerCase(
-            "quadratic",
-            [](const VerificationConfig&)
-            {
-                return std::make_unique<QuadraticCase>();
-            });
-
-        return true;
-    }();
-}
 
 double QuadraticCase::exact(
     double x,
@@ -29,3 +15,10 @@ double QuadraticCase::source(
 {
     return -4.0;
 }
+
+static VerificationAutoRegister register_quadratic(
+    "quadratic",
+    [](const VerificationConfig&)
+    {
+        return std::make_unique<QuadraticCase>();
+    });
