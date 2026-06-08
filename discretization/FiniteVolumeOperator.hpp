@@ -1,19 +1,16 @@
 #pragma once
-
-#include "mesh/MeshBase.hpp"
-#include "linear_system/LinearSystem.hpp"
-#include "physics/PhysicsModel.hpp"
 #include "discretization/FluxAccumulator.hpp"
-#include "discretization/CellFlux.hpp"
-#include "discretization/CellData.hpp"
-#include "bc/BCType.hpp"
+#include "mesh/MeshBase.hpp"
+#include "mesh/BoundaryPatchSystem.hpp"
+#include "physics/PhysicsModel.hpp"
+#include "utils/LinearAlgebraUtils.hpp"
 
-// #pragma message("USING FV HEADER: " __FILE__)
-
-class FiniteVolumeOperator
+class FluxBuilder
 {
 public:
-    static void assemble(
-        const FluxAccumulator& flux,
-        LinearSystem& sys);
+    static void buildFlux(
+        const MeshBase& mesh,
+        const PhysicsModel& model,
+        const BoundaryPatchSystem& boundary,
+        FluxAccumulator& flux);
 };
