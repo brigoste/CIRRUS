@@ -1,7 +1,7 @@
 #include "Simulation.hpp"
 
 #include "mesh/Mesh1D.hpp"
-// #include "mesh/Mesh2D.hpp"
+#include "mesh/QuadMesh2D.hpp"
 #include "discretization/FiniteVolumeOperator.hpp"
 #include "discretization/FluxBuilder.hpp"
 
@@ -23,12 +23,17 @@ Simulation::Simulation(const SimulationConfig& cfg)
     // -------------------------
     // 2. Mesh
     // -------------------------
-    if (cfg.mesh.type == "1D")
+    if (cfg.mesh.type == "line1D")
     {
-        mesh_ = std::make_unique<Mesh1D>(cfg.mesh.n, cfg.mesh.L);
+        mesh_ = std::make_unique<Mesh1D>(cfg.mesh.nx, cfg.mesh.lx);
+    }
+    else if (cfg.mesh.type == "quad2D")
+    {
+        mesh_ = std::make_unique<QuadMesh2D>(cfg.mesh.nx, cfg.mesh.ny, cfg.mesh.lx, cfg.mesh.ly);
     }
     else
     {
+        std::cout << "Mesh type declared: " << cfg.mesh.type << "\n";
         throw std::runtime_error("Unsupported mesh");
     }
 
@@ -107,15 +112,9 @@ void Simulation::bindBoundaryConditions(const SimulationConfig& cfg)
 {
     boundary_ = BoundaryPatchSystem();
 
-    const std::size_t nfaces = mesh_->nfaces();
-
     for (const auto& bc : cfg.boundary)
     {
-        if (bc.faceIndex >= nfaces)
-            throw std::runtime_error(
-                "Invalid BC faceIndex: " + std::to_string(bc.faceIndex));
-
-        boundary_.set(bc.faceIndex, bc.condition);
+        boundary_.setGroup(bc.group, bc.condition);
     }
 }
 
