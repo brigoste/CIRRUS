@@ -9,52 +9,57 @@
 #include "postprocessing/DerivedFields.hpp"
 #include "postprocessing/ErrorNorms.hpp"
 
-// #include "mesh/Mesh1D.hpp"
 #include "Solver/SolverMethod.hpp"
-
-// HT SOLVERS
-// #include "system/HeatSystem1D.hpp"
-// #include "system/HeatSystem2D.hpp"
-// #include "system/HeatSystem3D.hpp"
-
-// FLUID SOLVERS - need to implment
-// #include "system/FluidSystem1D.hpp"
-// #include "system/FluidSystem2D.hpp"
-// #include "system/FluidSystem3D.hpp"
 
 #include "linear_system/Residual.hpp"
 
 #include "simulation/Simulation.hpp"
 
 // JSON includes
-// #include "config/SimulationConfigLoader.hpp"
 #include "config/SimulationConfig.hpp"
 #include "tests/verification/VerificationRunner.hpp"
 #include "tests/verification/VerificationRegistry.hpp"
+#include "tests/verification/VerificationRegistryInit.hpp"
 
 #include <locale>   // for setlocale
 #include <codecvt>  // for UTF-8 conversion (C++11/14/17)
 #include <algorithm>
 #include <cmath>
 
+// ==================== GLOBAL PATHS ====================
 
-// TODO:
-//      Get our Python Plotting to work
+constexpr const char* PYTHON_EXE =
+    "C:/Users/E40112856/.julia/conda/3/x86_64/python.exe";
 
-void runPlot(const std::string& file)
+constexpr const char* PLOT_SCRIPT =
+    "C:/Users/E40112856/Packages/CIRRUS/scripts/Plot.py";
+
+void runPlot(const std::string& csvFile)
 {
-    std::string cmd = "python ./scripts/Plot.py " + file;
-    std::system(cmd.c_str());
+    std::string cmd =
+        "cmd /c "
+        "\"\"" + std::string(PYTHON_EXE) +
+        "\" \"" + PLOT_SCRIPT +
+        "\" \"" + csvFile +
+        "\"\"";
+
+    std::cout << cmd << '\n';       // forces a command prompt run of the python script
+
+    int rc = std::system(cmd.c_str());
+
+    std::cout << "\nReturn code = " << rc << "\n\n";
 }
 
 int main()
 {
     try
     {
-        std::cout.flush();
         std::cout << "\n\n================ INITIALIZING SYSTEM ================\n\n";
 
-        bool useJSON = true;
+        // -------------------------------------------------
+        // 1. Load configuration
+        // -------------------------------------------------
+        const bool useJSON = true;
 
         SimulationConfig cfg;
 
@@ -69,79 +74,98 @@ int main()
             cfg = defaultConfig();
         }
 
-        // std::cout << "BEFORE SIM\n";
-
         Simulation sim(cfg);
+        sim.assemble();
 
-        // std::cout << "AFTER SIM\n";
+        // -------------------------------------------------
+        // 2. Initialize global subsystems
+        // -------------------------------------------------
+        
 
-        sim.assemble();        
+        // -------------------------------------------------
+        // 3. Build and run simulation
+        // -------------------------------------------------
 
         std::cout << "# of cells = " << sim.mesh().ncells()
-            << "\n# of faces = " << sim.mesh().nfaces() << "\n";
+                  << "\n# of faces = " << sim.mesh().nfaces() << "\n";
 
-        auto phi = sim.solve();
+        std::vector<double> phi = sim.solve();
 
+        const auto& mesh = sim.mesh();
+        const auto& system = sim.system();
 
+        // -------------------------------------------------
+        // 4. Verification (optional diagnostic layer)
+        // -------------------------------------------------
         if (cfg.verification.enabled)
         {
             auto verificationCase =
                 VerificationRegistry::instance().create(cfg.verification);
 
             VerificationRunner::run(
-                sim.mesh(),
+                mesh,
                 phi,
                 *verificationCase,
                 cfg.verification);
         }
 
+        // -------------------------------------------------
+        // 5. Solver summary
+        // -------------------------------------------------
         std::cout << "\n================ SOLVER COMPLETE ================\n\n";
 
-        auto minIt = std::min_element(phi.begin(), phi.end());
-        auto maxIt = std::max_element(phi.begin(), phi.end());
+        auto [minIt, maxIt] =
+            std::minmax_element(phi.begin(), phi.end());
 
-        std::cout << "cells = " << sim.mesh().ncells() << ", nodes = " << sim.mesh().nnodes() << '\n';
+        std::cout << "cells = " << mesh.ncells()
+                  << ", nodes = " << mesh.nnodes() << '\n';
 
         std::cout << "Min Value: " << *minIt << "\n";
         std::cout << "Max Value: " << *maxIt << "\n";
 
-        auto r = computeResidual(sim.system(), phi);
+        auto residual = computeResidual(system, phi);
 
         double maxAbsResidual = 0.0;
+        for (double r : residual)
+            maxAbsResidual = std::max(maxAbsResidual, std::abs(r));
 
-        for (double ri : r)
-        {
-            maxAbsResidual = std::max(maxAbsResidual, std::abs(ri));
-        }
+        std::cout << "Max |Residual|: " << maxAbsResidual << "\n\n";
 
-        std::cout << "Max |Residual|: "
-                << maxAbsResidual
-                << "\n\n";
-
+        // -------------------------------------------------
+        // 6. Output (VTK + CSV)
+        // -------------------------------------------------
         VTKWriter::writeVTU(
-            sim.mesh(),
+            mesh,
             phi,
-            "../output/solution.vtu"
-        );
+            "../output/solution.vtu");
 
-        // std::cout << "[DEBUG] writing output files...\n";
-
-        // Create PointField data type to store data
         auto field = BoundaryReconstructor::reconstruct(
-            sim.mesh(),
+            mesh,
             sim.boundary(),
             sim.model(),
             phi);
 
+        std::string output_csv_filepath; 
+
+        if(cfg.verification.enabled){ output_csv_filepath = "../output/solution.csv"; }
+        else{ output_csv_filepath = "../output/validation/solution.csv"; }
+
         FieldWriter::writeCSVDebug(
             field,
-            sim.system().RHS(),
-            r,
-            "../output/solution.csv"
-        );
-        
-        bool plot_solution_field = false;       // placeholder. In the end, it should plot by default.
-        if (plot_solution_field) {runPlot("../output/solution.csv");}  // Doesn't work if you don't have python
+            system.RHS(),
+            residual,
+            output_csv_filepath);
+
+        // -------------------------------------------------
+        // 7. Post-processing (plotting)
+        // -------------------------------------------------
+        constexpr bool plot_solution_field = true;
+
+        if (plot_solution_field)
+        {
+            std::cout << "=========== PLOTTING SOLUTION ==============\n\n";
+            runPlot(output_csv_filepath);
+        }
     }
     catch (const std::exception& e)
     {
