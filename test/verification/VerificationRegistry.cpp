@@ -1,5 +1,6 @@
 #include "VerificationRegistry.hpp"
 #include <stdexcept>
+#include <iostream>
 
 VerificationRegistry& VerificationRegistry::instance()
 {
@@ -12,11 +13,13 @@ void VerificationRegistry::registerCase(
     Creator creator)
 {
     registry_[name] = std::move(creator);
+    std::cout << "Registering sinusoidal\n";
 }
 
-std::unique_ptr<VerificationCase>
-VerificationRegistry::create(const VerificationConfig& cfg) const
+std::unique_ptr<VerificationCase> VerificationRegistry::create(const VerificationConfig& cfg) const
 {
+    // std::cout << "Registry instance address: "
+    //       << &VerificationRegistry::instance() << "\n";
     auto it = registry_.find(cfg.case_name);
 
     if (it == registry_.end())
