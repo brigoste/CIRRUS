@@ -1,30 +1,18 @@
 #include "mesh/BoundaryPatchSystem.hpp"
 
-#include <stdexcept>
-
-// =========================================================
-// Registration
-// =========================================================
-
-void BoundaryPatchSystem::set(std::size_t faceIndex, const Condition& bc)
+void BoundaryPatchSystem::setGroup(std::size_t group, const Condition& bc)
 {
-    bcMap_[faceIndex] = bc;
+    groupBC_[group] = bc;
 }
 
-// =========================================================
-// Query
-// =========================================================
+// bool BoundaryPatchSystem::hasGroup(std::size_t group) const
+// {
+//     return groupBC_.find(group) != groupBC_.end();
+// }
 
-bool BoundaryPatchSystem::has(std::size_t faceIndex) const
+const BoundaryPatchSystem::Condition*
+BoundaryPatchSystem::getGroup(std::size_t group) const
 {
-    return bcMap_.find(faceIndex) != bcMap_.end();
-}
-
-const BoundaryPatchSystem::Condition* BoundaryPatchSystem::get(std::size_t faceIndex) const
-{
-    auto it = bcMap_.find(faceIndex);
-    if (it == bcMap_.end())
-        return nullptr;
-
-    return &it->second;
+    auto it = groupBC_.find(group);
+    return (it == groupBC_.end()) ? nullptr : &it->second;
 }
