@@ -18,11 +18,11 @@ void FluxBuilder::buildFlux(
     FluxAccumulator& flux)
 {
     if (flux.size() != mesh.ncells())
-        throw std::runtime_error("FluxAccumulator size mismatch with mesh");
+        throw std::runtime_error("FluxAccumulator size mismatch");
 
-    // =========================================================
-    // 1. FACE LOOP
-    // =========================================================
+    // =====================================================
+    // 1. INTERIOR FACES
+    // =====================================================
     for (std::size_t f = 0; f < mesh.nfaces(); ++f)
     {
         const Face& face = mesh.face(f);
@@ -30,40 +30,38 @@ void FluxBuilder::buildFlux(
         const std::size_t P = face.owner;
         const std::size_t N = face.neighbor;
 
-        // -----------------------------------------------------
-        // INTERIOR FACE
-        // -----------------------------------------------------
         if (N != Face::INVALID)
         {
-            const double d = face.dPN;
-            const double D = model.diffusionCoeff(face, d);
+            const double D = model.diffusionCoeff(face);
 
             flux.addDiffusion(P, N, D);
-
-            // optional convection
-            double faceFlux = 0.0;
-            flux.addConvection(P, N, model.convectionCoeff(faceFlux));
         }
+    }
 
-        // -----------------------------------------------------
-        // BOUNDARY FACE
-        // -----------------------------------------------------
-        else
+    // =====================================================
+    // 2. BOUNDARY FACES (GROUP-BASED)
+    // =====================================================
+    for (std::size_t g = 0; g < mesh.nBoundaryGroups(); ++g)
+    {
+        const auto* bc = boundary.getGroup(g);
+        if (!bc)
+            continue;
+
+        const auto& faces = mesh.boundaryFaces(g);
+
+        for (std::size_t f : faces)
         {
-            const auto* bc = boundary.get(f);
-            if (!bc)
-                throw std::runtime_error("Missing BC for face " + std::to_string(f));
+            const Face& face = mesh.face(f);
+            const std::size_t P = face.owner;
 
-            // boundary diffusion closure
-            const double d = MeshGeometry::faceDistance(mesh, face, P);
-            const double D = model.diffusionCoeff(face, d);
+            const double D = model.diffusionCoeff(face);
 
-            flux.addDiffusion(P, P, D);  // enforce diagonal contribution
+            // flux.addDiffusion(P, P, D);
 
             switch (bc->type)
             {
                 case bc::Type::Dirichlet:
-                    flux.addSource(P, D * bc->value, -D);
+                    flux.addBoundaryDiffusion(P, D, bc->value);
                     break;
 
                 case bc::Type::Neumann:
@@ -76,23 +74,22 @@ void FluxBuilder::buildFlux(
                     flux.addSource(P, hA * bc->Tinf, -hA);
                     break;
                 }
+
                 default:
                     break;
             }
         }
     }
 
-    // =========================================================
-    // 2. CELL SOURCES
-    // =========================================================
+    // =====================================================
+    // 3. CELL SOURCES
+    // =====================================================
     for (std::size_t c = 0; c < mesh.ncells(); ++c)
     {
         model.addCellSources(mesh, c, flux);
     }
 
-    // =========================================================
-    // 3. DEBUG
-    // =========================================================
+
 #ifdef DEBUG
     for (std::size_t i = 0; i < flux.size(); ++i)
     {
@@ -104,5 +101,13 @@ void FluxBuilder::buildFlux(
         if (std::abs(c.Sp) > 1e12)
             std::cerr << "[WARN] stiff source at cell " << i << "\n";
     }
+
+    if (N != Face::INVALID)
+    {
+        double dotVal = LA::dot(face.dPN, face.normal);
+        if (dotVal <= 0.0)
+            throw std::runtime_error("Invalid face orientation / geometry");
+    }
+    
 #endif
 }
