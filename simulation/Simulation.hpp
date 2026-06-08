@@ -18,6 +18,7 @@
 #include "Solver/TDMA.hpp"
 #include "Solver/GaussSeidel.hpp"
 #include "Solver/SolverMethod.hpp"
+#include "tests\verification\VerificationRegistry.hpp"
 
 // ============================================================
 // Simulation = composition root
@@ -63,4 +64,6 @@ private:
     std::unique_ptr<FluxAccumulator> flux_;
     SimulationConfig cfg_;
     bool assembled_;
+    VerificationRegistry verificationRegistry_;
+    std::unique_ptr<VerificationCase> verificationCase_;
 };
