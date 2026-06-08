@@ -8,9 +8,8 @@
 #include "postprocessing/BoundaryReconstructor.hpp"
 #include "postprocessing/DerivedFields.hpp"
 #include "postprocessing/ErrorNorms.hpp"
-#include "postprocessing/Field1D.hpp"
 
-#include "mesh/Mesh1D.hpp"
+// #include "mesh/Mesh1D.hpp"
 #include "Solver/SolverMethod.hpp"
 
 // HT SOLVERS
@@ -30,6 +29,8 @@
 // JSON includes
 // #include "config/SimulationConfigLoader.hpp"
 #include "config/SimulationConfig.hpp"
+#include "tests/verification/VerificationRunner.hpp"
+#include "tests/verification/VerificationRegistry.hpp"
 
 #include <locale>   // for setlocale
 #include <codecvt>  // for UTF-8 conversion (C++11/14/17)
@@ -79,25 +80,27 @@ int main()
         std::cout << "# of cells = " << sim.mesh().ncells()
             << "\n# of faces = " << sim.mesh().nfaces() << "\n";
 
-        // for (std::size_t i = 0; i < sim.system().size(); ++i)
-        // {
-        //     double w = sim.system().coeff(i, i > 0 ? i - 1 : i);
-        //     double p = sim.system().coeff(i, i);
-        //     double e = sim.system().coeff(i, i + 1 < sim.system().size() ? i + 1 : i);
-
-        //     std::cout << i
-        //             << " W=" << w
-        //             << " P=" << p
-        //             << " E=" << e
-        //             << "\n";
-        // }
-
         auto phi = sim.solve();
+
+
+        if (cfg.verification.enabled)
+        {
+            auto verificationCase =
+                VerificationRegistry::instance().create(cfg.verification);
+
+            VerificationRunner::run(
+                sim.mesh(),
+                phi,
+                *verificationCase,
+                cfg.verification);
+        }
 
         std::cout << "\n================ SOLVER COMPLETE ================\n\n";
 
         auto minIt = std::min_element(phi.begin(), phi.end());
         auto maxIt = std::max_element(phi.begin(), phi.end());
+
+        std::cout << "cells = " << sim.mesh().ncells() << ", nodes = " << sim.mesh().nnodes() << '\n';
 
         std::cout << "Min Value: " << *minIt << "\n";
         std::cout << "Max Value: " << *maxIt << "\n";
@@ -123,6 +126,7 @@ int main()
 
         // std::cout << "[DEBUG] writing output files...\n";
 
+        // Create PointField data type to store data
         auto field = BoundaryReconstructor::reconstruct(
             sim.mesh(),
             sim.boundary(),
