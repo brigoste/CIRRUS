@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
-
+from pathlib import Path
+import sys
 
 def plot_1d(df):
     x = df[:, 0]
@@ -21,7 +22,7 @@ def plot_2d(df):
     y = df[:, 1]
     phi = df[:, 3]
 
-    plt.tricontourf(x, y, phi, levels=50, color="viridis")
+    plt.tricontourf(x, y, phi, levels=50)#, color="viridis")
     plt.colorbar(label="Field")
     plt.axis("equal")
     plt.title("2D Finite Volume Solution")
@@ -66,6 +67,8 @@ def main(filename):
     else:
         raise ValueError("Unknown dimensional structure")
 
-
 if __name__ == "__main__":
-    main("output\\solution.csv")
+    if len(sys.argv) > 1:
+        main(sys.argv[1])
+    else:
+        main("output\\solution.csv")
