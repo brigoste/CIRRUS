@@ -1,5 +1,5 @@
 #include "config/SimulationConfig.hpp"
-// #include "mesh/Point.hpp"
+// #include "mesh/primitives/Point.hpp"
 
 #include <iostream>
 #include <stdexcept>
@@ -20,8 +20,8 @@ SimulationConfig defaultConfig()
     // Mesh defaults
     // -------------------------
     cfg.mesh.type = "1D";
-    cfg.mesh.n = 50;
-    cfg.mesh.L = 1.0;
+    cfg.mesh.nx = 50;
+    cfg.mesh.lx = 1.0;
 
     // -------------------------
     // Physics defaults
@@ -53,13 +53,16 @@ SimulationConfig loadConfig(const std::filesystem::path& path)
     file >> j;
 
     SimulationConfig cfg = defaultConfig();
+    cfg.verification = VerificationConfig{};
 
     // -------------------------
     // Mesh
     // -------------------------
     cfg.mesh.type = j.at("mesh").at("type").get<std::string>();
-    cfg.mesh.n    = j.at("mesh").at("n").get<int>();
-    cfg.mesh.L    = j.at("mesh").at("L").get<double>();
+    cfg.mesh.nx = j.at("mesh").at("nx").get<std::size_t>();
+    cfg.mesh.ny = j.at("mesh").value("ny", 1);
+    cfg.mesh.lx = j.at("mesh").at("lx").get<double>();
+    cfg.mesh.ly = j.at("mesh").value("ly", 1.0);
 
     // -------------------------
     // Physics
@@ -93,25 +96,12 @@ SimulationConfig loadConfig(const std::filesystem::path& path)
         // -------------------------
         // Face mapping
         // -------------------------
-        const std::string face =
-            bcJson.at("face").get<std::string>();
+        // const std::string f =
+        //     bcJson.at("patch").get<std::string>();
 
-        if (face == "LEFT")
-        {
-            bc.faceIndex = 0;
-        }
-        else if (face == "RIGHT")
-        {
-            // 1D mesh:
-            // n cells -> n+1 faces
-            // right boundary face = n
-            bc.faceIndex = cfg.mesh.n;
-        }
-        else
-        {
-            throw std::runtime_error(
-                "Unknown boundary face: " + face);
-        }
+        const std::size_t group = bcJson.at("group").get<std::size_t>();
+
+        bc.group = group;
 
         // -------------------------
         // BC type
@@ -121,20 +111,16 @@ SimulationConfig loadConfig(const std::filesystem::path& path)
         switch (bc.condition.type)
         {
             case bc::Type::Dirichlet:
-                bc.condition.value =
-                    bcJson.at("value").get<double>();
+                bc.condition.value = bcJson.at("value").get<double>();
                 break;
 
             case bc::Type::Neumann:
-                bc.condition.flux =
-                    bcJson.at("flux").get<double>();
+                bc.condition.flux = bcJson.at("flux").get<double>();
                 break;
 
             case bc::Type::Convective:
-                bc.condition.h =
-                    bcJson.at("h").get<double>();
-                bc.condition.Tinf =
-                    bcJson.at("Tinf").get<double>();
+                bc.condition.h = bcJson.at("h").get<double>();
+                bc.condition.Tinf = bcJson.at("Tinf").get<double>();
                 break;
 
             default:
@@ -144,21 +130,32 @@ SimulationConfig loadConfig(const std::filesystem::path& path)
         cfg.boundary.push_back(bc);
     }
 
-    // -------------------------
-    // Debug output
-    // -------------------------
-    // std::cout
-    //     << "Loaded "
-    //     << cfg.boundary.size()
-    //     << " boundary conditions\n";
+    if (j.contains("verification"))
+    {
+        const auto& v = j.at("verification");
 
-    // for (const auto& bc : cfg.boundary)
-    // {
-    //     std::cout
-    //         << "BC faceIndex = "
-    //         << bc.faceIndex
-    //         << "\n";
-    // }
+        cfg.verification.enabled = v.value("enabled", false);
+
+        cfg.verification.case_name = v.value("case_name", "");
+
+        if (v.contains("norms"))
+        {
+            const auto& n = v.at("norms");
+
+            cfg.verification.norms.l2 = n.value("l2", true);
+
+            cfg.verification.norms.linf = n.value("linf", true);
+        }
+
+        if (v.contains("output"))
+        {
+            const auto& o = v.at("output");
+
+            cfg.verification.output.csv = o.value("csv", "verification.csv");
+
+            cfg.verification.output.summary = o.value("summary", "verification.json");
+        }
+    }
 
     return cfg;
 }
