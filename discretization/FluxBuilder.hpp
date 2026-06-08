@@ -4,6 +4,7 @@
 #include "mesh/BoundaryPatchSystem.hpp"
 #include "physics/PhysicsModel.hpp"
 #include "utils/LinearAlgebraUtils.hpp"
+#include "tests/verification/VerificationCase.hpp"
 
 class FluxBuilder
 {
@@ -12,5 +13,6 @@ public:
         const MeshBase& mesh,
         const PhysicsModel& model,
         const BoundaryPatchSystem& boundary,
-        FluxAccumulator& flux);
+        FluxAccumulator& flux,
+        const VerificationCase* verificationCase);
 };
