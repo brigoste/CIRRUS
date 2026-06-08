@@ -1,67 +1,63 @@
 #include "postprocessing/BoundaryReconstructor.hpp"
+#include "io/PointField.hpp"
+#include "mesh/primitives/Face.hpp"
+#include "mesh/MeshGeometry.hpp"
 
-#include <stdexcept>
-
-Field1D BoundaryReconstructor::reconstruct(
+PointField BoundaryReconstructor::reconstruct(
     const MeshBase& mesh,
     const BoundaryPatchSystem& boundary,
     const PhysicsModel& model,
     const std::vector<double>& phi)
 {
-    Field1D out;
+    PointField out;
+    out.dim = mesh.dim();
 
-    const std::size_t n = mesh.ncells();
-    out.x.reserve(n + 2);
-    out.phi.reserve(n + 2);
+    const std::size_t nc = mesh.ncells();
+    const std::size_t ng = mesh.nBoundaryGroups();
 
-    if (n == 0)
-        return out;
+    out.reserve(nc + mesh.nfaces()); 
+    // safe upper bound for reconstruction
 
-    // LEFT BOUNDARY
+    // =====================================================
+    // 1. CELL CENTERS
+    // =====================================================
+    for (std::size_t c = 0; c < nc; ++c)
     {
-        const Face& f = mesh.face(0);
-        const auto* bc = boundary.get(0);
-
-        const double dx =
-            MeshGeometry::faceDistance(mesh, f, 0);
-
-        double Tw = model.reconstructBoundaryValue(
-            *bc,
-            phi.front(),
-            dx,
-            true);
-
-        out.x.push_back(f.center[0]);
-        out.phi.push_back(Tw);
+        out.push_back(mesh.cellCenter(c), phi[c]);
     }
 
     // =====================================================
-    // INTERIOR CELLS
+    // 2. BOUNDARY RECONSTRUCTION
     // =====================================================
-    for (std::size_t c = 0; c < n; ++c)
+    for (std::size_t g = 0; g < ng; ++g)
     {
-        out.x.push_back(mesh.cellCenter(c)[0]);
-        out.phi.push_back(phi[c]);
-    }
+        const auto& faces = mesh.boundaryFaces(g);
+        const auto* bc = boundary.getGroup(g);
 
-    // RIGHT BOUNDARY
-    {
-        const std::size_t fIdx = mesh.nfaces() - 1;
+        if (!bc)
+            continue;
 
-        const Face& f = mesh.face(fIdx);
-        const auto* bc = boundary.get(fIdx);
+        for (std::size_t fIdx : faces)
+        {
+            const Face& f = mesh.face(fIdx);
 
-        const double dx =
-            MeshGeometry::faceDistance(mesh, f, n - 1);
+            const std::size_t c = f.owner;
 
-        double Tw = model.reconstructBoundaryValue(
-            *bc,
-            phi.back(),
-            dx,
-            false);
+            const double dx =
+                MeshGeometry::faceDistance(mesh, f, c);
 
-        out.x.push_back(f.center[0]);
-        out.phi.push_back(Tw);
+            const bool isInward =
+                (f.normal[0] < 0.0 || f.normal[1] < 0.0 || f.normal[2] < 0.0);
+
+            const double phiB = model.reconstructBoundaryValue(
+                *bc,
+                phi[c],
+                dx,
+                isInward
+            );
+
+            out.push_back(f.center, phiB);
+        }
     }
 
     return out;
