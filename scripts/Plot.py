@@ -3,9 +3,12 @@ import numpy as np
 
 
 def plot_1d(df):
+    x = df[:, 0]
+    phi = df[:, 3]
+
     plt.figure()
-    plt.scatter(df[:,0], df[:,1])
-    plt.plot(df[:,0], df[:,1])
+    plt.scatter(x, phi)
+    plt.plot(x, phi)
     plt.xlabel("x")
     plt.ylabel("phi")
     plt.title("1D Finite Volume Solution")
@@ -14,72 +17,55 @@ def plot_1d(df):
 
 
 def plot_2d(df):
-    # infer structured grid size
-    x_unique = np.unique(df["x"])
-    y_unique = np.unique(df["y"])
+    x = df[:, 0]
+    y = df[:, 1]
+    phi = df[:, 3]
 
-    nx = len(x_unique)
-    ny = len(y_unique)
-
-    # safety check (important for debugging silent mesh issues)
-    if nx * ny != len(df):
-        raise ValueError("Data is not a structured grid (nx*ny mismatch)")
-
-    Z = df["phi"].values.reshape(ny, nx)
-
-    plt.figure()
-    plt.imshow(
-        Z,
-        origin="lower",
-        aspect="auto",
-        extent=[
-            df["x"].min(),
-            df["x"].max(),
-            df["y"].min(),
-            df["y"].max()
-        ]
-    )
-    plt.colorbar(label="phi")
-    plt.xlabel("x")
-    plt.ylabel("y")
+    plt.tricontourf(x, y, phi, levels=50, color="viridis")
+    plt.colorbar(label="Field")
+    plt.axis("equal")
     plt.title("2D Finite Volume Solution")
     plt.show()
 
+
 def plot_debug(df):
-    import matplotlib.pyplot as plt
+    x = df[:, 0]
+    y = df[:, 1]
+    res = df[:, 3]   # adjust if residual is separate column
 
-    if "y" in df.columns:
-        # 2D residual heatmap
-        x = np.unique(df["x"])
-        y = np.unique(df["y"])
-
-        Z = df["residual"].values.reshape(len(y), len(x))
-
-        plt.imshow(Z, origin="lower", cmap="coolwarm")
-        plt.colorbar(label="Residual")
-        plt.title("FV Residual Field")
-        plt.show()
-    else:
-        plt.plot(df["x"], df["residual"])
+    if np.allclose(y, y[0]):
+        plt.plot(x, res)
         plt.title("Residual (1D)")
-        plt.grid()
-        plt.show()
+    else:
+        xi = np.unique(x)
+        yi = np.unique(y)
 
-def main(filename="C:\\Users\\E40112856\\Packages\\CIRRUS\\output\\solution.csv"):
-    # df = pd.read_csv(filename)
+        Z = res.reshape(len(yi), len(xi))
+
+        plt.imshow(Z, origin="lower", cmap="coolwarm", aspect="auto")
+        plt.colorbar(label="Residual")
+        plt.title("Residual Field (2D)")
+
+    plt.show()
+
+
+def main(filename):
     df = np.loadtxt(filename, delimiter=",", skiprows=1)
 
-    ncols = df.shape[1]
+    x = df[:, 0]
+    y = df[:, 1]
+    z = df[:, 2]
 
-    if ncols == 4:
+    is_1d = np.allclose(y, y[0]) and np.allclose(z, 0)
+    is_2d = not is_1d
+
+    if is_1d:
         plot_1d(df)
-
-    elif ncols == 5:
+    elif is_2d:
         plot_2d(df)
-
     else:
-        raise ValueError(f"Unknown CSV format: columns = {df.columns}")
+        raise ValueError("Unknown dimensional structure")
 
 
 if __name__ == "__main__":
-    main()
+    main("output\\solution.csv")
