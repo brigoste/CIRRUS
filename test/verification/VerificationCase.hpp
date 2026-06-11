@@ -1,4 +1,5 @@
 #pragma once
+#include "Physics/HeatPhysicsModel.hpp"
 
 // Abstraction for all tests we use to verify.
 
@@ -14,6 +15,6 @@ public:
 
     // Source term S(x,y)
     virtual double source(
-        double x,
+        double x, 
         double y) const = 0;
 };
