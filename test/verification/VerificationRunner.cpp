@@ -4,10 +4,14 @@
 #include "tests/verification/ErrorMetrics.hpp"
 #include "mesh/MeshBase.hpp"
 
+#include "physics/PhysicsModel.hpp"
+
 #include <iostream>
 #include <stdexcept>
 #include <cmath>
 #include <algorithm>
+
+// #error "VerificationRunner.cpp is being compiled"
 
 std::vector<double>
 VerificationRunner::buildExactField(
@@ -73,59 +77,123 @@ void VerificationRunner::printSummary(
 void VerificationRunner::run(
     const MeshBase& mesh,
     const std::vector<double>& solution,
+    const LinearSystem& sys,
     const VerificationCase& verificationCase,
     const VerificationConfig& config)
 {
+    std::cout << "============== Running Verification ==================\n\n";
+
     if (!config.enabled)
         return;
 
+    // -------------------------------------------------
+    // Sanity checks
+    // -------------------------------------------------
     if (solution.size() != mesh.ncells())
     {
         throw std::runtime_error(
-            "VerificationRunner: solution size does not match mesh cells");
+            "VerificationRunner: solution size does not match mesh");
+    }
+
+    if (sys.size() != mesh.ncells())
+    {
+        throw std::runtime_error(
+            "VerificationRunner: system size does not match mesh");
     }
 
     // -------------------------------------------------
-    // 1. Exact field
+    // Build exact field
     // -------------------------------------------------
     auto exact = buildExactField(mesh, verificationCase);
 
-    // ================= DEBUG: spot-check PDE consistency =================
-    std::size_t c = 0; // pick first or middle cell
-    const auto& xc = mesh.cellCenter(c);
-
-    double x = xc.x[0];
-    double y = xc.x[1];
-
-    double phi_exact = exact[c];
-    double rhs_exact  = verificationCase.source(x, y);
-
-    std::cout << "\n================ DEBUG CELL CHECK ================\n";
-    std::cout << "Cell index: " << c << "\n";
-    std::cout << "x = " << x << ", y = " << y << "\n";
-    std::cout << "phi_exact = " << phi_exact << "\n";
-    std::cout << "source(x,y) = " << rhs_exact << "\n";
-    std::cout << "=================================================\n\n";
-
     // -------------------------------------------------
-    // 2. Error field
+    // Compute error field
     // -------------------------------------------------
     auto error = buildErrorField(solution, exact);
 
     // -------------------------------------------------
-    // 3. Norms
+    // Compute norms
     // -------------------------------------------------
-    const ErrorNormResults norms =
-        ErrorNorms::compute(mesh, solution, exact);
+    const ErrorNormResults norms = ErrorNorms::compute(mesh, solution, exact);
 
     // -------------------------------------------------
-    // 4. Output summary
+    // Discrete operator audit
+    // -------------------------------------------------
+    std::size_t cell = std::min<std::size_t>(25, mesh.ncells() - 1);
+
+    const auto& xc = mesh.cellCenter(cell);
+
+    double lhs = 0.0;
+
+    for (std::size_t j = 0; j < sys.size(); ++j)
+    {
+        lhs += sys.coeff(cell, j) * exact[j];
+    }
+
+    double rhs = sys.rhs(cell);
+    double residual = lhs - rhs;
+
+    std::cout
+        << "\n================ DISCRETE AUDIT ================\n"
+        << "Cell      : " << cell << "\n"
+        << "x         : " << xc.x[0] << "\n"
+        << "y         : " << xc.x[1] << "\n"
+        << "\n"
+        << "phi_exact : " << exact[cell] << "\n"
+        << "phi_num   : " << solution[cell] << "\n"
+        << "error     : "
+        << solution[cell] - exact[cell]
+        << "\n\n"
+        << "LHS       : " << lhs << "\n"
+        << "RHS       : " << rhs << "\n"
+        << "Residual  : " << residual << "\n"
+        << "===============================================\n";
+
+    std::cout << "\nRow coefficients:\n";
+
+    for (std::size_t j = 0; j < sys.size(); ++j)
+    {
+        double a = sys.coeff(cell, j);
+
+        if (std::abs(a) > 1e-12)
+        {
+            std::cout << "A[" << cell << "," << j << "] = " << a << "\n";
+        }
+    }
+
+    std::cout << "\nExact stencil values:\n";
+
+    for (std::size_t j = 0; j < sys.size(); ++j)
+    {
+        double a = sys.coeff(cell, j);
+
+        if (std::abs(a) > 1e-12)
+        {
+            std::cout << "phi[" << j << "] = " << exact[j] << "\n";
+        }
+    }
+
+    double volume = mesh.cellVolume(cell);
+
+    std::cout
+        << "Volume      : " << volume << "\n"
+        << "Source raw  : "
+        << verificationCase.source(
+            xc.x[0],
+            xc.x[1])
+        << "\n"
+        << "Source*V    : "
+        << verificationCase.source(
+            xc.x[0],
+            xc.x[1]) * volume
+        << "\n";
+
+    // -------------------------------------------------
+    // Verification summary
     // -------------------------------------------------
     printSummary(norms);
+}
 
-    // -------------------------------------------------
-    // 5. Optional: lightweight diagnostics (useful for debugging)
-    // -------------------------------------------------
 #ifdef DEBUG
     const auto [emin, emax] =
         std::minmax_element(error.begin(), error.end());
@@ -133,4 +201,3 @@ void VerificationRunner::run(
     std::cout << "[DEBUG] Error range: "
               << *emin << " to " << *emax << "\n";
 #endif
-}
