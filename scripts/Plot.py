@@ -57,6 +57,11 @@ def main(filename):
     y = df[:, 1]
     z = df[:, 2]
 
+    idx = np.argsort(x)
+    x = x[idx]
+    y = y[idx]
+    z = z[idx]
+
     is_1d = np.allclose(y, y[0]) and np.allclose(z, 0)
     is_2d = not is_1d
 
