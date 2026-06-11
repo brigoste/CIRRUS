@@ -8,6 +8,7 @@
 #include "utils/LinearAlgebraUtils.hpp"
 #include <limits>
 #include <cmath>
+#include <iostream>
 
 // Look at the chatGPT thread. We may need to add a geometry helper class.
 
@@ -111,12 +112,21 @@ void FluxBuilder::buildFlux(
             const double S = verificationCase->source(x, y);
 
             flux.addSource(c, S * mesh.cellVolume(c), 0.0);
+            // std::cout
+            //     << "S(raw) = "
+            //     << verificationCase->source(x,y)
+            //     << "\n"
+            //     << "S*V = "
+            //     << S * mesh.cellVolume(c)
+            //     << "\n";
         }
         else
         {
             model.addCellSources(mesh, c, flux);
         }
     }
+
+    std::cout << "k = " << model.diffusionScalar() << "\n";
 
 
 #ifdef DEBUG
