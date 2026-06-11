@@ -7,7 +7,7 @@
 #include "discretization/FaceDiffusion.hpp"
 #include "discretization/FaceConvection.hpp"
 #include "mesh/BoundaryPatchSystem.hpp"
-#include "mesh/Face.hpp"
+#include "mesh/primitives/Face.hpp"
 
 class FluxAccumulator
 {
@@ -49,10 +49,10 @@ public:
         else
             diffusion_.push_back({P, N, D, FaceType::Interior});
     }
-    void addBoundaryDiffusion(std::size_t P, double D, double Tw)
+    void addBoundaryDiffusion(std::size_t P, double D, double val)
     {
         cells_[P].Sp -= D;
-        cells_[P].Su += D * Tw;   // or passed Tw explicitly
+        cells_[P].Su += D * val;   // Tw, or V, or P, whatever this is.
     }
     void addConvection(std::size_t P, std::size_t N, double F)
     {
