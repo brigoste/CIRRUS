@@ -10,7 +10,9 @@
 //  outputs
 
 class MeshBase;
+class LinearSystem;
 class VerificationCase;
+
 
 struct VerificationConfig;
 struct ErrorNormResults;
@@ -22,6 +24,7 @@ public:
     static void run(
         const MeshBase& mesh,
         const std::vector<double>& solution,
+        const LinearSystem& sys,
         const VerificationCase& verificationCase,
         const VerificationConfig& config);
 
