@@ -7,10 +7,10 @@
 class HeatPhysicsModel : public PhysicsModel
 {
 public:
-    explicit HeatPhysicsModel(double k)
-        : k_(k) {} 
+    explicit HeatPhysicsModel(double k, double Su, double Sp)
+        : k_(k), Su_(Su), Sp_(Sp) {} 
 
-    double wallConductivity() const override
+    double diffusionScalar() const override
     {
         return k_;
     }
@@ -20,8 +20,13 @@ public:
                                             double phiCell,
                                             double dx,
                                             bool isLeft) const override;
+    void addCellSources(const MeshBase& mesh,
+                        std::size_t c,
+                        FluxAccumulator& flux) const override;
 
 private:
     double k_ = 1.0;
+    double Su_ = 0.0;
+    double Sp_ = 0.0;
 
 };
