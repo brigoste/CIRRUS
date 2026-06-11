@@ -1,6 +1,7 @@
 #include "HeatPhysicsModel.hpp"
 #include "mesh/primitives/Face.hpp"
 #include "utils/LinearAlgebraUtils.hpp"
+#include <iostream>
 
 double HeatPhysicsModel::diffusionCoeff(const Face& face) const
 {
@@ -11,6 +12,7 @@ double HeatPhysicsModel::diffusionCoeff(const Face& face) const
             "Invalid face spacing: d_eff = " +
             std::to_string(d_eff));
     }
+
     return k_ * face.area / d_eff;
 }
 double HeatPhysicsModel::convectionCoeff(double flux) const
@@ -24,7 +26,7 @@ double HeatPhysicsModel::reconstructBoundaryValue(
                                                 double dx,
                                                 bool /*isLeft*/) const
 {
-    const double k = wallConductivity();
+    const double k = diffusionScalar();
 
     switch (bc.type)
     {
@@ -41,4 +43,16 @@ double HeatPhysicsModel::reconstructBoundaryValue(
         default:
             throw std::runtime_error("Unsupported BC type");
     }
+}
+
+void HeatPhysicsModel::addCellSources(
+    const MeshBase& mesh,
+    std::size_t c,
+    FluxAccumulator& flux) const
+{
+    const double V = mesh.cellVolume(c);
+
+    flux.addSource(c, Su_ * V, Sp_ * V);
+
+    // std::cout << "Cell " << c << " Su = " << Su_ << " Sp = " << Sp_ << "\n";
 }
