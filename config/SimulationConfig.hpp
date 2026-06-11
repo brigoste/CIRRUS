@@ -35,6 +35,9 @@ struct PhysicsConfig
     std::string type;   // "heat", "navier-stokes", etc.
 
     double k = 0.0;
+
+    double Su = 0.0;
+    double Sp = 0.0;
 };
 // Verification case
 struct VerificationConfig
