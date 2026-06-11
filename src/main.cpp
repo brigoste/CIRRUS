@@ -19,7 +19,6 @@
 #include "config/SimulationConfig.hpp"
 #include "tests/verification/VerificationRunner.hpp"
 #include "tests/verification/VerificationRegistry.hpp"
-#include "tests/verification/VerificationRegistryInit.hpp"
 
 #include <locale>   // for setlocale
 #include <codecvt>  // for UTF-8 conversion (C++11/14/17)
@@ -72,18 +71,17 @@ int main()
         {
             std::cout << "Using default config...\n";
             cfg = defaultConfig();
-        }
+        }        
 
+        // -------------------------------------------------
+        // 2. Initialize simulation with loaded variables
+        // -------------------------------------------------
+        
         Simulation sim(cfg);
         sim.assemble();
 
         // -------------------------------------------------
-        // 2. Initialize global subsystems
-        // -------------------------------------------------
-        
-
-        // -------------------------------------------------
-        // 3. Build and run simulation
+        // 3. Run Simulation
         // -------------------------------------------------
 
         std::cout << "# of cells = " << sim.mesh().ncells()
@@ -100,11 +98,13 @@ int main()
         if (cfg.verification.enabled)
         {
             auto verificationCase =
-                VerificationRegistry::instance().create(cfg.verification);
+                VerificationRegistry::instance().create(
+                    cfg.verification);
 
             VerificationRunner::run(
-                mesh,
+                sim.mesh(),
                 phi,
+                sim.system(),
                 *verificationCase,
                 cfg.verification);
         }
@@ -117,7 +117,7 @@ int main()
         auto [minIt, maxIt] =
             std::minmax_element(phi.begin(), phi.end());
 
-        std::cout << "cells = " << mesh.ncells()
+        std::cout << "Interior cells = " << mesh.ncells()
                   << ", nodes = " << mesh.nnodes() << '\n';
 
         std::cout << "Min Value: " << *minIt << "\n";
@@ -144,11 +144,48 @@ int main()
             sim.boundary(),
             sim.model(),
             phi);
+        
+        // Sort 1D field values by x-position
+        if(field.dim == 1){
+            std::vector<std::size_t> idx(field.size());
+
+            std::iota(idx.begin(), idx.end(), 0);
+
+            std::sort(
+                idx.begin(),
+                idx.end(),
+                [&](std::size_t a, std::size_t b)
+                {
+                    return field.x[a].x[0] < field.x[b].x[0];
+                });
+
+            // Build sorted copies
+            PointField sortedField;
+            sortedField.reserve(field.size());
+
+            for (std::size_t i : idx)
+            {
+                sortedField.push_back(
+                    field.x[i],
+                    field.phi[i]);
+            }
+
+            // Replace original field
+            field = std::move(sortedField);
+        }
+        
+
+        for(std::size_t i = 0; i < field.size(); ++i){
+            std::cout << "Cell " << i << ", T = " << field.phi.at(i) << "\n"; 
+        }
+
 
         std::string output_csv_filepath; 
 
         if(cfg.verification.enabled){ output_csv_filepath = "../output/solution.csv"; }
-        else{ output_csv_filepath = "../output/validation/solution.csv"; }
+        else{ output_csv_filepath = cfg.verification.output.csv; }
+
+        
 
         FieldWriter::writeCSVDebug(
             field,
