@@ -69,6 +69,14 @@ SimulationConfig loadConfig(const std::filesystem::path& path)
     // -------------------------
     cfg.physics.type = j.at("physics").at("type").get<std::string>();
     cfg.physics.k = j.at("physics").at("k").get<double>();
+    cfg.physics.Su = j.at("physics").at("Su").get<double>();
+    cfg.physics.Sp = j.at("physics").at("Sp").get<double>();
+
+    std::cout
+    << "Config Su = " << cfg.physics.Su
+    << "\n"
+    << "Config Sp = " << cfg.physics.Sp
+    << "\n";
 
     // -------------------------
     // Solver
@@ -151,9 +159,27 @@ SimulationConfig loadConfig(const std::filesystem::path& path)
         {
             const auto& o = v.at("output");
 
-            cfg.verification.output.csv = o.value("csv", "verification.csv");
+            cfg.verification.output.csv =
+                o.value("csv", "verification.csv");
 
-            cfg.verification.output.summary = o.value("summary", "verification.json");
+            cfg.verification.output.summary =
+                o.value("summary", "verification.json");
+        }
+
+        // ------------------------------------
+        // Redirect verification outputs
+        // ------------------------------------
+        if (cfg.verification.enabled)
+        {
+            if (cfg.verification.output.csv == "verification.csv")
+            {
+                cfg.verification.output.csv = "output/validation/verification.csv";
+            }
+
+            if (cfg.verification.output.summary == "verification.json")
+            {
+                cfg.verification.output.summary = "output/validation/verification.json";
+            }
         }
     }
 
