@@ -160,7 +160,7 @@ void QuadMesh2D::buildFaces()
             Point{0.0, (j + 0.5) * dy_, 0.0},
             Point{-1.0, 0.0, 0.0},
             dy_,
-            Point{-0.5 * dx_, 0.0, 0.0}
+            Point{-dx_/2, 0.0, 0.0}
         );
 
         // leftFaces_.push_back(f);
@@ -177,7 +177,7 @@ void QuadMesh2D::buildFaces()
             Point{nx_ * dx_, (j + 0.5) * dy_, 0.0},
             Point{1.0, 0.0, 0.0},
             dy_,
-            Point{0.5 * dx_, 0.0, 0.0}
+            Point{dx_/2, 0.0, 0.0}
         );
 
         // rightFaces_.push_back(f);
@@ -193,7 +193,7 @@ void QuadMesh2D::buildFaces()
             Point{(i + 0.5) * dx_, ny_ * dy_, 0.0},
             Point{0.0, 1.0, 0.0},
             dx_,
-            Point{0.0, 0.5 * dy_, 0.0}
+            Point{0.0, dy_/2, 0.0}
         );
 
         // topFaces_.push_back(f);
@@ -209,7 +209,7 @@ void QuadMesh2D::buildFaces()
             Point{(i + 0.5) * dx_, 0.0, 0.0},
             Point{0.0, -1.0, 0.0},
             dx_,
-            Point{0.0, -0.5 * dy_, 0.0}
+            Point{0.0, -dy_/2, 0.0}
         );
 
         // bottomFaces_.push_back(f);
