@@ -18,7 +18,6 @@
 // JSON includes
 #include "config/SimulationConfig.hpp"
 #include "tests/verification/VerificationRunner.hpp"
-#include "tests/verification/VerificationRegistry.hpp"
 
 #include <locale>   // for setlocale
 #include <codecvt>  // for UTF-8 conversion (C++11/14/17)
@@ -65,7 +64,7 @@ int main()
         if (useJSON)
         {
             std::cout << "Loading JSON config...\n";
-            cfg = loadConfig("C:/Users/E40112856/Packages/CIRRUS/output/metadata.json");
+            cfg = loadConfig("C:/Users/E40112856/Packages/CIRRUS/output/verification/Linear1D.json");
         }
         else
         {
@@ -76,7 +75,6 @@ int main()
         // -------------------------------------------------
         // 2. Initialize simulation with loaded variables
         // -------------------------------------------------
-        
         Simulation sim(cfg);
         sim.assemble();
 
@@ -95,18 +93,23 @@ int main()
         // -------------------------------------------------
         // 4. Verification (optional diagnostic layer)
         // -------------------------------------------------
+        // if (cfg.verification.enabled)
+        // {
+        //     auto verificationCase =
+        //         VerificationRegistry::instance().create(
+        //             cfg.verification);
+
+        //     VerificationRunner::run(
+        //         sim.mesh(),
+        //         phi,
+        //         sim.system(),
+        //         *verificationCase,
+        //         cfg.verification);
+        // }
         if (cfg.verification.enabled)
         {
-            auto verificationCase =
-                VerificationRegistry::instance().create(
-                    cfg.verification);
-
-            VerificationRunner::run(
-                sim.mesh(),
-                phi,
-                sim.system(),
-                *verificationCase,
-                cfg.verification);
+            const std::string& folder = "verification/";
+            VerificationRunner::run(cfg);
         }
 
         // -------------------------------------------------
@@ -114,14 +117,14 @@ int main()
         // -------------------------------------------------
         std::cout << "\n================ SOLVER COMPLETE ================\n\n";
 
-        auto [minIt, maxIt] =
-            std::minmax_element(phi.begin(), phi.end());
+        // auto [minIt, maxIt] =
+        //     std::minmax_element(phi.begin(), phi.end());
 
-        std::cout << "Interior cells = " << mesh.ncells()
-                  << ", nodes = " << mesh.nnodes() << '\n';
+        // std::cout << "Interior cells = " << mesh.ncells()
+        //           << ", nodes = " << mesh.nnodes() << '\n';
 
-        std::cout << "Min Value: " << *minIt << "\n";
-        std::cout << "Max Value: " << *maxIt << "\n";
+        // std::cout << "Min Value: " << *minIt << "\n";
+        // std::cout << "Max Value: " << *maxIt << "\n";
 
         auto residual = computeResidual(system, phi);
 
@@ -129,7 +132,7 @@ int main()
         for (double r : residual)
             maxAbsResidual = std::max(maxAbsResidual, std::abs(r));
 
-        std::cout << "Max |Residual|: " << maxAbsResidual << "\n\n";
+        // std::cout << "Max |Residual|: " << maxAbsResidual << "\n\n";
 
         // -------------------------------------------------
         // 6. Output (VTK + CSV)
@@ -174,16 +177,37 @@ int main()
             field = std::move(sortedField);
         }
         
-
         for(std::size_t i = 0; i < field.size(); ++i){
             std::cout << "Cell " << i << ", T = " << field.phi.at(i) << "\n"; 
+        }
+
+        for (std::size_t i = 0; i < 3; ++i)
+        {
+            std::cout << "\nROW " << i << "\n";
+
+            for (std::size_t j = 0; j < system.size(); ++j)
+            {
+                double a = system.coeff(i,j);
+
+                if (std::abs(a) > 1e-12)
+                {
+                    std::cout
+                        << "A[" << i << "," << j << "] = "
+                        << a << "\n";
+                }
+            }
+
+            std::cout
+                << "rhs = "
+                << system.rhs(i)
+                << "\n";
         }
 
 
         std::string output_csv_filepath; 
 
         if(cfg.verification.enabled){ output_csv_filepath = "../output/solution.csv"; }
-        else{ output_csv_filepath = cfg.verification.output.csv; }
+        else{ output_csv_filepath = cfg.verification.output.directory; }
 
         
 
