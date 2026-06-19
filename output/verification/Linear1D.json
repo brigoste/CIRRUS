@@ -1,0 +1,24 @@
+{
+  "extends": "../base.json",
+
+  "mesh": {
+    "type": "line1D",
+    "nx": 20,
+    "lx": 1.5
+  },
+
+  "boundary_conditions": [
+    { "group": 0, "type": "Dirichlet", "value": 300 },
+    { "group": 1, "type": "Dirichlet", "value": 400 }
+  ],
+
+  "verification": {
+    "type": "manufactured",
+    "case_name": "Linear1D",
+
+    "manufactured": {
+      "phi_expr": "(100/L)*x + 300",
+      "source_expr": "0"
+    }
+  }
+}
