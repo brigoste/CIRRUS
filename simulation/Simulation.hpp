@@ -18,7 +18,7 @@
 #include "Solver/TDMA.hpp"
 #include "Solver/GaussSeidel.hpp"
 #include "Solver/SolverMethod.hpp"
-#include "tests\verification\VerificationRegistry.hpp"
+// #include "tests\verification\VerificationRegistry.hpp"
 
 // ============================================================
 // Simulation = composition root
@@ -39,7 +39,8 @@ public:
     const LinearSystem& system() const { return sys_; }
     const BoundaryPatchSystem& boundary() const { return boundary_; }
     const PhysicsModel& model() const noexcept { return *model_; }
-
+    const VerificationCase* verificationCase() const { return verificationCase_.get(); }
+    
     void printMesh() const
     {
         for (std::size_t f = 0; f < mesh_->nfaces(); ++f) {
@@ -48,6 +49,10 @@ public:
                     << " neighbor=" << mesh_->face(f).neighbor << "\n";
         }
     }
+
+    void setVerificationCase(std::unique_ptr<VerificationCase> verificationCase);
+
+    
 
 private:
     // -------------------------
@@ -64,6 +69,6 @@ private:
     std::unique_ptr<FluxAccumulator> flux_;
     SimulationConfig cfg_;
     bool assembled_;
-    VerificationRegistry verificationRegistry_;
+    // VerificationRegistry verificationRegistry_;
     std::unique_ptr<VerificationCase> verificationCase_;
 };
