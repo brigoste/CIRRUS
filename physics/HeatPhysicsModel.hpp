@@ -10,10 +10,7 @@ public:
     explicit HeatPhysicsModel(double k, double Su, double Sp)
         : k_(k), Su_(Su), Sp_(Sp) {} 
 
-    double diffusionScalar() const override
-    {
-        return k_;
-    }
+    double diffusionScalar() const override { return k_; }
     double diffusionCoeff(const Face& face) const;
     double convectionCoeff(double flux) const;
     double reconstructBoundaryValue(const BoundaryPatchSystem::Condition& bc,
