@@ -12,6 +12,28 @@ using json = nlohmann::json;
 // Default config
 // ============================================================
 
+nlohmann::json mergeJson(
+    nlohmann::json base,
+    const nlohmann::json& override)
+{
+    for (auto& [key,value] : override.items())
+    {
+        if (base.contains(key) &&
+            base[key].is_object() &&
+            value.is_object())
+        {
+            base[key] =
+                mergeJson(base[key], value);
+        }
+        else
+        {
+            base[key] = value;
+        }
+    }
+
+    return base;
+}
+
 SimulationConfig defaultConfig()
 {
     SimulationConfig cfg;
@@ -52,16 +74,57 @@ SimulationConfig loadConfig(const std::filesystem::path& path)
     json j;
     file >> j;
 
+    // ------------------------------------
+    // Load parent config if requested
+    // ------------------------------------
+    if (j.contains("extends"))
+    {
+        const std::string parent =
+            j.at("extends").get<std::string>();
+
+        std::filesystem::path parentPath = "C:/Users/E40112856/Packages/CIRRUS/output/base.json";
+
+        std::ifstream baseFile(parentPath);
+
+        std::cout << "LOADING CASE: " << path << "\n";
+        std::cout << "PARENT PATH: " << parentPath << "\n";
+        std::cout << "HAS MESH BEFORE MERGE: " << j.contains("mesh") << "\n";
+
+        if (!baseFile.is_open())
+        {
+            throw std::runtime_error(
+                "Cannot open parent config: " +
+                parentPath.string());
+        }
+
+        json base;
+        baseFile >> base;
+
+        std::cout << "BASE MESH: " << base.contains("mesh") << "\n";
+        j = mergeJson(base, j);
+
+    }
+
+    if (!j.contains("mesh"))
+    {
+        std::cerr << j.dump(2) << "\n";
+        throw std::runtime_error("Final config missing 'mesh'");
+    }
+
     SimulationConfig cfg = defaultConfig();
     cfg.verification = VerificationConfig{};
 
+    std::cout
+    << "Extends = "
+    << cfg.extends
+    << "\n";
     // -------------------------
     // Mesh
     // -------------------------
     cfg.mesh.type = j.at("mesh").at("type").get<std::string>();
-    cfg.mesh.nx = j.at("mesh").at("nx").get<std::size_t>();
+    cfg.mesh.nx = j.at("mesh").value("nx", 1);
     cfg.mesh.ny = j.at("mesh").value("ny", 1);
-    cfg.mesh.lx = j.at("mesh").at("lx").get<double>();
+    cfg.mesh.lx = j.at("mesh").value("lx", 1.0);
     cfg.mesh.ly = j.at("mesh").value("ly", 1.0);
 
     // -------------------------
@@ -69,8 +132,8 @@ SimulationConfig loadConfig(const std::filesystem::path& path)
     // -------------------------
     cfg.physics.type = j.at("physics").at("type").get<std::string>();
     cfg.physics.k = j.at("physics").at("k").get<double>();
-    cfg.physics.Su = j.at("physics").at("Su").get<double>();
-    cfg.physics.Sp = j.at("physics").at("Sp").get<double>();
+    cfg.physics.Su = j.at("physics").value("Su", 0.0);
+    cfg.physics.Sp = j.at("physics").value("Sp", 0.0);
 
     std::cout
     << "Config Su = " << cfg.physics.Su
@@ -144,7 +207,12 @@ SimulationConfig loadConfig(const std::filesystem::path& path)
 
         cfg.verification.enabled = v.value("enabled", false);
 
-        cfg.verification.case_name = v.value("case_name", "");
+        if (v.contains("cases"))
+        {
+            cfg.verification.cases =
+                v.at("cases")
+                .get<std::vector<std::string>>();
+        }
 
         if (v.contains("norms"))
         {
@@ -159,27 +227,7 @@ SimulationConfig loadConfig(const std::filesystem::path& path)
         {
             const auto& o = v.at("output");
 
-            cfg.verification.output.csv =
-                o.value("csv", "verification.csv");
-
-            cfg.verification.output.summary =
-                o.value("summary", "verification.json");
-        }
-
-        // ------------------------------------
-        // Redirect verification outputs
-        // ------------------------------------
-        if (cfg.verification.enabled)
-        {
-            if (cfg.verification.output.csv == "verification.csv")
-            {
-                cfg.verification.output.csv = "output/validation/verification.csv";
-            }
-
-            if (cfg.verification.output.summary == "verification.json")
-            {
-                cfg.verification.output.summary = "output/validation/verification.json";
-            }
+            cfg.verification.output.directory = o.value("directory", "output/validation");
         }
     }
 
