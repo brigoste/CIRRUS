@@ -68,12 +68,10 @@ void FluxBuilder::buildFlux(
 
                     if (verificationCase)
                     {
-                        const auto& xc = mesh.cellCenter(P); // or face centroid (better)
+                        double x = face.center.x[0];
+                        double y = face.center.x[1];
 
-                        double x = xc.x[0];
-                        double y = xc.x[1];
-
-                        value = verificationCase->exact(x, y);
+                        value = verificationCase->exact(x,y);
                     }
 
                     flux.addBoundaryDiffusion(P, D, value);
@@ -109,7 +107,7 @@ void FluxBuilder::buildFlux(
             const double x = xc.x[0];
             const double y = xc.x[1];
 
-            const double S = verificationCase->source(x, y);
+            const double S = -model.diffusionScalar() * verificationCase->laplacian(x, y);
 
             flux.addSource(c, S * mesh.cellVolume(c), 0.0);
             // std::cout
