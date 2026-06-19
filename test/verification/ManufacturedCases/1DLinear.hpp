@@ -5,12 +5,13 @@
 class OneDLinear : public VerificationCase
 {
 public:
+    SimulationConfig config() const override; 
 
     double exact(
         double x,
-        double y = 0.0) const override;
+        double y) const override;
 
-    double source(
+    double laplacian(
         double x,
-        double y = 0.0) const override;
+        double y) const override;
 };
