@@ -6,12 +6,6 @@
 #include <vector>
 #include <array>
 
-// enum class Patch
-// {
-//     LEFT = 0,
-//     RIGHT = 1
-// };
-
 class Mesh1D : public MeshBase
 {
 public:
