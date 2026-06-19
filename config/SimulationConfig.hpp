@@ -44,24 +44,24 @@ struct VerificationConfig
 {
     bool enabled = false;
 
-    // Registry key
-    std::string case_name;
+    std::vector<std::string> cases;
 
-    struct
+    struct Norms
     {
         bool l2 = true;
         bool linf = true;
     } norms;
 
-    struct
+    struct Output
     {
-        std::string csv;
-        std::string summary;
+        std::string directory =
+            "output/validation";
     } output;
 };
 
 struct SimulationConfig
 {
+    std::string extends;
     MeshConfig mesh;
     PhysicsConfig physics;
     std::vector<BoundaryConfig> boundary;  // <-- ALSO FIXED (was single object)
