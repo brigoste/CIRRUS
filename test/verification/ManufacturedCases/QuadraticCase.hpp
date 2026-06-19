@@ -1,16 +1,13 @@
 #pragma once
 
 #include "tests/verification/VerificationCase.hpp"
+#include "config/SimulationConfig.hpp"
 
-class QuadraticCase : public VerificationCase
+class Quadratic1D : public VerificationCase
 {
 public:
+    SimulationConfig config() const override;
 
-    double exact(
-        double x,
-        double y) const override;
-
-    double source(
-        double x,
-        double y) const override;
+    double exact(double x, double y) const override;
+    double laplacian(double x, double y) const override;
 };
