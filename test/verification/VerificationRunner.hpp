@@ -1,43 +1,29 @@
 #pragma once
 
-#include <vector>
 #include "config/SimulationConfig.hpp"
-
-// Computes:
-//  exact field
-//  error field
-//  norms
-//  outputs
-
-class MeshBase;
-class LinearSystem;
-class VerificationCase;
-
-
-struct VerificationConfig;
-struct ErrorNormResults;
+#include "tests/verification/VerificationCaseFactory.hpp"
+#include "mesh/MeshBase.hpp"
+#include "linear_system/LinearSystem.hpp"
 
 class VerificationRunner
 {
 public:
 
-    static void run(
-        const MeshBase& mesh,
-        const std::vector<double>& solution,
-        const LinearSystem& sys,
-        const VerificationCase& verificationCase,
-        const VerificationConfig& config);
+    static void run(const SimulationConfig& cfg);
 
 private:
 
-    static std::vector<double> buildExactField(
+    static void computeNorms(
         const MeshBase& mesh,
-        const VerificationCase& verificationCase);
-
-    static std::vector<double> buildErrorField(
         const std::vector<double>& numerical,
-        const std::vector<double>& exact);
+        const VerificationCase& exact,
+        double& l2,
+        double& linf);
 
-    static void printSummary(
-        const ErrorNormResults& norms);
+    static void writeOutput(
+        const SimulationConfig& cfg,
+        const std::vector<double>& field);
+
+    
+
 };
