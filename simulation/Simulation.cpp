@@ -4,6 +4,7 @@
 #include "mesh/QuadMesh2D.hpp"
 #include "discretization/FiniteVolumeOperator.hpp"
 #include "discretization/FluxBuilder.hpp"
+#include "tests/verification/VerificationCaseFactory.hpp"
 
 #include <stdexcept>
 
@@ -25,21 +26,18 @@ Simulation::Simulation(const SimulationConfig& cfg)
     // -------------------------
     if (cfg.mesh.type == "line1D")
     {
+        std::cout << "1D mesh\n";
         mesh_ = std::make_unique<Mesh1D>(cfg.mesh.nx, cfg.mesh.lx);
     }
     else if (cfg.mesh.type == "quad2D")
     {
+        std::cout << "2D mesh\n";
         mesh_ = std::make_unique<QuadMesh2D>(cfg.mesh.nx, cfg.mesh.ny, cfg.mesh.lx, cfg.mesh.ly);
     }
     else
     {
         std::cout << "Mesh type declared: " << cfg.mesh.type << "\n";
         throw std::runtime_error("Unsupported mesh");
-    }
-
-    if (cfg.verification.enabled)
-    {
-        verificationCase_ = verificationRegistry_.instance().create(cfg.verification);
     }
 
     // -------------------------
@@ -52,6 +50,12 @@ Simulation::Simulation(const SimulationConfig& cfg)
     // 4. Boundary conditions
     // -------------------------
     bindBoundaryConditions(cfg);
+}
+
+void Simulation::setVerificationCase(std::unique_ptr<VerificationCase> verificationCase)
+{
+    verificationCase_ =
+        std::move(verificationCase);
 }
 
 // ============================================================
