@@ -86,9 +86,9 @@ SimulationConfig loadConfig(const std::filesystem::path& path)
 
         std::ifstream baseFile(parentPath);
 
-        std::cout << "LOADING CASE: " << path << "\n";
-        std::cout << "PARENT PATH: " << parentPath << "\n";
-        std::cout << "HAS MESH BEFORE MERGE: " << j.contains("mesh") << "\n";
+        // std::cout << "LOADING CASE: " << path << "\n";
+        // std::cout << "PARENT PATH: " << parentPath << "\n";
+        // std::cout << "HAS MESH BEFORE MERGE: " << j.contains("mesh") << "\n";
 
         if (!baseFile.is_open())
         {
@@ -100,7 +100,6 @@ SimulationConfig loadConfig(const std::filesystem::path& path)
         json base;
         baseFile >> base;
 
-        std::cout << "BASE MESH: " << base.contains("mesh") << "\n";
         j = mergeJson(base, j);
 
     }
@@ -114,10 +113,12 @@ SimulationConfig loadConfig(const std::filesystem::path& path)
     SimulationConfig cfg = defaultConfig();
     cfg.verification = VerificationConfig{};
 
-    std::cout
-    << "Extends = "
-    << cfg.extends
-    << "\n";
+    if(cfg.verification.enabled == false){
+        std::cout
+        << "Extends = "
+        << cfg.extends
+        << "\n";
+    }
     // -------------------------
     // Mesh
     // -------------------------
@@ -135,11 +136,15 @@ SimulationConfig loadConfig(const std::filesystem::path& path)
     cfg.physics.Su = j.at("physics").value("Su", 0.0);
     cfg.physics.Sp = j.at("physics").value("Sp", 0.0);
 
-    std::cout
-    << "Config Su = " << cfg.physics.Su
-    << "\n"
-    << "Config Sp = " << cfg.physics.Sp
-    << "\n";
+    if(cfg.verification.enabled == false){
+        std::cout
+        << "Config Su = " << cfg.physics.Su
+        << "\n"
+        << "Config Sp = " << cfg.physics.Sp
+        << "\n";
+    }
+
+    cfg.verification.plot_enabled = j.at("verification").at("plot_enabled");
 
     // -------------------------
     // Solver
@@ -148,6 +153,11 @@ SimulationConfig loadConfig(const std::filesystem::path& path)
     cfg.solver.tol      = j.at("solver").at("tol").get<double>();
     cfg.solver.max_iter = j.at("solver").at("max_iter").get<int>();
     cfg.solver.omega    = j.at("solver").at("omega").get<double>();
+
+    // -------------------------
+    // Output
+    // -------------------------
+    cfg.io.output_root= j.at("paths").at("output_root");
 
     // -------------------------
     // Boundary Conditions
