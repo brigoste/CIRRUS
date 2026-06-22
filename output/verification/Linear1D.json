@@ -15,6 +15,7 @@
   "verification": {
     "type": "manufactured",
     "case_name": "Linear1D",
+    "plot_enabled": true,
 
     "manufactured": {
       "phi_expr": "(100/L)*x + 300",
