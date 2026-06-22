@@ -2,11 +2,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
 import sys
+import os
 
-def plot_1d(df):
-    x = df[:, 0]
-    phi = df[:, 3]
-
+def plot_1d(x,phi):
     plt.figure()
     plt.scatter(x, phi)
     plt.plot(x, phi)
@@ -16,12 +14,7 @@ def plot_1d(df):
     plt.grid()
     plt.show()
 
-
-def plot_2d(df):
-    x = df[:, 0]
-    y = df[:, 1]
-    phi = df[:, 3]
-
+def plot_2d(x,y,phi):
     plt.tricontourf(x, y, phi, levels=50)#, color="viridis")
     plt.colorbar(label="Field")
     plt.axis("equal")
@@ -56,19 +49,21 @@ def main(filename):
     x = df[:, 0]
     y = df[:, 1]
     z = df[:, 2]
+    phi = df[:, 3]
 
     idx = np.argsort(x)
     x = x[idx]
     y = y[idx]
     z = z[idx]
+    phi = phi[idx]
 
     is_1d = np.allclose(y, y[0]) and np.allclose(z, 0)
     is_2d = not is_1d
 
     if is_1d:
-        plot_1d(df)
+        plot_1d(x,phi)
     elif is_2d:
-        plot_2d(df)
+        plot_2d(x,y,phi)
     else:
         raise ValueError("Unknown dimensional structure")
 
