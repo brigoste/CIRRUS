@@ -18,7 +18,8 @@
 
   "verification": {
     "enabled": true,
-    "case_name": "sinusoidal",
+    "case_name": "Sinusoidal2D",
+    "plot_enabled": true,
 
     "norms": {
       "l2": true,
