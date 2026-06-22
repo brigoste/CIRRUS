@@ -29,6 +29,11 @@
 
     "output": {
       "directory": "output/validation"
+    }  
+  },
+
+  "paths": {
+      "output_root": "C:/Users/E40112856/Packages/CIRRUS/output"
     }
-  }
+
 }
