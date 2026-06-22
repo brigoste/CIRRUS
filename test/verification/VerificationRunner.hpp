@@ -23,7 +23,4 @@ private:
     static void writeOutput(
         const SimulationConfig& cfg,
         const std::vector<double>& field);
-
-    
-
 };
