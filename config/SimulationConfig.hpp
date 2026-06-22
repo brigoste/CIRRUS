@@ -43,6 +43,7 @@ struct PhysicsConfig
 struct VerificationConfig
 {
     bool enabled = false;
+    bool plot_enabled = false;
 
     std::vector<std::string> cases;
 
@@ -75,6 +76,10 @@ struct SimulationConfig
     } solver;
 
     VerificationConfig verification;
+
+    struct IOConfig {
+        std::string output_root;
+    } io;
 };
 
 
