@@ -17,7 +17,7 @@ void VTKWriter::writeVTU(
     if (!f.is_open())
         throw std::runtime_error("Failed to open VTU file");
 
-    const std::size_t Nnodes = mesh.nfaces();
+    const std::size_t Nnodes = mesh.nnodes();
     const std::size_t Ncells = mesh.ncells();
 
     f << "<?xml version=\"1.0\"?>\n";
