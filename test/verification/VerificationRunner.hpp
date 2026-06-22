@@ -19,8 +19,4 @@ private:
         const VerificationCase& exact,
         double& l2,
         double& linf);
-
-    static void writeOutput(
-        const SimulationConfig& cfg,
-        const std::vector<double>& field);
 };
