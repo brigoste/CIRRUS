@@ -1,6 +1,8 @@
 #include "io/FieldWriter.hpp"
 #include <fstream>
 #include <stdexcept>
+#include <iostream>
+#include <filesystem>
 
 void FieldWriter::writeCSVDebug(
     const PointField& field,
@@ -8,10 +10,21 @@ void FieldWriter::writeCSVDebug(
     const std::vector<double>& residual,
     const std::string& filename)
 {
-    std::ofstream f(filename);
+    std::filesystem::path path(filename);
+
+    // -------------------------
+    // Only create directories if there is a parent path
+    // -------------------------
+    if (path.has_parent_path())
+    {
+        std::filesystem::create_directories(path.parent_path());
+    }
+
+    std::ofstream f(path);
 
     if (!f.is_open())
-        throw std::runtime_error("Failed to open debug CSV");
+        throw std::runtime_error(
+            "Failed to open debug CSV: " + path.string());
 
     f << "x,y,z,phi,rhs,residual\n";
 
