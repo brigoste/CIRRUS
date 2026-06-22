@@ -2,45 +2,62 @@
 #include "mesh/MeshBase.hpp"
 #include "config/SimulationConfig.hpp"
 #include "simulation/Simulation.hpp"
+#include "io/PointField.hpp"
+#include "postprocessing/BoundaryReconstructor.hpp"
+#include "io/FieldWriter.hpp"
 #include <memory>
 #include <stdexcept>
 #include <iostream>
 #include <cmath>
+#include <fstream>
+#include "nlohmann/json.hpp"
+#include "io/PlotUtils.hpp"
 
 void VerificationRunner::run(const SimulationConfig& cfg)
 {
     if (!cfg.verification.enabled)
         return;
 
+    namespace fs = std::filesystem;
+
+    // -------------------------------------------------
+    // Output root (single source of truth)
+    // -------------------------------------------------
+    fs::path outputRoot = cfg.verification.output.directory;
+    fs::create_directories(outputRoot);
+
     for (const auto& caseName : cfg.verification.cases)
     {
-        std::cout
-            << "\n=================================\n"
-            << "Running verification case: "
-            << caseName
-            << "\n=================================\n";
+        std::cout << "\n=================================\n"
+                  << "Running verification case: " << caseName
+                  << "\n=================================\n";
 
-        auto casePtr =
-            VerificationCaseFactory::create(caseName);
+        // -------------------------------------------------
+        // Build and run case
+        // -------------------------------------------------
+        auto casePtr = VerificationCaseFactory::create(caseName);
 
-        // SimulationConfig caseCfg = cfg;
         SimulationConfig caseCfg = casePtr->config();
         Simulation sim(caseCfg);
-        // Simulation sim(cfg);
 
-        sim.setVerificationCase(
-            std::move(casePtr));
+        sim.setVerificationCase(std::move(casePtr));
 
         sim.assemble();
+        auto phi = sim.solve();
 
-        auto phi = sim.solve(); 
-        const auto& outputDir = cfg.verification.output.directory;
-        const std::string csvFile = outputDir + "/" + caseName + ".csv";
-        const std::string summaryFile = outputDir + "/" + caseName + ".json";
+        // -------------------------------------------------
+        // Paths (ALL filesystem-safe)
+        // -------------------------------------------------
+        fs::path basePath   = outputRoot / caseName;
+        fs::path csvPath    = basePath;
+        csvPath.replace_extension(".csv");
 
-        std::cout << "CSV Output     : " << csvFile << "\n" 
-                  << "Summary Output : " << summaryFile << "\n";
+        fs::path jsonPath   = basePath;
+        jsonPath.replace_extension(".json");
 
+        // -------------------------------------------------
+        // Compute norms
+        // -------------------------------------------------
         double l2 = 0.0;
         double linf = 0.0;
 
@@ -51,12 +68,61 @@ void VerificationRunner::run(const SimulationConfig& cfg)
             l2,
             linf);
 
+        // -------------------------------------------------
+        // Reconstruct field
+        // -------------------------------------------------
+        PointField field = BoundaryReconstructor::reconstruct(
+            sim.mesh(),
+            sim.boundary(),
+            sim.model(),
+            phi);
+
+        std::vector<double> residual(phi.size(), 0.0);
+
+        // -------------------------------------------------
+        // Write CSV
+        // -------------------------------------------------
+        FieldWriter::writeCSVDebug(
+            field,
+            sim.system().RHS(),
+            residual,
+            csvPath.string());
+
+        // -------------------------------------------------
+        // Write JSON summary
+        // -------------------------------------------------
+        {
+            std::ofstream json(jsonPath);
+            json << "{\n"
+                 << "  \"case\": \"" << caseName << "\",\n"
+                 << "  \"l2\": " << l2 << ",\n"
+                 << "  \"linf\": " << linf << "\n"
+                 << "}\n";
+        }
+
+        // -------------------------------------------------
+        // Console output
+        // -------------------------------------------------
         std::cout
             << "\n================ VERIFICATION ================\n"
             << "Case      : " << caseName << "\n"
             << "L2 Norm   : " << l2 << "\n"
             << "Linf Norm : " << linf << "\n"
+            << "CSV Output : " << csvPath << "\n"
             << "=============================================\n";
+
+        // -------------------------------------------------
+        // Optional plotting
+        // -------------------------------------------------
+        if (cfg.verification.plot_enabled)
+        {
+            std::cout << "Plotting:\n";
+            runPlot(csvPath.string());
+        }
+        else
+        {
+            std::cout << "No visualization requested.\n";
+        }
     }
 }
 
