@@ -23,6 +23,7 @@
   "verification": {
     "enabled": true,
     "case_name": "Quadratic1D",
+    "plot_enabled": true,
 
     "norms": {
       "l2": true,
