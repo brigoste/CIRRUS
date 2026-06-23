@@ -4,19 +4,24 @@
 #include <string>
 #include <filesystem>
 #include <functional>
+#include <iostream>
+#include <stdexcept>
+#include <fstream>
+#include <unordered_set>
 
 #include "Solver/SolverMethod.hpp"
 #include "mesh/primitives/Point.hpp"
 #include "mesh/BoundaryPatchSystem.hpp"
 
+#include <nlohmann/json.hpp>
 // -----------------------------
 // Forward-safe definitions
 // -----------------------------
 
 struct BoundaryConfig
 {
-    std::size_t group;
-    BoundaryPatchSystem::Condition condition;
+    std::size_t group = 0;
+    BoundaryPatchSystem::Condition condition{};
 };
 
 struct MeshConfig
@@ -39,33 +44,28 @@ struct PhysicsConfig
     double Su = 0.0;
     double Sp = 0.0;
 };
-// Verification case
-struct VerificationConfig
+
+struct VerificationSuite
 {
     bool enabled = false;
     bool plot_enabled = false;
 
     std::vector<std::string> cases;
 
-    struct Norms
-    {
-        bool l2 = true;
-        bool linf = true;
-    } norms;
-
     struct Output
     {
-        std::string directory =
-            "output/validation";
+        std::string directory = "output/verification";
     } output;
 };
 
 struct SimulationConfig
 {
     std::string extends;
+
     MeshConfig mesh;
     PhysicsConfig physics;
-    std::vector<BoundaryConfig> boundary;  // <-- ALSO FIXED (was single object)
+
+    std::vector<BoundaryConfig> boundary;
 
     struct SolverConfig
     {
@@ -75,15 +75,25 @@ struct SimulationConfig
         double omega;
     } solver;
 
-    VerificationConfig verification;
+    VerificationSuite verificationSuite;    // ✅ HERE
 
     struct IOConfig {
         std::string output_root;
+        bool plot_enabled = false;
     } io;
+
 };
 
 
+// using json = nlohmann::json;
 
 // factories
 SimulationConfig defaultConfig();
+
 SimulationConfig loadConfig(const std::filesystem::path& path);
+
+nlohmann::json mergeJson(
+    nlohmann::json base,
+    const nlohmann::json& override);
+
+SimulationConfig fromJson(const nlohmann::json& j);
