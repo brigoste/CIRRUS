@@ -1,14 +1,21 @@
 #pragma once
+#include "Physics/HeatPhysicsModel.hpp"
+#include "config/SimulationConfig.hpp"
 
-#include <memory>
-#include <string>
+// Abstraction for all tests we use to verify.
 
-#include "VerificationCase.hpp"
+#pragma once
 
-class VerificationCaseFactory
+class VerificationCase
 {
 public:
+    virtual ~VerificationCase() = default;
 
-    static std::unique_ptr<VerificationCase>
-    create(const std::string& name);
+    virtual SimulationConfig config() const = 0;
+
+    // Manufactured solution
+    virtual double exact(double x, double y) const = 0;
+
+    // RHS of PDE: -∇·(k∇φ) = S (WITHOUT k if your physics applies it)
+    virtual double laplacian(double x, double y) const = 0;
 };
