@@ -28,7 +28,7 @@
     },
 
     "output": {
-      "directory": "output/validation"
+      "directory": "verification"
     }  
   },
 
