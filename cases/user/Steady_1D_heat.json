@@ -1,0 +1,38 @@
+{
+  "extends": [
+    "../base.json"
+  ],
+
+  "case_name": "steady_1d_heat",
+
+  "mesh": {
+    "type": "line1D",
+    "nx": 20,
+    "lx": 1.5
+  },
+
+  "boundary_conditions": [
+    { "group": 0, "type": "Dirichlet", "value": 300 },
+    { "group": 1, "type": "Dirichlet", "value": 400 }
+  ],
+
+  "physics": {
+    "type": "heat",
+    "k": 100.0,
+    "Su": 0.0,
+    "Sp": 0.0
+  },
+
+  "solver": {
+    "method": "TDMA",
+    "tol": 1e-12,
+    "max_iter": 5000,
+    "omega": 1.0
+  },
+
+  "verification": {
+    "enabled": false,
+    "plot_enabled": true
+  }
+
+}
