@@ -11,16 +11,10 @@ ErrorNormResults ErrorNorms::compute(
     const std::vector<double>& exact)
 {
     if (numerical.size() != exact.size())
-    {
-        throw std::runtime_error(
-            "ErrorNorms: numerical/exact size mismatch");
-    }
+        throw std::runtime_error("ErrorNorms: size mismatch");
 
     if (numerical.size() != mesh.ncells())
-    {
-        throw std::runtime_error(
-            "ErrorNorms: field size does not match mesh");
-    }
+        throw std::runtime_error("ErrorNorms: mesh mismatch");
 
     ErrorNormResults result;
 
@@ -30,26 +24,19 @@ ErrorNormResults ErrorNorms::compute(
 
     for (std::size_t c = 0; c < mesh.ncells(); ++c)
     {
-        const double error =
-            numerical[c] - exact[c];
+        const double e = numerical[c] - exact[c];
+        const double V = mesh.cellVolume(c);
 
-        const double V =
-            mesh.cellVolume(c);
-
-        l2sum += error * error * V;
-
+        l2sum += e * e * V;
         volumeSum += V;
 
-        linf = std::max(
-            linf,
-            std::abs(error));
+        linf = std::max(linf, std::abs(e));
     }
 
+    result.l2_energy = std::sqrt(l2sum);
+
     if (volumeSum > 0.0)
-    {
-        result.l2 =
-            std::sqrt(l2sum / volumeSum);
-    }
+        result.l2_rms = std::sqrt(l2sum / volumeSum);
 
     result.linf = linf;
 
