@@ -46,9 +46,7 @@ void VerificationIO::writeSummary(
     std::ofstream out(file);
 
     if (!out.is_open())
-        throw std::runtime_error(
-            "Failed to open verification summary file: "
-            + file.string());
+        throw std::runtime_error("Failed to open verification summary file: " + file.string());
 
     out << j.dump(4);
 }
