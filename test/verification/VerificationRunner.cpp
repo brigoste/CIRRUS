@@ -2,6 +2,7 @@
 
 #include "config/SimulationConfig.hpp"
 #include "config/PathUtils.hpp"
+#include "config/PathContext.hpp"
 
 #include "simulation/Simulation.hpp"
 #include "mesh/MeshBase.hpp"
@@ -18,39 +19,33 @@
 #include <filesystem>
 #include <stdexcept>
 
-void VerificationRunner::run(const SimulationConfig& cfg)
+void VerificationRunner::run(
+    const SimulationConfig& cfg,
+    const PathContext& paths)
 {
-    if (!cfg.verification.enabled)
+    if (!cfg.verificationSuite.enabled)
         return;
 
-    for (const auto& caseName : cfg.verification.cases)
+    for (const auto& caseName : cfg.verificationSuite.cases)
     {
         std::cout
             << "\n=================================\n"
             << "Running verification case: " << caseName
             << "\n=================================\n";
 
-        // -------------------------------------------------
-        // Build case + simulation
-        // -------------------------------------------------
         auto casePtr = VerificationCaseFactory::create(caseName);
-        SimulationConfig caseCfg = casePtr->config();
 
+        SimulationConfig caseCfg = casePtr->config();
         Simulation sim(caseCfg);
+
         sim.setVerificationCase(std::move(casePtr));
 
-        // -------------------------------------------------
-        // Solve
-        // -------------------------------------------------
         sim.assemble();
         auto phi = sim.solve();
 
         const MeshBase& mesh = sim.mesh();
         const auto& verifCase = *sim.verificationCase();
 
-        // -------------------------------------------------
-        // Reconstruct field (for CSV output)
-        // -------------------------------------------------
         PointField field =
             BoundaryReconstructor::reconstruct(
                 mesh,
@@ -60,9 +55,9 @@ void VerificationRunner::run(const SimulationConfig& cfg)
 
         std::vector<double> residual(phi.size(), 0.0);
 
-        // -------------------------------------------------
-        // Error norms (UNIFIED)
-        // -------------------------------------------------
+        // -----------------------------
+        // exact field for norms
+        // -----------------------------
         std::vector<double> exactField(mesh.ncells());
 
         for (std::size_t c = 0; c < mesh.ncells(); ++c)
@@ -76,22 +71,24 @@ void VerificationRunner::run(const SimulationConfig& cfg)
             phi,
             exactField);
 
-        // -------------------------------------------------
-        // Paths
-        // -------------------------------------------------
-        auto csvPath   = Paths::verificationCSV(cfg, caseName);
-        auto jsonPath  = Paths::verificationJSON(cfg, caseName);
+        // -----------------------------
+        // PATHS (NOW PURE PathContext)
+        // -----------------------------
+        // auto csvPath  = paths.verificationCSV(caseName);
+        // auto jsonPath = paths.verificationJSON(caseName);
+        auto csvPath  = paths.outputRoot / "solution.csv";
+        auto jsonPath = paths.outputRoot / "solution.json";
+        auto vtkPath  = paths.outputRoot / "solution.vtu";
 
         std::filesystem::create_directories(csvPath.parent_path());
 
-        // -------------------------------------------------
-        // IO layer
-        // -------------------------------------------------
+        // -----------------------------
+        // IO
+        // -----------------------------
         VerificationIO::writeCSV(
             sim,
             phi,
             csvPath);
-
 
         VerificationIO::writeSummary(
             caseName,
@@ -99,9 +96,9 @@ void VerificationRunner::run(const SimulationConfig& cfg)
             norms.linf,
             jsonPath);
 
-        // -------------------------------------------------
-        // Console output
-        // -------------------------------------------------
+        // -----------------------------
+        // output
+        // -----------------------------
         std::cout
             << "\n================ VERIFICATION ================\n"
             << "Case      : " << caseName << "\n"
@@ -111,13 +108,10 @@ void VerificationRunner::run(const SimulationConfig& cfg)
             << "JSON Output: " << jsonPath << "\n"
             << "=============================================\n";
 
-        // -------------------------------------------------
-        // Plotting
-        // -------------------------------------------------
-        if (cfg.verification.plot_enabled)
+        if (cfg.verificationSuite.plot_enabled)
         {
             std::cout << "Plotting...\n";
-            runPlot(csvPath.string());
+            runPlot(csvPath.generic_string());
         }
     }
 }
