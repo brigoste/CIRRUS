@@ -15,11 +15,36 @@
 
   "verificationSuite": {
     "enabled": true,
+    "plot_enabled": true,
+    
     "cases": [
       "Linear1D",
       "Quadratic1D",
-      "Sinusoidal2D"
+      "Sinusoidal2D",
+      "AdvectionDiffusion2D"
     ],
+
+    "caseConfigs": {
+      "Linear1D": {
+        "params": { }
+      },
+      "Quadratic1D": {
+        "params": { "k": 100.0 }
+      },
+      "Sinusoidal2D": {
+        "params": { "k": 100.0 }
+      },
+      "AdvectionDiffusion2D": {
+        "params": {
+          "gamma": 1.0,
+          "rho": 1.0,
+          "ux": 1.0,
+          "uy": 0.0,
+          "uz": 0.0
+        }
+      }
+    },
+    
     "output": {
       "directory": "verification"
     }
