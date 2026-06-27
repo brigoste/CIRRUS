@@ -17,7 +17,14 @@
   ],
 
   "verificationCase": {
-    "case_name": "Sinusoidal2D",
+    "cases": [
+      {
+        "case_name": "Sinusoidal2D",
+        "params": {
+          "k": 100.0
+        }
+      }
+    ],
     "plot_enabled": true,
 
     "norms": {
