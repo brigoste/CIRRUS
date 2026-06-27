@@ -17,6 +17,7 @@
 #include "Solver/SOR.hpp"
 #include "Solver/TDMA.hpp"
 #include "Solver/GaussSeidel.hpp"
+#include "Solver/BiCGSTAB.hpp"
 #include "Solver/SolverMethod.hpp"
 // #include "tests\verification\VerificationRegistry.hpp"
 
