@@ -21,7 +21,15 @@
     ],
 
   "verificationCase": {
-    "case_name": "Quadratic1D",
+    "cases": [
+      {
+        "case_name": "Quadratic1D",
+        "params": {
+          "k": 100.0
+        }
+      }
+    ],
+
     "plot_enabled": true,
 
     "norms": {
