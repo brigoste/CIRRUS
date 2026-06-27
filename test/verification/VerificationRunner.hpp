@@ -9,15 +9,5 @@
 class VerificationRunner
 {
 public:
-
     static void run(const SimulationConfig& cfg, const PathContext& paths);
-
-private:
-
-    static void computeNorms(
-        const MeshBase& mesh,
-        const std::vector<double>& numerical,
-        const VerificationCase& exact,
-        double& l2,
-        double& linf);
 };
