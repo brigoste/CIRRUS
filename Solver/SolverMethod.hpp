@@ -14,7 +14,8 @@ namespace solver
         TDMA,
         GS,
         SOR,
-        CG
+        CG,
+        BiCGSTAB
     };
 
     // =========================================================
@@ -26,6 +27,7 @@ namespace solver
         if (s == "GS")   return Method::GS;
         if (s == "SOR")  return Method::SOR;
         if (s == "CG")   return Method::CG;
+        if (s == "BiCGSTAB") return Method::BiCGSTAB;
 
         throw std::runtime_error("Unknown solver method: " + s);
     }
@@ -34,10 +36,11 @@ namespace solver
     {
         switch (m)
         {
-            case Method::TDMA: return "TDMA";
-            case Method::GS:   return "GS";
-            case Method::SOR:  return "SOR";
-            case Method::CG:   return "CG";
+            case Method::TDMA:      return "TDMA";
+            case Method::GS:        return "GS";
+            case Method::SOR:       return "SOR";
+            case Method::CG:        return "CG";
+            case Method::BiCGSTAB:  return "BiCGSTAB";
         }
         return "UNKNOWN";
     }
