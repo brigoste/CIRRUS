@@ -45,7 +45,7 @@ SimulationConfig defaultConfig()
 {
     SimulationConfig cfg;
 
-    cfg.mesh.type = "1D";
+    cfg.mesh.type = "line1D";
     cfg.mesh.nx = 50;
     cfg.mesh.lx = 1.0;
 
@@ -146,11 +146,15 @@ SimulationConfig fromJson(
     // -------------------------------------------------
     // Physics
     // -------------------------------------------------
-    cfg.physics.type = j.at("physics").at("type").get<std::string>();
-    cfg.physics.k    = j.at("physics").at("k").get<double>();
-    cfg.physics.Su   = j.at("physics").value("Su", 0.0);
-    cfg.physics.Sp   = j.at("physics").value("Sp", 0.0);
+    cfg.physics.type = physics::physicsFromString(j.at("physics").at("type").get<std::string>());
 
+    cfg.physics.k     = j.at("physics").value("k", 0.0);
+    cfg.physics.gamma = j.at("physics").value("gamma", 0.0);
+
+    cfg.physics.rho = j.at("physics").value("rho", 1.0);
+    cfg.physics.ux  = j.at("physics").value("ux", 0.0);
+    cfg.physics.uy  = j.at("physics").value("uy", 0.0);
+    cfg.physics.uz  = j.at("physics").value("uz", 0.0);
     // -------------------------------------------------
     // Solver
     // -------------------------------------------------
@@ -180,11 +184,12 @@ SimulationConfig fromJson(
     // -------------------------------------------------
     cfg.boundary.clear();
 
+    if (!j.contains("boundary_conditions")) {
+        throw std::runtime_error("Config missing 'boundary_conditions'");
+    }
+
     for (const auto& bcJson : j.at("boundary_conditions"))
-    {
-        if (!j.contains("boundary_conditions")) {
-            throw std::runtime_error("Config missing 'boundary_conditions'");
-        }
+    {        
         BoundaryConfig bc{};
 
         bc.group = bcJson.at("group").get<std::size_t>();
@@ -221,20 +226,34 @@ SimulationConfig fromJson(
     // -------------------------------------------------
     // Verification (safe parsing)
     // -------------------------------------------------
-    if (j.contains("verificationSuite"))
+    if (j.contains("verificationCase"))
     {
-        const auto& v = j.at("verificationSuite");
+        const auto& v = j.at("verificationCase");
 
-        cfg.verificationSuite.enabled =
-            v.value("enabled", false);
+        cfg.verificationSuite.enabled = v.value("enabled", false);
 
-        cfg.verificationSuite.cases =
-            v.value("cases", std::vector<std::string>{});
+        cfg.verificationSuite.plot_enabled = v.value("plot_enabled", false);
+
+        cfg.verificationSuite.cases.clear();
+
+        if (v.contains("cases"))
+        {
+            for (const auto& c : v.at("cases"))
+            {
+                VerificationCaseEntry entry;
+
+                entry.name = c.at("case_name").get<std::string>();
+                entry.params = c.value("params", nlohmann::json::object());
+
+                cfg.verificationSuite.cases.push_back(std::move(entry));
+            }
+        }
 
         if (v.contains("output"))
         {
             cfg.verificationSuite.output.directory =
-                v.at("output").value("directory", "output/verification");
+                v.at("output").value("directory",
+                                    "output/verification");
         }
     }
 
