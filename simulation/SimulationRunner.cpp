@@ -15,11 +15,25 @@
 #include <algorithm>
 #include <cmath>
 
+void SimulationRunner::validate(
+    const SimulationConfig& cfg
+)
+{
+    // -------------------------------------------------
+    // Exception handling for illadvised solver pairing
+    // -------------------------------------------------
+    if (std::string(physics::to_string(cfg.physics.type)) == "advection-diffusion" && cfg.solver.method == solver::Method::CG)
+        throw std::runtime_error("CG not valid for advection-diffusion (non-symmetric system)");
+
+}
+
 void SimulationRunner::run(
     const SimulationConfig& cfg,
     const PathContext& paths)
 {
     std::cout << "\n================ USER SIMULATION ================\n";
+
+    validate(cfg);      // Makes sure solver/model pairings are ok.
 
     Simulation sim(cfg);
     sim.assemble();
