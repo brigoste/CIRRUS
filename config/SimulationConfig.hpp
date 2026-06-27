@@ -12,6 +12,7 @@
 #include "Solver/SolverMethod.hpp"
 #include "mesh/primitives/Point.hpp"
 #include "mesh/BoundaryPatchSystem.hpp"
+#include "config/PhysicsType.hpp"
 
 #include <nlohmann/json.hpp>
 // -----------------------------
@@ -37,20 +38,37 @@ struct MeshConfig
 
 struct PhysicsConfig
 {
-    std::string type;   // "heat", "navier-stokes", etc.
+    physics::PhysicsType type;
 
     double k = 0.0;
+    double gamma = 0.0;
 
-    double Su = 0.0;
-    double Sp = 0.0;
+    double rho = 1.0;
+    double ux = 0.0, uy = 0.0, uz = 0.0;
+};
+
+
+struct VerificationParams
+{
+    double k = 0.0;
+    double gamma = 0.0;
+    double ux = 0.0;
+    double uy = 0.0;
+    double uz = 0.0;
+};
+
+struct VerificationCaseEntry
+{
+    std::string name;
+    nlohmann::json params;
 };
 
 struct VerificationSuite
 {
-    bool enabled = false;
+    bool enabled = true;
     bool plot_enabled = false;
 
-    std::vector<std::string> cases;
+    std::vector<VerificationCaseEntry> cases;
 
     struct Output
     {
@@ -63,7 +81,7 @@ struct SimulationConfig
     std::string extends;
 
     MeshConfig mesh;
-    PhysicsConfig physics;
+    PhysicsConfig physics;   // ✅ FIXED
 
     std::vector<BoundaryConfig> boundary;
 
@@ -75,13 +93,13 @@ struct SimulationConfig
         double omega;
     } solver;
 
-    VerificationSuite verificationSuite;    // ✅ HERE
+    VerificationSuite verificationSuite;
 
-    struct IOConfig {
+    struct IOConfig
+    {
         std::string output_root;
         bool plot_enabled = false;
     } io;
-
 };
 
 
