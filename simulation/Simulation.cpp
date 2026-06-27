@@ -104,11 +104,14 @@ std::vector<double> Simulation::solve()
     if (!assembled_)
         throw std::runtime_error("System not assembled");
 
-    std::cout << "System Type: " << cfg_.physics.type << "\n";
+    std::cout << "System Type: " << physics::to_string(cfg_.physics.type) << "\n";
     std::cout << "Solver: " << to_string(cfg_.solver.method) << "\n";
 
     switch (solverCfg.method)
     {
+        case solver::Method::BiCGSTAB:
+            return BiCGSTAB(sys_, solverCfg.max_iter, solverCfg.tol);
+
         case solver::Method::CG:
             return CG(sys_, solverCfg.max_iter, solverCfg.tol);
 
