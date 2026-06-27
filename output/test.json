@@ -1,7 +1,0 @@
-{
-  "extends": "base.json",
-
-  "physics": {
-    "k": 200
-  }
-}
