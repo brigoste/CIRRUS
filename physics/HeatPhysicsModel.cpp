@@ -1,32 +1,43 @@
-#include "HeatPhysicsModel.hpp"
+#include "physics/HeatPhysicsModel.hpp"
 #include "mesh/primitives/Face.hpp"
 #include "utils/LinearAlgebraUtils.hpp"
-#include <iostream>
 
-double HeatPhysicsModel::diffusionCoeff(const Face& face) const
+#include <cmath>
+#include <stdexcept>
+
+double HeatPhysicsModel::diffusionFaceCoefficient(const Face& face) const
 {
-    double d_eff = std::abs(LA::dot(face.dPN, face.normal));
+    const double d_eff = std::abs(LA::dot(face.dPN, face.normal));
+
     if (d_eff <= 0.0)
-    {
-        throw std::runtime_error(
-            "Invalid face spacing: d_eff = " +
-            std::to_string(d_eff));
-    }
+        throw std::runtime_error("Invalid face spacing");
 
     return k_ * face.area / d_eff;
 }
-double HeatPhysicsModel::convectionCoeff(double flux) const
+
+double HeatPhysicsModel::convectionFaceFlux(const Face& /*face*/) const
 {
-    return flux;   // 0 if no convection
+    return 0.0;
+}
+
+void HeatPhysicsModel::addCellSources(
+    const MeshBase& mesh,
+    std::size_t c,
+    FluxAccumulator& flux) const
+{
+    // Heat equation has no volumetric source term by default
+    (void)mesh;
+    (void)c;
+    (void)flux;
 }
 
 double HeatPhysicsModel::reconstructBoundaryValue(
-                                                const BoundaryPatchSystem::Condition& bc,
-                                                double phiCell,
-                                                double dx,
-                                                bool /*isLeft*/) const
+    const BoundaryPatchSystem::Condition& bc,
+    double phiCell,
+    double dx,
+    bool /*isLeft*/) const
 {
-    const double k = diffusionScalar();
+    const double k = diffusionCoefficient();
 
     switch (bc.type)
     {
@@ -38,21 +49,17 @@ double HeatPhysicsModel::reconstructBoundaryValue(
 
         case bc::Type::Convective:
             return (k * phiCell + bc.h * dx * bc.Tinf)
-                   / (k + bc.h * dx);
+                 / (k + bc.h * dx);
 
         default:
             throw std::runtime_error("Unsupported BC type");
     }
 }
-
-void HeatPhysicsModel::addCellSources(
+double HeatPhysicsModel::cellSource(
     const MeshBase& mesh,
-    std::size_t c,
-    FluxAccumulator& flux) const
+    std::size_t c) const
 {
-    const double V = mesh.cellVolume(c);
-
-    flux.addSource(c, Su_ * V, Sp_ * V);
-
-    // std::cout << "Cell " << c << " Su = " << Su_ << " Sp = " << Sp_ << "\n";
+    (void) mesh;
+    (void) c;
+    return 0;   // note: Sp usually goes into diagonal, not RHS
 }
