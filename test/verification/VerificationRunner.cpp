@@ -1,23 +1,16 @@
 #include "tests/verification/VerificationRunner.hpp"
 
-#include "config/SimulationConfig.hpp"
-#include "config/PathUtils.hpp"
-#include "config/PathContext.hpp"
-
 #include "simulation/Simulation.hpp"
-#include "mesh/MeshBase.hpp"
-
-#include "postprocessing/BoundaryReconstructor.hpp"
-
 #include "tests/verification/VerificationCaseFactory.hpp"
 #include "tests/verification/VerificationIO.hpp"
 #include "tests/verification/ErrorMetrics.hpp"
 
+#include "config/PathContext.hpp"
+#include "mesh/MeshBase.hpp"
 #include "io/PlotUtils.hpp"
 
 #include <iostream>
 #include <filesystem>
-#include <stdexcept>
 
 void VerificationRunner::run(
     const SimulationConfig& cfg,
@@ -26,18 +19,40 @@ void VerificationRunner::run(
     if (!cfg.verificationSuite.enabled)
         return;
 
-    for (const auto& caseName : cfg.verificationSuite.cases)
+    std::cout << "\n================ VERIFICATION MODE ================\n";
+    std::cout << "Verification enabled: " << cfg.verificationSuite.enabled << "\n";
+    std::cout << "Plot enabled: " << cfg.verificationSuite.plot_enabled << "\n";
+    std::cout << "Case count: " << cfg.verificationSuite.cases.size() << "\n";
+
+    std::filesystem::create_directories(paths.outputRoot);
+
+    // -------------------------------------------------
+    // Main verification loop (NOW FULLY TYPED)
+    // -------------------------------------------------
+    for (const auto& caseEntry : cfg.verificationSuite.cases)
     {
-        std::cout
-            << "\n=================================\n"
-            << "Running verification case: " << caseName
-            << "\n=================================\n";
+        const std::string& caseName = caseEntry.name;
+        const nlohmann::json& params = caseEntry.params;
 
-        auto casePtr = VerificationCaseFactory::create(caseName);
+        std::cout << "\n=================================\n"
+                  << "Running verification case: " << caseName
+                  << "\n=================================\n";
 
-        SimulationConfig caseCfg = casePtr->config();
+        // -------------------------------------------------
+        // Build manufactured / verification case
+        // -------------------------------------------------
+        auto casePtr = VerificationCaseFactory::create(caseName, params);
+        // -------------------------------------------------
+        // Build simulation config (base config only)
+        // -------------------------------------------------
+        SimulationConfig caseCfg = cfg;
+
+        // IMPORTANT:
+        // No per-case JSON overrides anymore.
+        // All configuration must come from:
+        //   base.json + SimulationConfig + typed params
+
         Simulation sim(caseCfg);
-
         sim.setVerificationCase(std::move(casePtr));
 
         sim.assemble();
@@ -46,18 +61,9 @@ void VerificationRunner::run(
         const MeshBase& mesh = sim.mesh();
         const auto& verifCase = *sim.verificationCase();
 
-        PointField field =
-            BoundaryReconstructor::reconstruct(
-                mesh,
-                sim.boundary(),
-                sim.model(),
-                phi);
-
-        std::vector<double> residual(phi.size(), 0.0);
-
-        // -----------------------------
-        // exact field for norms
-        // -----------------------------
+        // -------------------------------------------------
+        // Exact solution evaluation
+        // -------------------------------------------------
         std::vector<double> exactField(mesh.ncells());
 
         for (std::size_t c = 0; c < mesh.ncells(); ++c)
@@ -66,52 +72,50 @@ void VerificationRunner::run(
             exactField[c] = verifCase.exact(xc.x[0], xc.x[1]);
         }
 
-        auto norms = ErrorNorms::compute(
-            mesh,
-            phi,
-            exactField);
+        // -------------------------------------------------
+        // Error norms
+        // -------------------------------------------------
+        auto norms = ErrorNorms::compute(mesh, phi, exactField);
 
-        // -----------------------------
-        // PATHS (NOW PURE PathContext)
-        // -----------------------------
-        // auto csvPath  = paths.verificationCSV(caseName);
-        // auto jsonPath = paths.verificationJSON(caseName);
-        auto csvPath  = paths.outputRoot / "solution.csv";
-        auto jsonPath = paths.outputRoot / "solution.json";
-        auto vtkPath  = paths.outputRoot / "solution.vtu";
+        // -------------------------------------------------
+        // Output paths
+        // -------------------------------------------------
+        auto csvPath  = paths.outputRoot / (caseName + ".csv");
+        auto jsonPath = paths.outputRoot / (caseName + ".json");
 
-        std::filesystem::create_directories(csvPath.parent_path());
+        std::filesystem::create_directories(paths.outputRoot);
 
-        // -----------------------------
-        // IO
-        // -----------------------------
-        VerificationIO::writeCSV(
-            sim,
-            phi,
-            csvPath);
-
+        // -------------------------------------------------
+        // Write outputs
+        // -------------------------------------------------
+        VerificationIO::writeCSV(sim, phi, csvPath);
         VerificationIO::writeSummary(
             caseName,
             norms.l2_energy,
             norms.linf,
-            jsonPath);
+            jsonPath
+        );
 
-        // -----------------------------
-        // output
-        // -----------------------------
-        std::cout
-            << "\n================ VERIFICATION ================\n"
-            << "Case      : " << caseName << "\n"
-            << "L2 Norm   : " << norms.l2_energy << "\n"
-            << "Linf Norm : " << norms.linf << "\n"
-            << "CSV Output: " << csvPath << "\n"
-            << "JSON Output: " << jsonPath << "\n"
-            << "=============================================\n";
-
+        // -------------------------------------------------
+        // Plotting
+        // -------------------------------------------------
         if (cfg.verificationSuite.plot_enabled)
         {
-            std::cout << "Plotting...\n";
+            std::cout << "Plotting " << caseName
+                      << " from " << csvPath << "\n";
+
             runPlot(csvPath.generic_string());
         }
+
+        // -------------------------------------------------
+        // Report
+        // -------------------------------------------------
+        std::cout << "\n================ VERIFICATION ================\n"
+                  << "Case      : " << caseName << "\n"
+                  << "L2 Norm   : " << norms.l2_energy << "\n"
+                  << "Linf Norm : " << norms.linf << "\n"
+                  << "CSV Output: " << csvPath << "\n"
+                  << "JSON Output: " << jsonPath << "\n"
+                  << "=============================================\n";
     }
 }
