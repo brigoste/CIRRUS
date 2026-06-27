@@ -10,4 +10,7 @@ public:
     static void run(
         const SimulationConfig& cfg,
         const PathContext& paths);
+
+    static void validate(
+        const SimulationConfig& cfg);
 };
