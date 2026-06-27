@@ -1,16 +1,24 @@
 #include "physics/PhysicsFactory.hpp"
-#include "HeatPhysicsModel.hpp"
+#include "physics/HeatPhysicsModel.hpp"
+#include "physics/AdvectionDiffusionPhysicsModel.hpp"
 
-std::unique_ptr<PhysicsModel> PhysicsFactory::create(const PhysicsConfig& cfg)
+#include <stdexcept>
+#include <nlohmann/json.hpp>
+
+std::unique_ptr<PhysicsModel>
+PhysicsFactory::create(const PhysicsConfig& cfg)
 {
-    if (cfg.type == "heat")
+    switch (cfg.type)
     {
-        return std::make_unique<HeatPhysicsModel>(cfg.k, cfg.Sp, cfg.Su);
-    }
-    if (cfg.type == "fluid")
-    {
-        throw std::runtime_error("Fluid physics model not yet implmented.");
+        case physics::PhysicsType::Heat:
+            return std::make_unique<HeatPhysicsModel>(cfg.k);
+
+        case physics::PhysicsType::AdvectionDiffusion:
+            return std::make_unique<AdvectionDiffusionPhysicsModel>(
+                cfg.gamma, cfg.rho, cfg.ux, cfg.uy, cfg.uz);
+        default:
+            throw std::runtime_error("Fluid physics model not implemented");
     }
 
-    throw std::runtime_error("Unknown physics model type: " + cfg.type);
+    throw std::runtime_error("Unknown physics model");
 }
