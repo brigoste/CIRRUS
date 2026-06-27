@@ -13,6 +13,14 @@
   ],
 
   "verificationCase": {
+    "cases": [
+      {
+        "case_name": "Linear1D",
+        "params": {
+          "k": 100.0
+        }
+      }
+    ],
     "type": "manufactured",
     "plot_enabled": true,
 
