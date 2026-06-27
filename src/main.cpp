@@ -51,6 +51,8 @@ int main()
         // BUILD PATH CONTEXT (CRITICAL FIX)
         // -------------------------------------------------
         PathContext paths = buildPaths(cfg);
+        std::cout << paths.verificationRoot << std::endl;
+        std::cout << paths.outputRoot << std::endl;
 
         // -------------------------------------------------
         // Single dispatch point
