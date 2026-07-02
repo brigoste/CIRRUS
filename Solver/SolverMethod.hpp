@@ -48,13 +48,6 @@ namespace solver
     // =========================================================
     // JSON serialization (nlohmann)
     // =========================================================
-    inline void to_json(nlohmann::json& j, const Method& m)
-    {
-        j = to_string(m);
-    }
-
-    inline void from_json(const nlohmann::json& j, Method& m)
-    {
-        m = from_string(j.get<std::string>());
-    }
+    inline void to_json(nlohmann::json& j, const Method& m) { j = to_string(m); }
+    inline void from_json(const nlohmann::json& j, Method& m) { m = from_string(j.get<std::string>()); }
 }
