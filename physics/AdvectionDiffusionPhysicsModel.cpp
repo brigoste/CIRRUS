@@ -1,7 +1,9 @@
 #include "physics/AdvectionDiffusionPhysicsModel.hpp"
+#include "utils/MathConstants.hpp"
 
 #include <cmath>
 #include <stdexcept>
+
 
 double AdvectionDiffusionPhysicsModel::diffusionFaceCoefficient(
     const Face& face) const
@@ -35,7 +37,9 @@ void AdvectionDiffusionPhysicsModel::addCellSources(
     (void)mesh;
     (void)c;
     (void)flux;
-    // no volumetric source in this model   -> For now...
+
+    // No intrinsic volumetric source.
+    // Verification sources are added separately by the verification framework.
 }
 
 double AdvectionDiffusionPhysicsModel::reconstructBoundaryValue(
@@ -57,8 +61,7 @@ double AdvectionDiffusionPhysicsModel::reconstructBoundaryValue(
             return phiCell + bc.flux * dx / gamma;
 
         case bc::Type::Convective:
-            return (gamma * phiCell + bc.h * dx * bc.Tinf)
-                 / (gamma + bc.h * dx);
+            return (gamma * phiCell + bc.h * dx * bc.Tinf) / (gamma + bc.h * dx);
 
         default:
             throw std::runtime_error("Unsupported BC type");
