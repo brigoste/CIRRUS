@@ -4,6 +4,4 @@
 #include <vector>
 
 // 1D-only solver (tridiagonal system)
-std::vector<double> TDMA(
-    LinearSystem sys
-);
+std::vector<double> TDMA( const LinearSystem& sys );
