@@ -36,21 +36,9 @@ nlohmann::json ConfigResolver::loadAndResolve(
     {
         std::vector<std::string> parents;
 
-        if (j["extends"].is_string())
-        {
-            parents.push_back(
-                j["extends"].get<std::string>());
-        }
-        else if (j["extends"].is_array())
-        {
-            parents =
-                j["extends"].get<std::vector<std::string>>();
-        }
-        else
-        {
-            throw std::runtime_error(
-                "'extends' must be string or array");
-        }
+        if (j["extends"].is_string()) { parents.push_back( j["extends"].get<std::string>()); }
+        else if (j["extends"].is_array()) { parents = j["extends"].get<std::vector<std::string>>(); }
+        else { throw std::runtime_error("'extends' must be string or array"); }
 
         for (const auto& rel : parents)
         {
@@ -77,12 +65,7 @@ nlohmann::json ConfigResolver::resolveFile(
 {
     std::ifstream file(path);
 
-    if (!file.is_open())
-    {
-        throw std::runtime_error(
-            "Cannot open config: "
-            + path.string());
-    }
+    if (!file.is_open()) { throw std::runtime_error("Cannot open config: "+ path.string()); }
 
     nlohmann::json j;
     file >> j;
