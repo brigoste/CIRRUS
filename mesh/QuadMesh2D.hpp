@@ -8,13 +8,6 @@
 #include "utils/LinearAlgebraUtils.hpp"
 #include <cmath>
 
-// enum class Patch { 
-//     LEFT = 0, 
-//     RIGHT = 1, 
-//     BOTTOM = 2, 
-//     TOP = 3 
-// };
-
 class QuadMesh2D : public MeshBase
 {
 public:
@@ -40,9 +33,7 @@ public:
     {
         const Face& face = faces_.at(f);
 
-        return std::abs(
-            LA::dot(face.dPN, face.normal)
-        );
+        return std::abs( LA::dot(face.dPN, face.normal) );
     }
 
     double distance( const Point& a, const Point& b) const override;
@@ -55,9 +46,7 @@ public:
     std::vector<Face>::const_iterator facesBegin() const override { return faces_.begin(); }
     std::vector<Face>::const_iterator facesEnd() const override { return faces_.end(); }
 
-    double cellVolume(std::size_t) const override {
-        return dx_ * dy_;
-    }
+    double cellVolume(std::size_t) const override { return dx_ * dy_; }
 
 private:
     std::size_t nx_, ny_;
@@ -74,5 +63,4 @@ private:
     void buildCells();
     void buildFaces(); 
     void buildNodes();    
-
 };
