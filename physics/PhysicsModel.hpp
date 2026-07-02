@@ -23,39 +23,25 @@ public:
     // =====================================================
     // Boundary handling
     // =====================================================
-    virtual double boundaryDirichletValue(
-        const BoundaryPatchSystem::Condition& bc,
-        const Face& face) const
+    virtual double boundaryDirichletValue( const BoundaryPatchSystem::Condition& bc, const Face& face) const
     {
         (void)face;
         return bc.value;
     }
 
-    virtual double reconstructBoundaryValue(
-        const BoundaryPatchSystem::Condition& bc,
-        double phiCell,
-        double dx,
-        bool isLeft) const = 0;
+    virtual double reconstructBoundaryValue( const BoundaryPatchSystem::Condition& bc, double phiCell, double dx, bool isLeft) const = 0;
 
     // =====================================================
     // Source term (UNIFIED ENTRY POINT)
     // =====================================================
-    virtual double cellSource(
-        const MeshBase& mesh,
-        std::size_t cell) const = 0;
+    virtual double cellSource( const MeshBase& mesh, std::size_t cell) const = 0;
 
-    virtual void addCellSources(
-        const MeshBase& mesh,
-        std::size_t cell,
-        FluxAccumulator& flux) const = 0;
+    virtual void addCellSources( const MeshBase& mesh, std::size_t cell, FluxAccumulator& flux) const = 0;
 
     // =====================================================
     // Optional: manufactured forcing hook
     // =====================================================
-    void attachVerification(const VerificationCase* vc)
-    {
-        vc_ = vc;
-    }
+    void attachVerification(const VerificationCase* vc) { vc_ = vc; }
 
 protected:
     const VerificationCase* vc_ = nullptr;
