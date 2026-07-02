@@ -14,8 +14,7 @@ void VTKWriter::writeVTU(
 {
     std::ofstream f(filename);
 
-    if (!f.is_open())
-        throw std::runtime_error("Failed to open VTU file");
+    if (!f.is_open()) { throw std::runtime_error("Failed to open VTU file"); }
 
     const std::size_t Nnodes = mesh.nnodes();
     const std::size_t Ncells = mesh.ncells();
@@ -65,8 +64,7 @@ void VTKWriter::writeVTU(
 
         int vtkType = mesh.vtkCellType(c);
 
-        for (auto n : nodes)
-            connectivity.push_back(n);
+        for (auto n : nodes) { connectivity.push_back(n); }
 
         runningOffset += nodes.size();
         offsets.push_back(runningOffset);
@@ -79,24 +77,21 @@ void VTKWriter::writeVTU(
     f << "<Cells>\n";
 
     f << "<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n";
-    for (auto n : connectivity)
-        f << n << " ";
+    for (auto n : connectivity) { f << n << " "; }
     f << "\n</DataArray>\n";
 
     // -------------------------
     // Offsets
     // -------------------------
     f << "<DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">\n";
-    for (auto o : offsets)
-        f << o << "\n";
+    for (auto o : offsets) { f << o << "\n"; }
     f << "</DataArray>\n";
 
     // -------------------------
     // Types
     // -------------------------
     f << "<DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\">\n";
-    for (auto t : types)
-        f << t << "\n";
+    for (auto t : types) { f << t << "\n"; }
     f << "</DataArray>\n";
 
     f << "</Cells>\n";
@@ -107,8 +102,7 @@ void VTKWriter::writeVTU(
     f << "<CellData Scalars=\"field\">\n";
     f << "<DataArray type=\"Float64\" Name=\"field\" format=\"ascii\">\n";
 
-    for (std::size_t c = 0; c < Ncells; ++c)
-        f << field[c] << "\n";
+    for (std::size_t c = 0; c < Ncells; ++c) { f << field[c] << "\n"; }
 
     f << "</DataArray>\n";
     f << "</CellData>\n";
