@@ -18,8 +18,7 @@ void FluxBuilder::buildFlux(
     FluxAccumulator& flux,
     const VerificationCase* verificationCase)
 {
-    if (flux.size() != mesh.ncells())
-        throw std::runtime_error("FluxAccumulator size mismatch");
+    if (flux.size() != mesh.ncells()) { throw std::runtime_error("FluxAccumulator size mismatch"); }
 
     // =====================================================
     // 1. INTERIOR FACES
@@ -47,8 +46,7 @@ void FluxBuilder::buildFlux(
     for (std::size_t g = 0; g < mesh.nBoundaryGroups(); ++g)
     {
         const auto* bc = boundary.getGroup(g);
-        if (!bc)
-            continue;
+        if (!bc) { continue; }
 
         const auto& faces = mesh.boundaryFaces(g);
 
@@ -71,10 +69,7 @@ void FluxBuilder::buildFlux(
                         const double y = face.center.x[1];
                         value = verificationCase->exact(x, y);
                     }
-                    else
-                    {
-                        value = model.boundaryDirichletValue(*bc, face);
-                    }
+                    else { value = model.boundaryDirichletValue(*bc, face); }
 
                     flux.addBoundaryDiffusion(P, D, value);
                     break;
@@ -104,7 +99,16 @@ void FluxBuilder::buildFlux(
     // =====================================================
     for (std::size_t c = 0; c < mesh.ncells(); ++c)
     {
+        // Physical source
         model.addCellSources(mesh, c, flux);
+
+        // Manufactured source
+        if (verificationCase)
+        {
+            const auto& xc = mesh.cellCenter(c);
+
+            flux.addSource(c, verificationCase->source(xc.x[0], xc.x[1]) * mesh.cellVolume(c), 0.0);
+        }
     }
 
 #ifdef DEBUG
@@ -119,4 +123,3 @@ void FluxBuilder::buildFlux(
             std::cerr << "[WARN] stiff source at cell " << i << "\n";
     }
 #endif
-}
