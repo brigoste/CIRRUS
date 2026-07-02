@@ -39,15 +39,11 @@ public:
 
     // direct matrix access for solvers (GS/SOR/CG)
     const std::unordered_map<std::size_t, double>& row(std::size_t i) const;
-
+    double diagonal(std::size_t i) const { return coeff(i, i); }
 
 private:
     std::size_t n_ = 0;
-
     // A stored as: row -> (col -> value)
     std::vector<std::unordered_map<std::size_t, double>> A_;
-
     std::vector<double> b_;
-
-
 };
