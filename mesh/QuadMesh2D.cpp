@@ -35,11 +35,7 @@ void QuadMesh2D::buildCells()
 
             cells_[c].id = c;
 
-            cells_[c].center = Point{
-                (i+0.5) * dx_,
-                (j+0.5) * dy_,
-                0.0
-            };
+            cells_[c].center = Point{ (i+0.5) * dx_, (j+0.5) * dy_, 0.0 };
 
             cells_[c].faces.clear();
         }
@@ -67,8 +63,7 @@ void QuadMesh2D::buildFaces()
         faces_.push_back(f);
 
         cells_[owner].faces.push_back(faces_.size() - 1);
-        if (neighbor != Face::INVALID)
-            cells_[neighbor].faces.push_back(faces_.size() - 1);
+        if (neighbor != Face::INVALID) cells_[neighbor].faces.push_back(faces_.size() - 1);
     };
 
     // -------------------------
@@ -81,17 +76,11 @@ void QuadMesh2D::buildFaces()
             std::size_t cL = idx(i, j);
             std::size_t cR = idx(i + 1, j);
 
-            Point fc{
-                (i + 1.0) * dx_,
-                (j + 0.5) * dy_,
-                0.0
-            };
+            Point fc{ (i + 1.0) * dx_, (j + 0.5) * dy_, 0.0 };
 
             Point normal{1.0, 0.0, 0.0};
 
-            Point dPN{
-                dx_, 0.0, 0.0
-            };
+            Point dPN{ dx_, 0.0, 0.0 };
 
             addFace(cL, cR, fc, normal, dy_, dPN);
         }
@@ -107,17 +96,11 @@ void QuadMesh2D::buildFaces()
             std::size_t cB = idx(i, j);
             std::size_t cT = idx(i, j + 1);
 
-            Point fc{
-                (i + 0.5) * dx_,
-                (j + 1.0) * dy_,
-                0.0
-            };
+            Point fc{ (i + 0.5) * dx_, (j + 1.0) * dy_, 0.0 };
 
             Point normal{0.0, 1.0, 0.0};
 
-            Point dPN{
-                0.0, dy_, 0.0
-            };
+            Point dPN{ 0.0, dy_, 0.0 };
 
             addFace(cB, cT, fc, normal, dx_, dPN);
         }
@@ -136,10 +119,8 @@ void QuadMesh2D::buildFaces()
 
         f.owner = owner;
         f.neighbor = Face::INVALID;
-
         f.center = c;
         f.normal = n;
-
         f.area = area;
         f.dPN = dPN;
 
@@ -163,9 +144,6 @@ void QuadMesh2D::buildFaces()
             Point{-dx_/2, 0.0, 0.0}
         );
 
-        // leftFaces_.push_back(f);
-        // f.dPN = f.center - centers_[N_ - 1];
-        
         boundaryGroups_[toGroup(Patch::LEFT)].push_back(f);
     }
 
@@ -179,8 +157,6 @@ void QuadMesh2D::buildFaces()
             dy_,
             Point{dx_/2, 0.0, 0.0}
         );
-
-        // rightFaces_.push_back(f);
 
         boundaryGroups_[toGroup(Patch::RIGHT)].push_back(f);
     }
@@ -196,24 +172,19 @@ void QuadMesh2D::buildFaces()
             Point{0.0, dy_/2, 0.0}
         );
 
-        // topFaces_.push_back(f);
-        
         boundaryGroups_[toGroup(Patch::TOP)].push_back(f);
     }
 
     // BOTTOM BOUNDARY
     for (std::size_t i = 0; i < nx_; ++i)
     {
-        std::size_t f = addBoundary(
-            idx(i, 0),
-            Point{(i + 0.5) * dx_, 0.0, 0.0},
-            Point{0.0, -1.0, 0.0},
-            dx_,
-            Point{0.0, -dy_/2, 0.0}
-        );
+        std::size_t f = addBoundary( 
+                    idx(i, 0), 
+                    Point{(i + 0.5) * dx_, 0.0, 0.0}, 
+                    Point{0.0, -1.0, 0.0}, 
+                    dx_, 
+                    Point{0.0, -dy_/2, 0.0} );
 
-        // bottomFaces_.push_back(f);
-        
         boundaryGroups_[toGroup(Patch::BOTTOM)].push_back(f);
     }
 }
@@ -223,8 +194,7 @@ void QuadMesh2D::buildNodes(){
     {
         for (std::size_t i = 0; i <= nx_; ++i)
         {
-            nodes_[j*(nx_+1)+i] =
-                Point{i*dx_, j*dy_, 0.0};
+            nodes_[j*(nx_+1)+i] = Point{i*dx_, j*dy_, 0.0};
         }
     }
 }
@@ -261,16 +231,3 @@ for (const auto& face : faces_)
         throw std::runtime_error("Invalid face spacing");
 }
 #endif
-
-// std::vector<std::size_t> QuadMesh2D::boundaryFaces(Patch patch) const
-// {
-//     switch (patch)
-//     {
-//         case Patch::LEFT:   return boundaryGroups_[0];
-//         case Patch::RIGHT:  return boundaryGroups_[1];
-//         case Patch::BOTTOM: return boundaryGroups_[2];
-//         case Patch::TOP:    return boundaryGroups_[3];
-//     }
-
-//     throw std::runtime_error("Invalid patch");
-// }
