@@ -34,8 +34,7 @@ PointField BoundaryReconstructor::reconstruct(
         const auto& faces = mesh.boundaryFaces(g);
         const auto* bc = boundary.getGroup(g);
 
-        if (!bc)
-            continue;
+        if (!bc) { continue; }
 
         for (std::size_t fIdx : faces)
         {
@@ -43,18 +42,11 @@ PointField BoundaryReconstructor::reconstruct(
 
             const std::size_t c = f.owner;
 
-            const double dx =
-                MeshGeometry::faceDistance(mesh, f, c);
+            const double dx = MeshGeometry::faceDistance(mesh, f, c);
 
-            const bool isInward =
-                (f.normal[0] < 0.0 || f.normal[1] < 0.0 || f.normal[2] < 0.0);
+            const bool isInward = (f.normal[0] < 0.0 || f.normal[1] < 0.0 || f.normal[2] < 0.0);
 
-            const double phiB = model.reconstructBoundaryValue(
-                *bc,
-                phi[c],
-                dx,
-                isInward
-            );
+            const double phiB = model.reconstructBoundaryValue( *bc, phi[c], dx, isInward );
 
             out.push_back(f.center, phiB);
         }
