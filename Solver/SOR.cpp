@@ -25,12 +25,11 @@ std::vector<double> SOR(
 
             for (const auto& [j, aij] : row)
             {
-                if (j == i) diag = aij;
-                else sum += aij * x[j];
+                if (j == i) { diag = aij; }
+                else { sum += aij * x[j]; }
             }
 
-            if (std::abs(diag) < 1e-14)
-                throw std::runtime_error("Zero diagonal at row " + std::to_string(i));
+            if (std::abs(diag) < 1e-14) { throw std::runtime_error("Zero diagonal at row " + std::to_string(i)); }
 
             double x_gs = (sys.rhs(i) - sum) / diag;
             double x_new = (1.0 - omega) * x[i] + omega * x_gs;
@@ -39,11 +38,9 @@ std::vector<double> SOR(
             x[i] = x_new;
         }
 
-        if (!std::isfinite(maxRes))
-            throw std::runtime_error("Non-finite residual in SOR");
+        if (!std::isfinite(maxRes)) { throw std::runtime_error("Non-finite residual in SOR"); }
 
-        if (maxRes < tol)
-            break;
+        if (maxRes < tol) { break; }
     }
 
     return x;
