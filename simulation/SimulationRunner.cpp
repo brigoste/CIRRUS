@@ -24,7 +24,6 @@ void SimulationRunner::validate(
     // -------------------------------------------------
     if (std::string(physics::to_string(cfg.physics.type)) == "advection-diffusion" && cfg.solver.method == solver::Method::CG)
         throw std::runtime_error("CG not valid for advection-diffusion (non-symmetric system)");
-
 }
 
 void SimulationRunner::run(
@@ -51,12 +50,7 @@ void SimulationRunner::run(
 
     auto residual = computeResidual(system, phi);
 
-    PointField field =
-        BoundaryReconstructor::reconstruct(
-            mesh,
-            sim.boundary(),
-            sim.model(),
-            phi);
+    PointField field = BoundaryReconstructor::reconstruct( mesh, sim.boundary(), sim.model(), phi);
 
     // -----------------------------
     // Output paths
@@ -72,17 +66,10 @@ void SimulationRunner::run(
     // -----------------------------
     VTKWriter::writeVTU(mesh, phi, vtkPath.string());
 
-    FieldWriter::writeCSVDebug(
-        field,
-        system.RHS(),
-        residual,
-        csvPath.generic_string());
+    FieldWriter::writeCSVDebug( field, system.RHS(), residual, csvPath.generic_string());
 
     // -----------------------------
     // Plotting
     // -----------------------------
-    if (cfg.io.plot_enabled)
-    {
-        runPlot(csvPath.generic_string());
-    }
+    if (cfg.io.plot_enabled) { runPlot(csvPath.generic_string()); }
 }
