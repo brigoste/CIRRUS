@@ -7,13 +7,11 @@ double ErrorNorms::L1(
     const std::vector<double>& numerical,
     const std::vector<double>& exact)
 {
-    if (numerical.size() != exact.size())
-        throw std::runtime_error("Vector size mismatch");
+    if (numerical.size() != exact.size()) { throw std::runtime_error("Vector size mismatch"); }
 
     double sum = 0.0;
 
-    for (std::size_t i = 0; i < numerical.size(); ++i)
-        sum += std::abs(numerical[i] - exact[i]);
+    for (std::size_t i = 0; i < numerical.size(); ++i) { sum += std::abs(numerical[i] - exact[i]); }
 
     return sum / numerical.size();
 }
@@ -22,8 +20,7 @@ double ErrorNorms::L2(
     const std::vector<double>& numerical,
     const std::vector<double>& exact)
 {
-    if (numerical.size() != exact.size())
-        throw std::runtime_error("Vector size mismatch");
+    if (numerical.size() != exact.size()) { throw std::runtime_error("Vector size mismatch"); }
 
     double sum = 0.0;
 
@@ -40,8 +37,7 @@ double ErrorNorms::Linf(
     const std::vector<double>& numerical,
     const std::vector<double>& exact)
 {
-    if (numerical.size() != exact.size())
-        throw std::runtime_error("Vector size mismatch");
+    if (numerical.size() != exact.size()) { throw std::runtime_error("Vector size mismatch"); }
 
     double maxErr = 0.0;
 
