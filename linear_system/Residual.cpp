@@ -15,10 +15,7 @@ std::vector<double> computeResidual(
     {
         r[i] = b[i];
 
-        for (auto [j, aij] : sys.row(i))
-        {
-            r[i] -= aij * x[j];
-        }
+        for (auto [j, aij] : sys.row(i)) { r[i] -= aij * x[j]; }
     }
 
     return r;
