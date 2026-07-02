@@ -30,12 +30,7 @@
 #include <algorithm>
 #include <cmath>
 
-std::filesystem::path resolveOutputPath(
-    const std::filesystem::path& root,
-    const std::string& relative)
-{
-    return root / relative;
-}
+std::filesystem::path resolveOutputPath( const std::filesystem::path& root, const std::string& relative) { return root / relative; }
 
 int main()
 {
@@ -58,7 +53,7 @@ int main()
         // Single dispatch point
         // -------------------------------------------------
 
-        if (cfg.verificationSuite.enabled)
+        if (cfg.verificationSuite.enabled) 
         {
             std::cout << "\n================ VERIFICATION MODE ================\n";
 
