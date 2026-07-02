@@ -51,16 +51,14 @@ public:
         }
     }
 
-    void setVerificationCase(std::unique_ptr<VerificationCase> verificationCase);
-
-    
+    void setVerificationCase(std::unique_ptr<VerificationCase> verificationCase);    
 
 private:
     // -------------------------
     // internal wiring
     // -------------------------
     void bindBoundaryConditions(const SimulationConfig& cfg);
-    std::size_t resolveBoundaryFace(const std::string& loc);
+    // std::size_t resolveBoundaryFace(const std::string& loc);
 
     std::unique_ptr<MeshBase> mesh_;
 
