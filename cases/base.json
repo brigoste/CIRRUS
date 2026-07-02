@@ -1,9 +1,7 @@
 {
   "physics": {
     "type": "heat",
-    "k": 100,
-    "Su": 0,
-    "Sp": 0
+    "k": 100.0
   },
 
   "solver": {
@@ -13,10 +11,14 @@
     "omega": 1.0
   },
 
+  "paths": {
+    "output_root": "C:/Users/E40112856/Packages/CIRRUS/output"
+  },
+
   "verificationSuite": {
     "enabled": true,
     "plot_enabled": true,
-    
+
     "cases": [
       "Linear1D",
       "Quadratic1D",
@@ -25,16 +27,129 @@
     ],
 
     "caseConfigs": {
+
       "Linear1D": {
-        "params": { }
+
+        "mesh": {
+          "type": "line1D",
+          "nx": 20,
+          "lx": 1.5
+        },
+
+        "physics": {
+          "type": "heat",
+          "k": 100.0
+        },
+
+        "solver": {
+          "type": "TDMA",
+          "tol": 1e-12,
+          "max_iter": 5000,
+          "omega": 1.0
+        },
+
+        "boundary_conditions": [
+          { "group": 0, "type": "Dirichlet", "value": 300.0 },
+          { "group": 1, "type": "Dirichlet", "value": 400.0 }
+        ],
+
+        "params": {}
       },
+
       "Quadratic1D": {
-        "params": { "k": 100.0 }
+
+        "mesh": {
+          "type": "line1D",
+          "nx": 20,
+          "lx": 1.0
+        },
+
+        "physics": {
+          "type": "heat",
+          "k": 100.0
+        },
+
+        "solver": {
+          "type": "CG",
+          "tol": 1e-8,
+          "max_iter": 5000
+        },
+
+        "boundary_conditions": [
+          { "group": 0, "type": "Dirichlet", "value": 0.0 },
+          { "group": 1, "type": "Dirichlet", "value": 2.25 }
+        ],
+
+        "params": {
+          "k": 100.0
+        }
       },
+
       "Sinusoidal2D": {
-        "params": { "k": 100.0 }
+
+        "mesh": {
+          "type": "quad2D",
+          "nx": 50,
+          "ny": 50,
+          "lx": 1.0,
+          "ly": 1.0
+        },
+
+        "physics": {
+          "type": "heat",
+          "k": 100.0
+        },
+
+        "solver": {
+          "type": "CG",
+          "tol": 1e-8,
+          "max_iter": 5000
+        },
+
+        "boundary_conditions": [
+          { "group": 0, "type": "Dirichlet", "value": 0.0 },
+          { "group": 1, "type": "Dirichlet", "value": 0.0 },
+          { "group": 2, "type": "Dirichlet", "value": 0.0 },
+          { "group": 3, "type": "Dirichlet", "value": 0.0 }
+        ],
+
+        "params": {
+          "k": 100.0
+        }
       },
+
       "AdvectionDiffusion2D": {
+
+        "mesh": {
+          "type": "quad2D",
+          "nx": 160,
+          "ny": 160,
+          "lx": 1.0,
+          "ly": 1.0
+        },
+
+        "physics": {
+          "type": "advection-diffusion",
+          "gamma": 1.0,
+          "rho": 1.0,
+          "ux": 1.0,
+          "uy": 0.2,
+          "uz": 0.0
+        },
+
+        "solver": {
+          "type": "BiCGSTAB",
+          "tol": 1e-8,
+          "max_iter": 5000
+        },
+
+        "boundary_conditions": [
+          { "group": 0, "type": "Dirichlet", "value": 0.0 },
+          { "group": 1, "type": "Dirichlet", "value": 0.0 },
+          { "group": 2, "type": "Dirichlet", "value": 0.0 },
+          { "group": 3, "type": "Dirichlet", "value": 0.0 }
+        ],
+
         "params": {
           "gamma": 1.0,
           "rho": 1.0,
@@ -44,14 +159,9 @@
         }
       }
     },
-    
+
     "output": {
       "directory": "verification"
     }
-  },
-
-  "paths": {
-      "output_root": "C:/Users/E40112856/Packages/CIRRUS/output"
-    }
-
+  }
 }
