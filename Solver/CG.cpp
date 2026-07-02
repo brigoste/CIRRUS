@@ -17,15 +17,14 @@ static std::vector<double> matVec(const LinearSystem sys, const std::vector<doub
     {
         const auto& row = sys.row(i);
 
-        for (const auto& [j, aij] : row)
-            y[i] += aij * x[j];
+        for (const auto& [j, aij] : row) { y[i] += aij * x[j]; }
     }
 
     return y;
 }
 
 std::vector<double> CG(
-    const LinearSystem sys,
+    const LinearSystem& sys,
     int max_iter,
     double tol)
 {
@@ -53,11 +52,9 @@ std::vector<double> CG(
         double alpha_num = rs_old;
         double alpha_den = 0.0;
 
-        for (std::size_t i = 0; i < N; ++i)
-            alpha_den += p[i] * Ap[i];
+        for (std::size_t i = 0; i < N; ++i) { alpha_den += p[i] * Ap[i]; }
 
-        if (std::abs(alpha_den) < 1e-14)
-            break;
+        if (std::abs(alpha_den) < 1e-14) { break; }
 
         double alpha = alpha_num / alpha_den;
 
@@ -70,11 +67,9 @@ std::vector<double> CG(
             rs_new += r[i] * r[i];
         }
 
-        if (std::sqrt(rs_new) < tol)
-            break;
+        if (std::sqrt(rs_new) < tol) { break; }
 
-        for (std::size_t i = 0; i < N; ++i)
-            p[i] = r[i] + (rs_new / rs_old) * p[i];
+        for (std::size_t i = 0; i < N; ++i) { p[i] = r[i] + (rs_new / rs_old) * p[i]; }
 
         rs_old = rs_new;
     }
