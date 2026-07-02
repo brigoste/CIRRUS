@@ -123,3 +123,4 @@ void FluxBuilder::buildFlux(
             std::cerr << "[WARN] stiff source at cell " << i << "\n";
     }
 #endif
+}
