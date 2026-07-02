@@ -9,16 +9,12 @@ double HeatPhysicsModel::diffusionFaceCoefficient(const Face& face) const
 {
     const double d_eff = std::abs(LA::dot(face.dPN, face.normal));
 
-    if (d_eff <= 0.0)
-        throw std::runtime_error("Invalid face spacing");
+    if (d_eff <= 0.0) { throw std::runtime_error("Invalid face spacing"); }
 
     return k_ * face.area / d_eff;
 }
 
-double HeatPhysicsModel::convectionFaceFlux(const Face& /*face*/) const
-{
-    return 0.0;
-}
+double HeatPhysicsModel::convectionFaceFlux(const Face& /*face*/) const { return 0.0; }
 
 void HeatPhysicsModel::addCellSources(
     const MeshBase& mesh,
@@ -48,8 +44,7 @@ double HeatPhysicsModel::reconstructBoundaryValue(
             return phiCell + bc.flux * dx / k;
 
         case bc::Type::Convective:
-            return (k * phiCell + bc.h * dx * bc.Tinf)
-                 / (k + bc.h * dx);
+            return (k * phiCell + bc.h * dx * bc.Tinf) / (k + bc.h * dx);
 
         default:
             throw std::runtime_error("Unsupported BC type");
