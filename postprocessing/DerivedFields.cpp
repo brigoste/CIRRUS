@@ -10,17 +10,13 @@ DerivedFields::gradient1D(
     const std::size_t n = phi.size();
     std::vector<double> grad(n, 0.0);
 
-    if (n < 2)
-        return grad;
+    if (n < 2) return grad;
 
     for (std::size_t i = 1; i < n - 1; ++i)
     {
-        const double dx =
-            mesh.cellCenter(i + 1)[0]
-          - mesh.cellCenter(i - 1)[0];
+        const double dx = mesh.cellCenter(i + 1)[0] - mesh.cellCenter(i - 1)[0];
 
-        grad[i] =
-            (phi[i + 1] - phi[i - 1]) / dx;
+        grad[i] = (phi[i + 1] - phi[i - 1]) / dx;
     }
 
     // simple boundary extrapolation
@@ -38,8 +34,7 @@ DerivedFields::heatFlux1D(
 {
     auto grad = gradient1D(mesh, phi);
 
-    for (double& g : grad)
-        g = -k * g;
+    for (double& g : grad) { g = -k * g; }
 
     return grad;
 }
