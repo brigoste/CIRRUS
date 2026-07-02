@@ -9,8 +9,6 @@
 #include <cmath>
 #include <iostream>
 
-// Look at the chatGPT thread. We may need to add a geometry helper class.
-
 void FluxBuilder::buildFlux(
     const MeshBase& mesh,
     const PhysicsModel& model,
