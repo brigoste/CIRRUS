@@ -11,8 +11,7 @@
 class QuadMesh2D : public MeshBase
 {
 public:
-    QuadMesh2D(std::size_t nx, std::size_t ny,
-               double lx, double ly);
+    QuadMesh2D(std::size_t nx, std::size_t ny, double lx, double ly);
 
     std::size_t ncells() const override { return cells_.size(); }
     std::size_t nfaces() const override { return faces_.size(); }
@@ -32,7 +31,6 @@ public:
     double faceDistance(std::size_t f) const override
     {
         const Face& face = faces_.at(f);
-
         return std::abs( LA::dot(face.dPN, face.normal) );
     }
 
