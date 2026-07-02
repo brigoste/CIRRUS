@@ -269,10 +269,7 @@ SimulationConfig fromJson(
                         entry.overrideBoundary = true;
                     }
                 }
-                else
-                {
-                    entry.params = {};
-                }
+                else { entry.params = {}; }
 
                 cfg.verificationSuite.cases.push_back(std::move(entry));
             }
