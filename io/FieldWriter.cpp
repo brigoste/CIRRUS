@@ -15,16 +15,11 @@ void FieldWriter::writeCSVDebug(
     // -------------------------
     // Only create directories if there is a parent path
     // -------------------------
-    if (path.has_parent_path())
-    {
-        std::filesystem::create_directories(path.parent_path());
-    }
+    if (path.has_parent_path()) { std::filesystem::create_directories(path.parent_path()); }
 
     std::ofstream f(path);
 
-    if (!f.is_open())
-        throw std::runtime_error(
-            "Failed to open debug CSV: " + path.string());
+    if (!f.is_open()) { throw std::runtime_error("Failed to open debug CSV: " + path.string()); }
 
     f << "x,y,z,phi,rhs,residual\n";
 
@@ -34,11 +29,9 @@ void FieldWriter::writeCSVDebug(
     {
         const Point& p = field.x[i];
 
-        const double rhs_i =
-            (i < rhs.size()) ? rhs[i] : 0.0;
+        const double rhs_i = (i < rhs.size()) ? rhs[i] : 0.0;
 
-        const double res_i =
-            (i < residual.size()) ? residual[i] : 0.0;
+        const double res_i = (i < residual.size()) ? residual[i] : 0.0;
 
         f << p.x[0] << ","
           << p.x[1] << ","
