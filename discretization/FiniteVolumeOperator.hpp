@@ -13,7 +13,5 @@
 class FiniteVolumeOperator
 {
 public:
-    static void assemble(
-        const FluxAccumulator& flux,
-        LinearSystem& sys);
+    static void assemble( const FluxAccumulator& flux, LinearSystem& sys);
 };
