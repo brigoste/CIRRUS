@@ -7,6 +7,5 @@
 class PhysicsFactory
 {
 public:
-    static std::unique_ptr<PhysicsModel>
-    create(const PhysicsConfig& cfg);
+    static std::unique_ptr<PhysicsModel> create(const PhysicsConfig& cfg);
 };
