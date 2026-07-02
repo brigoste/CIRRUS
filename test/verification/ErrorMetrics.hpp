@@ -16,9 +16,5 @@ struct ErrorNormResults
 class ErrorNorms
 {
 public:
-
-    static ErrorNormResults compute(
-        const MeshBase& mesh,
-        const std::vector<double>& numerical,
-        const std::vector<double>& exact);
+    static ErrorNormResults compute( const MeshBase& mesh, const std::vector<double>& numerical, const std::vector<double>& exact);
 };
