@@ -14,20 +14,11 @@ public:
 
     double diffusionCoefficient() const override { return k_; }
 
-    double reconstructBoundaryValue(
-        const BoundaryPatchSystem::Condition& bc,
-        double phiCell,
-        double dx,
-        bool isLeft) const override;
+    double reconstructBoundaryValue( const BoundaryPatchSystem::Condition& bc, double phiCell, double dx, bool isLeft) const override;
 
-    void addCellSources(
-        const MeshBase& mesh,
-        std::size_t c,
-        FluxAccumulator& flux) const override;
+    void addCellSources( const MeshBase& mesh, std::size_t c, FluxAccumulator& flux) const override;
 
-    double cellSource(
-        const MeshBase& mesh,
-        std::size_t c) const override;
+    double cellSource( const MeshBase& mesh, std::size_t c) const override;
 
 private:
     double k_ = 1.0;
