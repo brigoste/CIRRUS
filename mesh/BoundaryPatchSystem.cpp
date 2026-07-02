@@ -5,11 +5,6 @@ void BoundaryPatchSystem::setGroup(std::size_t group, const Condition& bc)
     groupBC_[group] = bc;
 }
 
-// bool BoundaryPatchSystem::hasGroup(std::size_t group) const
-// {
-//     return groupBC_.find(group) != groupBC_.end();
-// }
-
 const BoundaryPatchSystem::Condition*
 BoundaryPatchSystem::getGroup(std::size_t group) const
 {
