@@ -1,5 +1,6 @@
 #pragma once
 #include "mesh/primitives/Face.hpp"
+#include <vector>
 
 struct Cell
 {
@@ -12,4 +13,3 @@ struct Cell
 
     // optional: cached coefficients if you want later
 };
-
