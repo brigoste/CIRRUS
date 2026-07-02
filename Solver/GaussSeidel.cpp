@@ -3,14 +3,7 @@
 #include <cmath>
 #include <stdexcept>
 
-// static double rowDot(
-//     const std::unordered_map<std::size_t, double>& row,
-//     const std::vector<double>& x);
-
-std::vector<double> GaussSeidel(
-    const LinearSystem sys,
-    int max_iter,
-    double tol)
+std::vector<double> GaussSeidel( const LinearSystem& sys, int max_iter, double tol)
 {
     const std::size_t N = sys.size();
 
@@ -29,12 +22,11 @@ std::vector<double> GaussSeidel(
 
             for (const auto& [j, aij] : row)
             {
-                if (j == i) diag = aij;
-                else sum += aij * x[j];
+                if (j == i) { diag = aij; }
+                else { sum += aij * x[j]; }
             }
 
-            if (std::abs(diag) < 1e-14)
-                throw std::runtime_error("Zero diagonal in GS");
+            if (std::abs(diag) < 1e-14) { throw std::runtime_error("Zero diagonal in GS"); }
 
             double x_new = (sys.rhs(i) - sum) / diag;
 
@@ -42,8 +34,7 @@ std::vector<double> GaussSeidel(
             x[i] = x_new;
         }
 
-        if (maxRes < tol)
-            break;
+        if (maxRes < tol) { break; }
     }
 
     return x;
