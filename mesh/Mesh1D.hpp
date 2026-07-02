@@ -41,23 +41,12 @@ public:
     const std::vector<std::size_t>& boundaryFaces(std::size_t group) const override;
 
     // optional helper (mesh-specific convenience)
-    std::size_t toGroup(Patch p) const
-    {
-        return static_cast<std::size_t>(p);
-    }
-    std::size_t leftBoundaryFace() const
-    {
-        return boundaryGroups_[toGroup(Patch::LEFT)].front();
-    }
+    std::size_t toGroup(Patch p) const { return static_cast<std::size_t>(p); }
+    std::size_t leftBoundaryFace() const { return boundaryGroups_[toGroup(Patch::LEFT)].front(); }
 
-    std::size_t rightBoundaryFace() const
-    {
-        return boundaryGroups_[toGroup(Patch::RIGHT)].front();
-    }
+    std::size_t rightBoundaryFace() const { return boundaryGroups_[toGroup(Patch::RIGHT)].front(); }
 
-    double cellVolume(std::size_t) const override {
-        return dx_;
-    }
+    double cellVolume(std::size_t) const override { return dx_; }
 
 private:
     std::size_t N_;
