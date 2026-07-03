@@ -16,19 +16,11 @@ void VerificationIO::writeCSV(
     const std::filesystem::path& file)
 {
     PointField field =
-        BoundaryReconstructor::reconstruct(
-            sim.mesh(),
-            sim.boundary(),
-            sim.model(),
-            phi);
+        BoundaryReconstructor::reconstruct( sim.mesh(), sim.boundary(), sim.model(), phi);
 
     std::vector<double> residual(phi.size(), 0.0);
 
-    FieldWriter::writeCSVDebug(
-        field,
-        sim.system().RHS(),
-        residual,
-        file.string());
+    FieldWriter::writeCSVDebug( field, sim.system().RHS(), residual, file.string());
 }
 
 void VerificationIO::writeSummary(
@@ -45,8 +37,7 @@ void VerificationIO::writeSummary(
 
     std::ofstream out(file);
 
-    if (!out.is_open())
-        throw std::runtime_error("Failed to open verification summary file: " + file.string());
+    if (!out.is_open()) { throw std::runtime_error("Failed to open verification summary file: " + file.string()); }
 
     out << j.dump(4);
 }
