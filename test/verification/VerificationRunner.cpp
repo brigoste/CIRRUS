@@ -16,8 +16,7 @@ void VerificationRunner::run(
     const SimulationConfig& cfg,
     const PathContext& paths)
 {
-    if (!cfg.verificationSuite.enabled)
-        return;
+    if (!cfg.verificationSuite.enabled) { return; }
 
     std::cout << "\n================ VERIFICATION MODE ================\n";
     std::cout << "Verification enabled: " << cfg.verificationSuite.enabled << "\n";
@@ -29,10 +28,11 @@ void VerificationRunner::run(
     // -------------------------------------------------
     // Main verification loop (NOW FULLY TYPED)
     // -------------------------------------------------
+    
     for (const auto& caseEntry : cfg.verificationSuite.cases)
     {
         const std::string& caseName = caseEntry.name;
-        const nlohmann::json& params = caseEntry.params;
+        // const nlohmann::json& params = caseEntry.params;
 
         std::cout << "\n=================================\n"
                   << "Running verification case: " << caseName
@@ -41,41 +41,39 @@ void VerificationRunner::run(
         // -------------------------------------------------
         // Build manufactured / verification case
         // -------------------------------------------------
-        auto casePtr = VerificationCaseFactory::create(caseName, params);
-        // -------------------------------------------------
-        // Build simulation config (base config only)
-        // -------------------------------------------------
-        SimulationConfig caseCfg = cfg;
-
-        // IMPORTANT:
-        // No per-case JSON overrides anymore.
-        // All configuration must come from:
-        //   base.json + SimulationConfig + typed params
+        SimulationConfig caseCfg = resolveCaseConfig(cfg, caseEntry);
 
         Simulation sim(caseCfg);
+
+        auto casePtr = VerificationCaseFactory::create(caseName, caseEntry.params);
+
         sim.setVerificationCase(std::move(casePtr));
 
         sim.assemble();
         auto phi = sim.solve();
 
         const MeshBase& mesh = sim.mesh();
-        const auto& verifCase = *sim.verificationCase();
+        // const auto& verifCase = *sim.verificationCase();
+
+        if(caseEntry.name == "Quadratic1D") {
+            for (std::size_t i=0; i<sim.system().size(); ++i)
+            {
+                std::cout << i << "  b = " << sim.system().rhs(i) << '\n';
+            }
+        }
 
         // -------------------------------------------------
         // Exact solution evaluation
         // -------------------------------------------------
         std::vector<double> exactField(mesh.ncells());
 
-        for (std::size_t c = 0; c < mesh.ncells(); ++c)
-        {
-            const auto& xc = mesh.cellCenter(c);
-            exactField[c] = verifCase.exact(xc.x[0], xc.x[1]);
-        }
-
         // -------------------------------------------------
         // Error norms
         // -------------------------------------------------
         auto norms = ErrorNorms::compute(mesh, phi, exactField);
+
+        std::cout << cfg.physics.k << "\n";
+        std::cout << cfg.mesh.nx << "\n";
 
         // -------------------------------------------------
         // Output paths
@@ -89,21 +87,14 @@ void VerificationRunner::run(
         // Write outputs
         // -------------------------------------------------
         VerificationIO::writeCSV(sim, phi, csvPath);
-        VerificationIO::writeSummary(
-            caseName,
-            norms.l2_energy,
-            norms.linf,
-            jsonPath
-        );
+        VerificationIO::writeSummary( caseName, norms.l2_energy, norms.linf, jsonPath );
 
         // -------------------------------------------------
         // Plotting
         // -------------------------------------------------
-        if (cfg.verificationSuite.plot_enabled)
+        if (cfg.verificationSuite.plot_enabled) 
         {
-            std::cout << "Plotting " << caseName
-                      << " from " << csvPath << "\n";
-
+            std::cout << "Plotting " << caseName << " from " << csvPath << "\n";
             runPlot(csvPath.generic_string());
         }
 
