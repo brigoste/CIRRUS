@@ -9,6 +9,13 @@ public:
     explicit Quadratic1D(const nlohmann::json& params) {
         if (!params.contains("k")) { throw std::runtime_error("Quadratic1D missing required parameter k"); }
         k_ = params.value("k",100);
+
+        if (!params.contains("TL")) { throw std::runtime_error("Quadratic1D missing reuqired parameter TL"); }
+        TL = params.value("TL",300);
+
+        if (!params.contains("TR")) { throw std::runtime_error("Quadratic1D missing reuqired parameter TR"); }
+        TR = params.value("TR",400);
+
     }
 
     double exact(double x, double y) const override;
@@ -16,5 +23,5 @@ public:
     double source(double x, double y) const override;
 
 private:
-    double k_;
+    double k_, TL, TR;
 };
