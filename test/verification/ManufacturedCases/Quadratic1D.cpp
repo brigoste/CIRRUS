@@ -2,7 +2,7 @@
 
 double Quadratic1D::exact( double x, double) const
 {
-    return x;
+    return x*x + (TR - TL - 1)*x + TL;
 }
 
 double Quadratic1D::source(double x, double y) const
@@ -12,5 +12,5 @@ double Quadratic1D::source(double x, double y) const
 
 double Quadratic1D::laplacian( double, double) const
 {
-    return -2.0;      // -2*k
+    return 2.0;      // -2*k
 }
