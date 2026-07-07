@@ -55,11 +55,17 @@ void VerificationRunner::run(
         const MeshBase& mesh = sim.mesh();
         // const auto& verifCase = *sim.verificationCase();
 
-        if(caseEntry.name == "Quadratic1D") {
-            for (std::size_t i=0; i<sim.system().size(); ++i)
-            {
-                std::cout << i << "  b = " << sim.system().rhs(i) << '\n';
-            }
+        if (caseEntry.name == "Quadratic1D")
+        {
+            const double TL = caseEntry.params.at("TL").get<double>();
+            const double TR = caseEntry.params.at("TR").get<double>();
+
+            double leftBC  = caseCfg.boundary.at(0).condition.value;
+            double rightBC = caseCfg.boundary.at(1).condition.value;
+
+            if (std::abs(leftBC - TL) > 1e-12) { throw std::runtime_error( "Quadratic1D: TL does not match left boundary." ); }
+
+            if (std::abs(rightBC - TR) > 1e-12) { throw std::runtime_error( "Quadratic1D: TR does not match right boundary." ); }
         }
 
         // -------------------------------------------------
