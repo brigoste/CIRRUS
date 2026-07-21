@@ -22,6 +22,7 @@ public:
     const Point& cellCenter(std::size_t c) const override;
     double faceDistance(std::size_t f) const override;
     double distance(const Point& a, const Point& b) const override;
+    double getLx() const override {return L_;}
 
     // connectivity
     void cellNodes(std::size_t c, std::vector<std::size_t>& nodes) const override;
@@ -32,7 +33,7 @@ public:
     std::vector<Face>::const_iterator facesBegin() const override;
     std::vector<Face>::const_iterator facesEnd() const override;
 
-    // cellss
+    // cells
     const Cell& cell(std::size_t i) const override;
 
     // boundary interface (MeshBase contract)
