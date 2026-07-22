@@ -13,9 +13,6 @@
 #include <filesystem>
 #include <iomanip>
 
-constexpr double L2_TOL   = 1e-8;
-constexpr double LINF_TOL = 1e-8;
-
 struct VerificationSummary
 {
     std::string caseName;
@@ -25,6 +22,9 @@ struct VerificationSummary
 
     double l2;
     double linf;
+
+    double l2Tol;
+    double linfTol;
 
     bool passed = true;
 };
@@ -125,7 +125,7 @@ void VerificationRunner::run(
         // Write outputs
         // -------------------------------------------------
         VerificationIO::writeCSV(sim, phi, csvPath);
-        VerificationIO::writeSummary( caseName, norms.l2_rms, norms.linf, jsonPath );
+        VerificationIO::writeSummary(caseName, norms.l2_rms, norms.linf, jsonPath);
 
         // -------------------------------------------------
         // Plotting
@@ -154,6 +154,11 @@ void VerificationRunner::run(
         else if (meshType == "quad2D") { meshSize = std::to_string(caseCfg.mesh.nx) + "x" + std::to_string(caseCfg.mesh.ny); }
         else { meshSize = std::to_string(mesh.ncells()) + " cells"; }
 
+        double l2_tol = sim.verificationCase()->l2AcceptanceThreshold();
+        double linf_tol = sim.verificationCase()->linfAcceptanceThreshold();
+
+        bool passed = norms.l2_rms <= l2_tol && norms.linf <= linf_tol;
+
         summary.emplace_back(VerificationSummary{
             caseName,
             solver::to_string(caseCfg.solver.method),
@@ -161,7 +166,9 @@ void VerificationRunner::run(
             meshSize,
             norms.l2_rms,
             norms.linf,
-            (norms.l2_rms < L2_TOL && norms.linf < LINF_TOL)
+            l2_tol,
+            linf_tol,
+            passed
         });
     }
 
