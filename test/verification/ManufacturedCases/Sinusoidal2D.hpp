@@ -10,11 +10,15 @@ public:
         if (!params.contains("k")) { throw std::runtime_error("Sinusoidal2D missing required parameter k"); }
         k_ = params.value("k",100);
     }
+    void initialize(const MeshBase&) override {}// Default: nothing needed 
 
     double exact(double x, double y) const override;
     double laplacian(double x, double y) const override;
 
     double source(double x, double y) const override;
+
+    double l2AcceptanceThreshold() const override { return 5e-4; }
+    double linfAcceptanceThreshold() const override { return 5e-4; }
 private:
     double k_;
 };
