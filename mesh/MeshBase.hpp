@@ -21,6 +21,9 @@ public:
     virtual const Point& cellCenter(std::size_t c) const = 0;
     virtual double faceDistance(std::size_t f) const = 0;
     virtual double distance(const Point& a, const Point& b) const = 0;
+    virtual double getLx() const = 0;
+    virtual double getLy() const = 0;
+    virtual double getLz() const = 0;
 
     // connectivity (canonical)
     virtual void cellNodes(std::size_t c, std::vector<std::size_t>& nodes) const = 0;
