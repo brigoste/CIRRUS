@@ -110,6 +110,8 @@ std::size_t Mesh1D::nBoundaryGroups() const { return boundaryGroups_.size(); }
 
 const std::vector<std::size_t>& Mesh1D::boundaryFaces(std::size_t group) const { return boundaryGroups_.at(group); }
 
+
+
 // ---------------------------
 // Connectivity
 // ---------------------------
