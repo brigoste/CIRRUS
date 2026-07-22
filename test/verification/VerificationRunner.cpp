@@ -20,14 +20,13 @@ struct VerificationSummary
 {
     std::string caseName;
     std::string solver;
-
-    std::size_t nx;
-    std::size_t ny;
+    std::string meshType;
+    std::string meshSize;
 
     double l2;
     double linf;
 
-    bool passed = false;
+    bool passed = true;
 };
 
 
@@ -156,12 +155,29 @@ void VerificationRunner::run(
                   << "CSV Output: " << csvPath << "\n"
                   << "JSON Output: " << jsonPath << "\n"
                   << "=============================================\n";
+        
+        std::string meshType = caseCfg.mesh.type;
+
+        std::string meshSize;
+
+        if (meshType == "line1D")
+        {
+            meshSize = std::to_string(caseCfg.mesh.nx) + "x1";
+        }
+        else if (meshType == "quad2D")
+        {
+            meshSize = std::to_string(caseCfg.mesh.nx) + "x" + std::to_string(caseCfg.mesh.ny);
+        }
+        else
+        {
+            meshSize = std::to_string(mesh.ncells()) + " cells";
+        }
 
         summary.emplace_back(VerificationSummary{
             caseName,
             solver::to_string(caseCfg.solver.method),
-            caseCfg.mesh.nx,
-            caseCfg.mesh.ny,
+            meshType,
+            meshSize,
             norms.l2_rms,
             norms.linf,
             (norms.l2_rms < L2_TOL && norms.linf < LINF_TOL)
@@ -183,31 +199,30 @@ void VerificationRunner::run(
     std::cout << std::left
             << std::setw(24) << "Case"
             << std::setw(12) << "Solver"
-            << std::setw(8)  << "Nx"
-            << std::setw(8)  << "Ny"
+            << std::setw(16) << "Mesh Type"
+            << std::setw(16) << "Mesh Size"
             << std::setw(15) << "L2 RMS"
             << std::setw(15) << "Linf"
             << std::setw(10) << "Status"
             << "\n";
 
-    std::cout << std::string(92, '-') << "\n";
+    std::cout << std::string(105, '-') << "\n";
 
-    std::cout << std::scientific
-            << std::setprecision(6);
+    std::cout << std::scientific << std::setprecision(3);
 
     for (const auto& s : summary)
     {
         std::cout << std::left
                 << std::setw(24) << s.caseName
                 << std::setw(12) << s.solver
-                << std::setw(8)  << s.nx
-                << std::setw(8)  << s.ny
+                << std::setw(16) << s.meshType
+                << std::setw(16) << s.meshSize
                 << std::setw(15) << s.l2
                 << std::setw(15) << s.linf
                 << std::setw(10) << (s.passed ? "PASS" : "FAIL")
                 << "\n";
     }
 
-    std::cout << "\nVerification Result: " << passedCount << "/" << summary.size() << " cases passed\n\n";
+    std::cout << "\nVerification Result: " << passedCount << "/" << summary.size() << " cases passed, " << summary.size() - passedCount << " failed\n\n";
 
 }
