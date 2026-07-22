@@ -29,7 +29,6 @@ struct VerificationSummary
     bool passed = true;
 };
 
-
 void VerificationRunner::run(
     const SimulationConfig& cfg,
     const PathContext& paths)
@@ -205,5 +204,4 @@ void VerificationRunner::run(
     }
 
     std::cout << "\nVerification Result: " << passedCount << "/" << summary.size() << " cases passed, " << summary.size() - passedCount << " failed\n\n";
-
 }
