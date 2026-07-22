@@ -46,9 +46,14 @@ public:
 
     double cellVolume(std::size_t) const override { return dx_ * dy_; }
 
+    double getLx() const override {return Lx_;}
+    double getLy() const override {return Ly_;}
+    double getLz() const override {return 0.0;}
+
 private:
     std::size_t nx_, ny_;
     double dx_, dy_;
+    double Lx_, Ly_;
 
     std::array<std::vector<std::size_t>, 4> boundaryGroups_;
 
