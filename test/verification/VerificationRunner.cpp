@@ -94,8 +94,7 @@ void VerificationRunner::run(
         // -------------------------------------------------
         std::vector<double> exactField(mesh.ncells());
 
-        if (!sim.verificationCase())
-        {
+        if (!sim.verificationCase()) {
             throw std::runtime_error(
                 "Verification enabled but no verification case attached."
             );
@@ -132,7 +131,7 @@ void VerificationRunner::run(
         // -------------------------------------------------
         // Plotting
         // -------------------------------------------------
-        if (cfg.verificationSuite.plot_enabled)  {
+        if (cfg.verificationSuite.plot_enabled) {
             std::cout << "Plotting " << caseName << " from " << csvPath << "\n";
             runPlot(csvPath.generic_string());
         }
