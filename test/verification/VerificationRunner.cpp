@@ -108,14 +108,6 @@ void VerificationRunner::run(
             const auto& xc = mesh.cellCenter(c);
 
             exactField[c] = verifCase.exact(xc.x[0], xc.x[1]);
-
-            // std::cout
-            //     << c
-            //     << " x=" << xc.x[0]
-            //     << " phi=" << phi[c]
-            //     << " exact=" << exactField[c]
-            //     << " error=" << phi[c]-exactField[c]
-            //     << "\n";
         }
 
         // -------------------------------------------------
@@ -160,18 +152,9 @@ void VerificationRunner::run(
 
         std::string meshSize;
 
-        if (meshType == "line1D")
-        {
-            meshSize = std::to_string(caseCfg.mesh.nx) + "x1";
-        }
-        else if (meshType == "quad2D")
-        {
-            meshSize = std::to_string(caseCfg.mesh.nx) + "x" + std::to_string(caseCfg.mesh.ny);
-        }
-        else
-        {
-            meshSize = std::to_string(mesh.ncells()) + " cells";
-        }
+        if (meshType == "line1D") { meshSize = std::to_string(caseCfg.mesh.nx) + "x1"; }
+        else if (meshType == "quad2D") { meshSize = std::to_string(caseCfg.mesh.nx) + "x" + std::to_string(caseCfg.mesh.ny); }
+        else { meshSize = std::to_string(mesh.ncells()) + " cells"; }
 
         summary.emplace_back(VerificationSummary{
             caseName,
@@ -188,8 +171,7 @@ void VerificationRunner::run(
 
     for (const auto& s : summary)
     {
-        if (s.passed)
-            ++passedCount;
+        if (s.passed) { ++passedCount; }
     }
 
     std::cout << "\n==============================================================\n";
