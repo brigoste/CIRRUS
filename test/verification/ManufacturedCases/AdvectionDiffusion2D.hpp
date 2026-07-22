@@ -23,10 +23,14 @@ public:
         ux_ = params.value("ux", 1.0);
         uy_ = params.value("uy", 0.0);
     }
+    void initialize(const MeshBase&) override {}// Default: nothing needed     
 
     double exact(double x, double y) const override;
     double laplacian(double x, double y) const override;
     double source(double x, double y) const override;
+
+    double l2AcceptanceThreshold() const override { return 1e-2; }
+    double linfAcceptanceThreshold() const override { return 2e-2; }
 
 private:
     double rho_, ux_, uy_, gamma_;
