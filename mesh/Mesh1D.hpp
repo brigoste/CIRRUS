@@ -23,6 +23,8 @@ public:
     double faceDistance(std::size_t f) const override;
     double distance(const Point& a, const Point& b) const override;
     double getLx() const override {return L_;}
+    double getLy() const override {return 0.0;}
+    double getLz() const override {return 0.0;}
 
     // connectivity
     void cellNodes(std::size_t c, std::vector<std::size_t>& nodes) const override;
