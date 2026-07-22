@@ -13,6 +13,9 @@
 #include <filesystem>
 #include <iomanip>
 
+constexpr double L2_TOL   = 1e-8;
+constexpr double LINF_TOL = 1e-8;
+
 struct VerificationSummary
 {
     std::string caseName;
@@ -24,7 +27,7 @@ struct VerificationSummary
     double l2;
     double linf;
 
-    bool passed = true;
+    bool passed = false;
 };
 
 
@@ -138,8 +141,7 @@ void VerificationRunner::run(
         // -------------------------------------------------
         // Plotting
         // -------------------------------------------------
-        if (cfg.verificationSuite.plot_enabled) 
-        {
+        if (cfg.verificationSuite.plot_enabled)  {
             std::cout << "Plotting " << caseName << " from " << csvPath << "\n";
             runPlot(csvPath.generic_string());
         }
@@ -155,7 +157,6 @@ void VerificationRunner::run(
                   << "JSON Output: " << jsonPath << "\n"
                   << "=============================================\n";
 
-
         summary.emplace_back(VerificationSummary{
             caseName,
             solver::to_string(caseCfg.solver.method),
@@ -163,27 +164,37 @@ void VerificationRunner::run(
             caseCfg.mesh.ny,
             norms.l2_rms,
             norms.linf,
-            (norms.l2_rms < 1e-6)                // <-------------------------------------- Set "passed" parameter hack
+            (norms.l2_rms < L2_TOL && norms.linf < LINF_TOL)
         });
     }
+
+    std::size_t passedCount = 0;
+
+    for (const auto& s : summary)
+    {
+        if (s.passed)
+            ++passedCount;
+    }
+
     std::cout << "\n==============================================================\n";
     std::cout << "Verification Summary\n";
     std::cout << "==============================================================\n\n";
 
     std::cout << std::left
-          << std::setw(24) << "Case"
-          << std::setw(12) << "Solver"
-          << std::left
-          << std::setw(8)  << "Nx"
-          << std::setw(8)  << "Ny"
-          << std::setw(15) << "L2 RMS"
-          << std::setw(15) << "Linf"
-          << std::setw(8)  << "Status"
-          << "\n";
+            << std::setw(24) << "Case"
+            << std::setw(12) << "Solver"
+            << std::setw(8)  << "Nx"
+            << std::setw(8)  << "Ny"
+            << std::setw(15) << "L2 RMS"
+            << std::setw(15) << "Linf"
+            << std::setw(10) << "Status"
+            << "\n";
 
-    std::cout << std::string(90, '-') << "\n";
+    std::cout << std::string(92, '-') << "\n";
 
-    std::cout << std::scientific << std::setprecision(3);
+    std::cout << std::scientific
+            << std::setprecision(6);
+
     for (const auto& s : summary)
     {
         std::cout << std::left
@@ -191,9 +202,12 @@ void VerificationRunner::run(
                 << std::setw(12) << s.solver
                 << std::setw(8)  << s.nx
                 << std::setw(8)  << s.ny
-                << std::setw(15) << std::scientific << std::setprecision(6) << s.l2
+                << std::setw(15) << s.l2
                 << std::setw(15) << s.linf
-                << std::setw(8)  << (s.passed ? "PASS" : "FAIL")
+                << std::setw(10) << (s.passed ? "PASS" : "FAIL")
                 << "\n";
     }
+
+    std::cout << "\nVerification Result: " << passedCount << "/" << summary.size() << " cases passed\n\n";
+
 }
