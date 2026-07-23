@@ -40,6 +40,8 @@ public:
     const LinearSystem& system() const { return sys_; }
     const BoundaryPatchSystem& boundary() const { return boundary_; }
     const PhysicsModel& model() const noexcept { return *model_; }
+
+    VerificationCase* verificationCase() { return verificationCase_.get(); }
     const VerificationCase* verificationCase() const { return verificationCase_.get(); }
     
     void printMesh() const
