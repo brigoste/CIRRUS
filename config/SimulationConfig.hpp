@@ -80,6 +80,15 @@ struct IOConfig
 // Verification
 //==================================================
 
+struct RefinementConfig
+{
+    bool enabled = false;
+
+    std::vector<int> levels;
+
+    double expected_order = 2.0;
+};
+
 struct VerificationCaseEntry
 {
     std::string name;
@@ -87,6 +96,7 @@ struct VerificationCaseEntry
     MeshConfig mesh;
     PhysicsConfig physics;
     SolverConfig solver;
+    RefinementConfig refinement;
 
     std::vector<BoundaryConfig> boundary;
 
@@ -94,6 +104,7 @@ struct VerificationCaseEntry
     bool overridePhysics = false;
     bool overrideSolver = false;
     bool overrideBoundary = false;
+    bool overrideRefinement = false;
 
     nlohmann::json params;
 };
@@ -110,6 +121,8 @@ struct VerificationSuite
         std::string directory = "output/verification";
     } output;
 };
+
+
 
 //==================================================
 // Top-level simulation configuration
@@ -207,4 +220,17 @@ inline void from_json(const nlohmann::json& j, MeshConfig& m)
     m.ny   = j.value("ny", 1);
     m.lx   = j.value("lx", 1.0);
     m.ly   = j.value("ly", 1.0);
+}
+
+// --------------------- REFINEMENT -----------------------------
+inline void from_json(const nlohmann::json& j, RefinementConfig& r)
+{
+    r.enabled = j.value("enabled", false);
+
+    if (j.contains("levels"))
+    {
+        r.levels = j.at("levels").get<std::vector<int>>();
+    }
+
+    r.expected_order = j.value("expected_order", 2.0);
 }
