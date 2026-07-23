@@ -4,6 +4,14 @@
 #include "config/SimulationConfig.hpp"
 #include "utils/MathConstants.hpp"
 
+/*
+    Documentation:
+
+    Case                    Solver      Mesh        L2 Error      L2 Check    Refinement    Order
+    --------------------------------------------------------------------------------------------------
+    AdvectionDiffusion2D    BiCGSTAB    20x20       6.375e-03     PASS        FAIL          1.487e-01
+*/
+
 class AdvectionDiffusion2D : public VerificationCase
 {
 public:
