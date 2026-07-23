@@ -227,10 +227,7 @@ inline void from_json(const nlohmann::json& j, RefinementConfig& r)
 {
     r.enabled = j.value("enabled", false);
 
-    if (j.contains("levels"))
-    {
-        r.levels = j.at("levels").get<std::vector<int>>();
-    }
+    if (j.contains("levels")) { r.levels = j.at("levels").get<std::vector<int>>(); }
 
     r.expected_order = j.value("expected_order", 2.0);
 }
