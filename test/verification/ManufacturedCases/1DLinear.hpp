@@ -2,6 +2,14 @@
 
 #include "tests/verification/VerificationCase.hpp"
 
+/*
+    Documentation:
+
+    Case                    Solver      Mesh        L2 Error      L2 Check    Refinement    Order
+    --------------------------------------------------------------------------------------------------
+    Linear1D                TDMA        10x1        2.948e-13     PASS        N/A           N/A
+*/
+
 class OneDLinear : public VerificationCase
 {
 public:
