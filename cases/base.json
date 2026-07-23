@@ -32,8 +32,14 @@
 
         "mesh": {
           "type": "line1D",
-          "nx": 20,
+          "nx": 10,
           "lx": 1.5
+        },
+
+        "refinement": {
+          "enabled": false,
+          "levels": [10, 20, 40, 80, 160],
+          "expected_order": 2.0
         },
 
         "physics": {
@@ -62,6 +68,12 @@
           "type": "line1D",
           "nx": 20,
           "lx": 1.0
+        },
+
+        "refinement": {
+          "enabled": false,
+          "levels": [10, 20, 40, 80, 160],
+          "expected_order": 2.0
         },
 
         "physics": {
@@ -99,6 +111,12 @@
           "ly": 1.0
         },
 
+        "refinement": {
+          "enabled": true,
+          "levels": [25, 50, 100, 200],
+          "expected_order": 2.0
+        },
+
         "physics": {
           "type": "heat",
           "k": 100.0
@@ -126,10 +144,16 @@
 
         "mesh": {
           "type": "quad2D",
-          "nx": 120,
-          "ny": 120,
+          "nx": 20,
+          "ny": 20,
           "lx": 1.0,
           "ly": 1.0
+        },
+
+        "refinement": {
+          "enabled": true,
+          "levels": [10, 20, 40, 80],
+          "expected_order": 2.0
         },
 
         "physics": {
