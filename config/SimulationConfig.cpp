@@ -247,7 +247,12 @@ SimulationConfig fromJson(
                         entry.mesh = jc.value("mesh", MeshConfig{});
                         entry.overrideMesh = true;
                     }
-
+                    //     Mesh refinement for grid convergence
+                    if (jc.contains("refinement"))
+                    {
+                        entry.refinement = jc.value("refinement", RefinementConfig{});
+                        entry.overrideRefinement = true;
+                    }
                     // ---- Physics override ----
                     if (jc.contains("physics"))
                     {
