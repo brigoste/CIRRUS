@@ -5,6 +5,14 @@
 
 // Similar to a heated slab with fixed dirichlect boundary conditions.
 
+/*
+    Documentation:
+
+    Case                    Solver      Mesh        L2 Error      L2 Check    Refinement    Order
+    --------------------------------------------------------------------------------------------------
+    Quadratic1D             CG          20x1        6.250e-02     PASS        N/A           N/A
+*/
+
 class Quadratic1D : public VerificationCase
 {
 public:
