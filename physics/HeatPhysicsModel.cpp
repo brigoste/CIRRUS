@@ -4,6 +4,7 @@
 
 #include <cmath>
 #include <stdexcept>
+#include <iostream>
 
 double HeatPhysicsModel::diffusionFaceCoefficient(const Face& face) const
 {
@@ -34,9 +35,10 @@ double HeatPhysicsModel::reconstructBoundaryValue(
     bool /*isLeft*/) const
 {
     const double k = diffusionCoefficient();
-
+    
     switch (bc.type)
     {
+        
         case bc::Type::Dirichlet:
             return bc.value;
 
