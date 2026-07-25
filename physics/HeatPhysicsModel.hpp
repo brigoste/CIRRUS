@@ -21,5 +21,5 @@ public:
     double cellSource( const MeshBase& mesh, std::size_t c) const override;
 
 private:
-    double k_ = 1.0;
+    double k_;
 };
