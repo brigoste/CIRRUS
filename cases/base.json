@@ -152,7 +152,7 @@
 
         "refinement": {
           "enabled": true,
-          "levels": [10, 20, 40, 80],
+          "levels": [40, 80, 160, 320],
           "expected_order": 2.0
         },
 
