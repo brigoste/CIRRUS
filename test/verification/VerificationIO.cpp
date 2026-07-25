@@ -15,8 +15,7 @@ void VerificationIO::writeCSV(
     const std::vector<double>& phi,
     const std::filesystem::path& file)
 {
-    PointField field =
-        BoundaryReconstructor::reconstruct( sim.mesh(), sim.boundary(), sim.model(), phi);
+    PointField field = BoundaryReconstructor::reconstruct( sim.mesh(), sim.boundary(), sim.model(), phi);
 
     std::vector<double> residual(phi.size(), 0.0);
 
