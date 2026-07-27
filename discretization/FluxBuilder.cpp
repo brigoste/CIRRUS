@@ -97,15 +97,21 @@ void FluxBuilder::buildFlux(
     // =====================================================
     for (std::size_t c = 0; c < mesh.ncells(); ++c)
     {
-        // Physical source
+        // Physical model source
         model.addCellSources(mesh, c, flux);
 
-        // Manufactured source
+        // Manufactured verficiation forcing
         if (verificationCase)
         {
             const auto& xc = mesh.cellCenter(c);
+            double manufacturedSource = verificationCase->source(xc.x[0], xc.x[1]);
 
-            flux.addSource(c, verificationCase->source(xc.x[0], xc.x[1]) * mesh.cellVolume(c), 0.0);
+            flux.addSource(
+                c,
+                manufacturedSource * mesh.cellVolume(c),
+                0.0
+            );
+            // flux.addSource(c, verificationCase->source(xc.x[0], xc.x[1]) * mesh.cellVolume(c), 0.0);
         }
     }
 
