@@ -4,7 +4,7 @@
 
 #include "mesh/MeshBase.hpp"
 #include "linear_system/LinearSystem.hpp"
-#include "Solver/SolverMethod.hpp"
+#include "solver/SolverMethod.hpp"
 #include "physics/HeatEquationModel.hpp"
 
 class HeatSystemBase
