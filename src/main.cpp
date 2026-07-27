@@ -9,7 +9,7 @@
 #include "postprocessing/DerivedFields.hpp"
 #include "postprocessing/ErrorNorms.hpp"
 
-#include "Solver/SolverMethod.hpp"
+#include "solver/SolverMethod.hpp"
 
 #include "linear_system/Residual.hpp"
 
