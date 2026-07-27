@@ -4,10 +4,7 @@
   "verificationCase": {
     "cases": [
       {
-        "case_name": "Quadratic1D",
-        "params": {
-          "k": 100.0
-        }
+        "case_name": "Quadratic1D"
       }
     ],
 
