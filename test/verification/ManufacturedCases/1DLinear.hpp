@@ -13,10 +13,8 @@
 class OneDLinear : public VerificationCase
 {
 public:
-    explicit OneDLinear(const nlohmann::json& params)
-    {
-        (void) params;
-    }
+    explicit OneDLinear(const SimulationConfig& cfg) : k_(cfg.physics.k) {}
+    
     void initialize(const MeshBase&) override {}  // Default: nothing needed 
     
 
@@ -28,4 +26,7 @@ public:
 
     double l2AcceptanceThreshold() const override { return 1e-10; }
     double linfAcceptanceThreshold() const override { return 1e-10; }
+
+private:
+    double k_;
 };
