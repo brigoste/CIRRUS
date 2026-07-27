@@ -1,4 +1,4 @@
-#include "Solver/CG.hpp"
+#include "solver/CG.hpp"
 #include "utils/LinearAlgebraUtils.hpp"
 #include "linear_system/LinearSystem.hpp"
 
