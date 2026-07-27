@@ -3,6 +3,8 @@
 #include "tests/verification/VerificationCase.hpp"
 #include "config/SimulationConfig.hpp"
 
+#include <iostream>
+
 // Similar to a heated slab with fixed dirichlect boundary conditions.
 
 /*
@@ -16,18 +18,28 @@
 class Quadratic1D : public VerificationCase
 {
 public:
-    explicit Quadratic1D(const nlohmann::json& params) {
-        if (!params.contains("k")) { throw std::runtime_error("Quadratic1D missing required parameter k"); }
-            k_ = params.value("k",100);
+    explicit Quadratic1D(const SimulationConfig& cfg)
+    {
+        k_ = cfg.physics.k;
+        volumetricSource_ = cfg.physics.volumetricSource;
+        bool foundLeft = false;
+        bool foundRight = false;
 
-        if (!params.contains("TL")) { throw std::runtime_error("Quadratic1D missing reuqired parameter TL"); }
-            TL_ = params.value("TL",300);
+        for (const auto& bc : cfg.boundary)
+        {
+            if(bc.group == 0) { 
+                TL_ = bc.condition.value; 
+                foundLeft = true;
+            }
+            else if (bc.group == 1) { 
+                TR_ = bc.condition.value; 
+                foundRight = true;
+            }
+        }
 
-        if (!params.contains("TR")) { throw std::runtime_error("Quadratic1D missing reuqired parameter TR"); }
-            TR_ = params.value("TR",400);
-
-        if (!params.contains("qdot")) { throw std::runtime_error("Quadratic1D missing reuqired parameter qdot"); }
-            qdot_ = params.value("qdot", 40000.0);
+        if(!foundLeft || !foundRight){
+            throw std::runtime_error("Quadratic1D requires Dirichlet boundary groups 0 and 1");
+        }
     }
 
     void initialize(const MeshBase& mesh) override { L_ = mesh.getLx(); }
@@ -45,5 +57,5 @@ public:
     double linfAcceptanceThreshold() const override { return 7e-2; }
 
 private:
-    double k_, TL_, TR_, qdot_, L_;
+    double k_, TL_, TR_, volumetricSource_, L_;
 };
