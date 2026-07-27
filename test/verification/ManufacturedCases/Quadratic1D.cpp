@@ -1,16 +1,31 @@
 #include "tests/verification/ManufacturedCases/Quadratic1D.hpp"
+#include <iostream>
 
-double Quadratic1D::exact( double x, double) const
+double Quadratic1D::exact(double x, double) const
 {
-    return x*x + (TR - TL - 1)*x + TL;
+    return TL_ 
+           + ((TR_ - TL_) / L_ + volumetricSource_ * L_ / (2.0 * k_)) * x 
+           - (volumetricSource_ / (2.0*k_)) * x * x;
 }
 
-double Quadratic1D::source(double x, double y) const
+double Quadratic1D::source(double , double ) const
 {
-    return -k_ * laplacian(x, y);
+    return volumetricSource_;
 }
 
 double Quadratic1D::laplacian( double, double) const
 {
-    return 2.0;      // -2*k
+    return -volumetricSource_/k_;
 }
+/*
+    Manufactured solution:
+
+        -k d2T/dx2 = q'''
+
+    therefore:
+
+        d2T/dx2 = -q'''/k
+
+    The source term remains positive; the Laplacian carries
+    the negative sign from the governing equation.
+*/
