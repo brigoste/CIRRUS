@@ -4,12 +4,10 @@
   "verificationCase": {
     "cases": [
       {
-        "case_name": "Sinusoidal2D",
-        "params": {
-          "k": 100.0
-        }
+        "case_name": "Quadratic1D"
       }
     ],
+
     "plot_enabled": true,
 
     "norms": {
@@ -18,8 +16,8 @@
     },
 
     "output": {
-      "csv": "output/verification/Sinusoidal2D.csv",
-      "summary": "output/verification/Sinusoidal2D.json"
+      "csv": "output/verification/Quadratic1D.csv",
+      "summary": "output/verification/Quadratic1D.json"
     }
   }
 }
