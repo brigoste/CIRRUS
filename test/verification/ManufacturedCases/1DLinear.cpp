@@ -3,7 +3,7 @@
 // #include "tests/verification/VerificationRegistry.hpp"
 double OneDLinear::exact(double x, double) const
 {
-    return 300.0 + (100.0 / 1.5) * x;
+    return k_ * (3 + (1 / 1.5) * x);
 }
 
 double OneDLinear::laplacian(double,double) const
