@@ -36,7 +36,7 @@ file(GLOB_RECURSE CIRRUS_SOURCES
     ${PROJECT_SOURCE_DIR}/linear_system/*.cpp
     ${PROJECT_SOURCE_DIR}/mesh/*.cpp
     ${PROJECT_SOURCE_DIR}/physics/*.cpp
-    ${PROJECT_SOURCE_DIR}/Solver/*.cpp
+    ${PROJECT_SOURCE_DIR}/solver/*.cpp
     ${PROJECT_SOURCE_DIR}/system/*.cpp
     ${PROJECT_SOURCE_DIR}/utils/*.cpp
 )
