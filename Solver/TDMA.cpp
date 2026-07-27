@@ -1,4 +1,4 @@
-#include "Solver/TDMA.hpp"
+#include "solver/TDMA.hpp"
 #include <iostream>
 
 #include <vector>
