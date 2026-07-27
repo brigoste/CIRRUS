@@ -14,8 +14,8 @@ PhysicsFactory::create(const PhysicsConfig& cfg)
             return std::make_unique<HeatPhysicsModel>(cfg.k);
 
         case physics::PhysicsType::AdvectionDiffusion:
-            return std::make_unique<AdvectionDiffusionPhysicsModel>(
-                cfg.gamma, cfg.rho, cfg.ux, cfg.uy, cfg.uz);
+            return std::make_unique<AdvectionDiffusionPhysicsModel>(cfg.gamma, cfg.rho, cfg.ux, cfg.uy, cfg.uz);
+            
         default:
             throw std::runtime_error("Fluid physics model not implemented");
     }
