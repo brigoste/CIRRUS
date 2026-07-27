@@ -135,7 +135,7 @@ void VerificationRunner::run(
 
             Simulation sim(levelCfg);
 
-            auto casePtr = VerificationCaseFactory::create(caseName, caseEntry.params);
+            auto casePtr = VerificationCaseFactory::create(caseName, levelCfg);
 
             sim.setVerificationCase(std::move(casePtr));
 
@@ -145,19 +145,6 @@ void VerificationRunner::run(
             sim.assemble();
             
             auto phi = sim.solve();
-
-            if (caseEntry.name == "Quadratic1D")
-            {
-                const double TL = caseEntry.params.at("TL").get<double>();
-                const double TR = caseEntry.params.at("TR").get<double>();
-
-                double leftBC  = levelCfg.boundary.at(0).condition.value;
-                double rightBC = levelCfg.boundary.at(1).condition.value;
-
-                if (std::abs(leftBC - TL) > 1e-12) { throw std::runtime_error( "Quadratic1D: TL does not match left boundary." ); }
-
-                if (std::abs(rightBC - TR) > 1e-12) { throw std::runtime_error( "Quadratic1D: TR does not match right boundary." ); }
-            }
 
             // -------------------------------------------------
             // Exact solution evaluation
@@ -193,6 +180,19 @@ void VerificationRunner::run(
                 norms.l2_rms,
                 norms.linf
             });
+
+            // DEBUGGING
+            std::cout << "REFINEMENT DATA: "
+                    << levelCfg.mesh.nx
+                    << "x"
+                    << levelCfg.mesh.ny
+                    << " h="
+                    << h
+                    << " L2="
+                    << norms.l2_rms
+                    << " Linf="
+                    << norms.linf
+                    << "\n";
 
             // -------------------------------------------------
             // Output paths
@@ -266,41 +266,52 @@ void VerificationRunner::run(
             }
         }
 
-        if (refinementEnabled)  
-        { 
+        if (refinementEnabled)
+        {
+            std::size_t validL2 = 0;
+            std::size_t validLinf = 0;
+
+            constexpr double orderTolerance = 0.05;
+
             for (std::size_t i = 1; i < refinement.levels.size(); ++i)
             {
-                const auto& coarse = refinement.levels[i-1];
+                const auto& coarse = refinement.levels[i - 1];
                 const auto& fine   = refinement.levels[i];
 
-                double orderL2 = std::log(coarse.l2 / fine.l2) / std::log(coarse.h / fine.h);
-
-                double orderLinf = std::log(coarse.linf / fine.linf) / std::log(coarse.h / fine.h);
-
-                if (fine.l2 > 0.0 && coarse.l2 > 0.0)
+                if (coarse.l2 > 0.0 && fine.l2 > 0.0)
                 {
-                    double orderL2 = std::log(coarse.l2 / fine.l2) / std::log(coarse.h / fine.h);
-                    refinement.observedOrderL2 += orderL2;
-                }
-                if (fine.linf > 0.0 && coarse.linf > 0.0)
-                {
-                    double orderLinf = std::log(coarse.linf / fine.linf) / std::log(coarse.h / fine.h);
-                    refinement.observedOrderLinf += orderLinf;
+                    refinement.observedOrderL2 +=
+                        std::log(coarse.l2 / fine.l2) /
+                        std::log(coarse.h / fine.h);
+
+                    ++validL2;
                 }
 
-                refinement.observedOrderL2 += orderL2;
-                refinement.observedOrderLinf += orderLinf;
+                if (coarse.linf > 0.0 && fine.linf > 0.0)
+                {
+                    refinement.observedOrderLinf +=
+                        std::log(coarse.linf / fine.linf) /
+                        std::log(coarse.h / fine.h);
+
+                    ++validLinf;
+                }
             }
 
-            if (refinement.levels.size() > 1) { 
-                double n = refinement.levels.size() - 1; 
-            
-                refinement.observedOrderL2 /= n;
-                refinement.observedOrderLinf /= n;
-
-                refinement.passed = refinement.observedOrderL2 >= expectedOrder && refinement.observedOrderLinf >= expectedOrder;
+            if (validL2 > 0)
+            {
+                refinement.observedOrderL2 /= static_cast<double>(validL2);
             }
-            else { refinement.passed = false; }
+
+            if (validLinf > 0)
+            {
+                refinement.observedOrderLinf /= static_cast<double>(validLinf);
+            }
+
+            refinement.passed =
+                validL2 > 0 &&
+                validLinf > 0 &&
+                std::abs(refinement.observedOrderL2   - expectedOrder) <= orderTolerance &&
+                std::abs(refinement.observedOrderLinf - expectedOrder) <= orderTolerance;
 
             for (auto& s : summary)
             {
@@ -313,7 +324,7 @@ void VerificationRunner::run(
 
             refinementSummary.push_back(std::move(refinement));
 
-            std::cout 
+            std::cout
                 << "\n================ REFINEMENT STUDY ================\n"
                 << "Case: " << refinement.caseName << "\n"
                 << "Observed L2 Order   : " << refinement.observedOrderL2 << "\n"
