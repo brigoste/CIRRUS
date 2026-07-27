@@ -4,11 +4,16 @@
   "verificationCase": {
     "cases": [
       {
-        "case_name": "Quadratic1D"
+        "case_name": "Linear1D"
       }
     ],
-
+    "type": "manufactured",
     "plot_enabled": true,
+
+    "manufactured": {
+      "phi_expr": "(100/L)*x + 300",
+      "source_expr": "0"
+    },
 
     "norms": {
       "l2": true,
@@ -16,8 +21,8 @@
     },
 
     "output": {
-      "csv": "output/verification/Quadratic1D.csv",
-      "summary": "output/verification/Quadratic1D.json"
+      "csv": "Linear1D.csv",
+      "summary": "Linear1D.json"
     }
   }
 }
