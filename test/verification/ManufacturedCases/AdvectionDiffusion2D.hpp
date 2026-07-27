@@ -15,21 +15,12 @@
 class AdvectionDiffusion2D : public VerificationCase
 {
 public:
-    explicit AdvectionDiffusion2D(const nlohmann::json& params)
+    explicit AdvectionDiffusion2D(const SimulationConfig& cfg)
     {
-        if (!params.contains("gamma"))
-            throw std::runtime_error("AdvectionDiffusion2D missing required parameter gamma");
-        if (!params.contains("rho"))
-            throw std::runtime_error("AdvectionDiffusion2D missing required parameter rho");
-        if (!params.contains("ux"))
-            throw std::runtime_error("AdvectionDiffusion2D missing required parameter ux");
-        if (!params.contains("uy"))
-            throw std::runtime_error("AdvectionDiffusion2D missing required parameter uy");
-
-        gamma_ = params.value("gamma", 1.0);
-        rho_ = params.value("rho", 1.0);
-        ux_ = params.value("ux", 1.0);
-        uy_ = params.value("uy", 0.0);
+        gamma_ = cfg.physics.gamma;
+        rho_   = cfg.physics.rho;
+        ux_    = cfg.physics.ux;
+        uy_    = cfg.physics.uy;
     }
     void initialize(const MeshBase&) override {}// Default: nothing needed     
 
