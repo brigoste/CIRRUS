@@ -4,14 +4,7 @@
   "verificationCase": {
     "cases": [
       {
-        "case_name": "AdvectionDiffusion2D",
-        "params": {
-          "k": 100.0,
-          "ux": 1.0,
-          "uy": 0.0,
-          "uz": 0.0,
-          "gamma": 1.0
-        }
+        "case_name": "AdvectionDiffusion2D"
       }
     ],
     "type": "manufactured",
