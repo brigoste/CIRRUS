@@ -9,6 +9,7 @@
 #include "Solver/SolverMethod.hpp"
 #include "config/PhysicsType.hpp"
 #include "mesh/BoundaryPatchSystem.hpp"
+#include <iostream>
 
 //==================================================
 // Boundary
@@ -43,14 +44,16 @@ struct PhysicsConfig
 {
     physics::PhysicsType type = physics::PhysicsType::Heat;
 
-    double k     = 1.0;
-    double gamma = 0.0;
+    double k                = 1.0;
+    double gamma            = 0.0;
 
-    double rho = 1.0;
+    double rho              = 1.0;
 
-    double ux = 0.0;
-    double uy = 0.0;
-    double uz = 0.0;
+    double ux               = 0.0;
+    double uy               = 0.0;
+    double uz               = 0.0;
+    
+    double volumetricSource = 0.0;
 };
 
 //==================================================
@@ -159,12 +162,13 @@ SimulationConfig fromJson(const nlohmann::json& j);
 // ------------------------- Physics --------------------------
 inline void from_json(const nlohmann::json& j, PhysicsConfig& p)
 {
-    p.k     = j.value("k", 1.0);
-    p.gamma = j.value("gamma", 0.0);
-    p.rho   = j.value("rho", 1.0);
-    p.ux    = j.value("ux", 0.0);
-    p.uy    = j.value("uy", 0.0);
-    p.uz    = j.value("uz", 0.0);
+    p.k      = j.value("k", 1.0);
+    p.gamma  = j.value("gamma", 0.0);
+    p.rho    = j.value("rho", 1.0);
+    p.ux     = j.value("ux", 0.0);
+    p.uy     = j.value("uy", 0.0);
+    p.uz     = j.value("uz", 0.0);
+    p.volumetricSource = j.value("volumetricSource", 0.0);
 
     if (j.contains("type")) { p.type = physics::physicsFromString(j.at("type").get<std::string>());}
 }
