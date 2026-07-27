@@ -13,12 +13,12 @@
 #include "linear_system/LinearSystem.hpp"
 #include "bc/BoundaryFace.hpp"
 #include "discretization/FluxBuilder.hpp"
-#include "Solver/CG.hpp"
-#include "Solver/SOR.hpp"
-#include "Solver/TDMA.hpp"
-#include "Solver/GaussSeidel.hpp"
-#include "Solver/BiCGSTAB.hpp"
-#include "Solver/SolverMethod.hpp"
+#include "solver/CG.hpp"
+#include "solver/SOR.hpp"
+#include "solver/TDMA.hpp"
+#include "solver/GaussSeidel.hpp"
+#include "solver/BiCGSTAB.hpp"
+#include "solver/SolverMethod.hpp"
 // #include "tests\verification\VerificationRegistry.hpp"
 
 // ============================================================
