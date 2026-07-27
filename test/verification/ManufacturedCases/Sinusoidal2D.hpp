@@ -16,10 +16,15 @@
 class Sinusoidal2D : public VerificationCase
 {
 public:
-    explicit Sinusoidal2D(const nlohmann::json& params) {
-        if (!params.contains("k")) { throw std::runtime_error("Sinusoidal2D missing required parameter k"); }
-        k_ = params.value("k",100);
+    // explicit Sinusoidal2D(const nlohmann::json& params): {
+    //     if (!params.contains("k")) { throw std::runtime_error("Sinusoidal2D missing required parameter k"); }
+    //     k_ = params.value("k",100);
+    // }
+    explicit Sinusoidal2D(const SimulationConfig& cfg)
+    {
+        k_ = cfg.physics.k;
     }
+
     void initialize(const MeshBase&) override {}// Default: nothing needed 
 
     double exact(double x, double y) const override;
