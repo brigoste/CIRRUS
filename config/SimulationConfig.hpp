@@ -6,7 +6,7 @@
 
 #include <nlohmann/json.hpp>
 
-#include "Solver/SolverMethod.hpp"
+#include "solver/SolverMethod.hpp"
 #include "config/PhysicsType.hpp"
 #include "mesh/BoundaryPatchSystem.hpp"
 #include <iostream>
