@@ -22,9 +22,7 @@ This case verifies:
 
 The steady advection-diffusion equation is:
 
-$$
-\rho(\mathbf{u}\cdot\nabla \phi)-\nabla\cdot(\gamma\nabla\phi)=S
-$$
+$$ \rho(\mathbf{u}\cdot\nabla \phi)-\nabla\cdot(\gamma\nabla\phi)=S $$
 
 where:
 
@@ -36,20 +34,7 @@ where:
 
 Expanding the diffusion operator for constant diffusion coefficient:
 
-$$
-\rho(u_x\frac{\partial\phi}{\partial x}
-+
-u_y\frac{\partial\phi}{\partial y})
--
-\gamma
-\left(
-\frac{\partial^2\phi}{\partial x^2}
-+
-\frac{\partial^2\phi}{\partial y^2}
-\right)
-=
-S
-$$
+$$ \rho(u_x\frac{\partial\phi}{\partial x} + u_y\frac{\partial\phi}{\partial y}) - \gamma ( \frac{\partial^2\phi}{\partial x^2} + \frac{\partial^2\phi}{\partial y^2} ) = S $$
 
 The advection term transports the scalar field through the domain, while the diffusion term smooths spatial gradients.
 
@@ -61,13 +46,9 @@ The problem uses a two-dimensional computational domain.
 
 The domain is defined as:
 
-$$
-0 \leq x \leq L_x
-$$
+$$ 0 \leq x \leq L_x $$
 
-$$
-0 \leq y \leq L_y
-$$
+$$ 0 \leq y \leq L_y $$
 
 For this verification case:
 
@@ -97,15 +78,11 @@ Dirichlet boundary conditions are applied on all four boundaries.
 
 The manufactured solution satisfies:
 
-$$
-\phi(x,y)=\sin(\pi x)\sin(\pi y)
-$$
+$$ \phi(x,y)=\sin(\pi x)\sin(\pi y) $$
 
 Since:
 
-$$
-\sin(0)=\sin(\pi)=0
-$$
+$$ \sin(0)=\sin(\pi)=0 $$
 
 all boundaries have zero scalar value.
 
@@ -124,60 +101,31 @@ The boundary conditions are:
 
 The analytical solution is selected as:
 
-$$
-\phi(x,y)=\sin(\pi x)\sin(\pi y)
-$$
+$$ \phi(x,y)=\sin(\pi x)\sin(\pi y) $$
 
 The first derivatives are:
 
-$$
-\frac{\partial\phi}{\partial x}
-=
-\pi\cos(\pi x)\sin(\pi y)
-$$
+$$ \frac{\partial\phi}{\partial x} = \pi\cos(\pi x)\sin(\pi y) $$
 
 and:
 
-$$
-\frac{\partial\phi}{\partial y}
-=
-\pi\sin(\pi x)\cos(\pi y)
-$$
+$$ \frac{\partial\phi}{\partial y} = \pi\sin(\pi x)\cos(\pi y) $$
 
 The Laplacian is:
 
-$$
-\nabla^2\phi
-=
-\frac{\partial^2\phi}{\partial x^2}
-+
-\frac{\partial^2\phi}{\partial y^2}
-$$
+$$ \nabla^2\phi = \frac{\partial^2\phi}{\partial x^2} + \frac{\partial^2\phi}{\partial y^2} $$
 
 which gives:
 
-$$
-\nabla^2\phi
-=
--2\pi^2
-\sin(\pi x)
-\sin(\pi y)
-$$
+$$ \nabla^2\phi = -2\pi^2 \sin(\pi x) \sin(\pi y) $$
 
 or:
 
-$$
-\nabla^2\phi=-2\pi^2\phi
-$$
+$$ \nabla^2\phi=-2\pi^2\phi $$
 
 The manufactured source term is calculated from the governing equation:
 
-$$
-S=
-\rho(u_x\phi_x+u_y\phi_y)
--
-\gamma\nabla^2\phi
-$$
+$$ S= \rho(u_x\phi_x+u_y\phi_y) - \gamma\nabla^2\phi $$
 
 This source term produces the analytical solution exactly in the continuous equation.
 
@@ -187,21 +135,13 @@ This source term produces the analytical solution exactly in the continuous equa
 
 The verification case uses:
 
-$$
-\gamma=1.0
-$$
+$$ \gamma=1.0 $$
 
-$$
-\rho=1.0
-$$
+$$ \rho=1.0 $$
 
-$$
-u_x=1.0
-$$
+$$ u_x=1.0 $$
 
-$$
-u_y=0.5
-$$
+$$ u_y=0.5 $$
 
 The advection velocity introduces transport in both coordinate directions.
 
@@ -213,27 +153,15 @@ The source term consists of both advection compensation and diffusion compensati
 
 The advection contribution is:
 
-$$
-S_A=
-\rho
-\left(
-u_x\frac{\partial\phi}{\partial x}
-+
-u_y\frac{\partial\phi}{\partial y}
-\right)
-$$
+$$ S_A= \rho (u_x\frac{\partial\phi}{\partial x} + u_y\frac{\partial\phi}{\partial y} ) $$
 
 The diffusion contribution is:
 
-$$
-S_D=-\gamma\nabla^2\phi
-$$
+$$ S_D=-\gamma\nabla^2\phi $$
 
 The complete source term is:
 
-$$
-S=S_A+S_D
-$$
+$$ S=S_A+S_D $$
 
 The manufactured source is integrated over each finite volume during system assembly.
 
@@ -245,41 +173,15 @@ The AdvectionDiffusion2D verification case uses a cell-centered finite-volume di
 
 The governing equation is integrated over each control volume:
 
-$$
-\int_{V_P}
-\rho(\mathbf{u}\cdot\nabla\phi)dV
--
-\int_{V_P}
-\nabla\cdot(\gamma\nabla\phi)dV
-=
-\int_{V_P}S dV
-$$
+$$ \int_{V_P} \rho(\mathbf{u}\cdot\nabla\phi)dV - \int_{V_P} \nabla\cdot(\gamma\nabla\phi)dV = \int_{V_P}S dV $$
 
 Applying the divergence theorem to the diffusion term:
 
-$$
--\sum_f
-\gamma A_f
-\frac{\partial\phi}{\partial n}
-=
-SV_P
-$$
+$$ -\sum_f \gamma A_f \frac{\partial\phi}{\partial n} = SV_P $$
 
 The resulting discrete equation has the form:
 
-$$
-a_P\phi_P
-=
-a_E\phi_E
-+
-a_W\phi_W
-+
-a_N\phi_N
-+
-a_S\phi_S
-+
-b_P
-$$
+$$ a_P\phi_P = a_E\phi_E + a_W\phi_W + a_N\phi_N + a_S\phi_S + b_P $$
 
 where:
 
@@ -313,21 +215,11 @@ The following error metrics are calculated.
 
 ### L2 Norm
 
-$$
-L_2=
-\sqrt{
-\frac{1}{N}
-\sum_{i=1}^{N}
-(\phi_i-\phi_i^{exact})^2
-}
-$$
+$$ L_2= \sqrt{ \frac{1}{N} \sum_{i=1}^{N} (\phi_i-\phi_i^{exact})^2 } $$
 
 ### L∞ Norm
 
-$$
-L_\infty=
-\max_i|\phi_i-\phi_i^{exact}|
-$$
+$$ L_\infty= \max_i|\phi_i-\phi_i^{exact}| $$
 
 A mesh refinement study is performed to determine the observed convergence order.
 
