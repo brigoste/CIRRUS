@@ -21,9 +21,7 @@ This case verifies:
 
 The governing equation for steady one-dimensional heat conduction with volumetric heat generation is:
 
-$$
--\frac{d}{dx}\left(k\frac{dT}{dx}\right)=q'''
-$$
+$$ -\frac{d}{dx}\left(k\frac{dT}{dx}\right)=q''' $$
 
 The variables represent:
 
@@ -34,15 +32,11 @@ The variables represent:
 
 Assuming constant thermal conductivity, the equation simplifies to:
 
-$$
--k\frac{d^2T}{dx^2}=q'''
-$$
+$$ -k\frac{d^2T}{dx^2}=q''' $$
 
 or:
 
-$$
-\frac{d^2T}{dx^2}=-\frac{q'''}{k}
-$$
+$$ \frac{d^2T}{dx^2}=-\frac{q'''}{k} $$
 
 A positive volumetric source represents internal heat generation. Under this sign convention, the source introduces negative curvature into the temperature field, causing the solution profile to become concave downward.
 
@@ -54,9 +48,7 @@ The problem uses a one-dimensional computational domain along the x-axis.
 
 The domain is defined as:
 
-$$
-0 \leq x \leq L
-$$
+$$ 0 \leq x \leq L $$
 
 For this verification case:
 
@@ -76,13 +68,9 @@ Dirichlet boundary conditions are applied at both physical boundaries.
 
 The left and right boundary temperatures are:
 
-$$
-T(0)=T_L=100^\circ C
-$$
+$$ T(0)=T_L=100^\circ C $$
 
-$$
-T(L)=T_R=200^\circ C
-$$
+$$ T(L)=T_R=200^\circ C $$
 
 The boundary conditions are assigned through boundary groups:
 
@@ -99,20 +87,16 @@ No flux boundary conditions are applied.
 
 This case includes a constant volumetric heat generation term:
 
-$$
-q'''= 20000 \frac{W}{m^3}
-$$
+$$ q'''= 20000 \frac{W}{m^3} $$
 
 The source term is included as a volumetric contribution to each finite volume:
 
-$$
-b_P=q'''V_P
-$$
+$$ b_P=q'''V_P $$
 
 where:
 
-* ($b_P$) is the integrated source contribution
-* ($V_P$) is the cell volume
+* $(b_P)$ is the integrated source contribution
+* $(V_P)$ is the cell volume
 
 The finite-volume formulation integrates the source over the control volume, resulting in an extensive source contribution rather than a pointwise value. The manufactured solution uses the same source term to create the expected analytical solution.
 
@@ -122,74 +106,49 @@ The finite-volume formulation integrates the source over the control volume, res
 
 Starting from:
 
-$$
-\frac{d^2T}{dx^2}=-\frac{q'''}{k}
-$$
+$$ \frac{d^2T}{dx^2}=-\frac{q'''}{k} $$
 
 Integrating once:
 
-$$
-\frac{dT}{dx} = -\frac{q'''}{k}x+c_1
-$$
+$$ \frac{dT}{dx} = -\frac{q'''}{k}x+c_1 $$
 
 Integrating again:
 
-$$
-T(x)  = -\frac{q'''}{2k}x^2+c_1x+c_2
-$$
+$$ T(x)  = -\frac{q'''}{2k}x^2+c_1x+c_2 $$
 
 The constants are determined from the boundary conditions.
 
 At (x=0):
 
-$$
-T(0)=T_L
-$$
+$$ T(0)=T_L $$
 
 therefore:
 
-$$
-c_2=T_L
-$$
+$$ c_2=T_L $$
 
 At (x=L):
 
-$$
-T_R = -\frac{q'''}{2k}L^2+c_1L+T_L
-$$
+$$ T_R = -\frac{q'''}{2k}L^2+c_1L+T_L $$
 
 Solving for (c_1):
 
-$$
-c_1=
-\frac{T_R-T_L}{L}
-+
-\frac{q'''L}{2k}
-$$
+$$ c_1= \frac{T_R-T_L}{L} + \frac{q'''L}{2k} $$
 
 The final manufactured solution is:
 
-$$
-T(x)= T_L+ (\frac{T_R-T_L}{L}+\frac{q'''L}{2k})x - \frac{q'''}{2k}x^2
-$$
+$$ T(x)= T_L+ (\frac{T_R-T_L}{L}+\frac{q'''L}{2k})x - \frac{q'''} {2k}x^2 $$
 
 This expression is identical to the analytical solution implemented in Quadratic1D::exact().
 
 For this verification case:
 
-$$
-T_L=100,\quad T_R=200,\quad L=1.0,\quad k=100,\quad q'''=20000
-$$
+$$ T_L=100,\quad T_R=200,\quad L=1.0,\quad k=100,\quad q'''=20000 $$
 
 giving:
 
-$$
-T(x) = 100 + \bigg(\frac{200-100}{1} + \frac{20000(1)}{2(100)} \bigg)x - \frac{20000}{2(100)}x^2
-$$
+$$ T(x) = 100 + \bigg(\frac{200-100}{1} + \frac{20000(1)}{2(100)}  \bigg)x - \frac{20000}{2(100)}x^2 $$
 
-$$
-T(x)=100+200x-100x^2
-$$
+$$ T(x)=100+200x-100x^2 $$
 
 This analytical solution is used as the reference solution for error evaluation.
 
@@ -201,24 +160,17 @@ The Quadratic1D verification case uses a cell-centered finite-volume discretizat
 
 The governing equation is integrated over each control volume:
 
-$$
--\int_{V_P} \frac{d}{dx} \bigg(k\frac{dT}{dx}\bigg)dV =\int_{V_P}q'''dV
-$$
+$$ -\int_{V_P} \frac{d}{dx} \bigg(k\frac{dT}{dx}\bigg)dV =\int_{V_P} q'''dV $$
 
 Applying the divergence theorem gives:
 
-$$
--\sum_f kA_f
-\frac{dT}{dx}\bigg|_f = q'''V_P
-$$
+$$ -\sum_f kA_f \frac{dT}{dx}\bigg|_f = q'''V_P $$
 
 ### Spatial Discretization
 
 The domain is divided into uniform finite volumes. Temperature is stored at cell centers:
 
-$$
-T_P=T(x_P)
-$$
+$$ T_P=T(x_P) $$
 
 where (P) represents the cell center.
 
@@ -226,11 +178,7 @@ where (P) represents the cell center.
 
 Diffusive fluxes are approximated using a second-order central difference:
 
-$$
-\frac{dT}{dx}\bigg|_f
-\approx
-\frac{T_N-T_P}{d_{PN}}
-$$
+$$ \frac{dT}{dx}\bigg|_f \approx \frac{T_N-T_P}{d_{PN}} $$
 
 where:
 
@@ -240,27 +188,19 @@ where:
 
 The resulting diffusive face flux is:
 
-$$
-F_f=
--kA_f
-\frac{T_N-T_P}{d_{PN}}
-$$
+$$ F_f= -kA_f \frac{T_N-T_P}{d_{PN}} $$
 
 ### Source Integration
 
 The volumetric source is integrated over each control volume:
 
-$$
-b_P=q'''V_P
-$$
+$$ b_P=q'''V_P $$
 
 This contribution is added to the linear system during assembly.
 
 The resulting finite-volume equation is:
 
-$$
-a_PT_P=a_ET_E+a_WT_W+b_P
-$$
+$$ a_PT_P=a_ET_E+a_WT_W+b_P $$
 
 where (b_P) contains the source contribution. 
 
@@ -288,21 +228,11 @@ The following error metrics are calculated.
 
 ### L2 Norm
 
-$$
-L_2=
-\sqrt{
-\frac{1}{N}
-\sum_{i=1}^{N}
-(T_i-T_i^{exact})^2
-}
-$$
+$$ L_2= \sqrt{ \frac{1}{N} \sum_{i=1}^{N} (T_i-T_i^{exact})^2 } $$
 
 ### L∞ Norm
 
-$$
-L_\infty=
-\max_i |T_i-T_i^{exact}|
-$$
+$$ L_\infty= \max_i |T_i-T_i^{exact}| $$
 
 ---
 
