@@ -1,214 +1,220 @@
-# 03_Sinusoidal2D
+# 02_Quadratic1D
 
 ## Purpose
 
-This case verifies the implementation of two-dimensional steady diffusion within the heat conduction model. The problem uses a manufactured sinusoidal temperature field over a two-dimensional square domain with constant thermal conductivity.
+This case verifies the implementation of volumetric source terms within the steady heat conduction model. The problem represents one-dimensional conduction through a uniform rod with constant thermal conductivity and a distributed internal heat generation term.
 
-Unlike the previous one-dimensional verification cases, this problem evaluates the solver's ability to correctly assemble and solve a multidimensional diffusion operator. The smooth analytical solution provides a controlled environment for evaluating spatial discretization accuracy and mesh refinement behavior.
+Unlike the Linear1D case, where the solution is linear and the diffusion operator can reproduce the analytical solution to machine precision, this case produces a quadratic temperature distribution. This provides a verification of source term integration, diffusion-source coupling, linear system assembly, and solver accuracy.
 
 This case verifies:
 
-* two-dimensional diffusion operator implementation
-* x-direction and y-direction flux calculations
-* finite-volume discretization on a structured quadrilateral mesh
+* steady diffusion operator implementation
+* volumetric source term application
 * Dirichlet boundary condition enforcement
+* finite-volume source integration
 * linear system assembly
 * iterative solver functionality
-* second-order spatial convergence
 
 ---
 
 ## Governing Equation
 
-The governing equation for steady two-dimensional heat diffusion is:
+The governing equation for steady one-dimensional heat conduction with volumetric heat generation is:
 
-$$ -\nabla \cdot (k\nabla T)=q''' $$
+$$ -\frac{d}{dx}\left(k\frac{dT}{dx}\right)=q''' $$
 
-where:
+The variables represent:
 
-* $(k)$: thermal conductivity $(W/(m \cdot K))$
-* $(x,y)$: spatial coordinates $(m)$
-* $(T)$: temperature field $(^\circ C)$
-* $(q''')$: manufactured source term $(W/m^3)$
+* $(k)$: thermal conductivity (W/(m $\cdot$ K))
+* $(x)$: distance along the rod (m)
+* $(T)$: temperature $(^\circ C)$
+* $(q''')$: volumetric heat generation source term $(W/m^3)$
 
-For constant thermal conductivity, the equation becomes:
+Assuming constant thermal conductivity, the equation simplifies to:
 
-$$ -k\nabla^2T=q''' $$
+$$ -k\frac{d^2T}{dx^2}=q''' $$
 
-where the Laplacian operator is:
+or:
 
-$$ \nabla^2T= \frac{\partial^2T}{\partial x^2} + \frac{\partial^2T}{\partial y^2} $$
+$$ \frac{d^2T}{dx^2}=-\frac{q'''}{k} $$
 
-The manufactured source term is selected such that the analytical solution satisfies this equation exactly.
+A positive volumetric source represents internal heat generation. Under this sign convention, the source introduces negative curvature into the temperature field, causing the solution profile to become concave downward.
 
 ---
 
 ## Domain
 
-The problem uses a two-dimensional computational domain.
+The problem uses a one-dimensional computational domain along the x-axis.
 
 The domain is defined as:
 
-$$ 0 \leq x \leq L_x $$
-
-$$ 0 \leq y \leq L_y $$
+$$ 0 \leq x \leq L $$
 
 For this verification case:
 
-| Parameter | Value |
-|---|---|
-| Domain length ($L_x$) | 1.0 m |
-| Domain height ($L_y$) | 1.0 m |
-| Mesh type | Uniform quadrilateral mesh |
-| Cells | $50 \times 50$ |
+| Parameter       | Value          |
+| --------------- | -------------- |
+| Domain length   | 1.0 m          |
+| Number of cells | 20             |
+| Mesh type       | Uniform line1D |
 
-The mesh is generated using evenly spaced quadrilateral cells. Temperature is stored at the center of each finite volume.
+The mesh is generated using evenly spaced finite volumes with temperature stored at cell centers.
 
 ---
 
 ## Boundary Conditions
 
-Dirichlet boundary conditions are applied on all four physical boundaries.
+Dirichlet boundary conditions are applied at both physical boundaries.
 
-The manufactured solution naturally evaluates to zero on all domain boundaries, allowing a consistent fixed-temperature boundary condition.
+The left and right boundary temperatures are:
 
-The boundary conditions are:
+$$ T(0)=T_L=100^\circ C $$
 
-$$ T(0,y)=0 $$
-
-$$ T(L_x,y)=0 $$
-
-$$ T(x,0)=0 $$
-
-$$ T(x,L_y)=0 $$
+$$ T(L)=T_R=200^\circ C $$
 
 The boundary conditions are assigned through boundary groups:
 
-| Group | Boundary | Type | Value |
-|---|---|---|---|
-| 0 | Left | Dirichlet | $0^\circ C$ |
-| 1 | Right | Dirichlet | $0^\circ C$ |
-| 2 | Bottom | Dirichlet | $0^\circ C$ |
-| 3 | Top | Dirichlet | $0^\circ C$ |
+| Group | Boundary | Type      | Value         |
+| ----- | -------- | --------- | ------------- |
+| 0     | Left     | Dirichlet | (100^\circ C) |
+| 1     | Right    | Dirichlet | (200^\circ C) |
+
+No flux boundary conditions are applied.
 
 ---
 
 ## Source Term
 
-The manufactured solution requires a spatially varying source term.
+This case includes a constant volumetric heat generation term:
 
-The source is calculated from:
+$$ q'''= 20000 \frac{W}{m^3} $$
 
-$$ q'''=-k\nabla^2T $$
+The source term is included as a volumetric contribution to each finite volume:
 
-The thermal conductivity is constant:
+$$ b_P=q'''V_P $$
 
-$$ k=100 $$
+where:
 
-The resulting source distribution varies throughout the domain according to the analytical solution.
+* $(b_P)$ is the integrated source contribution
+* $(V_P)$ is the cell volume
 
-Unlike the previous Quadratic1D case, the source is not uniform. This allows verification of spatially varying source-term integration within the finite-volume formulation.
+The finite-volume formulation integrates the source over the control volume, resulting in an extensive source contribution rather than a pointwise value. The manufactured solution uses the same source term to create the expected analytical solution.
 
 ---
 
 ## Manufactured Solution
 
-The analytical temperature distribution is defined as:
+Starting from:
 
-$$ T(x,y)= \sin(\pi x)\sin(\pi y) $$
+$$ \frac{d^2T}{dx^2}=-\frac{q'''}{k} $$
 
-This solution satisfies all boundary conditions because:
+Integrating once:
 
-$$ \sin(0)=0 $$
+$$ \frac{dT}{dx} = -\frac{q'''}{k}x+c_1 $$
 
-and:
+Integrating again:
 
-$$ \sin(\pi)=0 $$
+$$ T(x)  = -\frac{q'''}{2k}x^2+c_1x+c_2 $$
 
-The second derivatives are:
+The constants are determined from the boundary conditions.
 
-$$ \frac{\partial^2T}{\partial x^2} = -\pi^2 \sin(\pi x)\sin(\pi y) $$
+At (x=0):
 
+$$ T(0)=T_L $$
 
-$$ \frac{\partial^2T}{\partial y^2} = -\pi^2 \sin(\pi x)\sin(\pi y) $$
+therefore:
 
-Therefore, the Laplacian is:
+$$ c_2=T_L $$
 
-$$ \nabla^2T = -2\pi^2 \sin(\pi x)\sin(\pi y) $$
+At (x=L):
 
-The manufactured source term is therefore:
+$$ T_R = -\frac{q'''}{2k}L^2+c_1L+T_L $$
 
-$$ q''' = -k\nabla^2T $$
+Solving for (c_1):
 
-or:
+$$ c_1= \frac{T_R-T_L}{L} + \frac{q'''L}{2k} $$
 
-$$ q''' = 2k\pi^2 \sin(\pi x)\sin(\pi y) $$
+The final manufactured solution is:
 
-This expression is identical to the analytical solution implemented in `Sinusoidal2D::exact()` and the source calculation implemented in `Sinusoidal2D::source()`.
+$$ T(x)= T_L+ (\frac{T_R-T_L}{L}+\frac{q'''L}{2k})x - \frac{q'''} {2k}x^2 $$
 
-The analytical solution is used as the reference solution for error evaluation.
+This expression is identical to the analytical solution implemented in Quadratic1D::exact().
+
+For this verification case:
+
+$$ T_L=100,\quad T_R=200,\quad L=1.0,\quad k=100,\quad q'''=20000 $$
+
+giving:
+
+$$ T(x) = 100 + \bigg(\frac{200-100}{1} + \frac{20000(1)}{2(100)}  \bigg)x - \frac{20000}{2(100)}x^2 $$
+
+$$ T(x)=100+200x-100x^2 $$
+
+This analytical solution is used as the reference solution for error evaluation.
 
 ---
 
 ## Discretization Details
 
-The Sinusoidal2D verification case uses a cell-centered finite-volume discretization of the steady two-dimensional heat equation.
+The Quadratic1D verification case uses a cell-centered finite-volume discretization of the steady heat equation with volumetric source terms.
 
 The governing equation is integrated over each control volume:
 
-$$ -\int_{V_P} \nabla\cdot(k\nabla T)dV = \int_{V_P}q'''dV $$
+$$ -\int_{V_P} \frac{d}{dx} \bigg(k\frac{dT}{dx}\bigg)dV =\int_{V_P} q'''dV $$
 
-Applying the divergence theorem converts the volume integral into a balance of diffusive fluxes through the cell faces:
+Applying the divergence theorem gives:
 
-$$ -\sum_f kA_f \frac{\partial T}{\partial n}\bigg|_f = q'''V_P $$
+$$ -\sum_f kA_f \frac{dT}{dx}\bigg|_f = q'''V_P $$
 
 ### Spatial Discretization
 
-The domain is divided into uniform quadrilateral finite volumes.
+The domain is divided into uniform finite volumes. Temperature is stored at cell centers:
 
-Temperature is stored at cell centers:
+$$ T_P=T(x_P) $$
 
-$$ T_P=T(x_P,y_P) $$
-
-where $P$ represents the cell center.
-
-Fluxes are evaluated independently in the x and y directions.
+where (P) represents the cell center.
 
 ### Flux Approximation
 
-Diffusive face gradients are approximated using second-order central differences:
+Diffusive fluxes are approximated using a second-order central difference:
 
-$$ \frac{\partial T}{\partial x}\bigg|_f \approx \frac{T_E-T_P}{d_{PE}} $$
-
-
-$$ \frac{\partial T}{\partial y}\bigg|_f \approx \frac{T_N-T_P}{d_{PN}} $$
+$$ \frac{dT}{dx}\bigg|_f \approx \frac{T_N-T_P}{d_{PN}} $$
 
 where:
 
-* $T_P$: current cell temperature
-* $T_E$: east neighboring cell temperature
-* $T_N$: north neighboring cell temperature
-* $d$: distance between cell centers
+* $(T_P)$: current cell temperature
+* $(T_N)$: neighboring cell temperature
+* $(d_{PN})$: distance between cell centers
 
-The resulting finite-volume equation is assembled as:
+The resulting diffusive face flux is:
 
-$$ a_PT_P = a_ET_E + a_WT_W + a_NT_N + a_ST_S + b_P $$
+$$ F_f= -kA_f \frac{T_N-T_P}{d_{PN}} $$
 
-where $b_P$ contains the integrated source contribution.
+### Source Integration
 
-Because the mesh is uniform and orthogonal, the discretization is formally second-order accurate.
+The volumetric source is integrated over each control volume:
+
+$$ b_P=q'''V_P $$
+
+This contribution is added to the linear system during assembly.
+
+The resulting finite-volume equation is:
+
+$$ a_PT_P=a_ET_E+a_WT_W+b_P $$
+
+where (b_P) contains the source contribution. 
 
 ---
 
 ## Solver Configuration
 
-The assembled diffusion matrix is symmetric positive definite and is solved using the Conjugate Gradient (CG) solver.
+For this steady diffusion problem with Dirichlet boundary conditions, the assembled system produces a symmetric positive definite matrix and is solved using the Conjugate Gradient solver.
 
-| Parameter | Value |
-|---|---|
-| Solver | CG |
-| Tolerance | $1e^{-8}$ |
-| Maximum iterations | 5000 |
+| Parameter          | Value     |
+| ------------------ | --------- |
+| Solver             | CG        |
+| Tolerance          | $1e^{-8}$ |
+| Maximum iterations | 5000      |
 
 CG convergence depends on the conditioning of the assembled matrix and the selected convergence tolerance.
 
@@ -228,64 +234,47 @@ $$ L_2= \sqrt{ \frac{1}{N} \sum_{i=1}^{N} (T_i-T_i^{exact})^2 } $$
 
 $$ L_\infty= \max_i |T_i-T_i^{exact}| $$
 
-A mesh refinement study is also performed to verify spatial convergence.
-
-For a second-order discretization:
-
-$$ L_2 \propto \Delta x^2 $$
-
 ---
 
 ## Expected Results
 
-The finite-volume discretization is expected to demonstrate second-order spatial convergence.
+Because the manufactured solution is quadratic, the finite-volume discretization is expected to have second-order spatial accuracy.
 
-The refinement study uses:
+For this coarse 20-cell mesh, the expected error is larger than Linear1D. Unlike Linear1D, the quadratic manufactured solution contains curvature. The cell-centered finite-volume approximation is second-order accurate but does not exactly reproduce quadratic fields on a coarse mesh.
 
-| Mesh | Expected Order |
-|---|---|
-| $25\times25$ | - |
-| $50\times50$ | 2 |
-| $100\times100$ | 2 |
-| $200\times200$ | 2 |
+The acceptance threshold for this case is:
 
-The computed results are:
+| Metric     | Threshold |
+| ---------- | --------- |
+| $L_2$      | 7e-02 |
+| $L_\infty$ | 7e-02 |
 
-| Mesh | $L_2$ Error | $L_\infty$ Error |
-|---|---|---|
-| $25\times25$ | $6.585e^{-4}$ | $1.317e^{-3}$ |
-| $50\times50$ | $1.645e^{-4}$ | $3.287e^{-4}$ |
-| $100\times100$ | $4.113e^{-5}$ | $8.223e^{-5}$ |
-| $200\times200$ | $1.028e^{-5}$ | $2.056e^{-5}$ |
+The computed errors are:
 
-The observed convergence rates are:
+| Error      | Value     |
+| ---------- | --------- |
+| $L_2$      | 6.250e-02 |
+| $L_\infty$ | 6.250e-02 |
 
-| Metric | Observed Order | Expected Order | Status |
-|---|---|---|---|
-| $L_2$ | 2.00037 | 2.0 | PASS |
-| $L_\infty$ | 2.00040 | 2.0 | PASS |
-
-The refinement study confirms that the two-dimensional diffusion operator maintains the expected second-order spatial accuracy.
+The results satisfy the verification criteria and confirm that the diffusion operator, volumetric source implementation, and boundary condition enforcement are functioning correctly.
 
 ---
 
 ## Components Verified
 
-The Sinusoidal2D case exercises the following components:
+The Quadratic1D case exercises the following components:
 
-| Component | Tested |
-|---|---|
-| 2D mesh generation | ✓ |
-| Cell-centered finite volume discretization | ✓ |
-| x-direction diffusion flux calculation | ✓ |
-| y-direction diffusion flux calculation | ✓ |
-| Spatially varying source integration | ✓ |
-| Dirichlet boundary conditions | ✓ |
-| Linear system assembly | ✓ |
-| CG solver | ✓ |
-| Mesh refinement framework | ✓ |
-| Analytical solution comparison | ✓ |
-| Verification error calculation | ✓ |
+| Component                                  | Tested |
+| ------------------------------------------ | ------ |
+| Mesh generation                            | ✓      |
+| Cell-centered finite volume discretization | ✓      |
+| Diffusion flux calculation                 | ✓      |
+| Volumetric source integration              | ✓      |
+| Dirichlet boundary conditions              | ✓      |
+| Linear system assembly                     | ✓      |
+| CG solver                                  | ✓      |
+| Analytical solution comparison             | ✓      |
+| Verification error calculation             | ✓      |
 
 ---
 
@@ -294,28 +283,24 @@ The Sinusoidal2D case exercises the following components:
 The following configuration was used:
 
 ```json
-"Sinusoidal2D": {
+"Quadratic1D": {
 
     "mesh": {
-        "type": "quad2D",
-        "nx": 50,
-        "ny": 50,
-        "lx": 1.0,
-        "ly": 1.0
+        "type": "line1D",
+        "nx": 20,
+        "lx": 1.0
     },
 
     "refinement": {
-        "enabled": true,
-        "levels": [25, 50, 100, 200],
+        "enabled": false,
+        "levels": [10, 20, 40, 80, 160],
         "expected_order": 2.0
     },
 
     "physics": {
         "type": "heat",
         "k": 100.0,
-        "gamma": 1.0,
-        "ux": 0.0,
-        "uy": 0.0
+        "volumetricSource": 20000.0
     },
 
     "solver": {
@@ -325,11 +310,10 @@ The following configuration was used:
     },
 
     "boundary_conditions": [
-        { "group": 0, "type": "Dirichlet", "value": 0.0 },
-        { "group": 1, "type": "Dirichlet", "value": 0.0 },
-        { "group": 2, "type": "Dirichlet", "value": 0.0 },
-        { "group": 3, "type": "Dirichlet", "value": 0.0 }
+        { "group": 0, "type": "Dirichlet", "value": 100.0 },
+        { "group": 1, "type": "Dirichlet", "value": 200.0 }
     ],
 
     "params": {}
 }
+```
