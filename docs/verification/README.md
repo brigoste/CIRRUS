@@ -25,15 +25,7 @@ Each case reports
 
 The observed order is computed as
 
-$$
-p
-=
-\frac{
-\log\left(E_h/E_{h/2}\right)
-}{
-\log\left(h/(h/2)\right)
-}
-$$
+$$ p = \frac{ \log(E_h/E_{h/2}) }{ \log(h/(h/2) )}$$
 
 where
 
