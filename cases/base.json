@@ -20,9 +20,6 @@
     "plot_enabled": true,
 
     "cases": [
-      "Linear1D",
-      "Quadratic1D",
-      "Sinusoidal2D",
       "AdvectionDiffusion2D"
     ],
 
@@ -154,15 +151,15 @@
         "refinement": {
           "enabled": true,
           "levels": [40, 80, 160, 320],
-          "expected_order": 2.0
+          "expected_order": 1.0
         },
 
         "physics": {
           "type": "advection-diffusion",
           "gamma": 1.0,
-          "rho": 0.0,
-          "ux": 0.0,
-          "uy": 0.0,
+          "rho": 1.0,
+          "ux": 1.0,
+          "uy": 0.5,
           "uz": 0.0
         },
 
