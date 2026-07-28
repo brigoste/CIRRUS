@@ -1,7 +1,4 @@
 #include "tests/verification/ManufacturedCases/Sinusoidal2D.hpp"
-
-// #include "tests/verification/VerificationAutoRegister.hpp"
-// #include "tests/verification/VerificationRegistry.hpp"
 #include "utils/MathConstants.hpp"
 
 double Sinusoidal2D::exact(
