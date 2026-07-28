@@ -76,8 +76,8 @@ The boundary conditions are assigned through boundary groups:
 
 | Group | Boundary | Type      | Value         |
 | ----- | -------- | --------- | ------------- |
-| 0     | Left     | Dirichlet | (100^\circ C) |
-| 1     | Right    | Dirichlet | (200^\circ C) |
+| 0     | Left     | Dirichlet | $100^\circ C$ |
+| 1     | Right    | Dirichlet | $200^\circ C$ |
 
 No flux boundary conditions are applied.
 
