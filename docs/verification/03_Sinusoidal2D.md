@@ -22,9 +22,7 @@ This case verifies:
 
 The governing equation for steady two-dimensional heat diffusion is:
 
-$$
--\nabla \cdot (k\nabla T)=q'''
-$$
+$$ -\nabla \cdot (k\nabla T)=q''' $$
 
 where:
 
@@ -35,18 +33,11 @@ where:
 
 For constant thermal conductivity, the equation becomes:
 
-$$
--k\nabla^2T=q'''
-$$
+$$ -k\nabla^2T=q''' $$
 
 where the Laplacian operator is:
 
-$$
-\nabla^2T=
-\frac{\partial^2T}{\partial x^2}
-+
-\frac{\partial^2T}{\partial y^2}
-$$
+$$ \nabla^2T= \frac{\partial^2T}{\partial x^2} + \frac{\partial^2T}{\partial y^2} $$
 
 The manufactured source term is selected such that the analytical solution satisfies this equation exactly.
 
@@ -58,13 +49,9 @@ The problem uses a two-dimensional computational domain.
 
 The domain is defined as:
 
-$$
-0 \leq x \leq L_x
-$$
+$$ 0 \leq x \leq L_x $$
 
-$$
-0 \leq y \leq L_y
-$$
+$$ 0 \leq y \leq L_y $$
 
 For this verification case:
 
@@ -87,21 +74,13 @@ The manufactured solution naturally evaluates to zero on all domain boundaries, 
 
 The boundary conditions are:
 
-$$
-T(0,y)=0
-$$
+$$ T(0,y)=0 $$
 
-$$
-T(L_x,y)=0
-$$
+$$ T(L_x,y)=0 $$
 
-$$
-T(x,0)=0
-$$
+$$ T(x,0)=0 $$
 
-$$
-T(x,L_y)=0
-$$
+$$ T(x,L_y)=0 $$
 
 The boundary conditions are assigned through boundary groups:
 
@@ -120,15 +99,11 @@ The manufactured solution requires a spatially varying source term.
 
 The source is calculated from:
 
-$$
-q'''=-k\nabla^2T
-$$
+$$ q'''=-k\nabla^2T $$
 
 The thermal conductivity is constant:
 
-$$
-k=100
-$$
+$$ k=100 $$
 
 The resulting source distribution varies throughout the domain according to the analytical solution.
 
@@ -140,65 +115,34 @@ Unlike the previous Quadratic1D case, the source is not uniform. This allows ver
 
 The analytical temperature distribution is defined as:
 
-$$
-T(x,y)=
-\sin(\pi x)\sin(\pi y)
-$$
+$$ T(x,y)= \sin(\pi x)\sin(\pi y) $$
 
 This solution satisfies all boundary conditions because:
 
-$$
-\sin(0)=0
-$$
+$$ \sin(0)=0 $$
 
 and:
 
-$$
-\sin(\pi)=0
-$$
+$$ \sin(\pi)=0 $$
 
 The second derivatives are:
 
-$$
-\frac{\partial^2T}{\partial x^2}
-=
--\pi^2
-\sin(\pi x)\sin(\pi y)
-$$
+$$ \frac{\partial^2T}{\partial x^2} = -\pi^2 \sin(\pi x)\sin(\pi y) $$
 
 
-$$
-\frac{\partial^2T}{\partial y^2}
-=
--\pi^2
-\sin(\pi x)\sin(\pi y)
-$$
+$$ \frac{\partial^2T}{\partial y^2} = -\pi^2 \sin(\pi x)\sin(\pi y) $$
 
 Therefore, the Laplacian is:
 
-$$
-\nabla^2T
-=
--2\pi^2
-\sin(\pi x)\sin(\pi y)
-$$
+$$ \nabla^2T = -2\pi^2 \sin(\pi x)\sin(\pi y) $$
 
 The manufactured source term is therefore:
 
-$$
-q'''
-=
--k\nabla^2T
-$$
+$$ q''' = -k\nabla^2T $$
 
 or:
 
-$$
-q'''
-=
-2k\pi^2
-\sin(\pi x)\sin(\pi y)
-$$
+$$ q''' = 2k\pi^2 \sin(\pi x)\sin(\pi y) $$
 
 This expression is identical to the analytical solution implemented in `Sinusoidal2D::exact()` and the source calculation implemented in `Sinusoidal2D::source()`.
 
@@ -212,21 +156,11 @@ The Sinusoidal2D verification case uses a cell-centered finite-volume discretiza
 
 The governing equation is integrated over each control volume:
 
-$$
--\int_{V_P}
-\nabla\cdot(k\nabla T)dV
-=
-\int_{V_P}q'''dV
-$$
+$$ -\int_{V_P} \nabla\cdot(k\nabla T)dV = \int_{V_P}q'''dV $$
 
 Applying the divergence theorem converts the volume integral into a balance of diffusive fluxes through the cell faces:
 
-$$
--\sum_f kA_f
-\frac{\partial T}{\partial n}\bigg|_f
-=
-q'''V_P
-$$
+$$ -\sum_f kA_f \frac{\partial T}{\partial n}\bigg|_f = q'''V_P $$
 
 ### Spatial Discretization
 
@@ -234,9 +168,7 @@ The domain is divided into uniform quadrilateral finite volumes.
 
 Temperature is stored at cell centers:
 
-$$
-T_P=T(x_P,y_P)
-$$
+$$ T_P=T(x_P,y_P) $$
 
 where $P$ represents the cell center.
 
@@ -246,18 +178,10 @@ Fluxes are evaluated independently in the x and y directions.
 
 Diffusive face gradients are approximated using second-order central differences:
 
-$$
-\frac{\partial T}{\partial x}\bigg|_f
-\approx
-\frac{T_E-T_P}{d_{PE}}
-$$
+$$ \frac{\partial T}{\partial x}\bigg|_f \approx \frac{T_E-T_P}{d_{PE}} $$
 
 
-$$
-\frac{\partial T}{\partial y}\bigg|_f
-\approx
-\frac{T_N-T_P}{d_{PN}}
-$$
+$$ \frac{\partial T}{\partial y}\bigg|_f \approx \frac{T_N-T_P}{d_{PN}} $$
 
 where:
 
@@ -268,19 +192,7 @@ where:
 
 The resulting finite-volume equation is assembled as:
 
-$$
-a_PT_P
-=
-a_ET_E
-+
-a_WT_W
-+
-a_NT_N
-+
-a_ST_S
-+
-b_P
-$$
+$$ a_PT_P = a_ET_E + a_WT_W + a_NT_N + a_ST_S + b_P $$
 
 where $b_P$ contains the integrated source contribution.
 
@@ -310,29 +222,17 @@ The following error metrics are calculated.
 
 ### L2 Norm
 
-$$
-L_2=
-\sqrt{
-\frac{1}{N}
-\sum_{i=1}^{N}
-(T_i-T_i^{exact})^2
-}
-$$
+$$ L_2= \sqrt{ \frac{1}{N} \sum_{i=1}^{N} (T_i-T_i^{exact})^2 } $$
 
 ### L∞ Norm
 
-$$
-L_\infty=
-\max_i |T_i-T_i^{exact}|
-$$
+$$ L_\infty= \max_i |T_i-T_i^{exact}| $$
 
 A mesh refinement study is also performed to verify spatial convergence.
 
 For a second-order discretization:
 
-$$
-L_2 \propto \Delta x^2
-$$
+$$ L_2 \propto \Delta x^2 $$
 
 ---
 
