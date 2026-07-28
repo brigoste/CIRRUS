@@ -107,29 +107,21 @@ The Linear1D verification case uses a cell-centered finite-volume discretization
 
 The governing equation is integrated over each control volume:
 
-$$
--\int_{V_P} \frac{d}{dx}\left(k\frac{dT}{dx}\right)dV = 0
-$$
+$$ -\int_{V_P} \frac{d}{dx}\left(k\frac{dT}{dx}\right)dV = 0 $$
 
 Applying the divergence theorem converts the volume integral into a balance of diffusive fluxes through the cell faces:
 
-$$
--\sum_f k A_f (\nabla T \cdot \bold{n})_f = 0
-$$
+$$ -\sum_f k A_f (\nabla T \cdot \vec{n})_f = 0 $$
 
 The form of the divergence can be written for 1D in the following form:
 
-$$
-(\nabla T \cdot n)_f \rightarrow \frac{T_N - T_P}{d_{PN}}
-$$
+$$ (\nabla T \cdot \vec{n})_f \rightarrow \frac{T_N - T_P}{d_{PN}} $$
 
 ### Spatial Discretization
 
 The domain is divided into uniform finite volumes. Temperature is stored at the center of each control volume:
 
-$$
-T_P = T(x_P)
-$$
+$$ T_P = T(x_P) $$
 
 where $P$ denotes the cell center.
 
@@ -137,11 +129,7 @@ where $P$ denotes the cell center.
 
 The diffusive flux between neighboring cells is approximated using a second-order central difference:
 
-$$
-\frac{dT}{dx}\bigg|_f
-\approx
-\frac{T_N-T_P}{d_{PN}}
-$$
+$$ \frac{dT}{dx}\bigg|_f \approx \frac{T_N-T_P}{d_{PN}} $$
 
 where:
 
@@ -151,11 +139,7 @@ where:
 
 The resulting face flux is:
 
-$$
-F_f =
--kA_f
-\frac{T_N-T_P}{d_{PN}}
-$$
+$$ F_f = -kA_f \frac{T_N-T_P}{d_{PN}} $$
 
 The value of $d_{PN}$ works for non-uniformilly sized cells as well as uniform spacing. Because the mesh is uniform and orthogonal, this approximation is formally second-order accurate.
 
@@ -169,10 +153,7 @@ The discretization is:
 
 The discrete equation for each control volume is assembled into a linear system:
 
-$$
-a_P T_P =
-a_E T_E + a_W T_W
-$$
+$$ a_P T_P = a_E T_E + a_W T_W $$
 
 where the coefficients represent the diffusive contributions from neighboring faces.
 
