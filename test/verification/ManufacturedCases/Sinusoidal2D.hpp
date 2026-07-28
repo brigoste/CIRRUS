@@ -8,18 +8,13 @@
     
     Case                    Solver      Mesh        L2 Error      L2 Check    Refinement    Order
     --------------------------------------------------------------------------------------------------
-    Sinusoidal2D            CG          50x50       6.585e-04     PASS        PASS          4.001e+00
+    Sinusoidal2D            CG          50x50       6.585e-04     PASS        PASS          2.00e+00
 
-    Observed order exceeds theoretical order due to symmetry/smooth manufactured solution.
 */
 
 class Sinusoidal2D : public VerificationCase
 {
 public:
-    // explicit Sinusoidal2D(const nlohmann::json& params): {
-    //     if (!params.contains("k")) { throw std::runtime_error("Sinusoidal2D missing required parameter k"); }
-    //     k_ = params.value("k",100);
-    // }
     explicit Sinusoidal2D(const SimulationConfig& cfg)
     {
         k_ = cfg.physics.k;
