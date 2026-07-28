@@ -82,7 +82,7 @@ void VerificationRunner::run(
     std::cout << "Case count: " << cfg.verificationSuite.cases.size() << "\n";
 
     auto verificationRoot = paths.outputRoot / "validation";
-
+    
     std::filesystem::create_directories(verificationRoot);
 
     // -------------------------------------------------
@@ -96,6 +96,7 @@ void VerificationRunner::run(
     {
         const std::string& caseName = caseEntry.name;
         // const nlohmann::json& params = caseEntry.params;
+        auto caseOutputDir = verificationRoot / caseName;
 
         std::cout << "\n=================================\n"
                   << "Running verification case: " << caseName
@@ -201,8 +202,8 @@ void VerificationRunner::run(
 
             if (refinementEnabled) { suffix = "_L" + std::to_string(level); }
 
-            auto csvPath = verificationRoot / (caseName + suffix + ".csv");
-            auto jsonPath = verificationRoot / (caseName + suffix + ".json");
+            auto csvPath = caseOutputDir / (caseName + suffix + ".csv");
+            auto jsonPath = caseOutputDir / (caseName + suffix + ".json");
 
             // -------------------------------------------------
             // Write outputs
