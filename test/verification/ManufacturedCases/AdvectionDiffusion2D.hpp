@@ -9,7 +9,7 @@
 
     Case                    Solver      Mesh        L2 Error      L2 Check    Refinement    Order
     --------------------------------------------------------------------------------------------------
-    AdvectionDiffusion2D    BiCGSTAB    20x20       6.375e-03     PASS        FAIL          1.487e-01
+    AdvectionDiffusion2D    BiCGSTAB    40x40       4.124e-03     PASS        PASS          1.0
 */
 
 class AdvectionDiffusion2D : public VerificationCase
