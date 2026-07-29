@@ -16,5 +16,5 @@ public:
 private:
     nlohmann::json loadAndResolve(const std::filesystem::path& path);
     nlohmann::json resolveFile(const std::filesystem::path& path);
-    std::unordered_map<std::filesystem::ppath, mlohmann::json> cache;
+    std::unordered_map<std::filesystem::path, mlohmann::json> cache;
 }
