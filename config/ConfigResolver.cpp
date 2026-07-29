@@ -23,8 +23,7 @@ nlohmann::json ConfigResolver::loadAndResolve(
     // LOAD FILE
     // -------------------------
 
-    nlohmann::json j =
-        resolveFile(absPath);
+    nlohmann::json j = resolveFile(absPath);
 
     // -------------------------
     // HANDLE EXTENDS
