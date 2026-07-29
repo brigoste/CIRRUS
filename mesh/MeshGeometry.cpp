@@ -1,6 +1,6 @@
 #include "mesh/MeshGeometry.hpp"
 #include "mesh/MeshBase.hpp"
-#include "mesh/Face.hpp"
+#include "mesh/primitives/Face.hpp"
 
 double MeshGeometry::cellDistance(const MeshBase& mesh,
                                    std::size_t P,
