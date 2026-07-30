@@ -6,7 +6,14 @@
 // JSON merge (recursive override)
 // ============================================================
 
-const std::unordered_set<std::string> atomicKeys = { "extends" };
+const std::unordered_set<std::string> atomicKeys = {
+    "extends",
+    "boundary_conditions",
+    "mesh",
+    "solver",
+    "physics",
+    "paths"
+};
 
 nlohmann::json mergeJson(nlohmann::json base, const nlohmann::json& override)
 {
@@ -23,6 +30,81 @@ nlohmann::json mergeJson(nlohmann::json base, const nlohmann::json& override)
     }
 
     return base;
+}
+
+VerificationSuite loadVerificationSuite(const std::filesystem::path& path)
+{
+    std::ifstream file(path);
+
+    if (!file.is_open()) { throw std::runtime_error( "Cannot open verification suite file: " + path.string()); }
+
+    nlohmann::json j;
+    file >> j;
+
+    if (j.contains("extends"))
+    {
+        std::filesystem::path parent = std::filesystem::weakly_canonical( path.parent_path() / j.at("extends").get<std::string>());
+
+        std::ifstream baseFile(parent);
+
+        nlohmann::json baseJson;
+        baseFile >> baseJson;
+
+        j = mergeJson(baseJson, j);
+    }
+
+    if (!j.contains("verificationSuite")) { throw std::runtime_error( "Verification suite missing 'verificationSuite'"); }
+
+    return j.at("verificationSuite").get<VerificationSuite>();
+}
+
+VerificationCaseConfig loadVerificationCase(
+    const std::filesystem::path& path)
+{
+    std::ifstream file(path);
+
+    if (!file.is_open()) { throw std::runtime_error( "Cannot open verification case: " + path.string()); }
+
+    nlohmann::json j;
+    file >> j;
+
+    VerificationCaseConfig cfg;
+
+    cfg.name = path.stem().string();
+
+    if (j.contains("mesh"))
+    {
+        cfg.mesh = j.at("mesh").get<MeshConfig>();
+        cfg.overrideMesh = true;
+    }
+
+    if (j.contains("physics"))
+    {
+        cfg.physics = j.at("physics").get<PhysicsConfig>();
+        cfg.overridePhysics = true;
+    }
+
+    if (j.contains("solver"))
+    {
+        cfg.solver = j.at("solver").get<SolverConfig>();
+        cfg.overrideSolver = true;
+    }
+
+    if (j.contains("boundary_conditions"))
+    {
+        cfg.boundary = j.at("boundary_conditions") .get<std::vector<BoundaryConfig>>();
+        cfg.overrideBoundary = true;
+    }
+
+    if (j.contains("refinement"))
+    {
+        cfg.refinement = j.at("refinement").get<RefinementConfig>();
+        cfg.overrideRefinement = true;
+    }
+
+    if (j.contains("params")) { cfg.params = j.at("params"); }
+
+    return cfg;
 }
 
 // ============================================================
@@ -51,9 +133,7 @@ SimulationConfig defaultConfig()
     return cfg;
 }
 
-SimulationConfig resolveCaseConfig(
-    const SimulationConfig& base,
-    const VerificationCaseEntry& entry)
+SimulationConfig resolveCaseConfig( const SimulationConfig& base, const VerificationCaseConfig& entry)
 {
     SimulationConfig cfg = base;
 
@@ -68,8 +148,7 @@ SimulationConfig resolveCaseConfig(
     return cfg;
 }
 
-SimulationConfig loadConfig(
-    const std::filesystem::path& path)
+SimulationConfig loadConfig( const std::filesystem::path& path)
 {
     std::ifstream file(path);
 
@@ -119,6 +198,8 @@ SimulationConfig loadConfig(
     // -------------------------------------------------
     // Build config from defaults
     // -------------------------------------------------
+    std::cout << "DEBUG CONFIG AFTER MERGE:\n";
+    std::cout << j.dump(2) << "\n";
 
     return fromJson(j);
 }
@@ -196,10 +277,20 @@ SimulationConfig fromJson(
         switch (bc.condition.type)
         {
             case bc::Type::Dirichlet:
+                if (!bcJson.contains("value"))
+                {
+                    throw std::runtime_error(
+                        "Dirichlet boundary condition requires 'value'");
+                }
                 bc.condition.value = bcJson.at("value").get<double>();
                 break;
 
             case bc::Type::Neumann:
+                if (!bcJson.contains("flux"))
+                {
+                    throw std::runtime_error(
+                        "Neumann boundary condition requires 'flux'");
+                }
                 bc.condition.flux = bcJson.at("flux").get<double>();
                 break;
 
@@ -232,7 +323,7 @@ SimulationConfig fromJson(
 
             for (const auto& c : v.at("cases"))
             {
-                VerificationCaseEntry entry;
+                VerificationCaseConfig entry;
                 entry.name = c.get<std::string>();
 
                 if (configs.contains(entry.name))
