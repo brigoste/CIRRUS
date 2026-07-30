@@ -1,5 +1,8 @@
 #include "config/PathUtils.hpp"
 
+#include <cstdlib>
+#include <iostream>
+
 PathContext buildPaths(
     const SimulationConfig& cfg,
     const std::filesystem::path& projectRoot)
@@ -22,6 +25,15 @@ PathContext buildPaths(
     {
         p.pythonExecutable = "python";
     } 
+
+    if (!std::filesystem::exists(p.pythonExecutable) &&
+    p.pythonExecutable != "python")
+    {
+        std::cerr
+            << "WARNING: Python executable not found: "
+            << p.pythonExecutable
+            << "\n";
+    }
 
     return p;
 }
