@@ -6,11 +6,10 @@
 /*
     Documentation:
 
-    Case                    Solver      Mesh        L2 Error      L2 Check    Refinement    Order
-    --------------------------------------------------------------------------------------------------
-    Neumann1D              CG          20          0.02           PASS         PASS          2.000e+00
+    Case          Solver   Mesh       L2 Error      L2 Check   Refinement   Order
+    -------------------------------------------------------------------------------
+    Neumann1D     TDMA     200x1      3.125e-4     PASS       PASS         2.000e+00
 */
-
 class Neumann1D : public VerificationCase
 {
 public:
