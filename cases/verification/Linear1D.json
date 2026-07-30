@@ -1,19 +1,48 @@
 {
-  "extends": "../../base.json",
+  "extends": "../base.json",
 
   "verificationCase": {
-    "cases": [
-      {
-        "case_name": "Linear1D"
-      }
-    ],
+    "name": "Linear1D",
     "type": "manufactured",
+
     "plot_enabled": true,
 
-    "manufactured": {
-      "phi_expr": "(100/L)*x + 300",
-      "source_expr": "0"
+    "mesh": {
+      "type": "line1D",
+      "nx": 20,
+      "lx": 1.0
     },
+
+    "refinement": {
+      "enabled": false,
+      "levels": [10, 20, 40, 80, 160],
+      "expected_order": 2.0
+    },
+
+    "physics": {
+      "type": "heat",
+      "k": 100.0,
+      "volumetricSource": 0.0
+    },
+
+    "solver": {
+      "type": "TDMA",
+      "tol": 1e-8,
+      "max_iter": 5000
+    },
+
+    "boundary_conditions": [
+      {
+        "group": 0,
+        "type": "Dirichlet",
+        "value": 100.0
+      },
+      {
+        "group": 1,
+        "type": "Dirichlet",
+        "value": 200.0
+      }
+    ],
 
     "norms": {
       "l2": true,
