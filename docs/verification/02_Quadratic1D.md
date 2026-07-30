@@ -283,37 +283,60 @@ The Quadratic1D case exercises the following components:
 The following configuration was used:
 
 ```json
-"Quadratic1D": {
+{
+  "extends": "../base.json",
+
+  "verificationCase": {
+    "name": "Quadratic1D",
+    "type": "manufactured",
+
+    "plot_enabled": true,
 
     "mesh": {
-        "type": "line1D",
-        "nx": 20,
-        "lx": 1.0
+      "type": "line1D",
+      "nx": 20,
+      "lx": 1.0
     },
 
     "refinement": {
-        "enabled": false,
-        "levels": [10, 20, 40, 80, 160],
-        "expected_order": 2.0
+      "enabled": false,
+      "levels": [10, 20, 40, 80, 160],
+      "expected_order": 2.0
     },
 
     "physics": {
-        "type": "heat",
-        "k": 100.0,
-        "volumetricSource": 20000.0
+      "type": "heat",
+      "k": 100.0,
+      "volumetricSource": 20000.0
     },
 
     "solver": {
-        "type": "CG",
-        "tol": 1e-8,
-        "max_iter": 5000
+      "type": "CG",
+      "tol": 1e-8,
+      "max_iter": 5000
     },
 
     "boundary_conditions": [
-        { "group": 0, "type": "Dirichlet", "value": 100.0 },
-        { "group": 1, "type": "Dirichlet", "value": 200.0 }
+      {
+        "group": 0,
+        "type": "Dirichlet",
+        "value": 100.0
+      },
+      {
+        "group": 1,
+        "type": "Dirichlet",
+        "value": 200.0
+      }
     ],
 
-    "params": {}
+    "norms": {
+      "l2": true,
+      "linf": true
+    },
+
+    "output": {
+      "csv": "Quadratic1D.csv",
+      "summary": "Quadratic1D.json"
+    }
+  }
 }
-```
