@@ -30,7 +30,7 @@
 #include <algorithm>
 #include <cmath>
 
-std::filesystem::path resolveOutputPath( const std::filesystem::path& root, const std::string& relative) { return root / relative; }
+//std::filesystem::path resolveOutputPath( const std::filesystem::path& root, const std::string& relative) { return root / relative; }
 
 int main()
 {
@@ -38,40 +38,81 @@ int main()
     {
         std::cout << "\n\n================ INITIALIZING SYSTEM ================\n\n";
 
-        const std::string caseFile = "C:/Users/E40112856/Packages/CIRRUS/cases/user/Steady_1D_heat.json";
+        const std::filesystem::path configPath = "C:/Users/E40112856/Packages/CIRRUS/cases/verification/verification_suite.json";
 
-        SimulationConfig cfg = loadConfig(caseFile);
 
-        // -------------------------------------------------
-        // BUILD PATH CONTEXT (CRITICAL FIX)
-        // -------------------------------------------------
-        PathContext paths = buildPaths(cfg);
-        std::cout << paths.verificationRoot << std::endl;
-        std::cout << paths.outputRoot << std::endl;
-
-        // -------------------------------------------------
-        // Single dispatch point
-        // -------------------------------------------------
-
-        if (cfg.verificationSuite.enabled) 
+        if (configPath.filename() == "verification_suite.json")
         {
-            std::cout << "\n================ VERIFICATION MODE ================\n";
+            std::cout << "Loading verification suite: " << configPath << "\n";
 
-            VerificationRunner::run(cfg, paths);
+            VerificationSuite suite = loadVerificationSuite(configPath);
+         
+            suite.case_directory = configPath.parent_path().string();
+
+            std::cout << "Verification cases loaded:\n";
+
+            for (const auto& c : suite.cases)
+            {
+                std::cout << "  case: " << c.name << "\n";
+            }
+
+
+            /*
+             * Load any minimal config needed for paths.
+             *
+             * This is NOT the simulation config.
+             * Individual cases will load:
+             *
+             * Linear1D.json
+             * Quadratic1D.json
+             * ...
+             *
+             * and resolve their own extends.
+             */
+            SimulationConfig cfg;
+
+            cfg.io.output_root = "C:/Users/E40112856/Packages/CIRRUS/output";
+
+            PathContext paths = buildPaths(cfg);
+
+            // std::cout << "\nVerification output:\n";
+            // std::cout << "  verification root: "
+            //           << paths.verificationRoot
+            //           << "\n";
+
+            // std::cout << "  output root: "
+            //           << paths.outputRoot
+            //           << "\n";
+
+
+            VerificationRunner::run( cfg, suite, paths );
 
             std::cout << "\n================ VERIFICATION COMPLETE ================\n";
+
             return 0;
         }
 
+        // -----------------------------
+        // Normal simulation mode
+        // -----------------------------
+
+        SimulationConfig cfg = loadConfig(configPath);
+
+        PathContext paths = buildPaths(cfg);
+
+
         std::cout << "\n================ USER SIMULATION MODE ================\n";
 
-        SimulationRunner::run(cfg, paths);
+        SimulationRunner::run( cfg, paths );
 
         std::cout << "\n================ SIMULATION COMPLETE ================\n";
     }
     catch (const std::exception& e)
     {
-        std::cerr << "EXCEPTION: " << e.what() << "\n";
+        std::cerr
+            << "EXCEPTION: "
+            << e.what()
+            << "\n";
     }
 
     return 0;
