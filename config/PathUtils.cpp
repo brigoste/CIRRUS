@@ -14,5 +14,14 @@ PathContext buildPaths(
 
     p.scriptRoot = p.projectRoot / "scripts";
 
+    if (const char* python = std::getenv("PYTHON_EXECUTABLE"))
+    {
+        p.pythonExecutable = python;
+    }
+    else
+    {
+        p.pythonExecutable = "python";
+    } 
+
     return p;
 }
