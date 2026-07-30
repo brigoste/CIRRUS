@@ -299,43 +299,75 @@ The AdvectionDiffusion2D case exercises the following components:
 The following configuration was used:
 
 ```json
-"AdvectionDiffusion2D": {
+{
+  "extends": "../base.json",
+
+  "verificationCase": {
+    "name": "AdvectionDiffusion2D",
+    "type": "manufactured",
+
+    "plot_enabled": true,
 
     "mesh": {
-        "type": "quad2D",
-        "nx": 20,
-        "ny": 20,
-        "lx": 1.0,
-        "ly": 1.0
+      "type": "quad2D",
+      "nx": 20,
+      "ny": 20,
+      "lx": 1.0,
+      "ly": 1.0
     },
 
     "refinement": {
-        "enabled": true,
-        "levels": [40, 80, 160, 320],
-        "expected_order": 1.0
+      "enabled": true,
+      "levels": [40, 80, 160, 320],
+      "expected_order": 1.0
     },
 
     "physics": {
-        "type": "advection-diffusion",
-        "gamma": 1.0,
-        "rho": 1.0,
-        "ux": 1.0,
-        "uy": 0.5,
-        "uz": 0.0
+      "type": "advection-diffusion",
+      "gamma": 1.0,
+      "rho": 1.0,
+      "ux": 1.0,
+      "uy": 0.5,
+      "uz": 0.0
     },
 
     "solver": {
-        "type": "BiCGSTAB",
-        "tol": 1e-8,
-        "max_iter": 5000
+      "type": "BiCGSTAB",
+      "tol": 1e-8,
+      "max_iter": 5000
     },
 
     "boundary_conditions": [
-        { "group": 0, "type": "Dirichlet", "value": 0.0 },
-        { "group": 1, "type": "Dirichlet", "value": 0.0 },
-        { "group": 2, "type": "Dirichlet", "value": 0.0 },
-        { "group": 3, "type": "Dirichlet", "value": 0.0 }
+      {
+        "group": 0,
+        "type": "Dirichlet",
+        "value": 0.0
+      },
+      {
+        "group": 1,
+        "type": "Dirichlet",
+        "value": 0.0
+      },
+      {
+        "group": 2,
+        "type": "Dirichlet",
+        "value": 0.0
+      },
+      {
+        "group": 3,
+        "type": "Dirichlet",
+        "value": 0.0
+      }
     ],
 
-    "params": {}
+    "norms": {
+      "l2": true,
+      "linf": true
+    },
+
+    "output": {
+      "csv": "AdvectionDiffusion2D.csv",
+      "summary": "AdvectionDiffusion2D.json"
+    }
+  }
 }
