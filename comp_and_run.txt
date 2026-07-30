@@ -1,11 +1,20 @@
-"@echo off
+'
+@echo off
 setlocal EnableDelayedExpansion
 
 REM ============================================================
 REM Project configuration
 REM ============================================================
-set "PROJECT_DIR=C:\Users\E40112856\OneDrive - RTX\Notebooks\Unclassified Practice Codes\CIRRUS"
-setlocal EnableDelayedExpansion
+set "PROJECT_DIR=%~dp0"
+set "PROJECT_DIR=%PROJECT_DIR:~0,-1%"
+
+REM ============================================================
+REM Python configuration
+REM ============================================================
+set "PYTHON_EXECUTABLE=C:/Users/E40112856/.julia/conda/3/x86_64/python.exe"
+
+REM Default simulation configuration
+set "CONFIG_PATH=%PROJECT_DIR%\cases\verification\verification_suite.json"
 
 set CLEAN=0
 set CLEAN_CACHE=0
@@ -37,6 +46,11 @@ if "%~1"=="-r" set BUILD_TYPE=Release
 if "%~1"=="--run" set RUN=1
 if "%~1"=="--norun" set RUN=0
 
+if "%~1"=="--config" (
+    shift
+    set "CONFIG_PATH=%~1"
+)
+
 if "%~1"=="--plot" set PLOT=1
 if "%~1"=="--log" set LOG=1
 if "%~1"=="--quiet" set QUIET=1
@@ -49,6 +63,17 @@ shift
 goto :parse_args
 
 :args_done
+
+REM ============================================================
+REM Configuration display
+REM ============================================================
+if %QUIET%==0 (
+    echo ============================================
+    echo Build Type: %BUILD_TYPE%
+    echo Configuration:
+    echo   %CONFIG_PATH%
+    echo ============================================
+)
 
 REM ============================================================
 REM Logging setup
@@ -66,10 +91,6 @@ REM ============================================================
 REM Enter project directory
 REM ============================================================
 cd /d "%PROJECT_DIR%"
-
-if %QUIET%==0 echo ============================================
-if %QUIET%==0 echo Build Type: %BUILD_TYPE%
-if %QUIET%==0 echo ============================================
 
 REM ============================================================
 REM Clean logic
@@ -125,7 +146,7 @@ REM ============================================================
 if %RUN%==1 (
     if exist CIRRUS.exe (
         if %QUIET%==0 echo Running CIRRUS.exe...
-        call CIRRUS.exe
+        call CIRRUS.exe --config "%CONFIG_PATH%"
     ) else (
         echo ERROR: CIRRUS.exe not found
     )
@@ -154,13 +175,16 @@ if defined OPEN_EXE (
 
 if defined OPEN_PROJ start "" "%PROJECT_DIR%"
 
-if %QUIET%==0 echo ============================================
-if %QUIET%==0 echo Build complete
-if %QUIET%==0 echo ============================================
+if %QUIET%==0 (
+    echo ============================================
+    echo Build complete
+    echo ============================================
+)
 
 pause
 endlocal
 exit /b 0
+
 
 REM ============================================================
 REM Error handling
@@ -173,6 +197,7 @@ exit /b 1
 echo Build failed
 exit /b 1
 
+
 REM ============================================================
 REM HELP MENU
 REM ============================================================
@@ -182,27 +207,30 @@ echo ===================== CIRRUS BUILD SYSTEM =====================
 echo Usage: build.bat [options]
 echo.
 echo Build options:
-echo   -c           Full clean rebuild (delete build/)
-echo   -i           Incremental build (default)
-echo   -cc          Clean CMake cache only
-echo   -d           Debug build
-echo   -r           Release build (default)
+echo   -c              Full clean rebuild (delete build/)
+echo   -i              Incremental build (default)
+echo   -cc             Clean CMake cache only
+echo   -d              Debug build
+echo   -r              Release build (default)
 echo.
 echo Run options:
-echo   --run        Run executable after build
-echo   --norun      Do not run executable
-echo   --plot       Run Python plotting script
+echo   --run           Run executable after build
+echo   --norun         Do not run executable
+echo   --config path   Override configuration file
+echo   --plot          Run Python plotting script
 echo.
 echo Utility:
-echo   --log        Write build output to build.log
-echo   --quiet      Minimal console output
+echo   --log           Write build output to build.log
+echo   --quiet         Minimal console output
 echo.
 echo Open shortcuts:
-echo   --openbuild  Open build directory
-echo   --openexe    Open executable
-echo   --openproj   Open project root
+echo   --openbuild     Open build directory
+echo   --openexe       Open executable
+echo   --openproj      Open project root
 echo.
 echo Help:
-echo   --help       Show this message
+echo   --help          Show this message
 echo ================================================================
-exit /b 0"
+exit /b 0
+
+'
