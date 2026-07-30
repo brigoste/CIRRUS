@@ -4,6 +4,7 @@
 #include "ManufacturedCases/Quadratic1D.hpp"
 #include "ManufacturedCases/Sinusoidal2D.hpp"
 #include "ManufacturedCases/AdvectionDiffusion2D.hpp"
+#include "ManufacturedCases/Neumann1D.hpp"
 
 std::unique_ptr<VerificationCase> VerificationCaseFactory::create(
     const std::string& name,
@@ -16,6 +17,8 @@ std::unique_ptr<VerificationCase> VerificationCaseFactory::create(
     if (name == "Sinusoidal2D") { return std::make_unique<Sinusoidal2D>(config); }
 
     if (name == "AdvectionDiffusion2D") { return std::make_unique<AdvectionDiffusion2D>(config); }
+
+    if (name == "Neumann1D") { return std::make_unique<Neumann1D>(config); }
 
     throw std::runtime_error("Unknown verification case: " + name);
 }
