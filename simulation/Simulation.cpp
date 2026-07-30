@@ -25,11 +25,11 @@ Simulation::Simulation(const SimulationConfig& cfg)
     // 2. Mesh
     // -------------------------
     if (cfg.mesh.type == "line1D") {
-        std::cout << "1D mesh\n";
+        // std::cout << "1D mesh\n";
         mesh_ = std::make_unique<Mesh1D>(cfg.mesh.nx, cfg.mesh.lx);
     }
     else if (cfg.mesh.type == "quad2D") {
-        std::cout << "2D Quad mesh\n";
+        // std::cout << "2D Quad mesh\n";
         mesh_ = std::make_unique<QuadMesh2D>(cfg.mesh.nx, cfg.mesh.ny, cfg.mesh.lx, cfg.mesh.ly);
     }
     else {
