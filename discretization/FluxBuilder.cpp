@@ -75,7 +75,7 @@ void FluxBuilder::buildFlux(
 
                 case bc::Type::Neumann:
                 {
-                    flux.addSource(P, bc->flux * face.area, 0.0);
+                    flux.addSource(P, -bc->flux * face.area, 0.0);
                     break;
                 }
 
