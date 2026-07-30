@@ -33,7 +33,7 @@
   ],
 
   "paths": {
-    "output_root": "C:/Users/E40112856/Packages/CIRRUS/output"
+    "python_executable": "python"
   },
 
   "verificationSuite": {
