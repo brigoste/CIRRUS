@@ -19,7 +19,6 @@
 #include "solver/GaussSeidel.hpp"
 #include "solver/BiCGSTAB.hpp"
 #include "solver/SolverMethod.hpp"
-// #include "tests\verification\VerificationRegistry.hpp"
 
 // ============================================================
 // Simulation = composition root
