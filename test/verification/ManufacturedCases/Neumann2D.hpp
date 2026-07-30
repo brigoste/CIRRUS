@@ -77,5 +77,6 @@ public:
     }
 
 private:
-    double k_, volumetricSource_, Lx_, Ly_, T0_, a_, b_, c_, d_;    
+
+    double k_, volumetricSource_, Lx_, Ly_, T0_, a_, b_, c_, d_;
 };
