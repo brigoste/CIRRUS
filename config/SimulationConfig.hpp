@@ -9,7 +9,8 @@
 #include "solver/SolverMethod.hpp"
 #include "config/PhysicsType.hpp"
 #include "mesh/BoundaryPatchSystem.hpp"
-#include <iostream>
+
+#include <unordered_map>
 
 //==================================================
 // Boundary
@@ -92,21 +93,29 @@ struct RefinementConfig
     double expected_order = 2.0;
 };
 
-struct VerificationCaseEntry
+struct VerificationCaseConfig
 {
     std::string name;
+    std::string type;
 
-    MeshConfig mesh;
-    PhysicsConfig physics;
-    SolverConfig solver;
+    bool l2 = true;
+    bool linf = true;
+    bool plot_enabled = true;
+
     RefinementConfig refinement;
 
+    bool overrideMesh = false;
+    MeshConfig mesh;
+
+    bool overridePhysics = false;
+    PhysicsConfig physics;
+
+    bool overrideSolver = false;
+    SolverConfig solver;
+
+    bool overrideBoundary = false;
     std::vector<BoundaryConfig> boundary;
 
-    bool overrideMesh = false;
-    bool overridePhysics = false;
-    bool overrideSolver = false;
-    bool overrideBoundary = false;
     bool overrideRefinement = false;
 
     nlohmann::json params;
@@ -117,19 +126,17 @@ struct VerificationSuite
     bool enabled = false;
     bool plot_enabled = true;
 
-    std::vector<VerificationCaseEntry> cases;
+    std::vector<VerificationCaseConfig> cases;
+
+    std::unordered_map<std::string, VerificationCaseConfig> caseConfigs;
+
+    std::string case_directory = "cases/verification";
 
     struct Output
     {
-        std::string directory = "output/verification";
+        std::string directory = "verification";
     } output;
 };
-
-
-
-//==================================================
-// Top-level simulation configuration
-//==================================================
 
 struct SimulationConfig
 {
@@ -143,9 +150,9 @@ struct SimulationConfig
     std::vector<BoundaryConfig> boundary;
 
     VerificationSuite verificationSuite;
-};
 
-SimulationConfig resolveCaseConfig( const SimulationConfig& base, const VerificationCaseEntry& entry);
+    VerificationCaseConfig verification;
+};
 
 //==================================================
 // Factory functions
@@ -155,7 +162,11 @@ SimulationConfig defaultConfig();
 
 SimulationConfig loadConfig(const std::filesystem::path& path);
 
+SimulationConfig resolveCaseConfig( const SimulationConfig& cfg, const VerificationCaseConfig& entry);
+
 nlohmann::json mergeJson( nlohmann::json base, const nlohmann::json& override_);
+
+VerificationSuite loadVerificationSuite( const std::filesystem::path& path);
 
 SimulationConfig fromJson(const nlohmann::json& j);
 
@@ -234,4 +245,101 @@ inline void from_json(const nlohmann::json& j, RefinementConfig& r)
     if (j.contains("levels")) { r.levels = j.at("levels").get<std::vector<int>>(); }
 
     r.expected_order = j.value("expected_order", 2.0);
+}
+
+// ------------------------- Read Config for Verification ------------
+inline void from_json(const nlohmann::json& j, VerificationCaseConfig& v)
+{
+    v.name = j.value("name", "");
+    v.type = j.value("type", "");
+
+    v.l2 = j.value("l2", true);
+    v.linf = j.value("linf", true);
+    v.plot_enabled = j.value("plot_enabled", true);
+
+    if (j.contains("refinement")) { v.refinement = j.at("refinement").get<RefinementConfig>(); }
+
+    if (j.contains("mesh"))
+    {
+        v.mesh = j.at("mesh").get<MeshConfig>();
+        v.overrideMesh = true;
+    }
+
+    if (j.contains("physics"))
+    {
+        v.physics = j.at("physics").get<PhysicsConfig>();
+        v.overridePhysics = true;
+    }
+
+    if (j.contains("solver"))
+    {
+        v.solver = j.at("solver").get<SolverConfig>();
+        v.overrideSolver = true;
+    }
+
+    if (j.contains("boundary_conditions"))
+    {
+        v.boundary = j.at("boundary_conditions").get<std::vector<BoundaryConfig>>();
+        v.overrideBoundary = true;
+    }
+
+    v.params = j.value("params", nlohmann::json::object());
+}
+
+// -------------------- Read Verification Suite -------------------
+inline void from_json(const nlohmann::json& j, VerificationSuite& v)
+{
+    v.enabled = j.value("enabled", false);
+    v.plot_enabled = j.value("plot_enabled", true);
+
+    v.cases.clear();
+
+    if (j.contains("cases"))
+    {
+        for (const auto& c : j.at("cases"))
+        {
+            VerificationCaseConfig entry;
+            entry.name = c.get<std::string>();
+            v.cases.push_back(entry);
+        }
+    }
+    if (j.contains("caseConfigs"))
+    {
+        for (auto& [name, cfg] : j["caseConfigs"].items())
+        {
+            VerificationCaseConfig entry =
+                cfg.get<VerificationCaseConfig>();
+
+            entry.name = name;
+
+            v.caseConfigs[name] = entry;
+        }
+    }
+
+    v.case_directory = j.value(
+        "case_directory",
+        "cases/verification"
+    );
+
+    if (j.contains("output"))
+    {
+        v.output.directory =
+            j.at("output").value("directory", "verification");
+    }
+}
+
+inline void from_json( const nlohmann::json& j, SimulationConfig& cfg)
+{
+    if (j.contains("extends")) { cfg.extends = j.at("extends").get<std::string>(); }
+    if (j.contains("mesh")) { cfg.mesh = j.at("mesh") .get<MeshConfig>(); }
+    if (j.contains("physics")) { cfg.physics = j.at("physics") .get<PhysicsConfig>(); }
+    if (j.contains("solver")) { cfg.solver = j.at("solver") .get<SolverConfig>(); }
+    if (j.contains("paths"))
+    {
+        cfg.io.output_root = j.at("paths").value("output_root", "output");
+        cfg.io.plot_enabled = j.at("paths").value("plot_enabled", true);
+    }
+    if (j.contains("boundary_conditions")) { cfg.boundary = j.at("boundary_conditions").get<std::vector<BoundaryConfig>>(); }
+    // if (j.contains("verificationSuite")) { cfg.verificationSuite = j.at("verificationSuite").get<VerificationSuite>(); }
+    if (j.contains("verificationCase")) { cfg.verification = j.at("verificationCase").get<VerificationCaseConfig>(); }
 }
