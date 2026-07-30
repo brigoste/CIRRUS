@@ -229,37 +229,59 @@ The following configuration was used to execute the verification case:
 
 ```json
 {
-    "Linear1D": {
+  "extends": "../base.json",
 
-        "mesh": {
-            "type": "line1D",
-            "nx": 10,
-            "lx": 1.5
-        },
+  "verificationCase": {
+    "name": "Linear1D",
+    "type": "manufactured",
 
-        "refinement": {
-            "enabled": false,
-            "levels": [10, 20, 40, 80, 160],
-            "expected_order": 2.0
-        },
+    "plot_enabled": true,
 
-        "physics": {
-            "type": "heat",
-            "k": 100.0
-        },
+    "mesh": {
+      "type": "line1D",
+      "nx": 20,
+      "lx": 1.0
+    },
 
-        "solver": {
-            "type": "TDMA",
-            "tol": 1e-12,
-            "max_iter": 5000,
-            "omega": 1.0
-        },
+    "refinement": {
+      "enabled": false,
+      "levels": [10, 20, 40, 80, 160],
+      "expected_order": 2.0
+    },
 
-        "boundary_conditions": [
-            { "group": 0, "type": "Dirichlet", "value": 300.0 },
-            { "group": 1, "type": "Dirichlet", "value": 400.0 }
-        ],
+    "physics": {
+      "type": "heat",
+      "k": 100.0,
+      "volumetricSource": 0.0
+    },
 
-        "params": {}
+    "solver": {
+      "type": "TDMA",
+      "tol": 1e-8,
+      "max_iter": 5000
+    },
+
+    "boundary_conditions": [
+      {
+        "group": 0,
+        "type": "Dirichlet",
+        "value": 100.0
+      },
+      {
+        "group": 1,
+        "type": "Dirichlet",
+        "value": 200.0
+      }
+    ],
+
+    "norms": {
+      "l2": true,
+      "linf": true
+    },
+
+    "output": {
+      "csv": "Linear1D.csv",
+      "summary": "Linear1D.json"
     }
+  }
 }
