@@ -12,17 +12,29 @@
 #include <algorithm>
 #include <cmath>
 
-int main()
+int main(int argc, char* argv[])
 {
     try
     {
         std::cout << "\n\n================ INITIALIZING SYSTEM ================\n\n";
+        std::filesystem::path configPath = "cases/base.json"; // fallback
 
-        const std::filesystem::path configPath = "C:/Users/E40112856/Packages/CIRRUS/cases/verification/verification_suite.json";
+        for (int i = 1; i < argc; ++i)
+        {
+            std::string arg = argv[i];
 
-        // verification_suite.json:
-        // CIRRUS/cases/verification/verification_suite.json
-        // Therefore project root is three directories above.
+            if (arg == "--config" && i + 1 < argc) { configPath = argv[++i]; }
+        }
+
+        if (argc < 2)
+        {
+            throw std::runtime_error(
+                "No configuration file provided.\n"
+                "Usage: CIRRUS <config_file.json>"
+            );
+        }
+
+        if (!std::filesystem::exists(configPath)) { throw std::runtime_error( "Configuration file not found: " + configPath.string() ); }
 
         const std::filesystem::path projectRoot = configPath.parent_path().parent_path().parent_path();
 
