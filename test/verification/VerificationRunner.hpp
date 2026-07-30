@@ -5,9 +5,12 @@
 #include "tests/verification/VerificationCaseFactory.hpp"
 #include "mesh/MeshBase.hpp"
 #include "linear_system/LinearSystem.hpp"
+#include <fstream>
 
 class VerificationRunner
 {
 public:
-    static void run(const SimulationConfig& cfg, const PathContext& paths);
+    static VerificationCaseConfig loadVerificationCase(const std::filesystem::path& path);
+    static SimulationConfig applyVerificationOverrides(const SimulationConfig& base, const VerificationCaseConfig& verif);
+    static void run( const SimulationConfig& baseCfg, const VerificationSuite& suite, const PathContext& paths);
 };
