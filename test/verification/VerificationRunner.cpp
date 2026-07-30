@@ -132,7 +132,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
     std::cout << "Plot enabled: " << suite.plot_enabled << "\n";
     std::cout << "Case count: " << suite.cases.size() << "\n";
 
-    auto verificationRoot = paths.outputRoot / "verification";
+    const auto& verificationRoot = paths.verificationRoot;
     
     std::filesystem::create_directories(verificationRoot);
 
@@ -162,6 +162,8 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
         SimulationConfig caseCfg = applyVerificationOverrides(baseCfg, verificationCase);
 
         auto caseOutputDir = verificationRoot / caseName;
+
+        std::filesystem::create_directories(caseOutputDir);
 
         std::cout << "\n=================================\n"
                 << "Running verification case: "
@@ -301,9 +303,15 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             // -------------------------------------------------
             // Plotting
             // -------------------------------------------------
-            if (suite.plot_enabled) {
-                std::cout << "Plotting " << caseName  << " from " << csvPath << "\n";
-                runPlot(csvPath.generic_string());
+            if (suite.plot_enabled)
+            {
+                std::cout << "Plotting "
+                        << caseName
+                        << " from "
+                        << csvPath
+                        << "\n";
+
+                runPlot(paths, csvPath);
             }
 
             // -------------------------------------------------
