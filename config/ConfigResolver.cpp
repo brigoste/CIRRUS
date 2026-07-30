@@ -1,8 +1,7 @@
 #include "config/ConfigResolver.hpp"
 #include "config/SimulationConfig.hpp"
 
-SimulationConfig ConfigResolver::load(
-    const std::filesystem::path& path)
+SimulationConfig ConfigResolver::load(const std::filesystem::path& path)
 {
     nlohmann::json resolved = loadAndResolve(path);
 
@@ -13,11 +12,9 @@ SimulationConfig ConfigResolver::load(
     return cfg;
 }
 
-nlohmann::json ConfigResolver::loadAndResolve(
-    const std::filesystem::path& path)
+nlohmann::json ConfigResolver::loadAndResolve(const std::filesystem::path& path)
 {
-    auto absPath =
-        std::filesystem::absolute(path);
+    auto absPath = std::filesystem::absolute(path);
 
     // -------------------------
     // LOAD FILE
@@ -59,8 +56,7 @@ nlohmann::json ConfigResolver::loadAndResolve(
     return mergeJson(base, j);
 }
 
-nlohmann::json ConfigResolver::resolveFile(
-    const std::filesystem::path& path)
+nlohmann::json ConfigResolver::resolveFile(const std::filesystem::path& path)
 {
     std::ifstream file(path);
 
