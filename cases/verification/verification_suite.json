@@ -6,7 +6,7 @@
 
         "cases":
         [
-          "Neumann1D"
+          "Neumann2D"
         ],
 
         "case_directory": ".",
@@ -16,7 +16,8 @@
           "Quadratic1D",
           "Sinusoidal2D",
           "AdvectionDiffusion2D",
-          "Neumann1D"
+          "Neumann1D",
+          "Neumann2D"
         ]
     }
 }
