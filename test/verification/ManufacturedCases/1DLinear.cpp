@@ -2,7 +2,7 @@
 
 double OneDLinear::exact(double x, double) const
 {
-    return k_ * (3 + (1 / 1.5) * x);
+    return 100.0 + 100.0 * x;
 }
 
 double OneDLinear::laplacian(double,double) const
