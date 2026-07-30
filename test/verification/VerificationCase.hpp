@@ -1,5 +1,5 @@
 #pragma once
-#include "physics/HeatPhysicsModel.hpp"
+#include "Physics/HeatPhysicsModel.hpp"
 #include "config/SimulationConfig.hpp"
 #include "nlohmann/json.hpp"
 
@@ -15,6 +15,10 @@ public:
     virtual double exact(double x, double y) const = 0;
     virtual double laplacian(double x, double y) const = 0;
     virtual double source(double x, double y) const = 0;
+    virtual double boundaryFlux(const Face&) const
+    {
+        throw std::runtime_error( "Neumann2D requires at least one Dirichlet boundary group." );
+    }
 
     virtual double l2AcceptanceThreshold() const = 0;
     virtual double linfAcceptanceThreshold() const = 0;
