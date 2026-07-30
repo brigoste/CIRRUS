@@ -294,42 +294,73 @@ The Sinusoidal2D case exercises the following components:
 The following configuration was used:
 
 ```json
-"Sinusoidal2D": {
+{
+  "extends": "../base.json",
+
+  "verificationCase": {
+    "name": "Sinusoidal2D",
+    "type": "manufactured",
+
+    "plot_enabled": true,
 
     "mesh": {
-        "type": "quad2D",
-        "nx": 50,
-        "ny": 50,
-        "lx": 1.0,
-        "ly": 1.0
+      "type": "quad2D",
+      "nx": 50,
+      "ny": 50,
+      "lx": 1.0,
+      "ly": 1.0
     },
 
     "refinement": {
-        "enabled": true,
-        "levels": [25, 50, 100, 200],
-        "expected_order": 2.0
+      "enabled": true,
+      "levels": [25, 50, 100, 200],
+      "expected_order": 2.0
     },
 
     "physics": {
-        "type": "heat",
-        "k": 100.0,
-        "gamma": 1.0,
-        "ux": 0.0,
-        "uy": 0.0
+      "type": "heat",
+      "gamma": 1.0,
+      "ux": 0.0,
+      "uy": 0.0
     },
 
     "solver": {
-        "type": "CG",
-        "tol": 1e-8,
-        "max_iter": 5000
+      "type": "CG",
+      "tol": 1e-8,
+      "max_iter": 5000
     },
 
     "boundary_conditions": [
-        { "group": 0, "type": "Dirichlet", "value": 0.0 },
-        { "group": 1, "type": "Dirichlet", "value": 0.0 },
-        { "group": 2, "type": "Dirichlet", "value": 0.0 },
-        { "group": 3, "type": "Dirichlet", "value": 0.0 }
+      {
+        "group": 0,
+        "type": "Dirichlet",
+        "value": 0.0
+      },
+      {
+        "group": 1,
+        "type": "Dirichlet",
+        "value": 0.0
+      },
+      {
+        "group": 2,
+        "type": "Dirichlet",
+        "value": 0.0
+      },
+      {
+        "group": 3,
+        "type": "Dirichlet",
+        "value": 0.0
+      }
     ],
 
-    "params": {}
+    "norms": {
+      "l2": true,
+      "linf": true
+    },
+
+    "output": {
+      "csv": "Sinusoidal2D.csv",
+      "summary": "Sinusoidal2D.json"
+    }
+  }
 }
