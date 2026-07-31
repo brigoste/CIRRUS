@@ -29,7 +29,7 @@ struct VerificationSummary
     double linfTol;
 
     // Individual verification checks
-    bool l2Passed = false;
+    bool accuracyPassed = false;
 
     bool refinementEnabled = false;
     bool refinementPassed = false;
@@ -40,10 +40,10 @@ struct VerificationSummary
     {
         if (refinementEnabled)
         {
-            return refinementPassed;
+            return accuracyPassed && refinementPassed;
         }
 
-        return l2Passed;
+        return accuracyPassed;
     }
 };
 
@@ -181,6 +181,9 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
         RefinementSummary refinement;
         refinement.caseName = caseName;
 
+        VerificationSummary finestSummary;      // Added
+        bool finestSummaryValid = false;        // Added
+
         const int nLevels = refinementEnabled ? refinementLevels.size() : 1;
 
         for (int level = 0; level < nLevels; ++level)
@@ -229,23 +232,6 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
 
                 exactField[c] = verifCase.exact(xc.x[0], xc.x[1]);
             }
-
-            // std::cout << "\n===== DEBUG SOLUTION COMPARISON =====\n";
-
-            // for (std::size_t c = 0; c < mesh.ncells(); ++c)
-            // {
-            //     const auto& xc = mesh.cellCenter(c);
-
-            //     std::cout
-            //         << "cell=" << c
-            //         << " x=" << xc.x[0]
-            //         << " phi=" << phi[c]
-            //         << " exact=" << exactField[c]
-            //         << " error=" << phi[c] - exactField[c]
-            //         << "\n";
-            // }
-
-            // std::cout << "=====================================\n\n";
 
             // -------------------------------------------------
             // Error norms
@@ -338,22 +324,28 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
 
             bool passed = norms.l2_rms <= l2_tol && norms.linf <= linf_tol;
 
-            if (level == 0)
+            if (level == nLevels - 1)                       // Adjusted to be last level, not first.
             {
-                summary.emplace_back(VerificationSummary{
-                    caseName ,
-                    solver::to_string(levelCfg.solver.method),
-                    meshType,
-                    meshSize,
-                    norms.l2_rms,
-                    norms.linf,
-                    l2_tol,
-                    linf_tol,
-                    passed,
-                    refinementEnabled,
-                    false,
-                    0.0
-                });
+                finestSummary.caseName = caseName;
+                finestSummary.solver = solver::to_string(levelCfg.solver.method);
+                finestSummary.meshType = meshType;
+                finestSummary.meshSize = meshSize;
+
+                finestSummary.l2 = norms.l2_rms;
+                finestSummary.linf = norms.linf;
+
+                finestSummary.l2Tol = l2_tol;
+                finestSummary.linfTol = linf_tol;
+
+                finestSummary.accuracyPassed = passed;
+
+                finestSummary.refinementEnabled = refinementEnabled;
+                finestSummary.refinementPassed = false;
+                finestSummary.observedOrder = 0.0;
+
+                finestSummaryValid = true;
+
+                finestSummaryValid = true;
             }
         }
 
@@ -415,6 +407,12 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                 << "==================================================\n";
 
             refinementSummary.push_back(std::move(refinement));
+            finestSummary.refinementPassed = refinement.passed;
+            finestSummary.observedOrder = refinement.observedOrderL2;
+        }
+        if (finestSummaryValid)
+        {
+            summary.push_back(finestSummary);
         }
     }
 
@@ -426,7 +424,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
 
     for (const auto& s : summary)
     {
-        if (s.l2Passed) { ++l2PassedCount; }
+        if (s.accuracyPassed) { ++l2PassedCount; }
 
         if (s.refinementEnabled)
         {
@@ -465,7 +463,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                 << std::setw(12) << s.solver
                 << std::setw(12) << s.meshSize
                 << std::setw(14) << s.l2
-                << std::setw(12) << (s.l2Passed ? "PASS" : "FAIL");
+                << std::setw(12) << (s.accuracyPassed ? "PASS" : "FAIL");
 
         if (s.refinementEnabled)
         {
@@ -487,7 +485,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
     // std::cout << "\nVerification Result: " << passedCount << "/" << summary.size() << " cases passed, " << summary.size() - passedCount << " failed\n\n";
     std::cout << "\n================ FINAL RESULT ================\n";
     std::cout
-        << "L2 Accuracy Checks : "
+        << "Accuracy Checks : "
         << l2PassedCount << "/" << l2Total
         << "\n";
 
