@@ -88,8 +88,25 @@ void FluxBuilder::buildFlux(
 
                 case bc::Type::Convective:
                 {
-                    const double hA = bc->h * face.area;
-                    flux.addSource(P, hA * bc->Tinf, -hA);
+                    double h = bc->h;
+                    double Tinf = bc->Tinf;
+
+                    if (verificationCase)
+                    {
+                        ConvectiveData robin = verificationCase->boundaryConvective(face);
+
+                        h = robin.h;
+                        Tinf = robin.T_inf;
+                    }
+
+                    const double hA = h * face.area;
+
+                    const double D = model.diffusionFaceCoefficient(face);
+
+                    const double H = (hA * D) / (hA + D);
+
+                    flux.addSource(P, H * Tinf, -H);
+
                     break;
                 }
 
