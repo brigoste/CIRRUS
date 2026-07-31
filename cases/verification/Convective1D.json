@@ -1,0 +1,56 @@
+{
+  "extends": "../base.json",
+
+  "verificationCase": {
+    "name": "Convective1D",
+    "type": "manufactured",
+
+    "mesh": {
+      "type": "line1D",
+      "nx": 200,
+      "lx": 1.0
+    },
+
+    "refinement": {
+      "enabled": true,
+      "levels": [25,50,100,200],
+      "expected_order": 2.0
+    },
+
+    "physics": {
+      "type": "heat",
+      "k": 100.0,
+      "volumetricSource": -200.0
+    },
+
+    "solver": {
+      "type": "TDMA",
+      "tol": 1e-8,
+      "max_iter": 5000
+    },
+
+    "boundary_conditions": [
+      {
+        "group": 0,
+        "type": "Dirichlet",
+        "value": 1.0
+      },
+      {
+        "group": 1,
+        "type": "Convective",
+        "h": 10.0,
+        "ambientTemperature": 84.0
+      }
+    ],
+
+    "norms": {
+      "l2": true,
+      "linf": true
+    },
+
+    "output": {
+      "csv": "Convective1D.csv",
+      "summary": "Convective1D.json"
+    }
+  }
+}
