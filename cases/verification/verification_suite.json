@@ -6,7 +6,7 @@
 
         "cases":
         [
-          "Neumann2D"
+          "Convective2D"
         ],
 
         "case_directory": ".",
@@ -17,7 +17,9 @@
           "Sinusoidal2D",
           "AdvectionDiffusion2D",
           "Neumann1D",
-          "Neumann2D"
+          "Neumann2D",
+          "Convective1D",
+          "Convective2D"
         ]
     }
 }
