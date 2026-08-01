@@ -39,6 +39,7 @@
 *.out
 *.app
 *.bat
+comp_and_run.sh
 
 # Build directories
 build/
