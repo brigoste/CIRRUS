@@ -10,3 +10,16 @@ Geometry discretization deals only in uniform, cartesian grid layouts. Further u
 Heat transfer implementations will use Dirichlect, Neumann, Robin, convective, and symmetry boundary conditions. 
 
 To compile and run, you can use the comp_and_run.txt file. Create a .bat of the same name and remove the leading " and trailing " on the file (one set encapsulates the whole file).
+
+
+# SETUP
+
+CIRRUS relies on .json files for case inputs. These are parsed with nlohmann.json and is a required dependancy. This can be added to your machine using the the following:
+
+Windows/MSYS2: 
+  bash:
+    pacman -S mingw-w64-ucrt-x86_64-nlohmann-json
+
+Ubuntu:
+  bash:
+    sudo apt install nlohmann-json3-dev
