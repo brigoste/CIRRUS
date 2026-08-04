@@ -18,7 +18,7 @@ void runPlot(
         + " "
         + csvFile.string();
 
-    std::cout << cmd << '\n';
+    // std::cout << cmd << '\n';            // Show commandline output in terminal (not necessary to execute command)
 
     int rc = std::system(cmd.c_str());
 
