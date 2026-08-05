@@ -1,5 +1,7 @@
 #include "solver/BiCGSTAB.hpp"
+#include "solver/preconditioners/Preconditioner.hpp"
 #include "utils/LinearAlgebraUtils.hpp"
+#include "utils/Timer.hpp"
 
 #include <stdexcept>
 #include <iostream>
@@ -7,18 +9,21 @@
 std::vector<double> BiCGSTAB(
     const LinearSystem& sys,
     int max_iter,
-    double tol)
+    double tol,
+    const Preconditioner& M)
 {
+    // Timer timer("BiCGSTAB total");
+
     const std::size_t N = sys.size();
 
-    std::vector<double> diagInv(N);
+    // std::vector<double> diagInv(N);
 
-    for (std::size_t i = 0; i < N; ++i) {
-        const double aii = sys.diagonal(i);
+    // for (std::size_t i = 0; i < N; ++i) {
+    //     const double aii = sys.diagonal(i);
 
-        if (std::abs(aii) < 1e-30) { throw std::runtime_error("BiCGSTAB: zero diagonal encountered while building Jacobi preconditioner."); }
-        diagInv[i] = 1.0 / aii;
-    }
+    //     if (std::abs(aii) < 1e-30) { throw std::runtime_error("BiCGSTAB: zero diagonal encountered while building Jacobi preconditioner."); }
+    //     diagInv[i] = 1.0 / aii;
+    // }
 
     if (sys.RHS().size() != N) { throw std::runtime_error("BiCGSTAB: RHS size mismatch"); }
 
@@ -67,10 +72,8 @@ std::vector<double> BiCGSTAB(
             }
         }
 
-        // Apply Jacobi preconditioner to p
-        for (std::size_t i = 0; i < N; ++i) {
-            p_hat[i] = diagInv[i] * p[i];
-        }
+        // Apply Jacobi M to p
+        M.apply(p, p_hat);
 
         // v = A(M⁻¹p)
         LA::matvec(sys, p_hat, v);
@@ -88,23 +91,21 @@ std::vector<double> BiCGSTAB(
         // early convergence check
         double norm_s = LA::norm2(s);
         if (norm_s < tol * norm_r0) {
-            for (std::size_t i = 0; i < N; ++i)
-                x[i] += alpha * p_hat[i];
+            for (std::size_t i = 0; i < N; ++i) { x[i] += alpha * p_hat[i]; }
 
+            std::cout << "BiCGSTAB converged in " << iter << " iterations. Residual = " << norm_s << "\n";
             return x;
         }
 
         // Apply Jacobi preconditioner to s
-        for (std::size_t i = 0; i < N; ++i) {
-            s_hat[i] = diagInv[i] * s[i];
-        }
+        M.apply(s, s_hat);
 
         // t = A(M⁻¹s)
         LA::matvec(sys, s_hat, t);
         const double tt = LA::dot(t, t);
         if (std::abs(tt) < 1e-30) { throw std::runtime_error("BiCGSTAB breakdown: <t,t> ~ 0"); }
 
-        omega = LA::dot(t, s_hat) / tt;
+        omega = LA::dot(t, s) / tt;
         if (std::abs(omega) < 1e-30) { throw std::runtime_error("BiCGSTAB breakdown: omega ~ 0"); }
 
         // update x
@@ -119,14 +120,17 @@ std::vector<double> BiCGSTAB(
 
         resid = LA::norm2(r);
 
-        if (resid < tol * norm_r0) { return x; }
-
-        if (std::abs(omega) < 1e-30) { throw std::runtime_error("BiCGSTAB breakdown: omega ~ 0"); }
+        if (resid < tol * norm_r0) { 
+            std::cout << "BiCGSTAB converged in " << iter << " iterations. Residual = " << resid << "\n";
+            return x; 
+        }
 
         rho_old = rho_new;
+
+        // if (iter % 100 == 0) { std::cout << "BiCGSTAB iter " << iter << ": residual = " << resid << "\n"; }
     }
 
-    std::cerr << "[WARN] BiCGSTAB did not fully converge. Residual = " << resid << "\n";
+    std::cerr << "[WARN] BiCGSTAB failed to converge after " << max_iter << " iterations. Residual = " << resid << "\n";
 
     return x;
 }
