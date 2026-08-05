@@ -17,13 +17,13 @@ The setup for this coding package was intended for Linux based operating systems
 
 CIRRUS relies on .json files for case inputs. These are parsed with nlohmann.json and is a required dependancy. This can be added to your machine using the the following:
 
-Windows/MSYS2: 
-  bash:
-    pacman -S mingw-w64-ucrt-x86_64-nlohmann-json
+  Windows/MSYS2: 
+    bash:
+      pacman -S mingw-w64-ucrt-x86_64-nlohmann-json
 
-Ubuntu:
-  bash:
-    sudo apt install nlohmann-json3-dev
+  Ubuntu:
+    bash:
+      sudo apt install nlohmann-json3-dev
 
 Futhermore, for plotting purposes, the package requires a python interpreter or a .vtk viewer such paraview. However, if not provided, no automatic plotting will occur. The produced .csv and .vtk files are stored in the projects output/ folder and can be used for viewing externally to the package using tools such as excel, MATLAB, python and paraview. 
 
