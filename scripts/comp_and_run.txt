@@ -1,0 +1,241 @@
+'
+@echo off
+setlocal EnableDelayedExpansion
+
+REM ============================================================
+REM Project configuration
+REM ============================================================
+REM Directory containing this script
+set "SCRIPT_DIR=%~dp0"
+
+REM Project root is the parent directory of scripts/
+for %%I in ("%SCRIPT_DIR%..") do set "PROJECT_DIR=%%~fI"
+
+REM Remove trailing backslash if present
+if "%PROJECT_DIR:~-1%"=="\" set "PROJECT_DIR=%PROJECT_DIR:~0,-1%"
+
+REM ============================================================
+REM Python configuration
+REM ============================================================
+set "PYTHON_EXECUTABLE=C:/Users/E40112856/.julia/conda/3/x86_64/python.exe"
+
+REM Default simulation configuration
+set "CONFIG_PATH=%PROJECT_DIR%\cases\verification\verification_suite.json"
+
+set CLEAN=0
+set CLEAN_CACHE=0
+set BUILD_TYPE=Release
+set RUN=1
+set PLOT=0
+set LOG=0
+set QUIET=0
+set DO_BUILD=1
+
+REM ============================================================
+REM Help function
+REM ============================================================
+if "%~1"=="--help" goto :help
+
+REM ============================================================
+REM Parse arguments
+REM ============================================================
+:parse_args
+if "%~1"=="" goto :args_done
+
+if "%~1"=="-c" set CLEAN=1
+if "%~1"=="-cc" set CLEAN_CACHE=1
+if "%~1"=="-i" set CLEAN=0
+
+if "%~1"=="-d" set BUILD_TYPE=Debug
+if "%~1"=="-r" set BUILD_TYPE=Release
+
+if "%~1"=="--run" set RUN=1
+if "%~1"=="--norun" set RUN=0
+
+if "%~1"=="--config" (
+    shift
+    set "CONFIG_PATH=%~1"
+)
+
+if "%~1"=="--plot" set PLOT=1
+if "%~1"=="--log" set LOG=1
+if "%~1"=="--quiet" set QUIET=1
+
+if "%~1"=="--openbuild" set OPEN_BUILD=1
+if "%~1"=="--openexe" set OPEN_EXE=1
+if "%~1"=="--openproj" set OPEN_PROJ=1
+
+shift
+goto :parse_args
+
+:args_done
+
+REM ============================================================
+REM Configuration display
+REM ============================================================
+if %QUIET%==0 (
+    echo ============================================
+    echo Build Type: %BUILD_TYPE%
+    echo Configuration:
+    echo   %CONFIG_PATH%
+    echo ============================================
+)
+
+REM ============================================================
+REM Logging setup
+REM ============================================================
+if %LOG%==1 (
+    set "LOGFILE=%PROJECT_DIR%\build.log"
+
+    echo Logging enabled: !LOGFILE!
+
+    echo ===== CIRRUS BUILD LOG ===== > "!LOGFILE!"
+    echo Build started: %date% %time% >> "!LOGFILE!"
+)
+
+REM ============================================================
+REM Enter project directory
+REM ============================================================
+cd /d "%PROJECT_DIR%"
+
+REM ============================================================
+REM Clean logic
+REM ============================================================
+if %CLEAN%==1 (
+    if exist build (
+        if %QUIET%==0 echo Removing build directory...
+        rmdir /s /q build
+    )
+)
+
+if %CLEAN_CACHE%==1 (
+    if exist build\CMakeCache.txt (
+        if %QUIET%==0 echo Removing CMake cache...
+        del /q build\CMakeCache.txt
+    )
+)
+
+if not exist build mkdir build
+cd build
+
+REM ============================================================
+REM CMake configure
+REM ============================================================
+if %CLEAN%==1 (
+    cmake -G Ninja -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ..
+) else (
+    if not exist CMakeCache.txt (
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ..
+    ) else (
+        if %QUIET%==0 echo Using existing CMake cache...
+    )
+)
+
+if errorlevel 1 goto :fail_cmake
+
+REM ============================================================
+REM Build
+REM ============================================================
+if %QUIET%==0 echo Running Ninja build...
+
+if %LOG%==1 (
+    ninja >> "!LOGFILE!" 2>&1
+) else (
+    ninja
+)
+
+if errorlevel 1 goto :fail_build
+
+REM ============================================================
+REM Run executable
+REM ============================================================
+if %RUN%==1 (
+    if exist CIRRUS.exe (
+        if %QUIET%==0 echo Running CIRRUS.exe...
+        call CIRRUS.exe --config "%CONFIG_PATH%"
+    ) else (
+        echo ERROR: CIRRUS.exe not found
+    )
+)
+
+REM ============================================================
+REM Run Python plot
+REM ============================================================
+if %PLOT%==1 (
+    if exist "..\scripts\Plot.py" (
+        if %QUIET%==0 echo Running Python plot...
+        python "..\scripts\Plot.py"
+    ) else (
+        echo WARNING: Plot.py not found
+    )
+)
+
+REM ============================================================
+REM Open shortcuts
+REM ============================================================
+if defined OPEN_BUILD start "" "%CD%"
+
+if defined OPEN_EXE (
+    if exist CIRRUS.exe start "" "%CD%\CIRRUS.exe"
+)
+
+if defined OPEN_PROJ start "" "%PROJECT_DIR%"
+
+if %QUIET%==0 (
+    echo ============================================
+    echo Build complete
+    echo ============================================
+)
+
+pause
+endlocal
+exit /b 0
+
+
+REM ============================================================
+REM Error handling
+REM ============================================================
+:fail_cmake
+echo CMake configuration failed
+exit /b 1
+
+:fail_build
+echo Build failed
+exit /b 1
+
+
+REM ============================================================
+REM HELP MENU
+REM ============================================================
+:help
+echo.
+echo ===================== CIRRUS BUILD SYSTEM =====================
+echo Usage: build.bat [options]
+echo.
+echo Build options:
+echo   -c              Full clean rebuild (delete build/)
+echo   -i              Incremental build (default)
+echo   -cc             Clean CMake cache only
+echo   -d              Debug build
+echo   -r              Release build (default)
+echo.
+echo Run options:
+echo   --run           Run executable after build
+echo   --norun         Do not run executable
+echo   --config path   Override configuration file
+echo   --plot          Run Python plotting script
+echo.
+echo Utility:
+echo   --log           Write build output to build.log
+echo   --quiet         Minimal console output
+echo.
+echo Open shortcuts:
+echo   --openbuild     Open build directory
+echo   --openexe       Open executable
+echo   --openproj      Open project root
+echo.
+echo Help:
+echo   --help          Show this message
+echo ================================================================
+exit /b 0
+'
