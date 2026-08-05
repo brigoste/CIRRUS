@@ -1,0 +1,208 @@
+# CIRRUS Development Roadmap
+
+## Core Infrastructure
+
+### Mesh
+
+* [x] 1D structured mesh
+* [x] 2D structured quadrilateral mesh
+* [ ] 3D structured mesh
+* [ ] Unstructured mesh support
+
+### Finite Volume Framework
+
+* [x] Generic face-based assembly
+* [x] Boundary condition framework
+* [x] Face abstraction
+* [x] Scalar field storage
+* [x] Vector field storage
+* [x] Field registry infrastructure
+
+### Linear Solvers
+
+* [x] TDMA
+* [x] Gauss-Seidel
+* [x] SOR
+* [x] CG
+* [x] BiCGSTAB
+
+### Preconditioners
+
+* [x] None
+* [x] Jacobi
+* [x] ILU(0)
+* [ ] SSOR
+* [ ] Algebraic Multigrid (AMG)
+
+## Verification Framework
+
+* [x] Existing verification suite
+* [x] JSON case loading
+* [x] Accuracy checks
+* [x] Mesh refinement studies
+* [x] Order-of-convergence calculations
+* [x] CSV output
+* [x] JSON output
+
+* [ ] Refactor verification to consume Field objects
+* [ ] Generalize field error norms
+
+---
+
+# Physics Models
+
+## Heat Diffusion
+
+* [x] 1D
+* [x] 2D
+* [ ] 3D
+
+## Advection-Diffusion
+
+* [x] 2D steady-state
+* [ ] 3D
+* [ ] Transient
+
+---
+
+# Shared Numerical Infrastructure
+
+## Field Types
+
+* [x] ScalarField
+* [x] VectorField
+* [x] FieldRegistry
+* [ ] TensorField
+* [ ] Generic field manager improvements
+
+## Gradient Operators
+
+* [ ] Green-Gauss gradient
+* [ ] Least-squares gradient
+
+## Face Interpolation
+
+* [ ] Linear interpolation
+* [ ] Central differencing
+* [ ] Upwind interpolation
+* [ ] Higher-order schemes
+
+## Flux Infrastructure
+
+* [ ] Diffusion flux framework
+* [ ] Convective flux framework
+* [ ] Generic face flux interface
+
+## Time Integration
+
+* [ ] Explicit Euler
+* [ ] Implicit Euler
+* [ ] Crank-Nicolson
+
+---
+
+# Incompressible Fluid Solver
+
+## Governing Equations
+
+* [ ] Continuity equation
+* [ ] Momentum equations
+
+## Velocity Components
+
+* [ ] u velocity
+* [ ] v velocity
+* [ ] w velocity
+
+## Pressure-Velocity Coupling
+
+* [ ] SIMPLE
+* [ ] SIMPLEC
+* [ ] SIMPLER
+* [ ] PISO
+
+## Pressure Equation
+
+* [ ] Pressure correction equation
+* [ ] Rhie-Chow interpolation
+
+## Fluid Boundary Conditions
+
+* [ ] Velocity inlet
+* [ ] Pressure outlet
+* [ ] No-slip wall
+* [ ] Symmetry
+* [ ] Periodic boundaries
+
+---
+
+# Turbulence Models
+
+* [ ] Mixing-length model
+* [ ] k-ε
+* [ ] k-ω SST
+
+---
+
+# Multiphysics
+
+* [ ] Conjugate heat transfer
+* [ ] Buoyancy
+* [ ] Species transport
+* [ ] Radiation
+
+---
+
+# Numerical Improvements
+
+* [ ] Under-relaxation framework
+* [ ] Residual history
+* [ ] Adaptive stopping criteria
+* [ ] Matrix diagnostics
+
+---
+
+# Parallel Computing
+
+* [ ] OpenMP
+* [ ] MPI
+* [ ] GPU acceleration (CUDA/HIP)
+
+---
+
+# Input / Output
+
+* [ ] VTK output
+* [ ] Restart files
+* [ ] Probe output
+
+---
+
+# Documentation
+
+* [ ] Theory manual
+* [ ] Verification manual
+* [ ] Developer guide
+
+---
+
+# Recommended Development Order
+
+1. Implement **gradient operators**
+2. Implement **face interpolation**
+3. Build **convective flux infrastructure**
+4. Develop **momentum equation system**
+5. Implement **pressure correction equation**
+6. Implement **SIMPLE family algorithms**
+7. Add transient infrastructure
+8. Expand to turbulence and multiphysics
+
+Current milestone completed:
+
+**Field infrastructure**
+
+* FieldBase ✅
+* ScalarField ✅
+* VectorField ✅
+* FieldRegistry ✅
+* Dedicated field test pipeline ✅
