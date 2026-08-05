@@ -13,6 +13,7 @@ To compile and run, you can use the scripts/build.txt (validation tests) and scr
 
 
 # SETUP
+The setup for this coding package was intended for Linux based operating systems. However, the compiler is written to be OS agnostic between Windows and Linux and should run on both.
 
 CIRRUS relies on .json files for case inputs. These are parsed with nlohmann.json and is a required dependancy. This can be added to your machine using the the following:
 
@@ -24,7 +25,8 @@ Ubuntu:
   bash:
     sudo apt install nlohmann-json3-dev
 
-The setup for this coding package was intended for Linux based operating systems. However, the compiler is written to be OS agnostic between Windows and Linux and should run on both.
+Futhermore, for plotting purposes, the package requires a python interpreter or a .vtk viewer such paraview. However, if not provided, no automatic plotting will occur. The produced .csv and .vtk files are stored in the projects output/ folder and can be used for viewing externally to the package using tools such as excel, MATLAB, python and paraview. 
+
 
 # DISCLAIMER
 
