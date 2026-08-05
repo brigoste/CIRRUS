@@ -10,6 +10,8 @@
 #include "config/PhysicsType.hpp"
 #include "mesh/BoundaryPatchSystem.hpp"
 
+#include "solver/preconditioners/Preconditioner.hpp"
+
 #include <unordered_map>
 
 //==================================================
@@ -68,6 +70,8 @@ struct SolverConfig
     int max_iter = 1000;
     double tol   = 1e-10;
     double omega = 1.0;
+
+    PreconditionerType preconditioner = PreconditionerType::None;
 };
 
 //==================================================
@@ -225,6 +229,7 @@ inline void from_json(const nlohmann::json& j, SolverConfig& s)
     s.tol      = j.value("tol", 1e-10);
     s.max_iter = j.value("max_iter", 1000);
     s.omega    = j.value("omega", 1.0);
+    s.preconditioner = j.value("preconditioner", PreconditionerType::None);
 }
 
 // --------------------- MESH -----------------------------
@@ -340,6 +345,5 @@ inline void from_json( const nlohmann::json& j, SimulationConfig& cfg)
         cfg.io.plot_enabled = j.at("paths").value("plot_enabled", true);
     }
     if (j.contains("boundary_conditions")) { cfg.boundary = j.at("boundary_conditions").get<std::vector<BoundaryConfig>>(); }
-    // if (j.contains("verificationSuite")) { cfg.verificationSuite = j.at("verificationSuite").get<VerificationSuite>(); }
     if (j.contains("verificationCase")) { cfg.verification = j.at("verificationCase").get<VerificationCaseConfig>(); }
 }
