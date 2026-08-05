@@ -25,3 +25,7 @@ Ubuntu:
     sudo apt install nlohmann-json3-dev
 
 The setup for this coding package was intended for Linux based operating systems. However, the compiler is written to be OS agnostic between Windows and Linux and should run on both.
+
+# DISCLAIMER
+
+I do not claim the ideas from this or the code as explicitly my own. This project was approached as a learning experience as the author doesn't have much experience in such large-scale coding packages. Much of the package was completed with the help of AI (ChatGPT) though each step was tested and vetted to make sure that the structure was readable. AI assisted in the creation of code and documentation, though the content was edited significantly to match the author's preference. 
