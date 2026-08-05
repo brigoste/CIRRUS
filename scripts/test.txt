@@ -1,0 +1,93 @@
+'
+@echo off
+setlocal
+
+set SCRIPT_DIR=%~dp0
+for %%I in ("%SCRIPT_DIR%..") do set PROJECT_DIR=%%~fI
+
+cd /d "%PROJECT_DIR%"
+
+echo ==============================
+echo CIRRUS TEST PIPELINE
+echo ==============================
+
+
+REM ============================================================
+REM Parse arguments
+REM ============================================================
+
+set CLEAN=0
+
+if "%~1"=="-c" (
+    set CLEAN=1
+)
+
+
+REM ============================================================
+REM Clean build directory if requested
+REM ============================================================
+
+if %CLEAN%==1 (
+    if exist build (
+        echo Removing build directory...
+        rmdir /s /q build
+    )
+)
+
+
+REM ============================================================
+REM Configure
+REM ============================================================
+
+if not exist build mkdir build
+
+cd build
+
+
+if not exist CMakeCache.txt (
+    cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug ..
+)
+
+
+if errorlevel 1 (
+    echo CMake failed
+    exit /b 1
+)
+
+
+REM ============================================================
+REM Build tests
+REM ============================================================
+
+ninja CIRRUS_tests
+
+
+if errorlevel 1 (
+    echo Build failed
+    exit /b 1
+)
+
+
+REM ============================================================
+REM Run tests
+REM ============================================================
+
+@REM echo Running tests...
+@REM echo ==============================
+
+call CIRRUS_tests.exe
+
+
+if errorlevel 1 (
+    echo Tests FAILED
+    exit /b 1
+)
+
+
+@REM echo ==============================
+@REM echo ALL TESTS PASSED
+@REM echo ==============================
+
+
+endlocal
+'
