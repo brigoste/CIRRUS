@@ -1,14 +1,16 @@
-#include "tests/verification/VerificationRunner.hpp"
+#include "test/verification/VerificationRunner.hpp"
 
 #include "simulation/Simulation.hpp"
-#include "tests/verification/VerificationCaseFactory.hpp"
-#include "tests/verification/VerificationIO.hpp"
-#include "tests/verification/ErrorMetrics.hpp"
+#include "test/verification/VerificationCaseFactory.hpp"
+#include "test/verification/VerificationIO.hpp"
+#include "test/verification/ErrorMetrics.hpp"
 
 #include "config/PathContext.hpp"
 #include "config/SimulationConfig.hpp"
 #include "mesh/MeshBase.hpp"
 #include "io/PlotUtils.hpp"
+
+#include "utils/Timer.hpp"
 
 #include <iostream>
 #include <filesystem>
@@ -125,6 +127,7 @@ SimulationConfig VerificationRunner::applyVerificationOverrides( const Simulatio
 
 void VerificationRunner::run( const SimulationConfig& baseCfg, const VerificationSuite& suite, const PathContext& paths)
 {
+    Timer verificationTimer("Verification Suite");
     if (!suite.enabled) { return; }
 
     std::cout << "\n================ VERIFICATION MODE ================\n";
@@ -145,6 +148,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
 
     for (const auto& caseEntry : suite.cases)
     {
+        // Timer caseTimer("Verification Case: " + caseEntry.name);
         const std::string caseName = caseEntry.name;
 
         // -------------------------------------------------
@@ -189,7 +193,8 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
         for (int level = 0; level < nLevels; ++level)
         {
             SimulationConfig levelCfg = caseCfg;
-
+            // Timer levelTimer(  "  Level " + std::to_string(level) +  " (" + std::to_string(levelCfg.mesh.nx) + "x" + std::to_string(levelCfg.mesh.ny) + ")" );
+            
             if (refinementEnabled)
             {
                 levelCfg.mesh.nx = refinementLevels[level];
@@ -213,9 +218,17 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             const MeshBase& mesh = sim.mesh();
             sim.verificationCase()->initialize(mesh); 
             
-            sim.assemble();
-            
-            auto phi = sim.solve();
+            {
+                // Timer timer("Assembly");
+                sim.assemble();
+            }
+
+            std::vector<double> phi;
+
+            {
+                // Timer timer("Solver");
+                phi = sim.solve();
+            }
 
             // -------------------------------------------------
             // Exact solution evaluation
@@ -275,29 +288,28 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             auto csvPath = caseOutputDir / (caseName  + suffix + ".csv");
             auto jsonPath = caseOutputDir / (caseName  + suffix + ".json");
 
+            
+            {
+                // Timer timer("Output");
             // -------------------------------------------------
             // Write outputs
             // -------------------------------------------------
-            VerificationIO::writeCSV(sim, phi, csvPath);
-            VerificationIO::writeSummary(
-                caseName  + suffix,
-                norms.l2_rms,
-                norms.linf,
-                jsonPath
-            );
+                
+                VerificationIO::writeCSV(sim, phi, csvPath);
 
+                VerificationIO::writeSummary(
+                    caseName + suffix,
+                    norms.l2_rms,
+                    norms.linf,
+                    jsonPath
+                );
             // -------------------------------------------------
             // Plotting
             // -------------------------------------------------
-            if (suite.plot_enabled)
-            {
-                std::cout << "Plotting "
-                        << caseName
-                        << " from "
-                        << csvPath
-                        << "\n";
-
-                runPlot(paths, csvPath);
+                if (suite.plot_enabled)
+                {
+                    runPlot(paths, csvPath);
+                }
             }
 
             // -------------------------------------------------
