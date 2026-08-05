@@ -32,7 +32,7 @@
 
   "verification": {
     "enabled": false,
-    "plot_enabled": true
+    "plot_enabled": false
   }
 
 }
