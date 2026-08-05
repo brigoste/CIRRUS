@@ -4,7 +4,11 @@
 #include "mesh/QuadMesh2D.hpp"
 #include "discretization/FiniteVolumeOperator.hpp"
 #include "discretization/FluxBuilder.hpp"
-#include "tests/verification/VerificationCaseFactory.hpp"
+#include "test/verification/VerificationCaseFactory.hpp"
+
+#include "solver/preconditioners/PreconditionerFactory.hpp"
+
+#include "utils/Timer.hpp" // Runtime optimziation checking
 
 #include <stdexcept>
 
@@ -80,18 +84,31 @@ void Simulation::assemble()
 std::vector<double> Simulation::solve()
 {
     const auto& solverCfg = cfg_.solver;
+
     if (!assembled_) { throw std::runtime_error("System not assembled"); }
 
     std::cout << "System Type: " << physics::to_string(cfg_.physics.type) << "\n";
-    std::cout << "Solver: " << to_string(cfg_.solver.method) << "\n";
+
+    std::cout << "Solver: " << solver::to_string(cfg_.solver.method) << "\n";
+    
 
     switch (solverCfg.method)
     {
         case solver::Method::BiCGSTAB:
-            return BiCGSTAB(sys_, solverCfg.max_iter, solverCfg.tol);
+        {
+            auto M = createPreconditioner(solverCfg.preconditioner);
+            M->setup(sys_);            
+            std::cout << "Preconditioner: " << M->name() << "\n";
+            return BiCGSTAB(sys_, solverCfg.max_iter, solverCfg.tol, *M);
+        }
 
         case solver::Method::CG:
-            return CG(sys_, solverCfg.max_iter, solverCfg.tol);
+        {
+            auto M = createPreconditioner(solverCfg.preconditioner);
+            M->setup(sys_);
+            std::cout << "Preconditioner: " << M->name() << "\n";
+            return CG(sys_, solverCfg.max_iter, solverCfg.tol, *M);
+        }
 
         case solver::Method::GS:
             return GaussSeidel(sys_, solverCfg.max_iter, solverCfg.tol);
@@ -103,7 +120,7 @@ std::vector<double> Simulation::solve()
             return TDMA(sys_);
 
         default:
-            throw std::runtime_error("Unknown solver method");
+            throw std::runtime_error("Solver method not part of directory.");
     }
 }
 
