@@ -1,14 +1,12 @@
 #include "simulation/SimulationRunner.hpp"
-
 #include "simulation/Simulation.hpp"
-
 #include "linear_system/Residual.hpp"
-
 #include "postprocessing/BoundaryReconstructor.hpp"
-
 #include "io/FieldWriter.hpp"
 #include "io/VTKWriter.hpp"
 #include "io/PlotUtils.hpp"
+
+#include "utils/Timer.hpp"
 
 #include <iostream>
 #include <filesystem>
@@ -30,12 +28,21 @@ void SimulationRunner::run(
     const SimulationConfig& cfg,
     const PathContext& paths)
 {
+    // Timer totalTimer("SimulationRunner::run");
+    
     std::cout << "\n================ USER SIMULATION ================\n";
 
-    validate(cfg);      // Makes sure solver/model pairings are ok.
+    {
+        // Timer timer("Validation");
+        validate(cfg);      // Makes sure solver/model pairings are ok.
+    }
 
     Simulation sim(cfg);
-    sim.assemble();
+
+    {
+        // Timer timer("Assembly");
+        sim.assemble();
+    }
 
     std::cout << "# of cells = " << sim.mesh().ncells()
               << "\n# of faces = " << sim.mesh().nfaces()
@@ -48,10 +55,19 @@ void SimulationRunner::run(
 
     std::cout << "\n================ SOLVER COMPLETE ================\n\n";
 
-    auto residual = computeResidual(system, phi);
+    std::vector<double> residual;
 
-    PointField field = BoundaryReconstructor::reconstruct( mesh, sim.boundary(), sim.model(), phi);
+    {
+        // Timer timer("Residual calculation");
+        residual = computeResidual(system, phi);
+    }
 
+    PointField field;
+
+    {
+        // Timer timer("Boundary reconstruction");
+        field = BoundaryReconstructor::reconstruct( mesh, sim.boundary(), sim.model(), phi);
+    }
     // -----------------------------
     // Output paths
     // -----------------------------
@@ -64,12 +80,21 @@ void SimulationRunner::run(
     // -----------------------------
     // Write outputs
     // -----------------------------
-    VTKWriter::writeVTU(mesh, phi, vtkPath.string());
+    {
+        // Timer timer("VTK output");
+        VTKWriter::writeVTU(mesh, phi, vtkPath.string());
+    }
 
-    FieldWriter::writeCSVDebug( field, system.RHS(), residual, csvPath.generic_string());
-
+    {
+        // Timer timer("CSV output");
+        FieldWriter::writeCSVDebug( field, system.RHS(), residual, csvPath.generic_string());
+    }
     // -----------------------------
     // Plotting
     // -----------------------------
-    if (cfg.io.plot_enabled) { runPlot(csvPath.generic_string()); }
+    if (cfg.io.plot_enabled) {
+        // Timer time("Plotting");
+        
+        runPlot(paths, csvPath); 
+    }
 }
