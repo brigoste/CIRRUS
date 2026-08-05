@@ -1,349 +1,385 @@
-#pragma once
+#include "config/SimulationConfig.hpp"
+#include <unordered_set>
+#include <fstream>
+#include <iostream>
+// ============================================================
+// JSON merge (recursive override)
+// ============================================================
 
-#include <filesystem>
-#include <string>
-#include <vector>
-
-#include <nlohmann/json.hpp>
-
-#include "solver/SolverMethod.hpp"
-#include "config/PhysicsType.hpp"
-#include "mesh/BoundaryPatchSystem.hpp"
-
-#include "solver/preconditioners/Preconditioner.hpp"
-
-#include <unordered_map>
-
-//==================================================
-// Boundary
-//==================================================
-
-struct BoundaryConfig
-{
-    std::size_t group = 0;
-    BoundaryPatchSystem::Condition condition{};
+const std::unordered_set<std::string> atomicKeys = {
+    "extends",
+    "boundary_conditions",
+    "mesh",
+    "solver",
+    "physics",
+    "paths"
 };
 
-//==================================================
-// Mesh
-//==================================================
-
-struct MeshConfig
+nlohmann::json mergeJson(nlohmann::json base, const nlohmann::json& override)
 {
-    std::string type = "line1D";
-
-    std::size_t nx = 1;
-    std::size_t ny = 1;
-
-    double lx = 1.0;
-    double ly = 1.0;
-};
-
-//==================================================
-// Physics
-//==================================================
-
-struct PhysicsConfig
-{
-    physics::PhysicsType type = physics::PhysicsType::Heat;
-
-    double k                = 1.0;
-    double gamma            = 0.0;
-
-    double rho              = 1.0;
-
-    double ux               = 0.0;
-    double uy               = 0.0;
-    double uz               = 0.0;
-    
-    double volumetricSource = 0.0;
-};
-
-//==================================================
-// Solver
-//==================================================
-
-struct SolverConfig
-{
-    solver::Method method = solver::Method::TDMA;
-
-    int max_iter = 1000;
-    double tol   = 1e-10;
-    double omega = 1.0;
-
-    PreconditionerType preconditioner = PreconditionerType::None;
-};
-
-//==================================================
-// I/O
-//==================================================
-
-struct IOConfig
-{
-    std::string output_root = "output";
-    bool plot_enabled = true;
-};
-
-//==================================================
-// Verification
-//==================================================
-
-struct RefinementConfig
-{
-    bool enabled = false;
-
-    std::vector<int> levels;
-
-    double expected_order = 2.0;
-};
-
-struct VerificationCaseConfig
-{
-    std::string name;
-    std::string type;
-
-    bool l2 = true;
-    bool linf = true;
-    bool plot_enabled = true;
-
-    RefinementConfig refinement;
-
-    bool overrideMesh = false;
-    MeshConfig mesh;
-
-    bool overridePhysics = false;
-    PhysicsConfig physics;
-
-    bool overrideSolver = false;
-    SolverConfig solver;
-
-    bool overrideBoundary = false;
-    std::vector<BoundaryConfig> boundary;
-
-    bool overrideRefinement = false;
-
-    nlohmann::json params;
-};
-
-struct VerificationSuite
-{
-    bool enabled = false;
-    bool plot_enabled = true;
-
-    std::vector<VerificationCaseConfig> cases;
-
-    std::unordered_map<std::string, VerificationCaseConfig> caseConfigs;
-
-    std::string case_directory = "cases/verification";
-
-    struct Output
+    for (auto& [key, value] : override.items())
     {
-        std::string directory = "verification";
-    } output;
-};
+        if (atomicKeys.find(key) != atomicKeys.end())
+        {
+            base[key] = value;
+            continue;
+        }
 
-struct SimulationConfig
-{
-    std::string extends;
-
-    MeshConfig mesh;
-    PhysicsConfig physics;
-    SolverConfig solver;
-    IOConfig io;
-
-    std::vector<BoundaryConfig> boundary;
-
-    VerificationSuite verificationSuite;
-
-    VerificationCaseConfig verification;
-};
-
-//==================================================
-// Factory functions
-//==================================================
-
-SimulationConfig defaultConfig();
-
-SimulationConfig loadConfig(const std::filesystem::path& path);
-
-SimulationConfig resolveCaseConfig( const SimulationConfig& cfg, const VerificationCaseConfig& entry);
-
-nlohmann::json mergeJson( nlohmann::json base, const nlohmann::json& override_);
-
-VerificationSuite loadVerificationSuite( const std::filesystem::path& path);
-
-SimulationConfig fromJson(const nlohmann::json& j);
-
-// ------------------------- Physics --------------------------
-inline void from_json(const nlohmann::json& j, PhysicsConfig& p)
-{
-    p.k      = j.value("k", 1.0);
-    p.gamma  = j.value("gamma", 0.0);
-    p.rho    = j.value("rho", 1.0);
-    p.ux     = j.value("ux", 0.0);
-    p.uy     = j.value("uy", 0.0);
-    p.uz     = j.value("uz", 0.0);
-    p.volumetricSource = j.value("volumetricSource", 0.0);
-
-    if (j.contains("type")) { p.type = physics::physicsFromString(j.at("type").get<std::string>());}
-}
-
-// ----------------- Boundary --------------------------
-inline void from_json(const nlohmann::json& j, BoundaryConfig& b)
-{
-    b.group = j.value("group", 0);
-
-    auto type = bc::from_string(j.value("type", "Dirichlet"));
-
-    b.condition.type = type;
-
-    b.condition.value = 0.0;
-    b.condition.flux  = 0.0;
-    b.condition.h     = 0.0;
-    b.condition.Tinf  = 0.0;
-
-    switch (type)
-    {
-        case bc::Type::Dirichlet:
-            b.condition.value = j.value("value", 0.0);
-            break;
-
-        case bc::Type::Neumann:
-            b.condition.flux = j.value("flux", 0.0);
-            break;
-
-        case bc::Type::Convective:
-            b.condition.h    = j.value("h", 0.0);
-            b.condition.Tinf = j.value("Tinf", 0.0);
-            break;
-
-        default:
-            break;
+        if (base.contains(key) && base[key].is_object() && value.is_object()) { base[key] = mergeJson(base[key], value); }
+        else { base[key] = value; }
     }
+
+    return base;
 }
 
-// -------------- SolverConfig --------------------
-inline void from_json(const nlohmann::json& j, SolverConfig& s)
+VerificationSuite loadVerificationSuite(const std::filesystem::path& path)
 {
-    s.method   = j.value("type", solver::Method::TDMA);
-    s.tol      = j.value("tol", 1e-10);
-    s.max_iter = j.value("max_iter", 1000);
-    s.omega    = j.value("omega", 1.0);
-    s.preconditioner = j.value("preconditioner", PreconditionerType::None);
+    std::ifstream file(path);
+
+    if (!file.is_open()) { throw std::runtime_error( "Cannot open verification suite file: " + path.string()); }
+
+    nlohmann::json j;
+    file >> j;
+
+    if (j.contains("extends"))
+    {
+        std::filesystem::path parent = std::filesystem::weakly_canonical( path.parent_path() / j.at("extends").get<std::string>());
+
+        std::ifstream baseFile(parent);
+
+        nlohmann::json baseJson;
+        baseFile >> baseJson;
+
+        j = mergeJson(baseJson, j);
+    }
+
+    if (!j.contains("verificationSuite")) { throw std::runtime_error( "Verification suite missing 'verificationSuite'"); }
+
+    return j.at("verificationSuite").get<VerificationSuite>();
 }
 
-// --------------------- MESH -----------------------------
-inline void from_json(const nlohmann::json& j, MeshConfig& m)
+VerificationCaseConfig loadVerificationCase(
+    const std::filesystem::path& path)
 {
-    m.type = j.value("type", "line1D");
-    m.nx   = j.value("nx", 1);
-    m.ny   = j.value("ny", 1);
-    m.lx   = j.value("lx", 1.0);
-    m.ly   = j.value("ly", 1.0);
-}
+    std::ifstream file(path);
 
-// --------------------- REFINEMENT -----------------------------
-inline void from_json(const nlohmann::json& j, RefinementConfig& r)
-{
-    r.enabled = j.value("enabled", false);
+    if (!file.is_open()) { throw std::runtime_error( "Cannot open verification case: " + path.string()); }
 
-    if (j.contains("levels")) { r.levels = j.at("levels").get<std::vector<int>>(); }
+    nlohmann::json j;
+    file >> j;
 
-    r.expected_order = j.value("expected_order", 2.0);
-}
+    VerificationCaseConfig cfg;
 
-// ------------------------- Read Config for Verification ------------
-inline void from_json(const nlohmann::json& j, VerificationCaseConfig& v)
-{
-    v.name = j.value("name", "");
-    v.type = j.value("type", "");
-
-    v.l2 = j.value("l2", true);
-    v.linf = j.value("linf", true);
-    v.plot_enabled = j.value("plot_enabled", true);
-
-    if (j.contains("refinement")) { v.refinement = j.at("refinement").get<RefinementConfig>(); }
+    cfg.name = path.stem().string();
 
     if (j.contains("mesh"))
     {
-        v.mesh = j.at("mesh").get<MeshConfig>();
-        v.overrideMesh = true;
+        cfg.mesh = j.at("mesh").get<MeshConfig>();
+        cfg.overrideMesh = true;
     }
 
     if (j.contains("physics"))
     {
-        v.physics = j.at("physics").get<PhysicsConfig>();
-        v.overridePhysics = true;
+        cfg.physics = j.at("physics").get<PhysicsConfig>();
+        cfg.overridePhysics = true;
     }
 
     if (j.contains("solver"))
     {
-        v.solver = j.at("solver").get<SolverConfig>();
-        v.overrideSolver = true;
+        cfg.solver = j.at("solver").get<SolverConfig>();
+        cfg.overrideSolver = true;
     }
 
     if (j.contains("boundary_conditions"))
     {
-        v.boundary = j.at("boundary_conditions").get<std::vector<BoundaryConfig>>();
-        v.overrideBoundary = true;
+        cfg.boundary = j.at("boundary_conditions") .get<std::vector<BoundaryConfig>>();
+        cfg.overrideBoundary = true;
     }
 
-    v.params = j.value("params", nlohmann::json::object());
+    if (j.contains("refinement"))
+    {
+        cfg.refinement = j.at("refinement").get<RefinementConfig>();
+        cfg.overrideRefinement = true;
+    }
+
+    if (j.contains("params")) { cfg.params = j.at("params"); }
+
+    return cfg;
 }
 
-// -------------------- Read Verification Suite -------------------
-inline void from_json(const nlohmann::json& j, VerificationSuite& v)
+// ============================================================
+// Defaults
+// ============================================================
+
+SimulationConfig defaultConfig()
 {
-    v.enabled = j.value("enabled", false);
-    v.plot_enabled = j.value("plot_enabled", true);
+    SimulationConfig cfg;
 
-    v.cases.clear();
+    cfg.mesh.type = "line1D";
+    cfg.mesh.nx = 50;
+    cfg.mesh.lx = 1.0;
 
-    if (j.contains("cases"))
-    {
-        for (const auto& c : j.at("cases"))
-        {
-            VerificationCaseConfig entry;
-            entry.name = c.get<std::string>();
-            v.cases.push_back(entry);
-        }
-    }
-    if (j.contains("caseConfigs"))
-    {
-        for (auto& [name, cfg] : j["caseConfigs"].items())
-        {
-            VerificationCaseConfig entry =
-                cfg.get<VerificationCaseConfig>();
+    cfg.physics.k = 1.0;
 
-            entry.name = name;
+    cfg.solver.method = solver::Method::SOR;
+    cfg.solver.tol = 1e-8;
+    cfg.solver.max_iter = 5000;
+    cfg.solver.omega = 1.0;
 
-            v.caseConfigs[name] = entry;
-        }
-    }
+    cfg.verificationSuite.enabled = false;
+    cfg.verificationSuite.cases.clear();
+    cfg.verificationSuite.output.directory = "output/verification";
 
-    v.case_directory = j.value(
-        "case_directory",
-        "cases/verification"
-    );
-
-    if (j.contains("output"))
-    {
-        v.output.directory =
-            j.at("output").value("directory", "verification");
-    }
+    return cfg;
 }
 
-inline void from_json( const nlohmann::json& j, SimulationConfig& cfg)
+SimulationConfig resolveCaseConfig( const SimulationConfig& base, const VerificationCaseConfig& entry)
 {
-    if (j.contains("extends")) { cfg.extends = j.at("extends").get<std::string>(); }
-    if (j.contains("mesh")) { cfg.mesh = j.at("mesh") .get<MeshConfig>(); }
-    if (j.contains("physics")) { cfg.physics = j.at("physics") .get<PhysicsConfig>(); }
-    if (j.contains("solver")) { cfg.solver = j.at("solver") .get<SolverConfig>(); }
+    SimulationConfig cfg = base;
+
+    if (entry.overrideMesh) { cfg.mesh = entry.mesh; }
+
+    if (entry.overridePhysics) { cfg.physics = entry.physics; }
+
+    if (entry.overrideSolver) { cfg.solver = entry.solver; }
+
+    if (entry.overrideBoundary) { cfg.boundary = entry.boundary; }
+
+    return cfg;
+}
+
+SimulationConfig loadConfig( const std::filesystem::path& path)
+{
+    std::ifstream file(path);
+
+    if (!file.is_open()) { throw std::runtime_error( "Cannot open config file: " + path.string()); }
+
+    nlohmann::json j;
+    file >> j;
+
+    // -------------------------------------------------
+    // Handle inheritance (extends)
+    // -------------------------------------------------
+    if (j.contains("extends")) {
+        std::vector<std::string> parents;
+
+        if (j.at("extends").is_string()) { parents.push_back(j.at("extends").get<std::string>()); }
+        else if (j.at("extends").is_array()) { parents = j.at("extends").get<std::vector<std::string>>(); }
+        else { throw std::runtime_error("`extends` must be string or array of strings"); }
+
+        nlohmann::json base;
+
+        for (const auto& parentRel : parents)
+        {
+            std::filesystem::path parentPath = std::filesystem::weakly_canonical(path.parent_path() / parentRel);
+
+            if (!std::filesystem::exists(parentPath)) { throw std::runtime_error("Cannot open parent config: " + parentPath.string()); }
+
+            std::ifstream baseFile(parentPath);
+
+            if (!baseFile.is_open()) { throw std::runtime_error("Cannot open parent config: " + parentPath.string()); }
+
+            nlohmann::json parentJson;
+            baseFile >> parentJson;
+
+            base = mergeJson(base, parentJson);
+        }
+
+        // finally merge child on top of all parents
+        j = mergeJson(base, j);
+    }
+
+    // -------------------------------------------------
+    // Validate minimal structure
+    // -------------------------------------------------
+    if (!j.contains("mesh")) { throw std::runtime_error("Config missing 'mesh'"); }
+    if (!j.contains("physics")) { throw std::runtime_error("Config missing 'physics'"); }
+
+    // -------------------------------------------------
+    // Build config from defaults
+    // -------------------------------------------------
+    std::cout << "DEBUG CONFIG AFTER MERGE:\n";
+    std::cout << j.dump(2) << "\n";
+
+    return fromJson(j);
+}
+
+SimulationConfig fromJson(
+    const nlohmann::json& j)
+{
+    SimulationConfig cfg = defaultConfig();
+
+    // -------------------------------------------------
+    // Mesh
+    // -------------------------------------------------
+    cfg.mesh.type = j.at("mesh").at("type").get<std::string>();
+    cfg.mesh.nx   = j.at("mesh").value("nx", 1);
+    cfg.mesh.ny   = j.at("mesh").value("ny", 1);
+    cfg.mesh.lx   = j.at("mesh").value("lx", 1.0);
+    cfg.mesh.ly   = j.at("mesh").value("ly", 1.0);
+
+    std::cout << "Requested mesh = " << cfg.mesh.nx << " x " << cfg.mesh.ny << '\n';
+
+    // -------------------------------------------------
+    // Physics
+    // -------------------------------------------------
+    cfg.physics.type    = physics::physicsFromString(j.at("physics").at("type").get<std::string>());
+
+    cfg.physics.k       = j.at("physics").value("k", 0.0);
+    cfg.physics.gamma   = j.at("physics").value("gamma", 0.0);
+
+    cfg.physics.rho     = j.at("physics").value("rho", 1.0);
+    cfg.physics.ux      = j.at("physics").value("ux", 0.0);
+    cfg.physics.uy      = j.at("physics").value("uy", 0.0);
+    cfg.physics.uz      = j.at("physics").value("uz", 0.0);
+    // -------------------------------------------------
+    // Solver
+    // -------------------------------------------------
+    cfg.solver.method   = j.at("solver").at("type").get<solver::Method>();
+    cfg.solver.tol      = j.at("solver").at("tol").get<double>();
+    cfg.solver.max_iter = j.at("solver").at("max_iter").get<int>();
+    cfg.solver.omega    = j.at("solver").at("omega").get<double>();
+
+    // -------------------------------------------------
+    // Output paths (normalized)
+    // -------------------------------------------------
     if (j.contains("paths"))
     {
-        cfg.io.output_root = j.at("paths").value("output_root", "output");
-        cfg.io.plot_enabled = j.at("paths").value("plot_enabled", true);
+        std::string raw = j.at("paths").at("output_root").get<std::string>();
+
+        std::filesystem::path p(raw);
+
+        if (!p.is_absolute()) { p = std::filesystem::current_path().parent_path() / p; }
+
+        cfg.io.output_root = p.string();
     }
-    if (j.contains("boundary_conditions")) { cfg.boundary = j.at("boundary_conditions").get<std::vector<BoundaryConfig>>(); }
-    if (j.contains("verificationCase")) { cfg.verification = j.at("verificationCase").get<VerificationCaseConfig>(); }
+
+    // -------------------------------------------------
+    // Boundary conditions
+    // -------------------------------------------------
+    cfg.boundary.clear();
+
+    if (!j.contains("boundary_conditions")) { throw std::runtime_error("Config missing 'boundary_conditions'"); }
+
+    for (const auto& bcJson : j.at("boundary_conditions"))
+    {        
+        BoundaryConfig bc{};
+
+        bc.group = bcJson.at("group").get<std::size_t>();
+
+        bc.condition.type  = bc::from_string(bcJson.at("type").get<std::string>());
+
+        bc.condition.value = 0.0;
+        bc.condition.flux  = 0.0;
+        bc.condition.h     = 0.0;
+        bc.condition.Tinf  = 0.0;
+
+        switch (bc.condition.type)
+        {
+            case bc::Type::Dirichlet:
+                if (!bcJson.contains("value"))
+                {
+                    throw std::runtime_error(
+                        "Dirichlet boundary condition requires 'value'");
+                }
+                bc.condition.value = bcJson.at("value").get<double>();
+                break;
+
+            case bc::Type::Neumann:
+                if (!bcJson.contains("flux"))
+                {
+                    throw std::runtime_error(
+                        "Neumann boundary condition requires 'flux'");
+                }
+                bc.condition.flux = bcJson.at("flux").get<double>();
+                break;
+
+            case bc::Type::Convective:
+                bc.condition.h = bcJson.at("h").get<double>();
+                bc.condition.Tinf = bcJson.at("Tinf").get<double>();
+                break;
+
+            default:
+                break;
+        }
+
+        cfg.boundary.push_back(bc);
+    }
+
+    // -------------------------------------------------
+    // Verification (safe parsing)
+    // -------------------------------------------------
+    if (j.contains("verificationSuite"))
+    {
+        const auto& v = j.at("verificationSuite");
+
+        cfg.verificationSuite.enabled = v.value("enabled", false);
+        cfg.verificationSuite.plot_enabled = v.value("plot_enabled", false);
+        cfg.verificationSuite.cases.clear();
+
+        if (v.contains("cases"))
+        {
+            const auto& configs = v.value("caseConfigs", nlohmann::json::object());
+
+            for (const auto& c : v.at("cases"))
+            {
+                VerificationCaseConfig entry;
+                entry.name = c.get<std::string>();
+
+                if (configs.contains(entry.name))
+                {
+                    const auto& jc = configs.at(entry.name);
+
+                    entry.params = jc.value("params", nlohmann::json::object());
+
+                    // ---- Mesh override ----
+                    if (jc.contains("mesh"))
+                    {
+                        entry.mesh = jc.value("mesh", MeshConfig{});
+                        entry.overrideMesh = true;
+                    }
+                    //     Mesh refinement for grid convergence
+                    if (jc.contains("refinement"))
+                    {
+                        entry.refinement = jc.value("refinement", RefinementConfig{});
+                        entry.overrideRefinement = true;
+                    }
+                    // ---- Physics override ----
+                    if (jc.contains("physics"))
+                    {
+                        entry.physics = jc.value("physics", PhysicsConfig{});
+                        entry.overridePhysics = true;
+                    }
+
+                    // ---- Solver override ----
+                    if (jc.contains("solver"))
+                    {
+                        entry.solver = jc.value("solver", SolverConfig{});
+                        entry.overrideSolver = true;
+                    }
+
+                    // ---- Boundary override ----
+                    if (jc.contains("boundary_conditions"))
+                    {
+                        entry.boundary = jc.value("boundary_conditions", std::vector<BoundaryConfig>{});
+                        entry.overrideBoundary = true;
+                    }
+                }
+                else { entry.params = {}; }
+
+                cfg.verificationSuite.cases.push_back(std::move(entry));
+            }
+        }
+
+        if (v.contains("output")) { cfg.verificationSuite.output.directory = v.at("output").value("directory", "output/verification"); }
+    }
+
+    
+    if (j.contains("verificationSuite") && j["verificationSuite"].contains("caseConfigs"))
+    {
+        for (auto& [k, v] : j["verificationSuite"]["caseConfigs"].items()) { std::cout << "  " << k << "\n";}
+    }
+    else { std::cout << "NO CASE CONFIGS FOUND\n"; }
+
+    return cfg;
 }
