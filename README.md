@@ -17,9 +17,9 @@ The setup for this coding package was intended for Linux based operating systems
 
 CIRRUS relies on .json files for case inputs. These are parsed with nlohmann.json and is a required dependancy. This can be added to your machine using the the following:
 
-Windows/MSYS2: 
-    bash:
-        pacman -S mingw-w64-ucrt-x86_64-nlohmann-json
+-Windows/MSYS2: 
+    - bash:
+        - pacman -S mingw-w64-ucrt-x86_64-nlohmann-json
 
 Ubuntu:
   bash:
