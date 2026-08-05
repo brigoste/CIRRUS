@@ -19,9 +19,9 @@ CIRRUS relies on .json files for case inputs. These are parsed with nlohmann.jso
 
 -Windows/MSYS2: 
 
-    - bash:
+    bash:
     
-        - pacman -S mingw-w64-ucrt-x86_64-nlohmann-json
+        pacman -S mingw-w64-ucrt-x86_64-nlohmann-json
 
 Ubuntu:
 
