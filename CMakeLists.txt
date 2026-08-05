@@ -30,20 +30,20 @@ include_directories(${PROJECT_BINARY_DIR})
 # Collect all source files
 # ----------------------------------------
 file(GLOB_RECURSE CIRRUS_SOURCES
-    ${PROJECT_SOURCE_DIR}/main.cpp
     ${PROJECT_SOURCE_DIR}/config/*.cpp
     ${PROJECT_SOURCE_DIR}/bc/*.cpp
     ${PROJECT_SOURCE_DIR}/discretization/*.cpp
+    ${PROJECT_SOURCE_DIR}/fields/*.cpp
     ${PROJECT_SOURCE_DIR}/io/*.cpp
     ${PROJECT_SOURCE_DIR}/linear_system/*.cpp
+    ${PROJECT_SOURCE_DIR}/postprocessing/*.cpp
     ${PROJECT_SOURCE_DIR}/physics/*.cpp
+    ${PROJECT_SOURCE_DIR}/simulation/*.cpp
     ${PROJECT_SOURCE_DIR}/solver/*.cpp
     ${PROJECT_SOURCE_DIR}/solver/preconditioners/*.cpp
-    ${PROJECT_SOURCE_DIR}/utils/*.cpp
-    ${PROJECT_SOURCE_DIR}/simulation/*.cpp
-    ${PROJECT_SOURCE_DIR}/postprocessing/*.cpp
     ${PROJECT_SOURCE_DIR}/test/verification/*.cpp
     ${PROJECT_SOURCE_DIR}/test/verification/ManufacturedCases/*.cpp
+    ${PROJECT_SOURCE_DIR}/utils/*.cpp
 
     # Update as we get 2D/3D meshes working
     # ${PROJECT_SOURCE_DIR}/mesh/*.cpp
@@ -79,16 +79,39 @@ message(STATUS "nlohmann_json include dir: ${NLOHMANN_JSON_INCLUDE_DIR}")
 include_directories(${NLOHMANN_JSON_INCLUDE_DIR})
 
 # ----------------------------------------
-# Executable
+# Executable - main
 # ----------------------------------------
-add_executable(CIRRUS ${CIRRUS_SOURCES})
+add_library(CIRRUS_core STATIC ${CIRRUS_SOURCES})
+
+add_executable(CIRRUS
+    src/main.cpp
+)
+
+target_link_libraries(CIRRUS
+    PRIVATE CIRRUS_core
+)
+
+# ----------------------------------------
+# Executable - testing
+# ----------------------------------------
+file(GLOB_RECURSE TEST_SOURCES
+    ${PROJECT_SOURCE_DIR}/test/*.cpp
+)
+
+add_executable(CIRRUS_tests
+    ${TEST_SOURCES}
+)
+
+target_link_libraries(CIRRUS_tests
+    PRIVATE CIRRUS_core
+)
 
 # ----------------------------------------
 # Include directories
 # ----------------------------------------
-target_include_directories(CIRRUS PUBLIC
+target_include_directories(CIRRUS_core PUBLIC
     ${PROJECT_SOURCE_DIR}
-    ${PROJECT_BINARY_DIR}   # for config.h
+    ${PROJECT_BINARY_DIR}
 )
 
 # ----------------------------------------
