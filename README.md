@@ -23,3 +23,5 @@ Windows/MSYS2:
 Ubuntu:
   bash:
     sudo apt install nlohmann-json3-dev
+
+The setup for this coding package was intended for Linux based operating systems. However, the compiler is written to be OS agnostic between Windows and Linux and should run on both.
