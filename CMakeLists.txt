@@ -37,12 +37,13 @@ file(GLOB_RECURSE CIRRUS_SOURCES
     ${PROJECT_SOURCE_DIR}/io/*.cpp
     ${PROJECT_SOURCE_DIR}/linear_system/*.cpp
     ${PROJECT_SOURCE_DIR}/physics/*.cpp
-    ${PROJECT_SOURCE_DIR}/Solver/*.cpp
+    ${PROJECT_SOURCE_DIR}/solver/*.cpp
+    ${PROJECT_SOURCE_DIR}/solver/preconditioners/*.cpp
     ${PROJECT_SOURCE_DIR}/utils/*.cpp
     ${PROJECT_SOURCE_DIR}/simulation/*.cpp
     ${PROJECT_SOURCE_DIR}/postprocessing/*.cpp
-    ${PROJECT_SOURCE_DIR}/tests/verification/*.cpp
-    ${PROJECT_SOURCE_DIR}/tests/verification/ManufacturedCases/*.cpp
+    ${PROJECT_SOURCE_DIR}/test/verification/*.cpp
+    ${PROJECT_SOURCE_DIR}/test/verification/ManufacturedCases/*.cpp
 
     # Update as we get 2D/3D meshes working
     # ${PROJECT_SOURCE_DIR}/mesh/*.cpp
