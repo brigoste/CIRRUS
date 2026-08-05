@@ -2,7 +2,7 @@
 #include <memory>
 #include <filesystem>
 #include "simulation/SimulationRunner.hpp"
-#include "tests/verification/VerificationRunner.hpp"
+#include "test/verification/VerificationRunner.hpp"
 #include "config/SimulationConfig.hpp"
 #include "config/PathContext.hpp"
 #include "config/PathUtils.hpp"
