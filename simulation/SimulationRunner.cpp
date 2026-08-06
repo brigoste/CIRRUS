@@ -5,6 +5,7 @@
 #include "io/FieldWriter.hpp"
 #include "io/VTKWriter.hpp"
 #include "io/PlotUtils.hpp"
+#include "fields/FieldNames.hpp"
 
 #include "utils/Timer.hpp"
 
@@ -21,7 +22,9 @@ void SimulationRunner::validate(
     // Exception handling for illadvised solver pairing
     // -------------------------------------------------
     if (std::string(physics::to_string(cfg.physics.type)) == "advection-diffusion" && cfg.solver.method == solver::Method::CG)
+    {
         throw std::runtime_error("CG not valid for advection-diffusion (non-symmetric system)");
+    }
 }
 
 void SimulationRunner::run(
@@ -48,7 +51,8 @@ void SimulationRunner::run(
               << "\n# of faces = " << sim.mesh().nfaces()
               << "\n";
 
-    auto phi = sim.solve();
+    sim.solve();
+    auto& temperature = sim.fields().scalar(FieldName::Temperature);
 
     const auto& mesh = sim.mesh();
     const auto& system = sim.system();
@@ -59,14 +63,14 @@ void SimulationRunner::run(
 
     {
         // Timer timer("Residual calculation");
-        residual = computeResidual(system, phi);
+        residual = computeResidual(system, temperature);
     }
 
     PointField field;
 
     {
         // Timer timer("Boundary reconstruction");
-        field = BoundaryReconstructor::reconstruct( mesh, sim.boundary(), sim.model(), phi);
+        field = BoundaryReconstructor::reconstruct( mesh, sim.boundary(), sim.model(), temperature);
     }
     // -----------------------------
     // Output paths
@@ -82,7 +86,7 @@ void SimulationRunner::run(
     // -----------------------------
     {
         // Timer timer("VTK output");
-        VTKWriter::writeVTU(mesh, phi, vtkPath.string());
+        VTKWriter::writeVTK(mesh, temperature, vtkPath.string());
     }
 
     {
