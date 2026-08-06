@@ -24,7 +24,7 @@ public:
     double diffusionFaceCoefficient(const Face& face) const override;
     double convectionFaceFlux(const Face& face) const override;
 
-    double diffusionCoefficient() const override { return gamma_; }
+    double diffusionCoefficient() const override                                        { return gamma_; }
 
     double reconstructBoundaryValue( const BoundaryPatchSystem::Condition& bc, double phiCell, double dx, bool isLeft) const override;
 
@@ -32,8 +32,8 @@ public:
     
     double cellSource( const MeshBase& mesh, std::size_t cell) const override;
 
-    FieldName solutionField() const override { return FieldName::Temperature; }
-    double initialSolutionValue() const override { return 0.0; }
+    FieldName solutionField() const override                                            { return FieldName::Temperature; }
+    double initialSolutionValue() const override                                        { return 0.0; }
 
 private:
     double gamma_ = 0.0;
