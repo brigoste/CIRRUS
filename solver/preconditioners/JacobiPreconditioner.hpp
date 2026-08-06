@@ -5,13 +5,11 @@
 
 #include <vector>
 
-
 class JacobiPreconditioner : public Preconditioner
 {
 public:
 
     void setup(const LinearSystem& sys) override;
-
 
     void apply(
         const std::vector<double>& r,
