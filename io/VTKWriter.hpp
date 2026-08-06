@@ -1,15 +1,17 @@
 #pragma once
 
-#include "mesh/MeshBase.hpp"
-#include <vector>
 #include <filesystem>
-#include <string>
+
+#include "mesh/MeshBase.hpp"
+#include "fields/ScalarField.hpp"
 
 class VTKWriter
 {
 public:
-    static void writeVTU(
+
+    static void writeVTK(
         const MeshBase& mesh,
-        const std::vector<double>& field,
+        const ScalarField& field,
         const std::filesystem::path& filename);
+
 };
