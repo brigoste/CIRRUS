@@ -7,9 +7,9 @@
 // --------------------------------------------------
 // MAIN WRITER
 // --------------------------------------------------
-void VTKWriter::writeVTU(
+void VTKWriter::writeVTK(
     const MeshBase& mesh,
-    const std::vector<double>& field,
+    const ScalarField& field,
     const std::filesystem::path& filename)
 {
     std::ofstream f(filename);
@@ -99,8 +99,9 @@ void VTKWriter::writeVTU(
     // =========================================================
     // CELL DATA
     // =========================================================
-    f << "<CellData Scalars=\"field\">\n";
-    f << "<DataArray type=\"Float64\" Name=\"field\" format=\"ascii\">\n";
+    f << "<CellData Scalars=\"" << field.name() << "\">\n";
+
+    f << "<DataArray type=\"Float64\" Name=\"" << field.name() << "\" format=\"ascii\">\n";
 
     for (std::size_t c = 0; c < Ncells; ++c) { f << field[c] << "\n"; }
 
