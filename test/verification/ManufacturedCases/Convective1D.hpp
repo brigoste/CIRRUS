@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tests/verification/VerificationCase.hpp"
+#include "test/verification/VerificationCase.hpp"
 
 /*
     Documentation:
@@ -27,9 +27,9 @@ public:
 
     ConvectiveData boundaryConvective(const Face& face) const override;
 
-    double l2AcceptanceThreshold() const override { return 5e-2; }
+    double l2AcceptanceThreshold() const override                       { return 5e-2; }
 
-    double linfAcceptanceThreshold() const override { return 5e-2; }
+    double linfAcceptanceThreshold() const override                     { return 5e-2; }
 
 private:
     double k_;
