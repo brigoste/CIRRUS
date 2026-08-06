@@ -49,7 +49,6 @@ struct PhysicsConfig
 
     double k                = 1.0;
     double gamma            = 0.0;
-
     double rho              = 1.0;
 
     double ux               = 0.0;
@@ -225,10 +224,10 @@ inline void from_json(const nlohmann::json& j, BoundaryConfig& b)
 // -------------- SolverConfig --------------------
 inline void from_json(const nlohmann::json& j, SolverConfig& s)
 {
-    s.method   = j.value("type", solver::Method::TDMA);
-    s.tol      = j.value("tol", 1e-10);
-    s.max_iter = j.value("max_iter", 1000);
-    s.omega    = j.value("omega", 1.0);
+    s.method         = j.value("type", solver::Method::TDMA);
+    s.tol            = j.value("tol", 1e-10);
+    s.max_iter       = j.value("max_iter", 1000);
+    s.omega          = j.value("omega", 1.0);
     s.preconditioner = j.value("preconditioner", PreconditionerType::None);
 }
 
@@ -255,11 +254,11 @@ inline void from_json(const nlohmann::json& j, RefinementConfig& r)
 // ------------------------- Read Config for Verification ------------
 inline void from_json(const nlohmann::json& j, VerificationCaseConfig& v)
 {
-    v.name = j.value("name", "");
-    v.type = j.value("type", "");
+    v.name         = j.value("name", "");
+    v.type         = j.value("type", "");
 
-    v.l2 = j.value("l2", true);
-    v.linf = j.value("linf", true);
+    v.l2           = j.value("l2", true);
+    v.linf         = j.value("linf", true);
     v.plot_enabled = j.value("plot_enabled", true);
 
     if (j.contains("refinement")) { v.refinement = j.at("refinement").get<RefinementConfig>(); }
@@ -294,7 +293,7 @@ inline void from_json(const nlohmann::json& j, VerificationCaseConfig& v)
 // -------------------- Read Verification Suite -------------------
 inline void from_json(const nlohmann::json& j, VerificationSuite& v)
 {
-    v.enabled = j.value("enabled", false);
+    v.enabled      = j.value("enabled", false);
     v.plot_enabled = j.value("plot_enabled", true);
 
     v.cases.clear();
@@ -336,14 +335,14 @@ inline void from_json(const nlohmann::json& j, VerificationSuite& v)
 inline void from_json( const nlohmann::json& j, SimulationConfig& cfg)
 {
     if (j.contains("extends")) { cfg.extends = j.at("extends").get<std::string>(); }
-    if (j.contains("mesh")) { cfg.mesh = j.at("mesh") .get<MeshConfig>(); }
+    if (j.contains("mesh"))    { cfg.mesh = j.at("mesh") .get<MeshConfig>(); }
     if (j.contains("physics")) { cfg.physics = j.at("physics") .get<PhysicsConfig>(); }
-    if (j.contains("solver")) { cfg.solver = j.at("solver") .get<SolverConfig>(); }
+    if (j.contains("solver"))  { cfg.solver = j.at("solver") .get<SolverConfig>(); }
     if (j.contains("paths"))
     {
         cfg.io.output_root = j.at("paths").value("output_root", "output");
         cfg.io.plot_enabled = j.at("paths").value("plot_enabled", true);
     }
     if (j.contains("boundary_conditions")) { cfg.boundary = j.at("boundary_conditions").get<std::vector<BoundaryConfig>>(); }
-    if (j.contains("verificationCase")) { cfg.verification = j.at("verificationCase").get<VerificationCaseConfig>(); }
+    if (j.contains("verificationCase"))    { cfg.verification = j.at("verificationCase").get<VerificationCaseConfig>(); }
 }
