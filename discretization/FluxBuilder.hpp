@@ -4,7 +4,7 @@
 #include "mesh/BoundaryPatchSystem.hpp"
 #include "physics/PhysicsModel.hpp"
 #include "utils/LinearAlgebraUtils.hpp"
-#include "tests/verification/VerificationCase.hpp"
+#include "test/verification/VerificationCase.hpp"
 
 class FluxBuilder
 {
