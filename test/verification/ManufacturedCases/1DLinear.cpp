@@ -1,4 +1,4 @@
-#include "tests/verification/ManufacturedCases/1DLinear.hpp"
+#include "test/verification/ManufacturedCases/1DLinear.hpp"
 
 double OneDLinear::exact(double x, double) const
 {
