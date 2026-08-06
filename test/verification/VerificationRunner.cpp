@@ -11,6 +11,7 @@
 #include "io/PlotUtils.hpp"
 
 #include "utils/Timer.hpp"
+#include "fields/FieldNames.hpp"
 
 #include <iostream>
 #include <filesystem>
@@ -114,13 +115,25 @@ SimulationConfig VerificationRunner::applyVerificationOverrides( const Simulatio
 {
     SimulationConfig cfg = base;
 
-    if (verif.overrideMesh) { cfg.mesh = verif.mesh; }
+    if (verif.overrideMesh) 
+    { 
+        cfg.mesh = verif.mesh; 
+    }
 
-    if (verif.overridePhysics) { cfg.physics = verif.physics; }
+    if (verif.overridePhysics) 
+    { 
+        cfg.physics = verif.physics; 
+    }
 
-    if (verif.overrideSolver) { cfg.solver = verif.solver; }
+    if (verif.overrideSolver) 
+    {
+        cfg.solver = verif.solver; 
+    }
 
-    if (verif.overrideBoundary) { cfg.boundary = verif.boundary; }
+    if (verif.overrideBoundary) 
+    { 
+        cfg.boundary = verif.boundary; 
+    }
 
     return cfg;
 }
@@ -128,7 +141,10 @@ SimulationConfig VerificationRunner::applyVerificationOverrides( const Simulatio
 void VerificationRunner::run( const SimulationConfig& baseCfg, const VerificationSuite& suite, const PathContext& paths)
 {
     Timer verificationTimer("Verification Suite");
-    if (!suite.enabled) { return; }
+    if (!suite.enabled) 
+    { 
+        return; 
+    }
 
     std::cout << "\n================ VERIFICATION MODE ================\n";
     std::cout << "Verification enabled: " << suite.enabled << "\n";
@@ -159,7 +175,10 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
 
         std::cout << "Loading verification case: " << casePath << "\n";
 
-        if (!std::filesystem::exists(casePath)) { throw std::runtime_error( "Missing verification case file: " + casePath.string()); }
+        if (!std::filesystem::exists(casePath)) 
+        { 
+            throw std::runtime_error( "Missing verification case file: " + casePath.string()); 
+        }
 
         auto verificationCase = loadVerificationCase(casePath);
 
@@ -199,7 +218,10 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             {
                 levelCfg.mesh.nx = refinementLevels[level];
 
-                if (levelCfg.mesh.type == "quad2D") { levelCfg.mesh.ny = refinementLevels[level]; }
+                if (levelCfg.mesh.type == "quad2D") 
+                {
+                    levelCfg.mesh.ny = refinementLevels[level]; 
+                }
             }
 
             std::cout << "Creating simulation:"
@@ -223,19 +245,22 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                 sim.assemble();
             }
 
-            std::vector<double> phi;
-
             {
                 // Timer timer("Solver");
-                phi = sim.solve();
+                sim.solve();
             }
+
+            auto& temperature = sim.fields().scalar(FieldName::Temperature);
 
             // -------------------------------------------------
             // Exact solution evaluation
             // -------------------------------------------------
             std::vector<double> exactField(mesh.ncells());
 
-            if (!sim.verificationCase()) { throw std::runtime_error( "Verification enabled but no verification case attached." ); }
+            if (!sim.verificationCase()) 
+            { 
+                throw std::runtime_error( "Verification enabled but no verification case attached." ); 
+            }
 
             const auto& verifCase = *sim.verificationCase();
 
@@ -249,13 +274,19 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             // -------------------------------------------------
             // Error norms
             // -------------------------------------------------
-            auto norms = ErrorNorms::compute(mesh, phi, exactField);
+            auto norms = ErrorNorms::compute(mesh, temperature, exactField);
             double hx = levelCfg.mesh.lx / levelCfg.mesh.nx;
             double hy = levelCfg.mesh.ly / levelCfg.mesh.ny;
 
             double h = 0.0;
-            if (levelCfg.mesh.type == "line1D") { h = hx; }
-            else if (levelCfg.mesh.type == "quad2D") { h = std::max(hx, hy); }
+            if (levelCfg.mesh.type == "line1D") 
+            {
+                h = hx; 
+            }
+            else if (levelCfg.mesh.type == "quad2D") 
+            { 
+                h = std::max(hx, hy); 
+            }
 
             refinement.levels.push_back({
                 levelCfg.mesh.nx,
@@ -283,19 +314,21 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             // -------------------------------------------------
             std::string suffix;
 
-            if (refinementEnabled) { suffix = "_L" + std::to_string(level); }
+            if (refinementEnabled) 
+            { 
+                suffix = "_L" + std::to_string(level); 
+            }
 
             auto csvPath = caseOutputDir / (caseName  + suffix + ".csv");
             auto jsonPath = caseOutputDir / (caseName  + suffix + ".json");
 
-            
             {
                 // Timer timer("Output");
             // -------------------------------------------------
             // Write outputs
             // -------------------------------------------------
                 
-                VerificationIO::writeCSV(sim, phi, csvPath);
+                VerificationIO::writeCSV(sim, temperature, csvPath);
 
                 VerificationIO::writeSummary(
                     caseName + suffix,
@@ -327,9 +360,18 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
 
             std::string meshSize;
 
-            if (meshType == "line1D") { meshSize = std::to_string(caseCfg.mesh.nx) + "x1"; }
-            else if (meshType == "quad2D") { meshSize = std::to_string(caseCfg.mesh.nx) + "x" + std::to_string(caseCfg.mesh.ny); }
-            else { meshSize = std::to_string(mesh.ncells()) + " cells"; }
+            if (meshType == "line1D") 
+            { 
+                meshSize = std::to_string(caseCfg.mesh.nx) + "x1"; 
+            }
+            else if (meshType == "quad2D") 
+            { 
+                meshSize = std::to_string(caseCfg.mesh.nx) + "x" + std::to_string(caseCfg.mesh.ny); 
+            }
+            else 
+            { 
+                meshSize = std::to_string(mesh.ncells()) + " cells"; 
+            }
 
             double l2_tol = sim.verificationCase()->l2AcceptanceThreshold();
             double linf_tol = sim.verificationCase()->linfAcceptanceThreshold();
@@ -392,9 +434,15 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                 }
             }
 
-            if (validL2 > 0) { refinement.observedOrderL2 /= static_cast<double>(validL2); }
+            if (validL2 > 0) 
+            { 
+                refinement.observedOrderL2 /= static_cast<double>(validL2); 
+            }
 
-            if (validLinf > 0) { refinement.observedOrderLinf /= static_cast<double>(validLinf); }
+            if (validLinf > 0) 
+            { 
+                refinement.observedOrderLinf /= static_cast<double>(validLinf); 
+            }
 
             refinement.passed = validL2 > 0 && validLinf > 0 && std::abs(refinement.observedOrderL2   - expectedOrder) <= orderTolerance && std::abs(refinement.observedOrderLinf - expectedOrder) <= orderTolerance;
 
@@ -436,13 +484,19 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
 
     for (const auto& s : summary)
     {
-        if (s.accuracyPassed) { ++l2PassedCount; }
+        if (s.accuracyPassed) 
+        { 
+            ++l2PassedCount; 
+        }
 
         if (s.refinementEnabled)
         {
             ++refinementTotal;
 
-            if (s.refinementPassed) { ++refinementPassedCount; }
+            if (s.refinementPassed) 
+            { 
+                ++refinementPassedCount; 
+            }
         }
     }
 
