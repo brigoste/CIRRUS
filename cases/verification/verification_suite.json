@@ -2,10 +2,17 @@
     "verificationSuite":
     {
         "enabled": true,
-        "plot_enabled": true,
+        "plot_enabled": false,
 
         "cases":
         [
+          "Linear1D",
+          "Quadratic1D",
+          "Sinusoidal2D",
+          "AdvectionDiffusion2D",
+          "Neumann1D",
+          "Neumann2D",
+          "Convective1D",
           "Convective2D"
         ],
 
