@@ -1,16 +1,23 @@
 #pragma once
 
 #include "mesh/primitives/Face.hpp"
-#include "mesh/MeshBase.hpp"
 #include "mesh/BoundaryPatchSystem.hpp"
 #include "discretization/FluxAccumulator.hpp"
+#include "fields/FieldNames.hpp"
 
 class VerificationCase; // forward declare
+class FieldRegistry;
+class MeshBase;
 
 class PhysicsModel
 {
 public:
     virtual ~PhysicsModel() = default;
+
+    virtual FieldName solutionField() const = 0;
+    virtual double initialSolutionValue() const = 0;
+
+    virtual void initializeFields( FieldRegistry& fields, const MeshBase& mesh) const;
 
     // =====================================================
     // Transport coefficients
@@ -41,7 +48,7 @@ public:
     // =====================================================
     // Optional: manufactured forcing hook
     // =====================================================
-    void attachVerification(const VerificationCase* vc) { vc_ = vc; }
+    void attachVerification(const VerificationCase* vc)                                             { vc_ = vc; }
 
 protected:
     const VerificationCase* vc_ = nullptr;
