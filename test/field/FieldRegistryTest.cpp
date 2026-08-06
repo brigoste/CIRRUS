@@ -6,6 +6,17 @@
 #include <stdexcept>
 #include <cmath>
 
+namespace
+{
+    void check(bool condition, const char* message)
+    {
+        if (!condition)
+        {
+            throw std::runtime_error(message);
+        }
+    }
+}
+
 void runFieldRegistryTest()
 {
     QuadMesh2D mesh(
@@ -28,11 +39,11 @@ void runFieldRegistryTest()
         300.0
     );
 
-    assert(registry.size() == 1);
-    assert(registry.contains("Temperature"));
+    check(registry.size() == 1, "Registry size should be 1 (no test added or already had input)");
+    check(registry.contains("Temperature"), "Registry should be of type Temperature");
 
-    assert(temperature.size() == mesh.ncells());
-    assert(std::abs(temperature[0] - 300.0) < 1e-12);
+    check(temperature.size() == mesh.ncells(), "Temperature field size incorrect");
+    check(std::abs(temperature[0] - 300.0) < 1e-12,"Temperature initialization incorrect");
 
     // --------------------------------------------------
     // Create vector field
@@ -45,14 +56,14 @@ void runFieldRegistryTest()
         Vector{1.0, 2.0, 3.0}
     );
 
-    assert(registry.size() == 2);
-    assert(registry.contains("Velocity"));
+    check(registry.size() == 2, "Registry size should be 2");
+    check(registry.contains("Velocity"), "Registry should be of type Velocity");
 
-    assert(velocity.size() == mesh.ncells());
+    check(velocity.size() == mesh.ncells(), "Velocity field size incorrect");
 
-    assert(std::abs(velocity[0].x - 1.0) < 1e-12);
-    assert(std::abs(velocity[0].y - 2.0) < 1e-12);
-    assert(std::abs(velocity[0].z - 3.0) < 1e-12);
+    check(std::abs(velocity[0].x - 1.0) < 1e-12, "Veliocity outside tolerance");
+    check(std::abs(velocity[0].y - 2.0) < 1e-12, "Veliocity outside tolerance");
+    check(std::abs(velocity[0].z - 3.0) < 1e-12, "Veliocity outside tolerance");
 
     // --------------------------------------------------
     // Access through typed interface
@@ -61,8 +72,8 @@ void runFieldRegistryTest()
     ScalarField& temperature2 = registry.scalar("Temperature");
     VectorField& velocity2 = registry.vector("Velocity");
 
-    assert(&temperature == &temperature2);
-    assert(&velocity == &velocity2);
+    check(&temperature == &temperature2, "Temperature references do not match");
+    check(&velocity == &velocity2, "Velocity references do not match");
 
     // --------------------------------------------------
     // Verify modifications affect stored fields
@@ -70,20 +81,20 @@ void runFieldRegistryTest()
 
     temperature2[0] = 350.0;
 
-    assert(std::abs(temperature[0] - 350.0) < 1e-12);
+    check(std::abs(temperature[0] - 350.0) < 1e-12, "Temperature outside tolerance");
 
     velocity2[0].x = 10.0;
 
-    assert(std::abs(velocity[0].x - 10.0) < 1e-12);
+    check(std::abs(velocity[0].x - 10.0) < 1e-12, "Veliocity outside tolerance");
 
     // --------------------------------------------------
     // Access through base interface
     // --------------------------------------------------
     FieldBase& base = registry.get("Temperature");
 
-    assert(base.name() == "Temperature");
-    assert(base.location() == FieldLocation::Cell);
-    assert(base.size() == mesh.ncells());
+    check(base.name() == "Temperature", "Incorrect base");
+    check(base.location() == FieldLocation::Cell, "Location doesn't match");
+    check(base.size() == mesh.ncells(), "Size not copied correctly");
 
     // --------------------------------------------------
     // Duplicate name should fail
@@ -102,7 +113,7 @@ void runFieldRegistryTest()
     }
     catch(const std::runtime_error&) { duplicateCaught = true; }
 
-    assert(duplicateCaught);
+    check(duplicateCaught, "");
 
     // --------------------------------------------------
     // Missing field should fail
@@ -113,7 +124,7 @@ void runFieldRegistryTest()
     try { registry.get("NotAField"); }
     catch(const std::runtime_error&) { missingCaught = true; }
 
-    assert(missingCaught);
+    check(missingCaught, "Field is missing");
 
     // --------------------------------------------------
     // Clear registry
@@ -121,10 +132,10 @@ void runFieldRegistryTest()
 
     registry.clear();
 
-    assert(registry.size() == 0);
+    check(registry.size() == 0, "Registry not cleared");
 
-    assert(!registry.contains("Temperature"));
-    assert(!registry.contains("Velocity"));
+    check(!registry.contains("Temperature"), "Temperature Field still exists");
+    check(!registry.contains("Velocity"), "Velocity Field still exists");
 
     std::cout << "FieldRegistry test passed.\n";
 }
