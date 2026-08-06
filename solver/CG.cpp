@@ -45,7 +45,10 @@ static std::vector<double> matVec(const LinearSystem& sys, const std::vector<dou
     {
         const auto& row = sys.row(i);
 
-        for (const auto& [j, aij] : row) { y[i] += aij * x[j]; }
+        for (const auto& [j, aij] : row) 
+        { 
+            y[i] += aij * x[j]; 
+        }
     }
 
     return y;
@@ -90,7 +93,10 @@ std::vector<double> CG(
 
     std::vector<double> z(N);       // Preconditioning
 
-    for(std::size_t i = 0; i < N; ++i) { r[i] = sys.rhs(i) - Ap[i]; }
+    for(std::size_t i = 0; i < N; ++i) 
+    { 
+        r[i] = sys.rhs(i) - Ap[i]; 
+    }
 
     static bool printed_diag = false;
 
@@ -107,7 +113,10 @@ std::vector<double> CG(
 
     double rz_old = 0.0;
 
-    for (std::size_t i = 0; i < N; ++i) { rz_old += r[i] * z[i]; }
+    for (std::size_t i = 0; i < N; ++i) 
+    { 
+        rz_old += r[i] * z[i]; 
+    }
 
     double matVecTime = 0.0;
     int iter_count = 0;
@@ -137,9 +146,15 @@ std::vector<double> CG(
         double alpha_num = rz_old;
         double alpha_den = 0.0;
 
-        for (std::size_t i = 0; i < N; ++i) { alpha_den += p[i] * Ap[i]; }
+        for (std::size_t i = 0; i < N; ++i) 
+        { 
+            alpha_den += p[i] * Ap[i]; 
+        }
 
-        if (std::abs(alpha_den) < 1e-14) { break; }
+        if (std::abs(alpha_den) < 1e-14) 
+        { 
+            break; 
+        }
 
         double alpha = alpha_num / alpha_den;
 
@@ -151,7 +166,10 @@ std::vector<double> CG(
 
         double residual = 0.0;
 
-        for (double v : r) { residual += v*v; }
+        for (double v : r) 
+        { 
+            residual += v*v; 
+        }
 
         residual = std::sqrt(residual);
 
@@ -165,7 +183,10 @@ std::vector<double> CG(
 
         double rz_new = 0.0;
 
-        for (std::size_t i = 0; i < N; ++i) { rz_new += r[i] * z[i]; }
+        for (std::size_t i = 0; i < N; ++i) 
+        { 
+            rz_new += r[i] * z[i]; 
+        }
 
         // double preconditioned_residual = std::sqrt(rz_new);
 
@@ -173,7 +194,10 @@ std::vector<double> CG(
 
         double beta = rz_new / rz_old;
 
-        for (std::size_t i = 0; i < N; ++i) { p[i] = z[i] + beta * p[i]; }
+        for (std::size_t i = 0; i < N; ++i) 
+        { 
+            p[i] = z[i] + beta * p[i]; 
+        }
 
         rz_old = rz_new;
     }
