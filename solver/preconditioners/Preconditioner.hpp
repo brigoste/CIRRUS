@@ -11,12 +11,20 @@ class LinearSystem;
 inline PreconditionerType preconditioner_from_string(
     const std::string& s)
 {
-    if (s == "None")   return PreconditionerType::None;
-    if (s == "Jacobi") return PreconditionerType::Jacobi;
-    if (s == "ILU0")   return PreconditionerType::ILU0;
+    if (s == "None")   
+    {
+        return PreconditionerType::None;
+    }
+    if (s == "Jacobi") 
+    {
+        return PreconditionerType::Jacobi;
+    }
+    if (s == "ILU0")   
+    {
+        return PreconditionerType::ILU0;
+    }
 
-    throw std::runtime_error(
-        "Unknown preconditioner: " + s);
+    throw std::runtime_error( "Unknown preconditioner: " + s);
 }
 
 
@@ -26,7 +34,6 @@ inline void from_json(
 {
     p = preconditioner_from_string( j.get<std::string>());
 }
-
 
 inline void to_json(
     nlohmann::json& j,
