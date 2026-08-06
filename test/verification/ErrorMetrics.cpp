@@ -1,18 +1,22 @@
-#include "tests/verification/ErrorMetrics.hpp"
+#include "test/verification/ErrorMetrics.hpp"
+
 #include "mesh/MeshBase.hpp"
+#include "fields/ScalarField.hpp"
 
 #include <stdexcept>
 #include <cmath>
 #include <algorithm>
 
-ErrorNormResults ErrorNorms::compute(
-    const MeshBase& mesh,
-    const std::vector<double>& numerical,
-    const std::vector<double>& exact)
+ErrorNormResults ErrorNorms::compute( const MeshBase& mesh, const ScalarField& numerical, const std::vector<double>& exact)
 {
-    if (numerical.size() != exact.size()) { throw std::runtime_error("ErrorNorms: size mismatch"); }
-
-    if (numerical.size() != mesh.ncells()) { throw std::runtime_error("ErrorNorms: mesh mismatch"); }
+    if (numerical.size() != exact.size()) 
+    {
+        throw std::runtime_error( "ErrorNorms: size mismatch" ); 
+    }
+    if (numerical.size() != mesh.ncells()) 
+    { 
+        throw std::runtime_error( "ErrorNorms: mesh mismatch" ); 
+    }
 
     ErrorNormResults result;
 
@@ -28,12 +32,15 @@ ErrorNormResults ErrorNorms::compute(
         l2sum += e * e * V;
         volumeSum += V;
 
-        linf = std::max(linf, std::abs(e));
+        linf = std::max(linf, std::abs(e) );
     }
 
     result.l2_energy = std::sqrt(l2sum);
 
-    if (volumeSum > 0.0) { result.l2_rms = std::sqrt(l2sum / volumeSum); }
+    if (volumeSum > 0.0) 
+    { 
+        result.l2_rms = std::sqrt( l2sum / volumeSum ); 
+    }
 
     result.linf = linf;
 
