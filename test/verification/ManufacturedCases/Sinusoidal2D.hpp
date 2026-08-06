@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tests/verification/VerificationCase.hpp"
+#include "test/verification/VerificationCase.hpp"
 #include "config/SimulationConfig.hpp"
 
 /*
@@ -27,8 +27,8 @@ public:
 
     double source(double x, double y) const override;
 
-    double l2AcceptanceThreshold() const override { return 5e-3; }
-    double linfAcceptanceThreshold() const override { return 5e-3; }
+    double l2AcceptanceThreshold() const override       { return 5e-3; }
+    double linfAcceptanceThreshold() const override     { return 5e-3; }
 private:
     double k_;
 };
