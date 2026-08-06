@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tests/verification/VerificationCase.hpp"
+#include "test/verification/VerificationCase.hpp"
 #include "config/SimulationConfig.hpp"
 
 #include <iostream>
@@ -27,17 +27,20 @@ public:
 
         for (const auto& bc : cfg.boundary)
         {
-            if(bc.group == 0) { 
+            if(bc.group == 0) 
+            { 
                 TL_ = bc.condition.value; 
                 foundLeft = true;
             }
-            else if (bc.group == 1) { 
+            else if (bc.group == 1) 
+            { 
                 TR_ = bc.condition.value; 
                 foundRight = true;
             }
         }
 
-        if(!foundLeft || !foundRight){
+        if(!foundLeft || !foundRight)
+        {
             throw std::runtime_error("Quadratic1D requires Dirichlet boundary groups 0 and 1");
         }
     }
@@ -47,13 +50,12 @@ public:
     double exact(double x, double y) const override;
     double laplacian(double x, double y) const override;
     double source(double x, double y) const override;
-
-    double l2AcceptanceThreshold() const override { 
-        // Second-order diffusion discretization:
-        // O(dx^2) error on 20 cells gives approximately 6.25e-2
-        // Allow margin for implementation changes.
-        return 7e-2; 
-    }
+    
+    // Second-order diffusion discretization:
+    // O(dx^2) error on 20 cells gives approximately 6.25e-2
+    // Allow margin for implementation changes.
+    double l2AcceptanceThreshold() const override { return 7e-2; }
+        
     double linfAcceptanceThreshold() const override { return 7e-2; }
 
 private:
