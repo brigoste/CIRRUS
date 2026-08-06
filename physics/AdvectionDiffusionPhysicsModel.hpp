@@ -3,6 +3,7 @@
 #include "physics/PhysicsModel.hpp"
 #include "mesh/primitives/Face.hpp"
 #include "utils/LinearAlgebraUtils.hpp"
+#include "fields/FieldNames.hpp"
 
 class AdvectionDiffusionPhysicsModel : public PhysicsModel
 {
@@ -30,6 +31,9 @@ public:
     void addCellSources( const MeshBase& mesh, std::size_t c, FluxAccumulator& flux) const override;
     
     double cellSource( const MeshBase& mesh, std::size_t cell) const override;
+
+    FieldName solutionField() const override { return FieldName::Temperature; }
+    double initialSolutionValue() const override { return 0.0; }
 
 private:
     double gamma_ = 0.0;
