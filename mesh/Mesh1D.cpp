@@ -12,7 +12,10 @@
 Mesh1D::Mesh1D(std::size_t N, double L)
     : N_(N), L_(L)
 {
-    if (N_ == 0) { throw std::runtime_error("Mesh1D: N must be > 0"); }
+    if (N_ == 0) 
+    { 
+        throw std::runtime_error("Mesh1D: N must be > 0"); 
+    }
 
     dx_ = L_ / static_cast<double>(N_);
 
@@ -26,12 +29,18 @@ Mesh1D::Mesh1D(std::size_t N, double L)
     // ---------------------------
     // Nodes
     // ---------------------------
-    for (std::size_t i = 0; i <= N_; ++i) { nodes_[i].x[0] = i * dx_; }
+    for (std::size_t i = 0; i <= N_; ++i) 
+    { 
+        nodes_[i].x[0] = i * dx_; 
+    }
 
     // ---------------------------
     // Cell centers
     // ---------------------------
-    for (std::size_t i = 0; i < N_; ++i) { centers_[i].x[0] = (i + 0.5) * dx_; }
+    for (std::size_t i = 0; i < N_; ++i) 
+    { 
+        centers_[i].x[0] = (i + 0.5) * dx_; 
+    }
 
     // ---------------------------
     // Faces
@@ -74,7 +83,10 @@ Mesh1D::Mesh1D(std::size_t N, double L)
     // ---------------------------
     // Sanity check
     // ---------------------------
-    if (faces_.size() != N_ + 1) { throw std::runtime_error("Invalid 1D mesh topology"); }
+    if (faces_.size() != N_ + 1) 
+    { 
+        throw std::runtime_error("Invalid 1D mesh topology"); 
+    }
 
     for (std::size_t f = 1; f < N_; ++f)
     {
@@ -87,36 +99,34 @@ Mesh1D::Mesh1D(std::size_t N, double L)
 // MeshBase interface
 // =========================================================
 
-std::size_t Mesh1D::ncells() const { return N_; }
-std::size_t Mesh1D::nnodes() const { return nodes_.size(); }
-std::size_t Mesh1D::nfaces() const { return faces_.size(); }
+std::size_t Mesh1D::ncells() const                                             { return N_; }
+std::size_t Mesh1D::nnodes() const                                             { return nodes_.size(); }
+std::size_t Mesh1D::nfaces() const                                             { return faces_.size(); }
 
-const Point& Mesh1D::node(std::size_t i) const { return nodes_.at(i); }
-const Point& Mesh1D::cellCenter(std::size_t i) const { return centers_.at(i); }
+const Point& Mesh1D::node(std::size_t i) const                                 { return nodes_.at(i); }
+const Point& Mesh1D::cellCenter(std::size_t i) const                           { return centers_.at(i); }
 
-const Face& Mesh1D::face(std::size_t f) const { return faces_.at(f); }
+const Face& Mesh1D::face(std::size_t f) const                                  { return faces_.at(f); }
 
-std::vector<Face>::const_iterator Mesh1D::facesBegin() const { return faces_.begin(); }
-std::vector<Face>::const_iterator Mesh1D::facesEnd() const { return faces_.end(); }
+std::vector<Face>::const_iterator Mesh1D::facesBegin() const                   { return faces_.begin(); }
+std::vector<Face>::const_iterator Mesh1D::facesEnd() const                     { return faces_.end(); }
 
 // ---------------------------
 // Geometry
 // ---------------------------
-double Mesh1D::faceDistance(std::size_t) const { return dx_; }
+double Mesh1D::faceDistance(std::size_t) const                                 { return dx_; }
 
-double Mesh1D::distance(const Point& a, const Point& b) const { return std::abs(a[0] - b[0]); }
+double Mesh1D::distance(const Point& a, const Point& b) const                  { return std::abs(a[0] - b[0]); }
 
-std::size_t Mesh1D::nBoundaryGroups() const { return boundaryGroups_.size(); }
+std::size_t Mesh1D::nBoundaryGroups() const                                    { return boundaryGroups_.size(); }
 
 const std::vector<std::size_t>& Mesh1D::boundaryFaces(std::size_t group) const { return boundaryGroups_.at(group); }
-
-
 
 // ---------------------------
 // Connectivity
 // ---------------------------
-void Mesh1D::cellNodes(std::size_t c, std::vector<std::size_t>& nodes) const { nodes = {c, c + 1}; }
+void Mesh1D::cellNodes(std::size_t c, std::vector<std::size_t>& nodes) const   { nodes = {c, c + 1}; }
 
-const Cell& Mesh1D::cell(std::size_t i) const { return cells_.at(i); }
+const Cell& Mesh1D::cell(std::size_t i) const                                  { return cells_.at(i); }
 
-int Mesh1D::vtkCellType(std::size_t) const { return 3; } // VTK_LINE 
+int Mesh1D::vtkCellType(std::size_t) const                                     { return 3; } // VTK_LINE 
