@@ -23,7 +23,10 @@ int main(int argc, char* argv[])
         {
             std::string arg = argv[i];
 
-            if (arg == "--config" && i + 1 < argc) { configPath = argv[++i]; }
+            if (arg == "--config" && i + 1 < argc) 
+            { 
+                configPath = argv[++i]; 
+            }
         }
 
         if (argc < 2)
@@ -34,7 +37,10 @@ int main(int argc, char* argv[])
             );
         }
 
-        if (!std::filesystem::exists(configPath)) { throw std::runtime_error( "Configuration file not found: " + configPath.string() ); }
+        if (!std::filesystem::exists(configPath)) 
+        { 
+            throw std::runtime_error( "Configuration file not found: " + configPath.string() ); 
+        }
 
         const std::filesystem::path projectRoot = configPath.parent_path().parent_path().parent_path();
 
