@@ -9,6 +9,10 @@
 * [ ] 3D structured mesh
 * [ ] Unstructured mesh support
 
+*Future:* Adaptive mesh refinement (AMR), mesh quality optimization, topology optimization.
+
+---
+
 ### Finite Volume Framework
 
 * [x] Generic face-based assembly
@@ -17,14 +21,19 @@
 * [x] Scalar field storage
 * [x] Vector field storage
 * [x] Field registry infrastructure
+* [ ] Simulation integration with FieldRegistry
+
+---
 
 ### Linear Solvers
 
 * [x] TDMA
 * [x] Gauss-Seidel
 * [x] SOR
-* [x] CG
+* [x] Conjugate Gradient (CG)
 * [x] BiCGSTAB
+
+---
 
 ### Preconditioners
 
@@ -34,18 +43,34 @@
 * [ ] SSOR
 * [ ] Algebraic Multigrid (AMG)
 
-## Verification Framework
+---
 
-* [x] Existing verification suite
+### Testing Infrastructure
+
+* [x] Standalone unit-test executable
+* [x] ScalarField tests
+* [x] VectorField tests
+* [x] FieldRegistry tests
+* [ ] Verification executable separation
+* [ ] Continuous regression testing
+
+---
+
+### Verification Framework
+
+* [x] Verification suite
 * [x] JSON case loading
 * [x] Accuracy checks
 * [x] Mesh refinement studies
 * [x] Order-of-convergence calculations
 * [x] CSV output
 * [x] JSON output
-
 * [ ] Refactor verification to consume Field objects
-* [ ] Generalize field error norms
+* [ ] Generalized field error norms
+* [ ] Richardson extrapolation
+* [ ] Grid Convergence Index (GCI)
+
+*Future:* Automatic grid convergence studies, grid independence detection, adaptive mesh recommendations.
 
 ---
 
@@ -57,7 +82,9 @@
 * [x] 2D
 * [ ] 3D
 
-## Advection-Diffusion
+---
+
+## Advection–Diffusion
 
 * [x] 2D steady-state
 * [ ] 3D
@@ -73,31 +100,46 @@
 * [x] VectorField
 * [x] FieldRegistry
 * [ ] TensorField
-* [ ] Generic field manager improvements
+* [ ] BoundaryField
+
+---
 
 ## Gradient Operators
 
-* [ ] Green-Gauss gradient
+* [ ] Green–Gauss gradient
 * [ ] Least-squares gradient
+
+---
 
 ## Face Interpolation
 
 * [ ] Linear interpolation
 * [ ] Central differencing
-* [ ] Upwind interpolation
-* [ ] Higher-order schemes
+* [x] Upwind interpolation (1st order)
+* [ ] Second-order upwind scheme
+* [ ] Higher-order interpolation
+* [ ] TVD schemes / flux limiters
+
+*Future:* QUICK, MUSCL, bounded high-resolution convection schemes.
+
+---
 
 ## Flux Infrastructure
 
 * [ ] Diffusion flux framework
-* [ ] Convective flux framework
+* [x] Convective flux framework
 * [ ] Generic face flux interface
+* [ ] Separate convection discretization from flux calculation
+
+---
 
 ## Time Integration
 
 * [ ] Explicit Euler
 * [ ] Implicit Euler
-* [ ] Crank-Nicolson
+* [ ] Crank–Nicolson
+
+*Future:* Adaptive time stepping and automatic timestep optimization.
 
 ---
 
@@ -108,23 +150,30 @@
 * [ ] Continuity equation
 * [ ] Momentum equations
 
-## Velocity Components
+---
 
-* [ ] u velocity
-* [ ] v velocity
-* [ ] w velocity
+## Primitive Variables
 
-## Pressure-Velocity Coupling
+* [ ] Pressure
+* [ ] Velocity field
+
+---
+
+## Pressure–Velocity Coupling
 
 * [ ] SIMPLE
 * [ ] SIMPLEC
 * [ ] SIMPLER
 * [ ] PISO
 
+---
+
 ## Pressure Equation
 
 * [ ] Pressure correction equation
-* [ ] Rhie-Chow interpolation
+* [ ] Rhie–Chow interpolation
+
+---
 
 ## Fluid Boundary Conditions
 
@@ -134,13 +183,17 @@
 * [ ] Symmetry
 * [ ] Periodic boundaries
 
+*Future:* Compute engineering quantities (lift, drag, pressure loss, heat transfer coefficients) to support design optimization.
+
 ---
 
 # Turbulence Models
 
 * [ ] Mixing-length model
-* [ ] k-ε
-* [ ] k-ω SST
+* [ ] k–ε
+* [ ] k–ω SST
+
+*Future:* Turbulence model calibration and parameter optimization.
 
 ---
 
@@ -151,6 +204,8 @@
 * [ ] Species transport
 * [ ] Radiation
 
+*Future:* Multi-objective optimization balancing thermal, fluid, and structural performance.
+
 ---
 
 # Numerical Improvements
@@ -160,6 +215,22 @@
 * [ ] Adaptive stopping criteria
 * [ ] Matrix diagnostics
 
+*Future:* Automatic relaxation-factor tuning, solver selection, and preconditioner optimization.
+
+---
+
+# Performance Infrastructure
+
+* [ ] Profiling framework
+* [ ] Benchmark suite
+* [ ] Memory usage diagnostics
+* [ ] Cache-friendly data layouts
+* [ ] Sparse matrix performance improvements
+* [ ] SIMD vectorization
+* [ ] Matrix-free operators
+
+*Future:* Automatic performance regression testing and runtime performance optimization.
+
 ---
 
 # Parallel Computing
@@ -167,6 +238,8 @@
 * [ ] OpenMP
 * [ ] MPI
 * [ ] GPU acceleration (CUDA/HIP)
+
+*Future:* Load balancing and runtime optimization for heterogeneous computing.
 
 ---
 
@@ -186,23 +259,75 @@
 
 ---
 
+# Long-Term Research Directions
+
+These projects naturally build upon the numerical and physics capabilities developed above.
+
+## Engineering Optimization
+
+* [ ] Heat sink optimization
+* [ ] Channel geometry optimization
+* [ ] Airfoil optimization
+* [ ] Pressure-loss minimization
+* [ ] Lift-to-drag optimization
+
+---
+
+## Geometry Optimization
+
+* [ ] Shape optimization
+* [ ] Mesh morphing
+* [ ] Topology optimization
+
+---
+
+## Inverse Problems
+
+* [ ] Material property estimation
+* [ ] Boundary condition reconstruction
+* [ ] Source identification
+
+---
+
+## Advanced Methods
+
+* [ ] Adjoint methods
+* [ ] Multi-objective optimization
+* [ ] Surrogate modeling
+* [ ] Bayesian optimization
+* [ ] Robust optimization
+
+---
+
+# Current Milestone
+
+## Field Infrastructure ✅
+
+* [x] FieldBase
+* [x] ScalarField
+* [x] VectorField
+* [x] FieldRegistry
+* [x] Dedicated unit-test pipeline
+* [x] ScalarField tests
+* [x] VectorField tests
+* [x] FieldRegistry tests
+
+---
+
 # Recommended Development Order
 
-1. Implement **gradient operators**
-2. Implement **face interpolation**
-3. Build **convective flux infrastructure**
-4. Develop **momentum equation system**
-5. Implement **pressure correction equation**
-6. Implement **SIMPLE family algorithms**
-7. Add transient infrastructure
-8. Expand to turbulence and multiphysics
-
-Current milestone completed:
-
-**Field infrastructure**
-
-* FieldBase ✅
-* ScalarField ✅
-* VectorField ✅
-* FieldRegistry ✅
-* Dedicated field test pipeline ✅
+1. Integrate **FieldRegistry** into `Simulation`
+2. Implement **gradient operators**
+3. Implement **face interpolation**
+4. Implement **second-order convection schemes**
+5. Build generalized **convective and diffusive flux infrastructure**
+6. Assemble the **momentum equation system**
+7. Implement the **pressure correction equation**
+8. Develop the **SIMPLE family of algorithms**
+9. Extend to **transient solvers**
+10. Add **turbulence models**
+11. Expand into **multiphysics**
+12. Strengthen **verification** (Richardson extrapolation, GCI, field-based verification)
+13. Optimize **solver performance** (profiling, memory layout, sparse matrices, SIMD)
+14. Add **engineering optimization** capabilities
+15. Develop **geometry and topology optimization**
