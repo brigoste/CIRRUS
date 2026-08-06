@@ -1,7 +1,10 @@
 #pragma once
-#include "physics/HeatPhysicsModel.hpp"
+#include "Physics/HeatPhysicsModel.hpp"
 #include "config/SimulationConfig.hpp"
 #include "nlohmann/json.hpp"
+#include "mesh/MeshBase.hpp"
+
+#include <stdexcept>
 
 // Abstraction for all tests we use to verify.
 struct ConvectiveData
@@ -30,11 +33,21 @@ public:
 
     virtual double boundaryFlux(const Face&) const
     {
-        throw std::runtime_error( "Neumann2D requires at least one Dirichlet boundary group." );
+        throw std::runtime_error(
+            "Neumann boundary flux not implemented for this verification case."
+        );
     }
     virtual ConvectiveData boundaryConvective(const Face&) const
     {
-        throw std::runtime_error("Robin BC not implemented.");
+        throw std::runtime_error(
+            "Convective boundary data not implemented for this verification case."
+        );
+    }
+    virtual RadiativeData boundaryRadiative(const Face&) const
+    {
+        throw std::runtime_error(
+            "Radiative boundary data not implemented for this verification case."
+        );
     }
 
     virtual double l2AcceptanceThreshold() const = 0;
