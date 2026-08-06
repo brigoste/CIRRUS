@@ -7,7 +7,7 @@ PointField BoundaryReconstructor::reconstruct(
     const MeshBase& mesh,
     const BoundaryPatchSystem& boundary,
     const PhysicsModel& model,
-    const std::vector<double>& phi)
+    const ScalarField& field)
 {
     PointField out;
     out.dim = mesh.dim();
@@ -23,7 +23,7 @@ PointField BoundaryReconstructor::reconstruct(
     // =====================================================
     for (std::size_t c = 0; c < nc; ++c)
     {
-        out.push_back(mesh.cellCenter(c), phi[c]);
+        out.push_back(mesh.cellCenter(c), field[c]);
     }
 
     // =====================================================
@@ -46,7 +46,7 @@ PointField BoundaryReconstructor::reconstruct(
 
             const bool isInward = (f.normal[0] < 0.0 || f.normal[1] < 0.0 || f.normal[2] < 0.0);
 
-            const double phiB = model.reconstructBoundaryValue( *bc, phi[c], dx, isInward );
+            const double phiB = model.reconstructBoundaryValue( *bc, field[c], dx, isInward );
 
             out.push_back(f.center, phiB);
         }
