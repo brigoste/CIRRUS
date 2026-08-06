@@ -4,6 +4,7 @@
 #include "mesh/BoundaryPatchSystem.hpp"
 #include "mesh/MeshGeometry.hpp"
 #include "physics/PhysicsModel.hpp"
+#include "fields/ScalarField.hpp"
 #include "io/PointField.hpp"
 
 class BoundaryReconstructor
@@ -14,6 +15,6 @@ public:
         const MeshBase& mesh,
         const BoundaryPatchSystem& boundary,
         const PhysicsModel& model,
-        const std::vector<double>& phi);
+        const ScalarField& phi);
 
 };
