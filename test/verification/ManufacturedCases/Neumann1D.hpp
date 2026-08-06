@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tests/verification/VerificationCase.hpp"
+#include "test/verification/VerificationCase.hpp"
 #include "config/SimulationConfig.hpp"
 
 /*
@@ -35,7 +35,8 @@ public:
             }
         }
 
-        if(!foundLeft || !foundRight){
+        if(!foundLeft || !foundRight)
+        {
             throw std::runtime_error("Neumann1D requires Dirichlet group 0 and Neumann group 1.");
         }
     }
@@ -48,19 +49,14 @@ public:
 
     double laplacian(double x, double y = 0.0) const override;
 
-    double l2AcceptanceThreshold() const override
-    {
-        return 5e-2;
-    }
-
-    double linfAcceptanceThreshold() const override
-    {
-        return 5e-2;
-    }
+    double l2AcceptanceThreshold() const override       { return 1e-3; }
+    double linfAcceptanceThreshold() const override     { return 1e-3; }
+    double boundaryFlux(const Face&) const override     { return qR_; }
 
 private:
 
-    double k_, volumetricSource_, TL_, qR_, L_, nx_;
+    double k_, volumetricSource_, TL_, qR_, L_;
+    int nx_;
 };
 
 /*
