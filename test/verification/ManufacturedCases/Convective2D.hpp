@@ -1,7 +1,6 @@
 #pragma once
 
-#include "tests/verification/VerificationCase.hpp"
-
+#include "test/verification/VerificationCase.hpp"
 
 /*
     Documentation:
@@ -10,7 +9,6 @@
     --------------------------------------------------------------------------------------------------
     Convective2D      CG          256x256     6.409e-05     PASS        PASS          2.001e+00 
 */
-
 
 class Convective2D : public VerificationCase
 {
@@ -27,7 +25,6 @@ public:
 
     void initialize(const MeshBase&) override {}
 
-
     double exact(double x, double y) const override;
 
     double laplacian(double x, double y) const override;
@@ -38,17 +35,8 @@ public:
 
     ConvectiveData boundaryConvective(const Face& face) const override;
 
-    double l2AcceptanceThreshold() const override
-    {
-        return 1e-3;
-    }
-
-
-    double linfAcceptanceThreshold() const override
-    {
-        return 2e-3;
-    }
-
+    double l2AcceptanceThreshold() const override                       { return 1e-3; }
+    double linfAcceptanceThreshold() const override                     { return 2e-3; }
 
 private:
 
