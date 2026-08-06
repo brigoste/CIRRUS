@@ -61,6 +61,7 @@
 * [x] Verification suite
 * [x] JSON case loading
 * [x] Accuracy checks
+* [x] Manufactured solution verification (MMS)
 * [x] Mesh refinement studies
 * [x] Order-of-convergence calculations
 * [x] CSV output
@@ -87,6 +88,8 @@
 ## Advection–Diffusion
 
 * [x] 2D steady-state
+* [x] First-order upwind convection
+* [ ] Second-order convection schemes
 * [ ] 3D
 * [ ] Transient
 
@@ -111,22 +114,22 @@
 
 ---
 
-## Face Interpolation
+## Convection Discretization
 
-* [ ] Linear interpolation
+* [x] First-order upwind scheme
 * [ ] Central differencing
-* [x] Upwind interpolation (1st order)
 * [ ] Second-order upwind scheme
-* [ ] Higher-order interpolation
+* [ ] QUICK
+* [ ] MUSCL reconstruction
 * [ ] TVD schemes / flux limiters
 
-*Future:* QUICK, MUSCL, bounded high-resolution convection schemes.
+*Future:* Bounded high-resolution convection schemes.
 
 ---
 
 ## Flux Infrastructure
 
-* [ ] Diffusion flux framework
+* [x] Diffusion flux framework
 * [x] Convective flux framework
 * [ ] Generic face flux interface
 * [ ] Separate convection discretization from flux calculation
@@ -301,26 +304,25 @@ These projects naturally build upon the numerical and physics capabilities devel
 
 # Current Milestone
 
-## Field Infrastructure ✅
+## Verification and Finite Volume Foundation ✅
 
-* [x] FieldBase
-* [x] ScalarField
-* [x] VectorField
-* [x] FieldRegistry
-* [x] Dedicated unit-test pipeline
-* [x] ScalarField tests
-* [x] VectorField tests
-* [x] FieldRegistry tests
+* [x] Face-based finite volume assembly
+* [x] Boundary condition framework
+* [x] Heat diffusion solver
+* [x] Advection-diffusion solver
+* [x] Steady-state verification framework
+* [x] MMS verification cases
+* [x] Automated refinement studies
 
 ---
 
 # Recommended Development Order
 
-1. Integrate **FieldRegistry** into `Simulation`
-2. Implement **gradient operators**
-3. Implement **face interpolation**
-4. Implement **second-order convection schemes**
-5. Build generalized **convective and diffusive flux infrastructure**
+1. Integrate FieldRegistry into Simulation
+2. Complete generalized flux infrastructure
+3. Implement gradient operators
+4. Implement second-order convection schemes
+5. Implement face reconstruction/interpolation framework
 6. Assemble the **momentum equation system**
 7. Implement the **pressure correction equation**
 8. Develop the **SIMPLE family of algorithms**
