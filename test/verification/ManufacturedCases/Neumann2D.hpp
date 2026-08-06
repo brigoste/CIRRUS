@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tests/verification/VerificationCase.hpp"
+#include "test/verification/VerificationCase.hpp"
 #include "config/SimulationConfig.hpp"
 
 /*
@@ -52,7 +52,7 @@ public:
 
         if (!hasDirichlet)
         {
-            throw std::runtime_error( "Neumann2D requires at least one Dirichlet boundary." );
+            throw std::runtime_error( "Neumann2D requires at least one Dirichlet boundary to remove the solution null space." );
         }
     };
 
@@ -66,15 +66,8 @@ public:
 
     double boundaryFlux(const Face& face) const override;
     
-    double l2AcceptanceThreshold() const override
-    {
-        return 5e-2;
-    }
-
-    double linfAcceptanceThreshold() const override
-    {
-        return 5e-2;
-    }
+    double l2AcceptanceThreshold() const override { return 5e-2; }
+    double linfAcceptanceThreshold() const override { return 5e-2; }
 
 private:
 
