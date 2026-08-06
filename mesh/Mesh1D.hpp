@@ -12,7 +12,7 @@ public:
     Mesh1D(std::size_t N, double L);
 
     // topology
-    std::size_t dim() const override { return 1; }
+    std::size_t dim() const override                                        { return 1; }
     std::size_t ncells() const override;
     std::size_t nnodes() const override;
     std::size_t nfaces() const override;
@@ -22,9 +22,9 @@ public:
     const Point& cellCenter(std::size_t c) const override;
     double faceDistance(std::size_t f) const override;
     double distance(const Point& a, const Point& b) const override;
-    double getLx() const override {return L_;}
-    double getLy() const override {return 0.0;}
-    double getLz() const override {return 0.0;}
+    double getLx() const override                                           {return L_;}
+    double getLy() const override                                           {return 0.0;}
+    double getLz() const override                                           {return 0.0;}
 
     // connectivity
     void cellNodes(std::size_t c, std::vector<std::size_t>& nodes) const override;
@@ -44,12 +44,11 @@ public:
     const std::vector<std::size_t>& boundaryFaces(std::size_t group) const override;
 
     // optional helper (mesh-specific convenience)
-    std::size_t toGroup(Patch p) const { return static_cast<std::size_t>(p); }
-    std::size_t leftBoundaryFace() const { return boundaryGroups_[toGroup(Patch::LEFT)].front(); }
+    std::size_t toGroup(Patch p) const                                      { return static_cast<std::size_t>(p); }
+    std::size_t leftBoundaryFace() const                                    { return boundaryGroups_[toGroup(Patch::LEFT)].front(); }
+    std::size_t rightBoundaryFace() const                                   { return boundaryGroups_[toGroup(Patch::RIGHT)].front(); }
 
-    std::size_t rightBoundaryFace() const { return boundaryGroups_[toGroup(Patch::RIGHT)].front(); }
-
-    double cellVolume(std::size_t) const override { return dx_; }
+    double cellVolume(std::size_t) const override                           { return dx_; }
 
 private:
     std::size_t N_;
