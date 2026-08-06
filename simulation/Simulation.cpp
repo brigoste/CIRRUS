@@ -13,6 +13,19 @@
 #include <stdexcept>
 
 // ============================================================
+// Field initializer
+// ============================================================
+
+void Simulation::initializeFields()
+{
+    fields_.createScalar(
+        physics_->solutionField(),
+        *mesh_,
+        FieldLocation::Cell,
+        physics_->initialSolutionValue()
+    );
+}
+// ============================================================
 // Constructor
 // ============================================================
 
@@ -23,32 +36,40 @@ Simulation::Simulation(const SimulationConfig& cfg)
     // -------------------------
     // 1. Build physics model FIRST
     // -------------------------
-    model_ = PhysicsFactory::create(cfg.physics);
+    physics_ = PhysicsFactory::create(cfg.physics);
 
     // -------------------------
     // 2. Mesh
     // -------------------------
-    if (cfg.mesh.type == "line1D") {
+    if (cfg.mesh.type == "line1D") 
+    {
         // std::cout << "1D mesh\n";
         mesh_ = std::make_unique<Mesh1D>(cfg.mesh.nx, cfg.mesh.lx);
     }
-    else if (cfg.mesh.type == "quad2D") {
+    else if (cfg.mesh.type == "quad2D") 
+    {
         // std::cout << "2D Quad mesh\n";
         mesh_ = std::make_unique<QuadMesh2D>(cfg.mesh.nx, cfg.mesh.ny, cfg.mesh.lx, cfg.mesh.ly);
     }
-    else {
+    else 
+    {
         std::cout << "Mesh type declared: " << cfg.mesh.type << "\n";
         throw std::runtime_error("Unsupported mesh");
     }
 
     // -------------------------
-    // 3. Allocate solver data
+    // 3. Create fields
+    // -------------------------
+    initializeFields();
+
+    // -------------------------
+    // 4. Allocate solver data
     // -------------------------
     flux_ = std::make_unique<FluxAccumulator>(mesh_->ncells());
     sys_.resize(mesh_->ncells());
 
     // -------------------------
-    // 4. Boundary conditions
+    // 5. Boundary conditions
     // -------------------------
     bindBoundaryConditions(cfg);
 
@@ -58,7 +79,10 @@ Simulation::Simulation(const SimulationConfig& cfg)
     std::cout << "NY     = " << cfg.mesh.ny << "\n";
 }
 
-void Simulation::setVerificationCase(std::unique_ptr<VerificationCase> verificationCase) { verificationCase_ = std::move(verificationCase); }
+void Simulation::setVerificationCase(std::unique_ptr<VerificationCase> verificationCase) 
+{ 
+    verificationCase_ = std::move(verificationCase); 
+}
 
 // ============================================================
 // Assemble (external responsibility)
@@ -69,8 +93,14 @@ void Simulation::assemble()
     flux_->reset();
     sys_.clear();
 
-    if (verificationCase_) { FluxBuilder::buildFlux( *mesh_, *model_, boundary_, *flux_, verificationCase_.get()); }
-    else { FluxBuilder::buildFlux( *mesh_, *model_, boundary_, *flux_, nullptr); }
+    if (verificationCase_) 
+    { 
+        FluxBuilder::buildFlux( *mesh_, *physics_, boundary_, *flux_, verificationCase_.get()); 
+    }
+    else 
+    { 
+        FluxBuilder::buildFlux( *mesh_, *physics_, boundary_, *flux_, nullptr); 
+    }
 
     FiniteVolumeOperator::assemble( *flux_, sys_);
 
@@ -81,47 +111,67 @@ void Simulation::assemble()
 // Solve (external responsibility)
 // ============================================================
 
-std::vector<double> Simulation::solve()
+void Simulation::solve()
 {
     const auto& solverCfg = cfg_.solver;
 
-    if (!assembled_) { throw std::runtime_error("System not assembled"); }
+    if (!assembled_) 
+    { 
+        throw std::runtime_error("System not assembled"); 
+    }
 
     std::cout << "System Type: " << physics::to_string(cfg_.physics.type) << "\n";
-
     std::cout << "Solver: " << solver::to_string(cfg_.solver.method) << "\n";
-    
+
+    std::vector<double> phi;
 
     switch (solverCfg.method)
     {
         case solver::Method::BiCGSTAB:
         {
-            auto M = createPreconditioner(solverCfg.preconditioner);
-            M->setup(sys_);            
+            auto M = createPreconditioner( solverCfg.preconditioner );
+            M->setup(sys_);
             std::cout << "Preconditioner: " << M->name() << "\n";
-            return BiCGSTAB(sys_, solverCfg.max_iter, solverCfg.tol, *M);
+            phi = BiCGSTAB(sys_,solverCfg.max_iter,solverCfg.tol,*M);
+            break;
         }
 
         case solver::Method::CG:
         {
-            auto M = createPreconditioner(solverCfg.preconditioner);
+            auto M = createPreconditioner( solverCfg.preconditioner );
             M->setup(sys_);
             std::cout << "Preconditioner: " << M->name() << "\n";
-            return CG(sys_, solverCfg.max_iter, solverCfg.tol, *M);
+            phi = CG( sys_, solverCfg.max_iter, solverCfg.tol, *M );
+            break;
         }
 
         case solver::Method::GS:
-            return GaussSeidel(sys_, solverCfg.max_iter, solverCfg.tol);
+            phi = GaussSeidel( sys_, solverCfg.max_iter, solverCfg.tol );
+            break;
 
         case solver::Method::SOR:
-            return SOR(sys_, solverCfg.max_iter, solverCfg.tol, solverCfg.omega);
+            phi = SOR( sys_, solverCfg.max_iter, solverCfg.tol, solverCfg.omega );
+            break;
 
         case solver::Method::TDMA:
-            return TDMA(sys_);
+            phi = TDMA(sys_);
+            break;
 
         default:
-            throw std::runtime_error("Solver method not part of directory.");
+            throw std::runtime_error( "Solver method not part of directory." );
     }
+
+    // ---------------------------------------
+    // Transfer solution into field storage
+    // ---------------------------------------
+    auto& solutionField = fields_.scalar(physics_->solutionField());
+
+    if (solutionField.size() != phi.size())
+    {
+        throw std::runtime_error( "Solution size does not match solution field size." );
+    }
+
+    for (std::size_t i = 0; i < phi.size(); ++i) { solutionField[i] = phi[i]; }
 }
 
 // ============================================================
