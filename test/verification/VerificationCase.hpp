@@ -1,5 +1,5 @@
 #pragma once
-#include "Physics/HeatPhysicsModel.hpp"
+#include "physics/HeatPhysicsModel.hpp"
 #include "config/SimulationConfig.hpp"
 #include "nlohmann/json.hpp"
 
