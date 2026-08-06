@@ -67,7 +67,10 @@ void FluxBuilder::buildFlux(
                         const double y = face.center.x[1];
                         value = verificationCase->exact(x, y);
                     }
-                    else { value = model.boundaryDirichletValue(*bc, face); }
+                    else 
+                    { 
+                        value = model.boundaryDirichletValue(*bc, face); 
+                    }
 
                     flux.addBoundaryDiffusion(P, D, value);
                     break;
