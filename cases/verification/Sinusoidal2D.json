@@ -5,7 +5,7 @@
     "name": "Sinusoidal2D",
     "type": "manufactured",
 
-    "plot_enabled": true,
+    "plot_enabled": false,
 
     "mesh": {
       "type": "quad2D",
