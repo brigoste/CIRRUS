@@ -1,9 +1,10 @@
-#include "tests/verification/VerificationIO.hpp"
+#include "test/verification/VerificationIO.hpp"
 
 #include "simulation/Simulation.hpp"
 #include "io/PointField.hpp"
 #include "io/FieldWriter.hpp"
 #include "postprocessing/BoundaryReconstructor.hpp"
+#include "fields/ScalarField.hpp"
 
 #include "nlohmann/json.hpp"
 
@@ -12,14 +13,14 @@
 
 void VerificationIO::writeCSV(
     const Simulation& sim,
-    const std::vector<double>& phi,
+    const ScalarField& phi,
     const std::filesystem::path& file)
 {
-    PointField field = BoundaryReconstructor::reconstruct( sim.mesh(), sim.boundary(), sim.model(), phi);
+    PointField reconstructed = BoundaryReconstructor::reconstruct( sim.mesh(), sim.boundary(), sim.model(), phi );
 
     std::vector<double> residual(phi.size(), 0.0);
 
-    FieldWriter::writeCSVDebug( field, sim.system().RHS(), residual, file.string());
+    FieldWriter::writeCSVDebug( reconstructed, sim.system().RHS(), residual, file.string() );
 }
 
 void VerificationIO::writeSummary(
@@ -36,7 +37,10 @@ void VerificationIO::writeSummary(
 
     std::ofstream out(file);
 
-    if (!out.is_open()) { throw std::runtime_error("Failed to open verification summary file: " + file.string()); }
+    if (!out.is_open()) 
+    { 
+        throw std::runtime_error("Failed to open verification summary file: " + file.string()); 
+    }
 
     out << j.dump(4);
 }
