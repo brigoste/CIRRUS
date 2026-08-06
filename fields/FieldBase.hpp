@@ -15,11 +15,18 @@ class FieldBase
 public:
     virtual ~FieldBase() = default;
 
-    const std::string& name() const { return name_; }
-
-    const MeshBase& mesh() const { return mesh_; }
-
-    FieldLocation location() const { return location_; }
+    const std::string& name() const 
+    { 
+        return name_; 
+    }
+    const MeshBase& mesh() const 
+    { 
+        return mesh_; 
+    }
+    FieldLocation location() const 
+    { 
+        return location_; 
+    }
 
     virtual std::size_t size() const = 0;
 
