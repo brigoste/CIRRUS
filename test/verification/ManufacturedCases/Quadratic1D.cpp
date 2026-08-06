@@ -1,4 +1,4 @@
-#include "tests/verification/ManufacturedCases/Quadratic1D.hpp"
+#include "test/verification/ManufacturedCases/Quadratic1D.hpp"
 #include <iostream>
 
 double Quadratic1D::exact(double x, double) const
