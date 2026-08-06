@@ -25,7 +25,7 @@ public:
     const Vector& operator[](std::size_t i) const;
 
     void fill(const Vector& value);
-
+    const std::vector<Vector>& values() const { return values_; }
 
 private:
 
