@@ -1,63 +1,31 @@
-#pragma once
-
-#include "test/verification/VerificationCase.hpp"
-#include "config/SimulationConfig.hpp"
-
+#include "test/verification/ManufacturedCases/Quadratic1D.hpp"
 #include <iostream>
 
-// Similar to a heated slab with fixed dirichlect boundary conditions.
-
-/*
-    Documentation:
-
-    Case                    Solver      Mesh        L2 Error      L2 Check    Refinement    Order
-    --------------------------------------------------------------------------------------------------
-    Quadratic1D             CG          20x1        6.250e-02     PASS        N/A           N/A
-*/
-
-class Quadratic1D : public VerificationCase
+double Quadratic1D::exact(double x, double) const
 {
-public:
-    explicit Quadratic1D(const SimulationConfig& cfg)
-    {
-        k_ = cfg.physics.k;
-        volumetricSource_ = cfg.physics.volumetricSource;
-        bool foundLeft = false;
-        bool foundRight = false;
+    return TL_ 
+           + ((TR_ - TL_) / L_ + volumetricSource_ * L_ / (2.0 * k_)) * x 
+           - (volumetricSource_ / (2.0*k_)) * x * x;
+}
 
-        for (const auto& bc : cfg.boundary)
-        {
-            if(bc.group == 0) 
-            { 
-                TL_ = bc.condition.value; 
-                foundLeft = true;
-            }
-            else if (bc.group == 1) 
-            { 
-                TR_ = bc.condition.value; 
-                foundRight = true;
-            }
-        }
+double Quadratic1D::source(double , double ) const
+{
+    return volumetricSource_;
+}
 
-        if(!foundLeft || !foundRight)
-        {
-            throw std::runtime_error("Quadratic1D requires Dirichlet boundary groups 0 and 1");
-        }
-    }
+double Quadratic1D::laplacian( double, double) const
+{
+    return -volumetricSource_/k_;
+}
+/*
+    Manufactured solution:
 
-    void initialize(const MeshBase& mesh) override { L_ = mesh.getLx(); }
+        -k d2T/dx2 = q'''
 
-    double exact(double x, double y) const override;
-    double laplacian(double x, double y) const override;
-    double source(double x, double y) const override;
-    
-    // Second-order diffusion discretization:
-    // O(dx^2) error on 20 cells gives approximately 6.25e-2
-    // Allow margin for implementation changes.
-    double l2AcceptanceThreshold() const override { return 7e-2; }
-        
-    double linfAcceptanceThreshold() const override { return 7e-2; }
+    therefore:
 
-private:
-    double k_, TL_, TR_, volumetricSource_, L_;
-};
+        d2T/dx2 = -q'''/k
+
+    The source term remains positive; the Laplacian carries
+    the negative sign from the governing equation.
+*/
