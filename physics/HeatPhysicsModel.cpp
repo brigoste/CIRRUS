@@ -1,16 +1,31 @@
 #include "physics/HeatPhysicsModel.hpp"
 #include "mesh/primitives/Face.hpp"
 #include "utils/LinearAlgebraUtils.hpp"
+#include "mesh/MeshBase.hpp"
+#include "fields/FieldRegistry.hpp"
 
 #include <cmath>
 #include <stdexcept>
 #include <iostream>
 
+// void HeatPhysicsModel::initializeFields( FieldRegistry& fields, const MeshBase& mesh ) const
+// {
+//     fields.createScalar(
+//         solutionField(),
+//         mesh,
+//         FieldLocation::Cell,
+//         300.0
+//     );
+// }
+
 double HeatPhysicsModel::diffusionFaceCoefficient(const Face& face) const
 {
     const double d_eff = std::abs(LA::dot(face.dPN, face.normal));
 
-    if (d_eff <= 0.0) { throw std::runtime_error("Invalid face spacing"); }
+    if (d_eff <= 0.0) 
+    { 
+        throw std::runtime_error("Invalid face spacing"); 
+    }
 
     return k_ * face.area / d_eff;
 }
