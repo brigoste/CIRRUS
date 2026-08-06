@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tests/verification/VerificationCase.hpp"
+#include "test/verification/VerificationCase.hpp"
 #include "config/SimulationConfig.hpp"
 #include "utils/MathConstants.hpp"
 
@@ -9,7 +9,7 @@
 
     Case                    Solver      Mesh        L2 Error      L2 Check    Refinement    Order
     --------------------------------------------------------------------------------------------------
-    AdvectionDiffusion2D    BiCGSTAB    40x40       4.124e-03     PASS        PASS          1.0
+    AdvectionDiffusion2D    BiCGSTAB    320x320     5.731e-04     PASS        PASS          9.491e-01
 */
 
 class AdvectionDiffusion2D : public VerificationCase
