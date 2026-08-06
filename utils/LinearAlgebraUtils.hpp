@@ -16,14 +16,20 @@ inline void matvec(const LinearSystem& sys, const std::vector<double>& x, std::v
 {
     const std::size_t N = sys.size();
 
-    if (x.size() != N || y.size() != N) { throw std::runtime_error("matvec: dimension mismatch"); }
+    if (x.size() != N || y.size() != N) 
+    { 
+        throw std::runtime_error("matvec: dimension mismatch"); 
+    }
 
     for (std::size_t i = 0; i < N; ++i)
     {
         double sum = 0.0;
 
         // Iterate over all non-zeros in row i
-        for (const auto& [j, aij] : sys.row(i)) { sum += aij * x[j]; }
+        for (const auto& [j, aij] : sys.row(i)) 
+        {
+            sum += aij * x[j]; 
+        }
 
         y[i] = sum;
     }
@@ -35,11 +41,17 @@ inline void matvec(const LinearSystem& sys, const std::vector<double>& x, std::v
 inline double dot(const std::vector<double>& a,
                 const std::vector<double>& b)
 {
-    if (a.size() != b.size()) { throw std::runtime_error("dot: size mismatch"); }
+    if (a.size() != b.size()) 
+    { 
+        throw std::runtime_error("dot: size mismatch"); 
+    }
 
     double s = 0.0;
 
-    for (size_t i = 0; i < a.size(); ++i) { s += a[i] * b[i]; }
+    for (size_t i = 0; i < a.size(); ++i) 
+    { 
+        s += a[i] * b[i]; 
+    }
 
     return s;
 }
@@ -56,9 +68,15 @@ inline double dot(const Point& a, const Point& b)
 // --------------------------------------------------
 inline void axpy(double alpha, const std::vector<double>& x, std::vector<double>& y)
 {
-    if (x.size() != y.size()) { throw std::runtime_error("axpy: size mismatch"); }
+    if (x.size() != y.size()) 
+    { 
+        throw std::runtime_error("axpy: size mismatch"); 
+    }
 
-    for (size_t i = 0; i < x.size(); ++i) { y[i] += alpha * x[i]; }
+    for (size_t i = 0; i < x.size(); ++i) 
+    { 
+        y[i] += alpha * x[i]; 
+    }
 }
 
 // --------------------------------------------------
@@ -68,7 +86,10 @@ inline double norm2(const std::vector<double>& x)
 {
     double s = 0.0;
 
-    for (double v : x) { s += v * v; }
+    for (double v : x) 
+    { 
+        s += v * v; 
+    }
 
     return std::sqrt(s);
 }
@@ -80,7 +101,10 @@ inline void residual(const LinearSystem& sys, const std::vector<double>& x, std:
 {
     const std::size_t N = sys.size();
 
-    if (x.size() != N || r.size() != N) { throw std::runtime_error("residual: dimension mismatch"); }
+    if (x.size() != N || r.size() != N) 
+    { 
+        throw std::runtime_error("residual: dimension mismatch"); 
+    }
 
     const auto& b = sys.RHS();
 
@@ -88,7 +112,10 @@ inline void residual(const LinearSystem& sys, const std::vector<double>& x, std:
     {
         double Ax = 0.0;
 
-        for (const auto& [j, aij] : sys.row(i)) { Ax += aij * x[j]; }
+        for (const auto& [j, aij] : sys.row(i)) 
+        { 
+            Ax += aij * x[j]; 
+        }
 
         r[i] = b[i] - Ax;
     }
