@@ -1,6 +1,5 @@
-#include "tests/verification/ManufacturedCases/Convective2D.hpp"
+#include "test/verification/ManufacturedCases/Convective2D.hpp"
 #include "utils/MathConstants.hpp"
-
 
 double Convective2D::exact(double x, double y) const
 {
