@@ -25,6 +25,7 @@ public:
 
     // Utility
     void fill(double value);
+    const std::vector<double>& values() const { return values_; }
 
 private:
 
