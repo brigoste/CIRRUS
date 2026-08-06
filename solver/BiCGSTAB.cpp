@@ -16,15 +16,6 @@ std::vector<double> BiCGSTAB(
 
     const std::size_t N = sys.size();
 
-    // std::vector<double> diagInv(N);
-
-    // for (std::size_t i = 0; i < N; ++i) {
-    //     const double aii = sys.diagonal(i);
-
-    //     if (std::abs(aii) < 1e-30) { throw std::runtime_error("BiCGSTAB: zero diagonal encountered while building Jacobi preconditioner."); }
-    //     diagInv[i] = 1.0 / aii;
-    // }
-
     if (sys.RHS().size() != N) { throw std::runtime_error("BiCGSTAB: RHS size mismatch"); }
 
     // -----------------------------
@@ -49,25 +40,35 @@ std::vector<double> BiCGSTAB(
     double omega    = 1.0;
 
     double norm_r0 = LA::norm2(r);
-    if (norm_r0 < tol) {
+    if (norm_r0 < tol) 
+    {
         std::cout << "Initial guess already satisfies system.\n";
         return x;
     }
 
     double resid = norm_r0;
 
-    for (int iter = 0; iter < max_iter; ++iter) {
+    for (int iter = 0; iter < max_iter; ++iter) 
+    {
         double rho_new = LA::dot(r0_hat, r);
 
         // std::cout << "iter " << iter << " rho = " << rho_new << '\n';
 
-        if (std::abs(rho_new) < 1e-30) { throw std::runtime_error("BiCGSTAB breakdown: rho ~ 0"); }
+        if (std::abs(rho_new) < 1e-30) 
+        { 
+            throw std::runtime_error("BiCGSTAB breakdown: rho ~ 0"); 
+        }
 
-        if (iter == 0) { p = r; }
-        else {
+        if (iter == 0) 
+        { 
+            p = r; 
+        }
+        else 
+        {
             double beta = (rho_new / rho_old) * (alpha / omega);
 
-            for (std::size_t i = 0; i < N; ++i) {
+            for (std::size_t i = 0; i < N; ++i) 
+            {
                 p[i] = r[i] + beta * (p[i] - omega * v[i]);
             }
         }
@@ -79,19 +80,27 @@ std::vector<double> BiCGSTAB(
         LA::matvec(sys, p_hat, v);
 
         const double r0v = LA::dot(r0_hat, v);
-        if (std::abs(r0v) < 1e-30) { throw std::runtime_error("BiCGSTAB breakdown: <r0_hat,v> ~ 0"); }
+        if (std::abs(r0v) < 1e-30) 
+        { 
+            throw std::runtime_error("BiCGSTAB breakdown: <r0_hat,v> ~ 0"); 
+        }
 
         alpha = rho_new / r0v;
 
         // s = r - alpha v
-        for (std::size_t i = 0; i < N; ++i) {
+        for (std::size_t i = 0; i < N; ++i) 
+        {
             s[i] = r[i] - alpha * v[i];
         }
 
         // early convergence check
         double norm_s = LA::norm2(s);
-        if (norm_s < tol * norm_r0) {
-            for (std::size_t i = 0; i < N; ++i) { x[i] += alpha * p_hat[i]; }
+        if (norm_s < tol * norm_r0) 
+        {
+            for (std::size_t i = 0; i < N; ++i) 
+            { 
+                x[i] += alpha * p_hat[i]; 
+            }
 
             std::cout << "BiCGSTAB converged in " << iter << " iterations. Residual = " << norm_s << "\n";
             return x;
@@ -103,24 +112,33 @@ std::vector<double> BiCGSTAB(
         // t = A(M⁻¹s)
         LA::matvec(sys, s_hat, t);
         const double tt = LA::dot(t, t);
-        if (std::abs(tt) < 1e-30) { throw std::runtime_error("BiCGSTAB breakdown: <t,t> ~ 0"); }
+        if (std::abs(tt) < 1e-30) 
+        { 
+            throw std::runtime_error("BiCGSTAB breakdown: <t,t> ~ 0"); 
+        }
 
         omega = LA::dot(t, s) / tt;
-        if (std::abs(omega) < 1e-30) { throw std::runtime_error("BiCGSTAB breakdown: omega ~ 0"); }
+        if (std::abs(omega) < 1e-30) 
+        { 
+            throw std::runtime_error("BiCGSTAB breakdown: omega ~ 0"); 
+        }
 
         // update x
-        for (std::size_t i = 0; i < N; ++i) {
+        for (std::size_t i = 0; i < N; ++i) 
+        {
             x[i] += alpha * p_hat[i] + omega * s_hat[i];
         }
 
         // update r
-        for (std::size_t i = 0; i < N; ++i) {
+        for (std::size_t i = 0; i < N; ++i) 
+        {
             r[i] = s[i] - omega * t[i];
         }
 
         resid = LA::norm2(r);
 
-        if (resid < tol * norm_r0) { 
+        if (resid < tol * norm_r0) 
+        { 
             std::cout << "BiCGSTAB converged in " << iter << " iterations. Residual = " << resid << "\n";
             return x; 
         }
