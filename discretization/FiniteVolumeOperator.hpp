@@ -8,8 +8,6 @@
 #include "discretization/CellData.hpp"
 #include "bc/BCType.hpp"
 
-// #pragma message("USING FV HEADER: " __FILE__)
-
 class FiniteVolumeOperator
 {
 public:
