@@ -2,7 +2,7 @@
 
 #include "config/SimulationConfig.hpp"
 #include "config/PathContext.hpp"
-#include "tests/verification/VerificationCaseFactory.hpp"
+#include "test/verification/VerificationCaseFactory.hpp"
 #include "mesh/MeshBase.hpp"
 #include "linear_system/LinearSystem.hpp"
 #include <fstream>
