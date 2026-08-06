@@ -14,7 +14,7 @@
     },
 
     "refinement": {
-      "enabled": false,
+      "enabled": true,
       "levels": [16,32,64,128,256],
       "expected_order": 2.0
     },
