@@ -1,4 +1,4 @@
-#include "tests/verification/ManufacturedCases/Convective1D.hpp"
+#include "test/verification/ManufacturedCases/Convective1D.hpp"
 #include <iostream>
 
 double Convective1D::exact(double x, double) const
@@ -30,14 +30,6 @@ ConvectiveData Convective1D::boundaryConvective(const Face& face) const
 
     robin.h = h;
     robin.T_inf = T + (k_ * dTdx) / h;     // Backward implmentation. We solve for T_inf from the manufactured solution.
-
-    // std::cout 
-    // << "Convective BC:"
-    // << " x=" << x
-    // << " T=" << exact(x,0)
-    // << " dTdx=" << dTdx
-    // << " Tinf=" << robin.T_inf
-    // << "\n";
 
     return robin;
 }
