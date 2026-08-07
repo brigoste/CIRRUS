@@ -2,8 +2,8 @@
 #include "simulation/Simulation.hpp"
 #include "linear_system/Residual.hpp"
 #include "postprocessing/BoundaryReconstructor.hpp"
-#include "io/FieldWriter.hpp"
-#include "io/VTKWriter.hpp"
+#include "io/OutputManager.hpp"
+#include "io/OutputData.hpp"
 #include "io/PlotUtils.hpp"
 #include "fields/FieldNames.hpp"
 
@@ -52,7 +52,7 @@ void SimulationRunner::run(
               << "\n";
 
     sim.solve();
-    auto& temperature = sim.fields().scalar(FieldName::Temperature);
+    const auto& temperature = sim.fields().scalar(FieldName::Temperature);
 
     const auto& mesh = sim.mesh();
     const auto& system = sim.system();
@@ -72,32 +72,50 @@ void SimulationRunner::run(
         // Timer timer("Boundary reconstruction");
         field = BoundaryReconstructor::reconstruct( mesh, sim.boundary(), sim.model(), temperature);
     }
+    
+
     // -----------------------------
     // Output paths
     // -----------------------------
     std::filesystem::create_directories(paths.outputRoot);
 
-    auto csvPath  = paths.outputRoot / "solution.csv";
-    auto jsonPath = paths.outputRoot / "solution.json";
-    auto vtkPath  = paths.outputRoot / "solution.vtu";
+    // auto csvPath  = paths.outputRoot / "solution.csv";
+    // auto jsonPath = paths.outputRoot / "solution.json";
+    // auto vtkPath  = paths.outputRoot / "solution.vtu";
 
+    // -----------------------------
+    // Organize outputs
+    // -----------------------------
+    OutputData outputData{
+        mesh,
+        temperature,
+        field,
+        system.RHS(),
+        residual
+    };
+    
     // -----------------------------
     // Write outputs
     // -----------------------------
     {
-        // Timer timer("VTK output");
-        VTKWriter::writeVTK(mesh, temperature, vtkPath.string());
+        // Timer timer("Output Writing");
+        OutputManager::write(
+            outputData,
+            paths.outputRoot);
     }
+    // {
+    //     // Timer timer("VTK output");
+    //     VTKWriter::writeVTK(mesh, temperature, vtkPath.string());
 
-    {
-        // Timer timer("CSV output");
-        FieldWriter::writeCSVDebug( field, system.RHS(), residual, csvPath.generic_string());
-    }
+    // }
+
     // -----------------------------
     // Plotting
     // -----------------------------
     if (cfg.io.plot_enabled) {
         // Timer time("Plotting");
+
+        auto csvPath = paths.outputRoot / "solution.csv";
         
         runPlot(paths, csvPath); 
     }

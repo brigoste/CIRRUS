@@ -1,4 +1,4 @@
-#include "tests/verification/ManufacturedCases/Neumann1D.hpp"
+#include "test/verification/ManufacturedCases/Neumann1D.hpp"
 
 double Neumann1D::exact(double x, double) const
 {

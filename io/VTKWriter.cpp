@@ -1,20 +1,39 @@
 #include "io/VTKWriter.hpp"
+
+#include "io/OutputData.hpp"
+
+#include "mesh/MeshBase.hpp"
+#include "fields/ScalarField.hpp"
+
 #include <fstream>
 #include <stdexcept>
 #include <filesystem>
 #include <vector>
 
+
 // --------------------------------------------------
 // MAIN WRITER
 // --------------------------------------------------
-void VTKWriter::writeVTK(
-    const MeshBase& mesh,
-    const ScalarField& field,
+void VTKWriter::write(
+    const OutputData& data,
     const std::filesystem::path& filename)
 {
+    if (filename.has_parent_path())
+    {
+        std::filesystem::create_directories(
+            filename.parent_path());
+    }
+
     std::ofstream f(filename);
 
-    if (!f.is_open()) { throw std::runtime_error("Failed to open VTU file"); }
+    if (!f.is_open())
+    {
+        throw std::runtime_error(
+            "Failed to open VTU file: " + filename.string());
+    }
+
+    const auto& mesh  = data.mesh;
+    const auto& field = data.temperature;
 
     const std::size_t Nnodes = mesh.nnodes();
     const std::size_t Ncells = mesh.ncells();
@@ -25,6 +44,7 @@ void VTKWriter::writeVTK(
 
     f << "<Piece NumberOfPoints=\"" << Nnodes
       << "\" NumberOfCells=\"" << Ncells << "\">\n";
+
 
     // =========================================================
     // POINTS
@@ -44,6 +64,7 @@ void VTKWriter::writeVTK(
     f << "</DataArray>\n";
     f << "</Points>\n";
 
+
     // =========================================================
     // CELLS
     // =========================================================
@@ -51,7 +72,7 @@ void VTKWriter::writeVTK(
     std::vector<std::size_t> offsets;
     std::vector<int> types;
 
-    connectivity.reserve(Ncells * 8); // safe upper bound
+    connectivity.reserve(Ncells * 8);
     offsets.reserve(Ncells);
     types.reserve(Ncells);
 
@@ -60,53 +81,88 @@ void VTKWriter::writeVTK(
     for (std::size_t c = 0; c < Ncells; ++c)
     {
         std::vector<std::size_t> nodes;
+
         mesh.cellNodes(c, nodes);
 
-        int vtkType = mesh.vtkCellType(c);
+        const int vtkType = mesh.vtkCellType(c);
 
-        for (auto n : nodes) { connectivity.push_back(n); }
+        for (auto n : nodes)
+        {
+            connectivity.push_back(n);
+        }
 
         runningOffset += nodes.size();
+
         offsets.push_back(runningOffset);
         types.push_back(vtkType);
     }
 
+
+    f << "<Cells>\n";
+
+
     // -------------------------
     // Connectivity
     // -------------------------
-    f << "<Cells>\n";
-
     f << "<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n";
-    for (auto n : connectivity) { f << n << " "; }
+
+    for (auto n : connectivity)
+    {
+        f << n << " ";
+    }
+
     f << "\n</DataArray>\n";
+
 
     // -------------------------
     // Offsets
     // -------------------------
     f << "<DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">\n";
-    for (auto o : offsets) { f << o << "\n"; }
+
+    for (auto o : offsets)
+    {
+        f << o << "\n";
+    }
+
     f << "</DataArray>\n";
+
 
     // -------------------------
     // Types
     // -------------------------
     f << "<DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\">\n";
-    for (auto t : types) { f << t << "\n"; }
+
+    for (auto t : types)
+    {
+        f << t << "\n";
+    }
+
     f << "</DataArray>\n";
 
     f << "</Cells>\n";
 
+
     // =========================================================
     // CELL DATA
     // =========================================================
-    f << "<CellData Scalars=\"" << field.name() << "\">\n";
+    f << "<CellData Scalars=\"" 
+      << field.name()
+      << "\">\n";
 
-    f << "<DataArray type=\"Float64\" Name=\"" << field.name() << "\" format=\"ascii\">\n";
+    f << "<DataArray type=\"Float64\" Name=\""
+      << field.name()
+      << "\" format=\"ascii\">\n";
 
-    for (std::size_t c = 0; c < Ncells; ++c) { f << field[c] << "\n"; }
+
+    for (std::size_t c = 0; c < Ncells; ++c)
+    {
+        f << field[c] << "\n";
+    }
+
 
     f << "</DataArray>\n";
     f << "</CellData>\n";
+
 
     f << "</Piece>\n";
     f << "</UnstructuredGrid>\n";

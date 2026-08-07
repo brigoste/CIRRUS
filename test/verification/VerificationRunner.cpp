@@ -319,26 +319,37 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                 suffix = "_L" + std::to_string(level); 
             }
 
-            auto csvPath = caseOutputDir / (caseName  + suffix + ".csv");
-            auto jsonPath = caseOutputDir / (caseName  + suffix + ".json");
-
-            {
-                // Timer timer("Output");
+            auto csvPath = caseOutputDir / (caseName + suffix + ".csv");
+            auto vtkPath = caseOutputDir / (caseName + suffix + ".vtu");
+            auto jsonPath = caseOutputDir / (caseName + suffix + ".json");
+                
             // -------------------------------------------------
             // Write outputs
             // -------------------------------------------------
-                
-                VerificationIO::writeCSV(sim, temperature, csvPath);
+            {
+                // Timer timer("Output");
+
+                VerificationIO::writeCSV(
+                    sim,
+                    temperature,
+                    csvPath);
+
+                VerificationIO::writeVTK(
+                    sim,
+                    temperature,
+                    vtkPath);
 
                 VerificationIO::writeSummary(
                     caseName + suffix,
                     norms.l2_rms,
                     norms.linf,
-                    jsonPath
-                );
+                    jsonPath);
+            }
+            
             // -------------------------------------------------
             // Plotting
             // -------------------------------------------------
+            {
                 if (suite.plot_enabled)
                 {
                     runPlot(paths, csvPath);
