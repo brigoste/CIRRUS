@@ -8,7 +8,11 @@
 #include "config/PathContext.hpp"
 #include "config/SimulationConfig.hpp"
 #include "mesh/MeshBase.hpp"
+
 #include "io/PlotUtils.hpp"
+#include "io/OutputData.hpp"
+#include "io/OutputManager.hpp"
+#include "io/OutputBuilder.hpp"
 
 #include "utils/Timer.hpp"
 #include "fields/FieldNames.hpp"
@@ -326,20 +330,39 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             // -------------------------------------------------
             // Write outputs
             // -------------------------------------------------
-            {
-                // Timer timer("Output");
+            // {
+            //     // Timer timer("Output");
 
-                VerificationIO::writeCSV(
-                    sim,
-                    temperature,
-                    csvPath);
+            //     VerificationIO::writeCSV(
+            //         sim,
+            //         temperature,
+            //         csvPath);
 
-                VerificationIO::writeVTK(
-                    sim,
-                    temperature,
-                    vtkPath);
+            //     VerificationIO::writeVTK(
+            //         sim,
+            //         temperature,
+            //         vtkPath);
 
-                VerificationIO::writeSummary(
+            //     VerificationIO::wrtieReport(
+            //         caseName + suffix,
+            //         norms.l2_rms,
+            //         norms.linf,
+            //         jsonPath);
+            // }
+            // -------------------------------------------------
+            // Write outputs
+            // -------------------------------------------------
+            {                
+                auto output =
+                    OutputBuilder::build(
+                        sim,
+                        temperature);
+
+                OutputManager::write(
+                    output,
+                    caseOutputDir);
+
+                VerificationIO::writeReport(
                     caseName + suffix,
                     norms.l2_rms,
                     norms.linf,
@@ -365,6 +388,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                     << "Linf Norm : " << norms.linf << "\n"
                     << "CSV Output: " << csvPath << "\n"
                     << "JSON Output: " << jsonPath << "\n"
+                    << "VTK Output: " << vtkPath << "\n"
                     << "=============================================\n";
             
             std::string meshType = caseCfg.mesh.type;

@@ -1,10 +1,10 @@
-#include "OutputManager.hpp"
+#include "io/OutputManager.hpp"
 
-#include "OutputData.hpp"
+#include "io/OutputData.hpp"
 
-#include "CSVWriter.hpp"
-#include "VTKWriter.hpp"
-// #include "JSONWriter.hpp"
+#include "io/CSVWriter.hpp"
+#include "io/VTKWriter.hpp"
+#include "io/MetadataWriter.hpp"
 
 void OutputManager::write(
     const OutputData& data,
@@ -18,7 +18,7 @@ void OutputManager::write(
         data,
         outputDirectory / "solution.vtu");
 
-    // JSONWriter::write(
-    //     data,
-    //     outputDirectory);
+    MetadataWriter::write(
+        data,
+        outputDirectory / "metadata.json");
 }

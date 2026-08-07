@@ -1,15 +1,17 @@
-#include "io/VTKWriter.hpp"
 
-#include "io/OutputData.hpp"
 
-#include "mesh/MeshBase.hpp"
 #include "fields/ScalarField.hpp"
+#include "mesh/MeshBase.hpp"
+#include "mesh/primitives/Point.hpp"
+#include "io/FieldOutput.hpp"
+#include "io/PointField.hpp"
+#include "io/VTKWriter.hpp"
+#include "io/OutputData.hpp"
 
 #include <fstream>
 #include <stdexcept>
 #include <filesystem>
 #include <vector>
-
 
 // --------------------------------------------------
 // MAIN WRITER
@@ -33,7 +35,6 @@ void VTKWriter::write(
     }
 
     const auto& mesh  = data.mesh;
-    const auto& field = data.temperature;
 
     const std::size_t Nnodes = mesh.nnodes();
     const std::size_t Ncells = mesh.ncells();
@@ -72,6 +73,7 @@ void VTKWriter::write(
     std::vector<std::size_t> offsets;
     std::vector<int> types;
 
+    // Upper bound for structured quad/hex meshes
     connectivity.reserve(Ncells * 8);
     offsets.reserve(Ncells);
     types.reserve(Ncells);
@@ -145,23 +147,60 @@ void VTKWriter::write(
     // =========================================================
     // CELL DATA
     // =========================================================
-    f << "<CellData Scalars=\"" 
-      << field.name()
-      << "\">\n";
 
-    f << "<DataArray type=\"Float64\" Name=\""
-      << field.name()
-      << "\" format=\"ascii\">\n";
+    f << "<CellData>\n";
 
-
-    for (std::size_t c = 0; c < Ncells; ++c)
+    for (const auto& outputField : data.fields)
     {
-        f << field[c] << "\n";
+        if (outputField.cellField == nullptr)
+        {
+            continue;
+        }
+
+        const auto& field = *outputField.cellField;
+
+        f << "<DataArray type=\"Float64\" Name=\""
+        << outputField.name
+        << "\" format=\"ascii\">\n";
+
+        for (std::size_t c = 0; c < Ncells; ++c)
+        {
+            f << field[c] << "\n";
+        }
+
+        f << "</DataArray>\n";
     }
 
-
-    f << "</DataArray>\n";
     f << "</CellData>\n";
+
+    // =========================================================
+    // POINT DATA
+    // =========================================================
+
+    f << "<PointData>\n";
+
+    for (const auto& outputField : data.fields)
+    {
+        if (outputField.pointField == nullptr)
+        {
+            continue;
+        }
+
+        const auto& field = *outputField.pointField;
+
+        f << "<DataArray type=\"Float64\" Name=\""
+        << outputField.name
+        << "\" format=\"ascii\">\n";
+
+        for (std::size_t i = 0; i < field.phi.size(); ++i)
+        {
+            f << field.phi[i] << "\n";
+        }
+
+        f << "</DataArray>\n";
+    }
+
+    f << "</PointData>\n";
 
 
     f << "</Piece>\n";

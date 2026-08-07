@@ -20,7 +20,7 @@ public:
         const ScalarField& phi,
         const std::filesystem::path& path);
 
-    static void writeSummary(
+    static void writeReport(
         const std::string& caseName,
         double l2,
         double linf,

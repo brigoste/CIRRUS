@@ -6,6 +6,8 @@
 #include "io/VTKWriter.hpp"
 #include "io/OutputData.hpp"
 #include "io/PointField.hpp"
+#include "io/FieldOutput.hpp"
+#include "io/OutputBuilder.hpp"
 
 #include "postprocessing/BoundaryReconstructor.hpp"
 #include "fields/ScalarField.hpp"
@@ -14,37 +16,19 @@
 
 #include <fstream>
 #include <vector>
-
+#include <stdexcept>
 
 void VerificationIO::writeCSV(
     const Simulation& sim,
     const ScalarField& phi,
     const std::filesystem::path& file)
 {
-    PointField reconstructed =
-        BoundaryReconstructor::reconstruct(
-            sim.mesh(),
-            sim.boundary(),
-            sim.model(),
-            phi);
+    auto output =
+    OutputBuilder::build(
+        sim,
+        phi);
 
-    std::vector<double> residual(
-        phi.size(),
-        0.0);
-
-
-    OutputData output{
-        sim.mesh(),
-        phi,
-        reconstructed,
-        sim.system().RHS(),
-        residual
-    };
-
-
-    CSVWriter::write(
-        output,
-        file);
+    CSVWriter::write(output, file);
 }
 
 void VerificationIO::writeVTK(
@@ -52,31 +36,15 @@ void VerificationIO::writeVTK(
     const ScalarField& phi,
     const std::filesystem::path& path)
 {
-    PointField reconstructed =
-        BoundaryReconstructor::reconstruct(
-            sim.mesh(),
-            sim.boundary(),
-            sim.model(),
-            phi);
+    auto output =
+    OutputBuilder::build(
+        sim,
+        phi);
 
-    std::vector<double> residual(
-        phi.size(),
-        0.0);
-
-    OutputData data{
-        sim.mesh(),
-        phi,
-        reconstructed,
-        sim.system().RHS(),
-        residual
-    };
-
-    VTKWriter::write(
-        data,
-        path);
+    VTKWriter::write(output, path);
 }
 
-void VerificationIO::writeSummary(
+void VerificationIO::writeReport(
     const std::string& caseName,
     double l2,
     double linf,
@@ -84,16 +52,17 @@ void VerificationIO::writeSummary(
 {
     nlohmann::json j;
 
-    j["case"] = caseName;
-    j["l2"]   = l2;
-    j["linf"] = linf;
+    j["verification"]["case"] = caseName;
+
+    j["error"]["L2"] = l2;
+    j["error"]["Linf"] = linf;
 
     std::ofstream out(file);
 
     if (!out.is_open())
     {
         throw std::runtime_error(
-            "Failed to open verification summary file: "
+            "Failed to open verification summary JSON: "
             + file.string());
     }
 

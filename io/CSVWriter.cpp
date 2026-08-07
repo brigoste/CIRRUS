@@ -6,6 +6,7 @@
 #include <fstream>
 #include <stdexcept>
 #include <filesystem>
+#include <iomanip>
 
 void CSVWriter::write(
     const OutputData& data,
@@ -24,10 +25,17 @@ void CSVWriter::write(
         throw std::runtime_error(
             "Failed to open CSV output: " + filename.string());
     }
-
+    
+    f << std::setprecision(16);
     f << "x,y,z,phi,rhs,residual\n";
 
-    const auto& field = data.reconstructedField;
+    const auto& field = *data.reconstructedField;
+
+    if (!data.reconstructedField)
+    {
+        throw std::runtime_error(
+            "CSVWriter requires reconstructed point field");
+    }
 
     const std::size_t N = field.phi.size();
 
@@ -42,10 +50,10 @@ void CSVWriter::write(
             (i < data.residual.size()) ? data.residual[i] : 0.0;
 
         f << p.x[0] << ","
-          << p.x[1] << ","
-          << p.x[2] << ","
-          << field.phi[i] << ","
-          << rhs_i << ","
-          << res_i << "\n";
+        << p.x[1] << ","
+        << p.x[2] << ","
+        << field.phi[i] << ","
+        << rhs_i << ","
+        << res_i << "\n";
     }
 }

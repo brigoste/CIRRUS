@@ -5,6 +5,7 @@
 #include "io/OutputManager.hpp"
 #include "io/OutputData.hpp"
 #include "io/PlotUtils.hpp"
+#include "io/OutputBuilder.hpp"
 #include "fields/FieldNames.hpp"
 
 #include "utils/Timer.hpp"
@@ -53,7 +54,6 @@ void SimulationRunner::run(
 
     sim.solve();
     const auto& temperature = sim.fields().scalar(FieldName::Temperature);
-
     const auto& mesh = sim.mesh();
     const auto& system = sim.system();
 
@@ -72,27 +72,19 @@ void SimulationRunner::run(
         // Timer timer("Boundary reconstruction");
         field = BoundaryReconstructor::reconstruct( mesh, sim.boundary(), sim.model(), temperature);
     }
-    
 
     // -----------------------------
     // Output paths
     // -----------------------------
     std::filesystem::create_directories(paths.outputRoot);
 
-    // auto csvPath  = paths.outputRoot / "solution.csv";
-    // auto jsonPath = paths.outputRoot / "solution.json";
-    // auto vtkPath  = paths.outputRoot / "solution.vtu";
-
     // -----------------------------
     // Organize outputs
     // -----------------------------
-    OutputData outputData{
-        mesh,
-        temperature,
-        field,
-        system.RHS(),
-        residual
-    };
+    auto output =
+        OutputBuilder::build(
+            sim,
+            temperature);
     
     // -----------------------------
     // Write outputs
@@ -100,14 +92,9 @@ void SimulationRunner::run(
     {
         // Timer timer("Output Writing");
         OutputManager::write(
-            outputData,
+            output,
             paths.outputRoot);
     }
-    // {
-    //     // Timer timer("VTK output");
-    //     VTKWriter::writeVTK(mesh, temperature, vtkPath.string());
-
-    // }
 
     // -----------------------------
     // Plotting
