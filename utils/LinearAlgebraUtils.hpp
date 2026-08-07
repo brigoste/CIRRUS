@@ -2,6 +2,7 @@
 
 #include "linear_system/LinearSystem.hpp"
 #include "mesh/primitives/Point.hpp"
+#include "mesh/primitives/Vector.hpp"
 #include <vector>
 #include <cmath>
 #include <stdexcept>
@@ -61,6 +62,22 @@ inline double dot(const Point& a, const Point& b)
     return a.x[0] * b.x[0]
          + a.x[1] * b.x[1]
          + a.x[2] * b.x[2];
+}
+
+inline double dot(const Point& a, const Vector& b)
+{
+    return
+        a.x[0]*b.x +
+        a.x[1]*b.y +
+        a.x[2]*b.z;
+}
+
+inline double dot(const Vector& a, const Vector& b)
+{
+    return 
+        a.x*b.x +
+        a.y*b.y +
+        a.z*b.z;
 }
 
 // --------------------------------------------------

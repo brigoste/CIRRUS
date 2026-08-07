@@ -56,27 +56,32 @@ Mesh1D::Mesh1D(std::size_t N, double L)
         {
             face.owner = 0;
             face.neighbor = Face::INVALID;
-            face.normal.x[0] = -1.0;
+            face.normal = Vector(-1.0, 0.0, 0.0);
 
-            face.dPN = face.center - centers_[0];
+            auto d = face.center - centers_[0];
+            face.dPN = Vector(d.x[0], d.x[1], d.x[2]);
+
             boundaryGroups_[toGroup(Patch::LEFT)].push_back(f);
         }
         else if (f == N_)
         {
             face.owner = N_ - 1;
             face.neighbor = Face::INVALID;
-            face.normal.x[0] = 1.0;
+            face.normal = Vector(1.0, 0.0, 0.0);
 
-            face.dPN = face.center - centers_[N_ - 1];
+            auto d = face.center - centers_[N_ - 1];
+            face.dPN = Vector(d.x[0], d.x[1], d.x[2]);
+
             boundaryGroups_[toGroup(Patch::RIGHT)].push_back(f);
         }
         else
         {
             face.owner = f - 1;
             face.neighbor = f;
-            face.normal.x[0] = 1.0;
+            face.normal = Vector(1.0, 0.0, 0.0);
 
-            face.dPN = centers_[f] - centers_[f - 1];
+            auto d = face.center - centers_[f-1];
+            face.dPN = Vector(d.x[0], d.x[1], d.x[2]);
         }
     }
 
@@ -114,7 +119,7 @@ std::vector<Face>::const_iterator Mesh1D::facesEnd() const                     {
 // ---------------------------
 // Geometry
 // ---------------------------
-double Mesh1D::faceDistance(std::size_t) const                                 { return dx_; }
+double Mesh1D::faceDistance(std::size_t f) const                                 { return faces_[f].dPN.magnitude(); } 
 
 double Mesh1D::distance(const Point& a, const Point& b) const                  { return std::abs(a[0] - b[0]); }
 

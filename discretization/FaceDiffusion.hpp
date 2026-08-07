@@ -1,16 +1,12 @@
 #pragma once
-#include <stdexcept>
 
-enum class FaceType
-{
-    Interior,
-    Boundary
-};
+#include <cstddef>
+#include "discretization/FaceType.hpp"
 
 struct FaceDiffusion
 {
     std::size_t P;
-    std::size_t N;     // only valid if Interior
+    std::size_t N;
     double D;
     FaceType type;
 };

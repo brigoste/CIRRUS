@@ -16,7 +16,7 @@
     "refinement": {
       "enabled": true,
       "levels": [40, 80, 160, 320],
-      "expected_order": 1.0
+      "expected_order": 2.0
     },
 
     "physics": {

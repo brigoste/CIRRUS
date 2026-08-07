@@ -67,6 +67,8 @@ Simulation::Simulation(const SimulationConfig& cfg)
     // -------------------------
     flux_ = std::make_unique<FluxAccumulator>(mesh_->ncells());
     sys_.resize(mesh_->ncells());
+    
+    fvOperator_ = std::make_unique<FiniteVolumeOperator>(convectionScheme_);
 
     // -------------------------
     // 5. Boundary conditions
@@ -102,7 +104,7 @@ void Simulation::assemble()
         FluxBuilder::buildFlux( *mesh_, *physics_, boundary_, *flux_, nullptr); 
     }
 
-    FiniteVolumeOperator::assemble( *flux_, sys_);
+    fvOperator_->assemble( *flux_, sys_);
 
     assembled_ = true;
 }

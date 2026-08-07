@@ -23,7 +23,7 @@
 
 void FiniteVolumeOperator::assemble(
     const FluxAccumulator& flux,
-    LinearSystem& sys)
+    LinearSystem& sys) const
 {
     sys.clear();
 
@@ -53,18 +53,7 @@ void FiniteVolumeOperator::assemble(
     // =========================================================
     for (const auto& f : flux.convection())
     {
-        const auto P = f.P;
-        const auto N = f.N;
-        const double F = f.F;
-
-        const double Fp = std::max(F,  0.0);   // P -> N
-        const double Fn = std::max(-F, 0.0);   // N -> P
-
-        sys.addCoeff(P, P,  Fp);
-        sys.addCoeff(P, N, -Fn);
-
-        sys.addCoeff(N, N,  Fn);
-        sys.addCoeff(N, P, -Fp);
+        convectionScheme_.assemble(f, sys);
     }
 
     // =========================================================

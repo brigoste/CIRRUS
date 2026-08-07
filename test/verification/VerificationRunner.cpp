@@ -316,39 +316,18 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             // -------------------------------------------------
             // Output paths
             // -------------------------------------------------
-            std::string suffix;
+            std::filesystem::path levelOutputDir = caseOutputDir;
 
-            if (refinementEnabled) 
-            { 
-                suffix = "_L" + std::to_string(level); 
+            if (refinementEnabled)
+            {
+                levelOutputDir /= "L" + std::to_string(level + 1);
             }
 
-            auto csvPath = caseOutputDir / (caseName + suffix + ".csv");
-            auto vtkPath = caseOutputDir / (caseName + suffix + ".vtu");
-            auto jsonPath = caseOutputDir / (caseName + suffix + ".json");
-                
-            // -------------------------------------------------
-            // Write outputs
-            // -------------------------------------------------
-            // {
-            //     // Timer timer("Output");
+            std::filesystem::create_directories(levelOutputDir);
 
-            //     VerificationIO::writeCSV(
-            //         sim,
-            //         temperature,
-            //         csvPath);
-
-            //     VerificationIO::writeVTK(
-            //         sim,
-            //         temperature,
-            //         vtkPath);
-
-            //     VerificationIO::wrtieReport(
-            //         caseName + suffix,
-            //         norms.l2_rms,
-            //         norms.linf,
-            //         jsonPath);
-            // }
+            auto csvPath = levelOutputDir / (caseName + ".csv");
+            auto vtkPath = levelOutputDir / (caseName + ".vtu");
+            auto jsonPath = levelOutputDir / (caseName + ".json");
             // -------------------------------------------------
             // Write outputs
             // -------------------------------------------------
@@ -360,10 +339,10 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
 
                 OutputManager::write(
                     output,
-                    caseOutputDir);
+                    levelOutputDir);
 
                 VerificationIO::writeReport(
-                    caseName + suffix,
+                    caseName,
                     norms.l2_rms,
                     norms.linf,
                     jsonPath);

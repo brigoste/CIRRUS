@@ -73,9 +73,9 @@ Mesh2D::Mesh2D(int Nx, int Ny, double Lx, double Ly)
             face.center.x[2] = 0.0;
 
             face.area = dy_;
-            face.normal.x[0] = (i == 0) ? -1.0 : 1.0;
-            face.normal.x[1] = 0.0;
-            face.normal.x[2] = 0.0;
+            face.normal.x = (i == 0) ? -1.0 : 1.0;
+            face.normal.y = 0.0;
+            face.normal.z = 0.0;
 
             if (i == 0)
             {
@@ -115,9 +115,9 @@ Mesh2D::Mesh2D(int Nx, int Ny, double Lx, double Ly)
             face.center.x[2] = 0.0;
 
             face.area = dx_;
-            face.normal.x[0] = 0.0;
-            face.normal.x[1] = (j == 0) ? -1.0 : 1.0;
-            face.normal.x[2] = 0.0;
+            face.normal.x = 0.0;
+            face.normal.y = (j == 0) ? -1.0 : 1.0;
+            face.normal.z = 0.0;
 
             if (j == 0)
             {

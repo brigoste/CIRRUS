@@ -14,6 +14,9 @@
 #include "linear_system/LinearSystem.hpp"
 #include "bc/BoundaryFace.hpp"
 #include "discretization/FluxBuilder.hpp"
+#include "discretization/convection/UpwindScheme.hpp"
+#include "discretization/convection/CentralDifferenceScheme.hpp"
+#include "discretization/FiniteVolumeOperator.hpp"
 #include "solver/CG.hpp"
 #include "solver/SOR.hpp"
 #include "solver/TDMA.hpp"
@@ -69,12 +72,17 @@ private:
 
     BoundaryPatchSystem boundary_;
     std::unique_ptr<PhysicsModel> physics_;
+
     LinearSystem sys_;
     std::unique_ptr<FluxAccumulator> flux_;
+    
+    CentralDifferenceScheme convectionScheme_;
+    std::unique_ptr<FiniteVolumeOperator> fvOperator_;
+    
     SimulationConfig cfg_;
     bool assembled_;
     // VerificationRegistry verificationRegistry_;
+    
     std::unique_ptr<VerificationCase> verificationCase_;
     FieldRegistry fields_;
-    
 };

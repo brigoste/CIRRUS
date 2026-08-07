@@ -61,12 +61,15 @@ fi
 ############################################################
 
 cmake --build . --target CIRRUS_tests
+cmake --build . --target CIRRUS_discretization_tests
 
 ############################################################
 # Run tests
 ############################################################
 
 ./CIRRUS_tests
+
+./CIRRUS_discretization_tests
 
 echo
 echo "=============================="

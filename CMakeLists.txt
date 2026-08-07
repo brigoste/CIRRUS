@@ -94,15 +94,37 @@ target_link_libraries(CIRRUS
 # ----------------------------------------
 # Executable - testing
 # ----------------------------------------
+
+# Main test suite
 file(GLOB_RECURSE TEST_SOURCES
     ${PROJECT_SOURCE_DIR}/test/*.cpp
 )
+
+# Remove discretization tests from main suite
+list(FILTER TEST_SOURCES EXCLUDE REGEX ".*/test/discretization/.*")
 
 add_executable(CIRRUS_tests
     ${TEST_SOURCES}
 )
 
 target_link_libraries(CIRRUS_tests
+    PRIVATE CIRRUS_core
+)
+
+
+# ----------------------------------------
+# Executable - discretization tests
+# ----------------------------------------
+
+file(GLOB_RECURSE DISCRETIZATION_TEST_SOURCES
+    ${PROJECT_SOURCE_DIR}/test/discretization/*.cpp
+)
+
+add_executable(CIRRUS_discretization_tests
+    ${DISCRETIZATION_TEST_SOURCES}
+)
+
+target_link_libraries(CIRRUS_discretization_tests
     PRIVATE CIRRUS_core
 )
 

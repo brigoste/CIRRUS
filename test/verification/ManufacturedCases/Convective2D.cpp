@@ -30,7 +30,7 @@ double Convective2D::boundaryFlux(const Face& face) const
 
     const double dTdy = -d_*(math::PI/Ly_) * std::sin(math::PI*y/Ly_);
 
-    const double dTdn = dTdx*face.normal.x[0] + dTdy*face.normal.x[1];
+    const double dTdn = dTdx*face.normal.x + dTdy*face.normal.y;
 
     return -k_ * dTdn;
 }
@@ -50,7 +50,7 @@ ConvectiveData Convective2D::boundaryConvective(const Face& face) const
 
     const double dTdy = -d_*(math::PI/Ly_) *std::sin(math::PI*y/Ly_);
 
-    const double dTdn = dTdx*face.normal.x[0] + dTdy*face.normal.x[1];
+    const double dTdn = dTdx*face.normal.x + dTdy*face.normal.y;
 
     convective.h = h;
     convective.T_inf = T + (k_*dTdn)/h;

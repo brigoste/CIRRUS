@@ -27,7 +27,7 @@ double Neumann2D::boundaryFlux(const Face& face) const
     const double dTdx = a_ + 2.0*c_*x;
     const double dTdy = b_ + 2.0*d_*y;
 
-    double qn = -k_ * ( dTdx*face.normal.x[0] + dTdy*face.normal.x[1] );
+    double qn = -k_ * ( dTdx*face.normal.x + dTdy*face.normal.y );
 
     return qn;
 }

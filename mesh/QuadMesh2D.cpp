@@ -50,13 +50,13 @@ void QuadMesh2D::buildFaces()
                    const Point& c,
                    const Point& n,
                    double area,
-                   const Point& dPN)
+                   const Vector& dPN)
     {
         Face f;
         f.owner = owner;
         f.neighbor = neighbor;
         f.center = c;
-        f.normal = n;
+        f.normal = Vector( n.x[0], n.x[1], n.x[2] );
         f.area = area;
         f.dPN = dPN;
 
@@ -80,7 +80,7 @@ void QuadMesh2D::buildFaces()
 
             Point normal{1.0, 0.0, 0.0};
 
-            Point dPN{ dx_, 0.0, 0.0 };
+            const Vector& dPN{ dx_, 0.0, 0.0 };
 
             addFace(cL, cR, fc, normal, dy_, dPN);
         }
@@ -100,7 +100,7 @@ void QuadMesh2D::buildFaces()
 
             Point normal{0.0, 1.0, 0.0};
 
-            Point dPN{ 0.0, dy_, 0.0 };
+            const Vector& dPN{ 0.0, dy_, 0.0 };
 
             addFace(cB, cT, fc, normal, dx_, dPN);
         }
@@ -113,14 +113,14 @@ void QuadMesh2D::buildFaces()
                        const Point& c,
                        const Point& n,
                        double area,
-                       const Point& dPN) -> std::size_t
+                       const Vector& dPN) -> std::size_t
     {
         Face f;
 
         f.owner = owner;
         f.neighbor = Face::INVALID;
         f.center = c;
-        f.normal = n;
+        f.normal = Vector( n.x[0], n.x[1], n.x[2] );
         f.area = area;
         f.dPN = dPN;
 
@@ -141,7 +141,7 @@ void QuadMesh2D::buildFaces()
             Point{0.0, (j + 0.5) * dy_, 0.0},
             Point{-1.0, 0.0, 0.0},
             dy_,
-            Point{-dx_/2, 0.0, 0.0}
+            Vector{-dx_/2, 0.0, 0.0}
         );
 
         boundaryGroups_[toGroup(Patch::LEFT)].push_back(f);
@@ -155,7 +155,7 @@ void QuadMesh2D::buildFaces()
             Point{nx_ * dx_, (j + 0.5) * dy_, 0.0},
             Point{1.0, 0.0, 0.0},
             dy_,
-            Point{dx_/2, 0.0, 0.0}
+            Vector{dx_/2, 0.0, 0.0}
         );
 
         boundaryGroups_[toGroup(Patch::RIGHT)].push_back(f);
@@ -169,7 +169,7 @@ void QuadMesh2D::buildFaces()
             Point{(i + 0.5) * dx_, ny_ * dy_, 0.0},
             Point{0.0, 1.0, 0.0},
             dx_,
-            Point{0.0, dy_/2, 0.0}
+            Vector{0.0, dy_/2, 0.0}
         );
 
         boundaryGroups_[toGroup(Patch::TOP)].push_back(f);
@@ -179,11 +179,11 @@ void QuadMesh2D::buildFaces()
     for (std::size_t i = 0; i < nx_; ++i)
     {
         std::size_t f = addBoundary( 
-                    idx(i, 0), 
-                    Point{(i + 0.5) * dx_, 0.0, 0.0}, 
-                    Point{0.0, -1.0, 0.0}, 
-                    dx_, 
-                    Point{0.0, -dy_/2, 0.0} );
+            idx(i, 0), 
+            Point{(i + 0.5) * dx_, 0.0, 0.0}, 
+            Point{0.0, -1.0, 0.0}, 
+            dx_, 
+            Vector{0.0, -dy_/2, 0.0} );
 
         boundaryGroups_[toGroup(Patch::BOTTOM)].push_back(f);
     }
