@@ -13,20 +13,20 @@ class QuadMesh2D : public MeshBase
 public:
     QuadMesh2D(std::size_t nx, std::size_t ny, double lx, double ly);
 
-    std::size_t ncells() const override { return cells_.size(); }
-    std::size_t nfaces() const override { return faces_.size(); }
+    std::size_t ncells() const override                                             { return cells_.size(); }
+    std::size_t nfaces() const override                                             { return faces_.size(); }
 
-    const Cell& cell(std::size_t i) const override { return cells_[i]; }
-    const Face& face(std::size_t i) const override { return faces_[i]; }
+    const Cell& cell(std::size_t i) const override                                  { return cells_[i]; }
+    const Face& face(std::size_t i) const override                                  { return faces_[i]; }
 
-    const Point& cellCenter(std::size_t i) const override { return cells_[i].center; }
+    const Point& cellCenter(std::size_t i) const override                           { return cells_[i].center; }
 
     const std::vector<std::size_t>& boundaryFaces(std::size_t group) const override {return boundaryGroups_.at(group);}
-    std::size_t nBoundaryGroups() const override { return boundaryGroups_.size(); }
-    std::size_t toGroup(Patch p) const { return static_cast<std::size_t>(p);}
+    std::size_t nBoundaryGroups() const override                                    { return boundaryGroups_.size(); }
+    std::size_t toGroup(Patch p) const                                              { return static_cast<std::size_t>(p);}
 
-    std::size_t nnodes() const override { return nodes_.size(); }
-    const Point& node(std::size_t i) const override { return nodes_.at(i); }
+    std::size_t nnodes() const override                                             { return nodes_.size(); }
+    const Point& node(std::size_t i) const override                                 { return nodes_.at(i); }
 
     double faceDistance(std::size_t f) const override
     {
@@ -38,17 +38,17 @@ public:
 
     void cellNodes(std::size_t c, std::vector<std::size_t>& nodes) const override;
 
-    std::size_t dim() const override { return 2; }
-    int vtkCellType(std::size_t) const override { return 9; }
+    std::size_t dim() const override                                                { return 2; }
+    int vtkCellType(std::size_t) const override                                     { return 9; }
 
-    std::vector<Face>::const_iterator facesBegin() const override { return faces_.begin(); }
-    std::vector<Face>::const_iterator facesEnd() const override { return faces_.end(); }
+    std::vector<Face>::const_iterator facesBegin() const override                   { return faces_.begin(); }
+    std::vector<Face>::const_iterator facesEnd() const override                     { return faces_.end(); }
 
-    double cellVolume(std::size_t) const override { return dx_ * dy_; }
+    double cellVolume(std::size_t) const override                                   { return dx_ * dy_; }
 
-    double getLx() const override {return Lx_;}
-    double getLy() const override {return Ly_;}
-    double getLz() const override {return 0.0;}
+    double getLx() const override                                                   {return Lx_;}
+    double getLy() const override                                                   {return Ly_;}
+    double getLz() const override                                                   {return 0.0;}
 
 private:
     std::size_t nx_, ny_;
