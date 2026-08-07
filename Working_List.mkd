@@ -105,7 +105,7 @@ Future:
 
 - [x] 2D steady-state
 - [x] First-order upwind convection
-- [ ] Central differencing
+- [x] Central differencing
 - [ ] Second-order convection schemes
 - [ ] 3D
 - [ ] Transient
@@ -127,11 +127,19 @@ Future:
 
 ## Gradient Operators
 
-- [ ] Green-Gauss gradient
-- [ ] Least-squares gradient
+- [x] Green-Gauss gradient
+- [x] Least-squares gradient
 - [ ] Gradient limiting
 
 ---
+
+## Gradient Configuration & Verification
+- [x] Configurable gradient scheme
+- [x] JSON serialization/deserialization of gradient scheme
+- [x] Verification-case gradient scheme override
+- [x] Report gradient scheme in verification output
+- [ ] Verify multiple gradient schemes through MMS
+- [ ] Compare gradient-scheme accuracy/order
 
 ## Convection Discretization
 
@@ -356,8 +364,18 @@ Future:
 
 # Current Milestone
 
-## High-order convection infrastructure ✅
+## Numerical Discretization Infrastructure
+### Gradient Infrastructure
+- [x] Implement Green-Gauss gradient
+- [x] Add configurable gradient scheme
+- [x] Integrate gradient scheme into simulation configuration
+- [x] Allow verification cases to override gradient scheme
+- [x] Report gradient scheme in verification results
+- [ ] Implement least-squares gradient
+- [ ] Verify least-squares gradient with MMS
+- [ ] Compare gradient schemes through mesh refinement
 
+### Convection Infrastructure
 - [x] Extract convection discretization from finite volume assembly
 - [x] Implement UpwindScheme
 - [x] Implement CentralDifferenceScheme
@@ -366,11 +384,13 @@ Future:
 
 
 # Recommended Development Order
-
 1. Integrate FieldRegistry into Simulation
 2. Complete generic equation/operator framework
 3. Finish generalized flux infrastructure
-4. Implement gradient operators
+4. Complete gradient operator framework
+- Green-Gauss ✅
+- Least-squares
+- Scheme selection/dispatch
 5. Implement interpolation/reconstruction framework
 6. Add second-order convection schemes
 7. Add nonlinear iteration framework
@@ -380,7 +400,10 @@ Future:
 11. Add transient solver framework
 12. Add turbulence models
 13. Expand multiphysics capability
-14. Strengthen verification (Richardson/GCI/regression)
+14. Strengthen verification
+- Richardson extrapolation
+- GCI
+- regression verification
 15. Optimize memory layout and solver performance
 16. Add parallel computing
 17. Add engineering optimization capabilities
