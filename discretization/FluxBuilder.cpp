@@ -21,6 +21,30 @@ void FluxBuilder::buildFlux(
     // =====================================================
     // 1. INTERIOR FACES
     // =====================================================
+    // for (std::size_t f = 0; f < mesh.nfaces(); ++f)
+    // {
+    //     const Face& face = mesh.face(f);
+
+    //     const std::size_t P = face.owner;
+    //     const std::size_t N = face.neighbor;
+
+    //     if (N != Face::INVALID)
+    //     {
+    //         const double D = model.diffusionFaceCoefficient(face);
+    //         flux.addDiffusion(P, N, D);
+
+    //         const double F = model.convectionFaceFlux(face);
+    //         flux.addConvection(P, N, F);
+    //     }
+    // }
+    diffusion_.apply(
+        mesh,
+        model,
+        flux
+    );
+    // =====================================================
+    // INTERIOR CONVECTION
+    // =====================================================
     for (std::size_t f = 0; f < mesh.nfaces(); ++f)
     {
         const Face& face = mesh.face(f);
@@ -30,9 +54,6 @@ void FluxBuilder::buildFlux(
 
         if (N != Face::INVALID)
         {
-            const double D = model.diffusionFaceCoefficient(face);
-            flux.addDiffusion(P, N, D);
-
             const double F = model.convectionFaceFlux(face);
             flux.addConvection(P, N, F);
         }

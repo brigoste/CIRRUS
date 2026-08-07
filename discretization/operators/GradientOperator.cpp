@@ -1,6 +1,5 @@
 #include "GradientOperator.hpp"
 
-
 GradientOperator::GradientOperator(
     std::unique_ptr<GradientScheme> scheme
 )

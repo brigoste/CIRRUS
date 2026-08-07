@@ -27,8 +27,8 @@ Future:
 - [x] Scalar field storage
 - [x] Vector field storage
 - [x] Field registry infrastructure
-- [ ] Simulation integration with FieldRegistry
-- [ ] Generic operator framework
+- [x] Simulation integration with FieldRegistry
+- [ ] Generic operator framework   --------------------> next
 - [ ] Generic equation system abstraction
 - [ ] Matrix/vector assembly interface
 
@@ -371,7 +371,7 @@ Future:
 - [x] Integrate gradient scheme into simulation configuration
 - [x] Allow verification cases to override gradient scheme
 - [x] Report gradient scheme in verification results
-- [ ] Implement least-squares gradient
+- [x] Implement least-squares gradient
 - [ ] Verify least-squares gradient with MMS
 - [ ] Compare gradient schemes through mesh refinement
 

@@ -118,14 +118,9 @@ void Simulation::assemble()
     flux_->reset();
     sys_.clear();
 
-    if (verificationCase_) 
-    { 
-        FluxBuilder::buildFlux( *mesh_, *physics_, boundary_, *flux_, verificationCase_.get()); 
-    }
-    else 
-    { 
-        FluxBuilder::buildFlux( *mesh_, *physics_, boundary_, *flux_, nullptr); 
-    }
+    FluxBuilder fluxBuilder;
+
+    fluxBuilder.buildFlux( *mesh_, *physics_, boundary_, *flux_, verificationCase_.get()); 
 
     fvOperator_->assemble( *flux_, sys_);
 
