@@ -80,7 +80,7 @@ Mesh1D::Mesh1D(std::size_t N, double L)
             face.neighbor = f;
             face.normal = Vector(1.0, 0.0, 0.0);
 
-            auto d = face.center - centers_[f-1];
+            auto d = centers_[f] - centers_[f-1];
             face.dPN = Vector(d.x[0], d.x[1], d.x[2]);
         }
     }
@@ -119,7 +119,7 @@ std::vector<Face>::const_iterator Mesh1D::facesEnd() const                     {
 // ---------------------------
 // Geometry
 // ---------------------------
-double Mesh1D::faceDistance(std::size_t f) const                                 { return faces_[f].dPN.magnitude(); } 
+double Mesh1D::faceDistance(std::size_t f) const                               { return faces_.at(f).dPN.magnitude(); } 
 
 double Mesh1D::distance(const Point& a, const Point& b) const                  { return std::abs(a[0] - b[0]); }
 

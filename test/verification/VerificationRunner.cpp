@@ -28,6 +28,7 @@ struct VerificationSummary
     std::string solver;
     std::string meshType;
     std::string meshSize;
+    std::string gradient;
 
     double l2;
     double linf;
@@ -398,6 +399,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                 finestSummary.solver = solver::to_string(levelCfg.solver.method);
                 finestSummary.meshType = meshType;
                 finestSummary.meshSize = meshSize;
+                finestSummary.gradient = gradientToString(levelCfg.discretization.gradientScheme);
 
                 finestSummary.l2 = norms.l2_rms;
                 finestSummary.linf = norms.linf;
@@ -410,8 +412,6 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                 finestSummary.refinementEnabled = refinementEnabled;
                 finestSummary.refinementPassed = false;
                 finestSummary.observedOrder = 0.0;
-
-                finestSummaryValid = true;
 
                 finestSummaryValid = true;
             }
@@ -525,6 +525,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
     std::cout << std::left
             << std::setw(24) << "Case"
             << std::setw(12) << "Solver"
+            << std::setw(12) << "Gradient"
             << std::setw(12) << "Mesh"
             << std::setw(14) << "L2 Error"
             << std::setw(12) << "Accuracy"
@@ -541,6 +542,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
         std::cout << std::left
                 << std::setw(24) << s.caseName
                 << std::setw(12) << s.solver
+                << std::setw(12) << s.gradient
                 << std::setw(12) << s.meshSize
                 << std::setw(14) << s.l2
                 << std::setw(12) << (s.accuracyPassed ? "PASS" : "FAIL");

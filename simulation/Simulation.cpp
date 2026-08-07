@@ -4,6 +4,7 @@
 #include "mesh/QuadMesh2D.hpp"
 #include "discretization/FiniteVolumeOperator.hpp"
 #include "discretization/FluxBuilder.hpp"
+#include "discretization/operators/GradientFactory.hpp"
 #include "test/verification/VerificationCaseFactory.hpp"
 
 #include "solver/preconditioners/PreconditionerFactory.hpp"
@@ -30,50 +31,72 @@ void Simulation::initializeFields()
 // ============================================================
 
 Simulation::Simulation(const SimulationConfig& cfg)
-    : cfg_(cfg),
-      assembled_(false)
+: cfg_(cfg),
+  assembled_(false)
 {
-    // -------------------------
-    // 1. Build physics model FIRST
-    // -------------------------
+    // 1. Physics
     physics_ = PhysicsFactory::create(cfg.physics);
 
+    // 2. Gradient
+    gradient_ =
+        std::make_unique<GradientOperator>(
+            GradientFactory::create(
+                cfg.discretization.gradientScheme
+            )
+        );
+
     // -------------------------
-    // 2. Mesh
+    // 3. Mesh
     // -------------------------
-    if (cfg.mesh.type == "line1D") 
+    if (cfg.mesh.type == "line1D")
     {
-        // std::cout << "1D mesh\n";
-        mesh_ = std::make_unique<Mesh1D>(cfg.mesh.nx, cfg.mesh.lx);
+        mesh_ = std::make_unique<Mesh1D>(
+            cfg.mesh.nx,
+            cfg.mesh.lx
+        );
     }
-    else if (cfg.mesh.type == "quad2D") 
+    else if (cfg.mesh.type == "quad2D")
     {
-        // std::cout << "2D Quad mesh\n";
-        mesh_ = std::make_unique<QuadMesh2D>(cfg.mesh.nx, cfg.mesh.ny, cfg.mesh.lx, cfg.mesh.ly);
+        mesh_ = std::make_unique<QuadMesh2D>(
+            cfg.mesh.nx,
+            cfg.mesh.ny,
+            cfg.mesh.lx,
+            cfg.mesh.ly
+        );
     }
-    else 
+    else
     {
-        std::cout << "Mesh type declared: " << cfg.mesh.type << "\n";
-        throw std::runtime_error("Unsupported mesh");
+        throw std::runtime_error(
+            "Unsupported mesh type: " + cfg.mesh.type
+        );
     }
 
     // -------------------------
-    // 3. Create fields
+    // 4. Create fields
     // -------------------------
     initializeFields();
 
-    // -------------------------
-    // 4. Allocate solver data
-    // -------------------------
-    flux_ = std::make_unique<FluxAccumulator>(mesh_->ncells());
-    sys_.resize(mesh_->ncells());
-    
-    fvOperator_ = std::make_unique<FiniteVolumeOperator>(convectionScheme_);
 
     // -------------------------
-    // 5. Boundary conditions
+    // 5. Allocate solver data
+    // -------------------------
+    flux_ = std::make_unique<FluxAccumulator>(
+        mesh_->ncells()
+    );
+
+    sys_.resize(mesh_->ncells());
+
+    fvOperator_ =
+        std::make_unique<FiniteVolumeOperator>(
+            convectionScheme_
+        );
+
+
+    // -------------------------
+    // 6. Boundary conditions
     // -------------------------
     bindBoundaryConditions(cfg);
+
 
     std::cout << "NCELLS = " << mesh_->ncells() << "\n";
     std::cout << "NFACE  = " << mesh_->nfaces() << "\n";

@@ -17,6 +17,7 @@
 #include "discretization/convection/UpwindScheme.hpp"
 #include "discretization/convection/CentralDifferenceScheme.hpp"
 #include "discretization/FiniteVolumeOperator.hpp"
+#include "discretization/operators/GradientOperator.hpp"
 #include "solver/CG.hpp"
 #include "solver/SOR.hpp"
 #include "solver/TDMA.hpp"
@@ -78,6 +79,7 @@ private:
     
     CentralDifferenceScheme convectionScheme_;
     std::unique_ptr<FiniteVolumeOperator> fvOperator_;
+    std::unique_ptr<GradientOperator> gradient_;
     
     SimulationConfig cfg_;
     bool assembled_;

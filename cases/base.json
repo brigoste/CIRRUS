@@ -7,6 +7,10 @@
     "ly": 1.0
   },
 
+  "discretization": {
+      "gradientScheme":"green_gauss"
+  },
+
   "physics": {
     "type": "heat",
     "k": 1.0
@@ -44,4 +48,5 @@
       "directory": "verification"
     }
   }
+
 }
