@@ -54,8 +54,8 @@ discretization/
 ├── FaceConvection.hpp
 ├── FaceDiffusion.hpp
 ├── FaceType.hpp
-├── FiniteVolumeOperator.cpp
-├── FiniteVolumeOperator.hpp
+├── FiniteVolumeAssembler.cpp
+├── FiniteVolumeAssembler.hpp
 ├── FluxAccumulator.hpp
 ├── FluxBuilder.cpp
 └── FluxBuilder.hpp
@@ -98,7 +98,7 @@ The overall discretization pipeline is:
                                     │
                                     ▼
                        ┌────────────────────────┐
-                       │ FiniteVolumeOperator   │
+                       │ FiniteVolumeAssembler   │
                        │      (orchestrator)    │
                        └────────────┬───────────┘
                                     │
@@ -508,14 +508,14 @@ The scheme controls the discretization while the operator controls orchestration
 
 ---
 
-## `FiniteVolumeOperator`
+## `FiniteVolumeAssembler`
 
 ```text
-FiniteVolumeOperator.cpp
-FiniteVolumeOperator.hpp
+FiniteVolumeAssembler.cpp
+FiniteVolumeAssembler.hpp
 ```
 
-`FiniteVolumeOperator` is the high-level assembly coordinator.
+`FiniteVolumeAssembler` is the high-level finite-volume assembly coordinator.
 
 Its current assembly sequence is:
 
@@ -544,7 +544,7 @@ sys.addRHS(c, flux[c].Su);
 sys.addCoeff(c, c, -flux[c].Sp);
 ```
 
-Thus `FiniteVolumeOperator` provides the common finite-volume assembly pathway without requiring the individual operators to know about one another.
+Thus `FiniteVolumeAssembler` provides the common finite-volume assembly pathway without requiring the individual operators to know about one another.
 
 ---
 
@@ -744,7 +744,7 @@ The current architecture intentionally separates several concerns.
 | `DiffusionOperator`     | Assembles diffusion matrix contributions   |
 | `ConvectionOperator`    | Coordinates convection matrix assembly     |
 | `ConvectionScheme`      | Determines convection coefficients         |
-| `FiniteVolumeOperator`  | Coordinates complete FV matrix assembly    |
+| `FiniteVolumeAssembler`  | Coordinates complete FV matrix assembly    |
 | `GradientScheme`        | Computes cell gradients when required      |
 | `LinearSystem`          | Stores the final discrete algebraic system |
 

@@ -2,6 +2,8 @@
 #include <vector>
 #include <linear_system/LinearSystem.hpp>
 #include <cmath>
+#include <stdexcept>
+#include <string>
 
 std::vector<double> SOR(
     const LinearSystem& sys,
