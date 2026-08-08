@@ -20,8 +20,6 @@ void FiniteVolumeOperator::assemble(
     const FluxAccumulator& flux,
     LinearSystem& sys) const
 {
-    sys.clear();
-
     // =========================================================
     // 1. DIFFUSION
     // =========================================================

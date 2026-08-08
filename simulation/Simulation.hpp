@@ -13,12 +13,16 @@
 #include "physics/HeatPhysicsModel.hpp"
 #include "linear_system/LinearSystem.hpp"
 #include "bc/BoundaryFace.hpp"
-#include "discretization/FluxBuilder.hpp"
+
 #include "discretization/convection/UpwindScheme.hpp"
 #include "discretization/convection/CentralDifferenceScheme.hpp"
-#include "discretization/FiniteVolumeOperator.hpp"
-#include "discretization/operators/GradientOperator.hpp"
 #include "discretization/diffusion/DiffusionOperator.hpp"
+#include "discretization/operators/GradientOperator.hpp"
+#include "discretization/operators/ConvectionOperator.hpp"
+#include "discretization/DiffusionFluxBuilder.hpp"
+#include "discretization/FiniteVolumeOperator.hpp"
+#include "discretization/FluxBuilder.hpp"
+
 #include "solver/CG.hpp"
 #include "solver/SOR.hpp"
 #include "solver/TDMA.hpp"
@@ -33,6 +37,8 @@
 class Simulation
 {
 public:
+
+    ~Simulation();
     Simulation(const SimulationConfig& cfg);
 
     void assemble();
@@ -79,9 +85,11 @@ private:
     std::unique_ptr<FluxAccumulator> flux_;
 
     CentralDifferenceScheme convectionScheme_;
+
     ConvectionOperator convection_;
     DiffusionOperator diffusion_;
-    std::unique_ptr<FiniteVolumeOperator> fvOperator_;
+    FiniteVolumeOperator fvOperator_;
+    
     std::unique_ptr<GradientOperator> gradient_;
     
     

@@ -2,16 +2,18 @@
 
 #include "mesh/Mesh1D.hpp"
 #include "mesh/QuadMesh2D.hpp"
-#include "discretization/FiniteVolumeOperator.hpp"
 #include "discretization/FluxBuilder.hpp"
 #include "discretization/operators/GradientFactory.hpp"
 #include "test/verification/VerificationCaseFactory.hpp"
+#include "test/verification/VerificationCase.hpp"
 
 #include "solver/preconditioners/PreconditionerFactory.hpp"
 
 #include "utils/Timer.hpp" // Runtime optimziation checking
 
 #include <stdexcept>
+
+Simulation::~Simulation() = default;
 
 // ============================================================
 // Field initializer
@@ -32,6 +34,8 @@ void Simulation::initializeFields()
 
 Simulation::Simulation(const SimulationConfig& cfg)
     : convection_(convectionScheme_),
+      diffusion_(),
+      fvOperator_(convection_, diffusion_),
       cfg_(cfg),
       assembled_(false)
 {
@@ -46,9 +50,7 @@ Simulation::Simulation(const SimulationConfig& cfg)
             )
         );
 
-    // -------------------------
     // 3. Mesh
-    // -------------------------
     if (cfg.mesh.type == "line1D")
     {
         mesh_ = std::make_unique<Mesh1D>(
@@ -72,33 +74,18 @@ Simulation::Simulation(const SimulationConfig& cfg)
         );
     }
 
-    // -------------------------
-    // 4. Create fields
-    // -------------------------
+    // 4. Fields
     initializeFields();
 
-
-    // -------------------------
-    // 5. Allocate solver data
-    // -------------------------
+    // 5. Solver data
     flux_ = std::make_unique<FluxAccumulator>(
         mesh_->ncells()
     );
 
     sys_.resize(mesh_->ncells());
 
-    fvOperator_ =
-        std::make_unique<FiniteVolumeOperator>(
-            convection_,
-            diffusion_
-        );
-
-
-    // -------------------------
     // 6. Boundary conditions
-    // -------------------------
     bindBoundaryConditions(cfg);
-
 
     std::cout << "NCELLS = " << mesh_->ncells() << "\n";
     std::cout << "NFACE  = " << mesh_->nfaces() << "\n";
@@ -120,11 +107,20 @@ void Simulation::assemble()
     flux_->reset();
     sys_.clear();
 
-    FluxBuilder fluxBuilder(diffusion_);
+    FluxBuilder fluxBuilder;
 
-    fluxBuilder.buildFlux( *mesh_, *physics_, boundary_, *flux_, verificationCase_.get()); 
+    fluxBuilder.buildFlux(
+        *mesh_,
+        *physics_,
+        boundary_,
+        *flux_,
+        verificationCase_.get()
+    );
 
-    fvOperator_->assemble( *flux_, sys_);
+    fvOperator_.assemble(
+        *flux_,
+        sys_
+    );
 
     assembled_ = true;
 }

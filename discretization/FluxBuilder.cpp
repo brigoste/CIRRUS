@@ -12,7 +12,8 @@ void FluxBuilder::buildFlux(
     const PhysicsModel& model,
     const BoundaryPatchSystem& boundary,
     FluxAccumulator& flux,
-    const VerificationCase* verificationCase)
+    const VerificationCase* verificationCase
+) const
 {
     if (flux.size() != mesh.ncells())
     {
@@ -21,10 +22,7 @@ void FluxBuilder::buildFlux(
         );
     }
 
-    // =====================================================
-    // 1. DIFFUSION
-    // =====================================================
-    diffusion_.apply(
+    diffusionFlux_.apply(
         mesh,
         model,
         boundary,
@@ -32,44 +30,16 @@ void FluxBuilder::buildFlux(
         verificationCase
     );
 
-    // =====================================================
-    // 2. INTERIOR CONVECTION
-    // =====================================================
     convectionFlux_.apply(
         mesh,
         model,
         flux
     );
 
-    // =====================================================
-    // 3. CELL SOURCES
-    // =====================================================
-    for (std::size_t c = 0; c < mesh.ncells(); ++c)
-    {
-        const double source = model.cellSource(mesh, c);
-        // Physical model source
-        flux.addSource(
-            c,
-            source * mesh.cellVolume(c),
-            0.0
-        );
-
-        // Manufactured verification forcing
-        if (verificationCase)
-        {
-            const auto& xc = mesh.cellCenter(c);
-
-            const double manufacturedSource =
-                verificationCase->source(
-                    xc.x[0],
-                    xc.x[1]
-                );
-
-            flux.addSource(
-                c,
-                manufacturedSource * mesh.cellVolume(c),
-                0.0
-            );
-        }
-    }
+    sourceFlux_.apply(
+        mesh,
+        model,
+        flux,
+        verificationCase
+    );
 }
