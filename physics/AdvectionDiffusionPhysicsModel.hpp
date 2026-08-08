@@ -28,8 +28,6 @@ public:
 
     double reconstructBoundaryValue( const BoundaryPatchSystem::Condition& bc, double phiCell, double dx, bool isLeft) const override;
 
-    void addCellSources( const MeshBase& mesh, std::size_t c, FluxAccumulator& flux) const override;
-    
     double cellSource( const MeshBase& mesh, std::size_t cell) const override;
 
     FieldName solutionField() const override                                            { return FieldName::Temperature; }

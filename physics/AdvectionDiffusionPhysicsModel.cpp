@@ -29,19 +29,6 @@ double AdvectionDiffusionPhysicsModel::convectionFaceFlux(
     return rho_ * un * face.area;
 }
 
-void AdvectionDiffusionPhysicsModel::addCellSources(
-    const MeshBase& mesh,
-    std::size_t c,
-    FluxAccumulator& flux) const
-{
-    (void)mesh;
-    (void)c;
-    (void)flux;
-
-    // No intrinsic volumetric source.
-    // Verification sources are added separately by the verification framework.
-}
-
 double AdvectionDiffusionPhysicsModel::reconstructBoundaryValue(
     const BoundaryPatchSystem::Condition& bc,
     double phiCell,

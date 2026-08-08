@@ -24,7 +24,6 @@ public:
     // =====================================================
     virtual double diffusionFaceCoefficient(const Face& face) const = 0;
     virtual double convectionFaceFlux(const Face& face) const = 0;
-
     virtual double diffusionCoefficient() const = 0;
 
     // =====================================================
@@ -42,8 +41,6 @@ public:
     // Source term (UNIFIED ENTRY POINT)
     // =====================================================
     virtual double cellSource( const MeshBase& mesh, std::size_t cell) const = 0;
-
-    virtual void addCellSources( const MeshBase& mesh, std::size_t cell, FluxAccumulator& flux) const = 0;
 
     // =====================================================
     // Optional: manufactured forcing hook

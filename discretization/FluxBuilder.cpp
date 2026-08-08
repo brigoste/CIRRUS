@@ -35,29 +35,24 @@ void FluxBuilder::buildFlux(
     // =====================================================
     // 2. INTERIOR CONVECTION
     // =====================================================
-    for (std::size_t f = 0; f < mesh.nfaces(); ++f)
-    {
-        const Face& face = mesh.face(f);
-
-        const std::size_t P = face.owner;
-        const std::size_t N = face.neighbor;
-
-        if (N != Face::INVALID)
-        {
-            const double F =
-                model.convectionFaceFlux(face);
-
-            flux.addConvection(P, N, F);
-        }
-    }
+    convectionFlux_.apply(
+        mesh,
+        model,
+        flux
+    );
 
     // =====================================================
     // 3. CELL SOURCES
     // =====================================================
     for (std::size_t c = 0; c < mesh.ncells(); ++c)
     {
+        const double source = model.cellSource(mesh, c);
         // Physical model source
-        model.addCellSources(mesh, c, flux);
+        flux.addSource(
+            c,
+            source * mesh.cellVolume(c),
+            0.0
+        );
 
         // Manufactured verification forcing
         if (verificationCase)
@@ -77,26 +72,4 @@ void FluxBuilder::buildFlux(
             );
         }
     }
-
-#ifdef DEBUG
-    for (std::size_t i = 0; i < flux.size(); ++i)
-    {
-        const auto& c = flux[i];
-
-        if (!std::isfinite(c.Su) ||
-            !std::isfinite(c.Sp))
-        {
-            throw std::runtime_error(
-                "Non-finite flux source term"
-            );
-        }
-
-        if (std::abs(c.Sp) > 1e12)
-        {
-            std::cerr
-                << "[WARN] stiff source at cell "
-                << i << "\n";
-        }
-    }
-#endif
 }

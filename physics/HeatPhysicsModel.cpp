@@ -32,17 +32,6 @@ double HeatPhysicsModel::diffusionFaceCoefficient(const Face& face) const
 
 double HeatPhysicsModel::convectionFaceFlux(const Face& /*face*/) const { return 0.0; }
 
-void HeatPhysicsModel::addCellSources(
-    const MeshBase& mesh,
-    std::size_t c,
-    FluxAccumulator& flux) const
-{
-    // Heat equation has no volumetric source term by default
-    (void)mesh;
-    (void)c;
-    (void)flux;
-}
-
 double HeatPhysicsModel::reconstructBoundaryValue(
     const BoundaryPatchSystem::Condition& bc,
     double phiCell,
