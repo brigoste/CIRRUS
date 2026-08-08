@@ -4,7 +4,7 @@
 #include <stdexcept>
 
 void JacobiPreconditioner::setup(
-    const LinearSystem& sys)
+    const LinearEquationSystem& sys)
 {
     const std::size_t N = sys.size();
 
@@ -12,7 +12,7 @@ void JacobiPreconditioner::setup(
 
     for (std::size_t i = 0; i < N; ++i)
     {
-        const double aii = sys.diagonal(i);
+        const double aii = sys.coeff(i,i);
 
         if (std::abs(aii) < 1e-30) 
         { 

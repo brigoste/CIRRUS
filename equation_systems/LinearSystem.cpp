@@ -1,6 +1,7 @@
 #include "equation_systems/LinearSystem.hpp"
 
 #include <algorithm>
+#include <stdexcept>
 
 // ============================================================
 // Construction
@@ -151,4 +152,31 @@ std::size_t LinearSystem::nnz() const
     }
 
     return count;
+}
+
+// ============================================================
+// MATRIX SOLVING
+// ============================================================
+
+void LinearSystem::matvec(
+    const std::vector<double>& x,
+    std::vector<double>& y
+) const
+{
+    const std::size_t N = size();
+
+    if (x.size() != N)
+    {
+        throw std::runtime_error( "LinearSystem::matvec: vector size mismatch" );
+    }
+
+    y.assign(N, 0.0);
+
+    for (std::size_t i = 0; i < N; ++i)
+    {
+        for (const auto& [j, aij] : A_[i])
+        {
+            y[i] += aij * x[j];
+        }
+    }
 }

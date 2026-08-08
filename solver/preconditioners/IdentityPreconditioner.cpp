@@ -1,7 +1,7 @@
 #include "solver/preconditioners/IdentityPreconditioner.hpp"
 
 void IdentityPreconditioner::setup(
-    const LinearSystem&)
+    const LinearEquationSystem&)
 {
     // Nothing to do.
 }

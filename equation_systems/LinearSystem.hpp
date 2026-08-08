@@ -4,7 +4,7 @@
 #include <utility>
 #include <vector>
 
-#include "equation_systems/EquationSystem.hpp"
+#include "equation_systems/LinearEquationSystem.hpp"
 
 // ============================================================
 // Sparse scalar linear system
@@ -17,7 +17,7 @@
 // systems.
 // ============================================================
 
-class LinearSystem : public EquationSystem
+class LinearSystem : public LinearEquationSystem
 {
 public:
     LinearSystem() = default;
@@ -48,6 +48,9 @@ public:
     double diagonal(std::size_t i) const;
 
     std::size_t nnz() const;
+
+    void matvec( const std::vector<double>& x, std::vector<double>& y ) const override;
+
 
 private:
     std::size_t n_ = 0;

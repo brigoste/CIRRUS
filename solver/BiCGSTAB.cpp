@@ -7,7 +7,7 @@
 #include <iostream>
 
 std::vector<double> BiCGSTAB(
-    const LinearSystem& sys,
+    const LinearEquationSystem& sys,
     int max_iter,
     double tol,
     const Preconditioner& M)
@@ -15,8 +15,6 @@ std::vector<double> BiCGSTAB(
     // Timer timer("BiCGSTAB total");
 
     const std::size_t N = sys.size();
-
-    if (sys.RHS().size() != N) { throw std::runtime_error("BiCGSTAB: RHS size mismatch"); }
 
     // -----------------------------
     // Initial guess: zero field
@@ -26,13 +24,20 @@ std::vector<double> BiCGSTAB(
     std::vector<double> v(N, 0.0);
     std::vector<double> p(N, 0.0);
     std::vector<double> t(N);
-    std::vector<double> p_hat(N);       // Preconditioning values
+    std::vector<double> p_hat(N);
     std::vector<double> s_hat(N);
     std::vector<double> s(N);
 
     // r = b - A x
-    LA::residual(sys, x, r);
+    sys.matvec(x, r);
+
+    for (std::size_t i = 0; i < N; ++i)
+    {
+        r[i] = sys.rhs(i) - r[i];
+    }
+
     std::cout << "Initial residual = " << LA::norm2(r) << '\n';
+
     r0_hat = r;
 
     double rho_old = 1.0;
@@ -77,7 +82,7 @@ std::vector<double> BiCGSTAB(
         M.apply(p, p_hat);
 
         // v = A(M⁻¹p)
-        LA::matvec(sys, p_hat, v);
+        sys.matvec(p_hat, v);
 
         const double r0v = LA::dot(r0_hat, v);
         if (std::abs(r0v) < 1e-30) 
@@ -110,7 +115,7 @@ std::vector<double> BiCGSTAB(
         M.apply(s, s_hat);
 
         // t = A(M⁻¹s)
-        LA::matvec(sys, s_hat, t);
+        sys.matvec(s_hat, t);
         const double tt = LA::dot(t, t);
         if (std::abs(tt) < 1e-30) 
         { 

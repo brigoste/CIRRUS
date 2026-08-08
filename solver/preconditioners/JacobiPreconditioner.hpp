@@ -1,7 +1,7 @@
 #pragma once
 
 #include "solver/preconditioners/Preconditioner.hpp"
-#include "equation_systems/LinearSystem.hpp"
+#include "equation_systems/LinearEquationSystem.hpp"
 
 #include <vector>
 
@@ -9,7 +9,7 @@ class JacobiPreconditioner : public Preconditioner
 {
 public:
 
-    void setup(const LinearSystem& sys) override;
+    void setup(const LinearEquationSystem& sys) override;
 
     void apply(
         const std::vector<double>& r,

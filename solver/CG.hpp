@@ -1,13 +1,13 @@
 #pragma once
 
-#include "equation_systems/LinearSystem.hpp"
+#include "equation_systems/LinearEquationSystem.hpp"
 #include "solver/preconditioners/Preconditioner.hpp"
 
 #include <vector>
 
 
 std::vector<double> CG(
-    const LinearSystem& sys,
+    const LinearEquationSystem& sys,
     int max_iter,
     double tol,
     const Preconditioner& M);

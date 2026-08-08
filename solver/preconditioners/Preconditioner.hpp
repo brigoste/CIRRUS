@@ -6,7 +6,7 @@
 #include <nlohmann/json.hpp>
 #include "solver/preconditioners/PreconditionerType.hpp"
 
-class LinearSystem;
+class LinearEquationSystem;
 
 inline PreconditionerType preconditioner_from_string(
     const std::string& s)
@@ -62,7 +62,7 @@ public:
     virtual ~Preconditioner() = default;
 
     virtual void setup(
-        const LinearSystem& sys) = 0;
+        const LinearEquationSystem& sys) = 0;
 
     virtual void apply(
         const std::vector<double>& r,

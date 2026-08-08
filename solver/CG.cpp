@@ -1,6 +1,6 @@
 #include "solver/CG.hpp"
 #include "utils/LinearAlgebraUtils.hpp"
-#include "equation_systems/LinearSystem.hpp"
+#include "equation_systems/LinearEquationSystem.hpp"
 
 #include "utils/Timer.hpp"
 
@@ -12,56 +12,14 @@
 #include <chrono>
 #include <limits>
 
-static std::vector<double> matVec(const LinearSystem& sys, const std::vector<double>& x)
-{
-    const std::size_t N = sys.size();
-    std::vector<double> y(N, 0.0);
-
-    static bool printed = false;
-
-    if (!printed)
-    {
-        std::cout
-            << "Matrix size: "
-            << N
-            << " x "
-            << N
-            << "\n";
-
-        std::cout
-            << "NNZ: "
-            << sys.nnz()
-            << "\n";
-
-        std::cout
-            << "NNZ/row: "
-            << static_cast<double>(sys.nnz()) / N
-            << "\n";
-
-        printed = true;
-    }
-
-    for (std::size_t i = 0; i < N; ++i)
-    {
-        const auto& row = sys.row(i);
-
-        for (const auto& [j, aij] : row) 
-        { 
-            y[i] += aij * x[j]; 
-        }
-    }
-
-    return y;
-}
-
-static void printDiagonalStats(const LinearSystem& sys)
+static void printDiagonalStats(const LinearEquationSystem& sys)
 {
     double minDiag = std::numeric_limits<double>::max();
     double maxDiag = 0.0;
 
     for (std::size_t i = 0; i < sys.size(); ++i)
     {
-        double d = std::abs(sys.diagonal(i));
+        double d = std::abs(sys.coeff(i, i));
 
         minDiag = std::min(minDiag, d);
         maxDiag = std::max(maxDiag, d);
@@ -75,7 +33,7 @@ static void printDiagonalStats(const LinearSystem& sys)
 }
 
 std::vector<double> CG(
-    const LinearSystem& sys,
+    const LinearEquationSystem& sys,
     int max_iter,
     double tol,
     const Preconditioner& M)
@@ -87,7 +45,7 @@ std::vector<double> CG(
     std::vector<double> r(N), p(N), Ap(N);
 
     // r = b - A x
-    Ap = matVec(sys, x);
+    sys.matvec(x, Ap);
 
     // Initialization
 
@@ -137,7 +95,7 @@ std::vector<double> CG(
 
         auto start = std::chrono::high_resolution_clock::now();
 
-        Ap = matVec(sys, p);
+        sys.matvec(p, Ap);
 
         auto end = std::chrono::high_resolution_clock::now();
 

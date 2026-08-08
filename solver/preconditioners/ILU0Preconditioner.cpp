@@ -1,13 +1,14 @@
 #include "solver/preconditioners/ILU0Preconditioner.hpp"
 #include "equation_systems/LinearSystem.hpp"
+#include "equation_systems/LinearEquationSystem.hpp"
 
 #include <stdexcept>
 
-void ILU0Preconditioner::copyMatrix(const LinearSystem& sys)
+void ILU0Preconditioner::copyMatrix(const LinearEquationSystem& sys)
 {
     for (std::size_t i = 0; i < N_; ++i)
     {
-        for (auto [j, aij] : sys.row(i))
+        for (const auto& [j, aij] : sys.row(i))
         {
             LU_[i][j] = aij;
         }
@@ -61,7 +62,7 @@ void ILU0Preconditioner::factorize()
     }
 }
 
-void ILU0Preconditioner::setup(const LinearSystem& sys)
+void ILU0Preconditioner::setup(const LinearEquationSystem& sys)
 {
     N_ = sys.size();
     LU_.assign(N_, {});     // guarantees an empty map over LU_.resize(N_);

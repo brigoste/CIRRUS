@@ -9,8 +9,8 @@ class ILU0Preconditioner : public Preconditioner
 {
 public:
 
-    void copyMatrix(const LinearSystem& sys);
-    void setup(const LinearSystem& sys);
+    void copyMatrix(const LinearEquationSystem& sys);
+    void setup(const LinearEquationSystem& sys);
     void factorize();
 
     void apply( const std::vector<double>& r, std::vector<double>& z) const override;
