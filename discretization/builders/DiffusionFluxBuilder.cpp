@@ -1,4 +1,4 @@
-#include "discretization/DiffusionFluxBuilder.hpp"
+#include "discretization/builders/DiffusionFluxBuilder.hpp"
 
 #include "mesh/MeshBase.hpp"
 #include "mesh/primitives/Face.hpp"
@@ -59,8 +59,7 @@ void DiffusionFluxBuilder::apply(
             const Face& face = mesh.face(f);
             const std::size_t P = face.owner;
 
-            const double D =
-                model.diffusionFaceCoefficient(face);
+            const double D = model.diffusionFaceCoefficient(face);
 
             switch (bc->type)
             {
@@ -70,22 +69,14 @@ void DiffusionFluxBuilder::apply(
 
                     if (verificationCase)
                     {
-                        value = verificationCase->exact(
-                            face.center.x[0],
-                            face.center.x[1]
-                        );
+                        value = verificationCase->exact( face.center.x[0], face.center.x[1] );
                     }
                     else
                     {
-                        value =
-                            model.boundaryDirichletValue(*bc, face);
+                        value = model.boundaryDirichletValue(*bc, face);
                     }
 
-                    flux.addBoundaryDiffusion(
-                        P,
-                        D,
-                        value
-                    );
+                    flux.addBoundaryDiffusion( P, D, value );
 
                     break;
                 }
@@ -96,15 +87,10 @@ void DiffusionFluxBuilder::apply(
 
                     if (verificationCase)
                     {
-                        boundaryFlux =
-                            verificationCase->boundaryFlux(face);
+                        boundaryFlux = verificationCase->boundaryFlux(face);
                     }
 
-                    flux.addSource(
-                        P,
-                        -boundaryFlux * face.area,
-                        0.0
-                    );
+                    flux.addSource( P, -boundaryFlux * face.area, 0.0 );
 
                     break;
                 }
@@ -116,8 +102,7 @@ void DiffusionFluxBuilder::apply(
 
                     if (verificationCase)
                     {
-                        ConvectiveData robin =
-                            verificationCase->boundaryConvective(face);
+                        ConvectiveData robin = verificationCase->boundaryConvective(face);
 
                         h = robin.h;
                         Tinf = robin.T_inf;
@@ -125,14 +110,9 @@ void DiffusionFluxBuilder::apply(
 
                     const double hA = h * face.area;
 
-                    const double H =
-                        (hA * D) / (hA + D);
+                    const double H = (hA * D) / (hA + D);
 
-                    flux.addSource(
-                        P,
-                        H * Tinf,
-                        -H
-                    );
+                    flux.addSource( P, H * Tinf, -H );
 
                     break;
                 }

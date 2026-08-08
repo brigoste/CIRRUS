@@ -1,9 +1,9 @@
 #pragma once
 
 #include "discretization/FluxAccumulator.hpp"
-#include "discretization/DiffusionFluxBuilder.hpp"
-#include "discretization/ConvectionFluxBuilder.hpp"
-#include "discretization/SourceFluxBuilder.hpp"
+#include "discretization/builders/DiffusionFluxBuilder.hpp"
+#include "discretization/builders/ConvectionFluxBuilder.hpp"
+#include "discretization/builders/SourceFluxBuilder.hpp"
 
 class MeshBase;
 class PhysicsModel;

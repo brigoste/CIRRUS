@@ -1,22 +1,10 @@
-#include "discretization/FiniteVolumeOperator.hpp"
-
-#include "mesh/MeshBase.hpp"
-#include "mesh/primitives/Face.hpp"
-
-#include "physics/PhysicsModel.hpp"
-#include "linear_system/LinearSystem.hpp"
-
-#include <limits>
-#include <stdexcept>
-#include <iostream>
-#include <numeric>
-#include <algorithm>
+#include "discretization/FiniteVolumeAssembler.hpp"
 
 // =========================================================
 // Core assembly
 // =========================================================
 
-void FiniteVolumeOperator::assemble(
+void FiniteVolumeAssembler::assemble(
     const FluxAccumulator& flux,
     LinearSystem& sys) const
 {

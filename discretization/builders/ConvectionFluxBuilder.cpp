@@ -1,4 +1,4 @@
-#include "discretization/ConvectionFluxBuilder.hpp"
+#include "discretization/builders/ConvectionFluxBuilder.hpp"
 
 void ConvectionFluxBuilder::apply(
     const MeshBase& mesh,
@@ -15,8 +15,7 @@ void ConvectionFluxBuilder::apply(
 
         if (N != Face::INVALID)
         {
-            const double F =
-                model.convectionFaceFlux(face);
+            const double F = model.convectionFaceFlux(face);
 
             flux.addConvection(P, N, F);
         }

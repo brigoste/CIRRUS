@@ -3,7 +3,6 @@
 #include "mesh/Mesh1D.hpp"
 #include "mesh/QuadMesh2D.hpp"
 #include "discretization/FluxBuilder.hpp"
-#include "discretization/operators/GradientFactory.hpp"
 #include "test/verification/VerificationCaseFactory.hpp"
 #include "test/verification/VerificationCase.hpp"
 
@@ -42,15 +41,7 @@ Simulation::Simulation(const SimulationConfig& cfg)
     // 1. Physics
     physics_ = PhysicsFactory::create(cfg.physics);
 
-    // 2. Gradient
-    gradient_ =
-        std::make_unique<GradientOperator>(
-            GradientFactory::create(
-                cfg.discretization.gradientScheme
-            )
-        );
-
-    // 3. Mesh
+    // 2. Mesh
     if (cfg.mesh.type == "line1D")
     {
         mesh_ = std::make_unique<Mesh1D>(
@@ -74,17 +65,17 @@ Simulation::Simulation(const SimulationConfig& cfg)
         );
     }
 
-    // 4. Fields
+    // 3. Fields
     initializeFields();
 
-    // 5. Solver data
+    // 4. Solver data
     flux_ = std::make_unique<FluxAccumulator>(
         mesh_->ncells()
     );
 
     sys_.resize(mesh_->ncells());
 
-    // 6. Boundary conditions
+    // 5. Boundary conditions
     bindBoundaryConditions(cfg);
 
     std::cout << "NCELLS = " << mesh_->ncells() << "\n";

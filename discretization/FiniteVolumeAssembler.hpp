@@ -5,11 +5,11 @@
 #include "discretization/diffusion/DiffusionOperator.hpp"
 #include "discretization/operators/ConvectionOperator.hpp"
 
-class FiniteVolumeOperator
+class FiniteVolumeAssembler
 {
 public:
 
-    FiniteVolumeOperator(
+    FiniteVolumeAssembler(
         const ConvectionOperator& convection,
         const DiffusionOperator& diffusion
     )

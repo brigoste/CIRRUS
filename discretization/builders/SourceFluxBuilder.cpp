@@ -1,4 +1,4 @@
-#include "discretization/SourceFluxBuilder.hpp"
+#include "discretization/builders/SourceFluxBuilder.hpp"
 #include "mesh/MeshBase.hpp"
 #include "physics/PhysicsModel.hpp"
 #include "test/verification/VerificationCase.hpp"

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "discretization/operators/Operator.hpp"
-#include "discretization/DiffusionFluxBuilder.hpp"
+#include "discretization/builders/DiffusionFluxBuilder.hpp"
 
 class DiffusionOperator : public Operator
 {

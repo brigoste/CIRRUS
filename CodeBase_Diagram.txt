@@ -27,7 +27,7 @@
             └────────┬──────────┘
                      ▼
         ┌──────────────────────────┐
-        │ FiniteVolumeOperator     │
+        │ FiniteVolumeAssembler     │
         │ (matrix assembly)        │
         └────────┬─────────────────┘
                  ▼

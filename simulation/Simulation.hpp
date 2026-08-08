@@ -17,10 +17,9 @@
 #include "discretization/convection/UpwindScheme.hpp"
 #include "discretization/convection/CentralDifferenceScheme.hpp"
 #include "discretization/diffusion/DiffusionOperator.hpp"
-#include "discretization/operators/GradientOperator.hpp"
 #include "discretization/operators/ConvectionOperator.hpp"
-#include "discretization/DiffusionFluxBuilder.hpp"
-#include "discretization/FiniteVolumeOperator.hpp"
+#include "discretization/builders/DiffusionFluxBuilder.hpp"
+#include "discretization/FiniteVolumeAssembler.hpp"
 #include "discretization/FluxBuilder.hpp"
 
 #include "solver/CG.hpp"
@@ -88,14 +87,10 @@ private:
 
     ConvectionOperator convection_;
     DiffusionOperator diffusion_;
-    FiniteVolumeOperator fvOperator_;
-    
-    std::unique_ptr<GradientOperator> gradient_;
-    
+    FiniteVolumeAssembler fvOperator_;
     
     SimulationConfig cfg_;
     bool assembled_;
-    // VerificationRegistry verificationRegistry_;
     
     std::unique_ptr<VerificationCase> verificationCase_;
     FieldRegistry fields_;

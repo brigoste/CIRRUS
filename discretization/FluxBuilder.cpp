@@ -3,10 +3,6 @@
 #include "mesh/BoundaryPatchSystem.hpp"
 #include "discretization/FluxBuilder.hpp"
 
-#include <cmath>
-#include <iostream>
-#include <stdexcept>
-
 void FluxBuilder::buildFlux(
     const MeshBase& mesh,
     const PhysicsModel& model,
