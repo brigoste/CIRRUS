@@ -1,23 +1,21 @@
 #pragma once
 
-#include "mesh/MeshBase.hpp"
 #include "linear_system/LinearSystem.hpp"
-#include "physics/PhysicsModel.hpp"
 #include "discretization/FluxAccumulator.hpp"
-#include "discretization/CellFlux.hpp"
-#include "discretization/CellData.hpp"
-#include "discretization/convection/ConvectionScheme.hpp"
-#include "bc/BCType.hpp"
+#include "discretization/diffusion/DiffusionOperator.hpp"
+#include "discretization/operators/ConvectionOperator.hpp"
 
 class FiniteVolumeOperator
 {
 public:
 
     FiniteVolumeOperator(
-        const ConvectionScheme& convectionScheme
+        const ConvectionOperator& convection,
+        const DiffusionOperator& diffusion
     )
     :
-        convectionScheme_(convectionScheme)
+        convection_(convection),
+        diffusion_(diffusion)
     {}
 
     void assemble(
@@ -27,5 +25,6 @@ public:
 
 private:
 
-    const ConvectionScheme& convectionScheme_;
+    const ConvectionOperator& convection_;
+    const DiffusionOperator& diffusion_;
 };

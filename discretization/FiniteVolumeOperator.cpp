@@ -12,11 +12,6 @@
 #include <numeric>
 #include <algorithm>
 
-// static volatile int fv_loaded = [](){
-//     std::cout << ">>> FV FILE LOADED <<<\n";
-//     return 0;
-// }();
-
 // =========================================================
 // Core assembly
 // =========================================================
@@ -30,31 +25,12 @@ void FiniteVolumeOperator::assemble(
     // =========================================================
     // 1. DIFFUSION
     // =========================================================
-    std::cout << "diffusion faces = " << flux.diffusion().size() << "\n";
-
-    for (const auto& f : flux.diffusion())
-    {
-        const auto P = f.P;
-        const auto N = f.N;
-        const double D = f.D;
-
-        if (f.type == FaceType::Interior)
-        {
-            sys.addCoeff(P, P,  D);
-            sys.addCoeff(P, N, -D);
-
-            sys.addCoeff(N, N,  D);
-            sys.addCoeff(N, P, -D);
-        }
-    }
+    diffusion_.assemble(flux, sys);
 
     // =========================================================
-    // 2. CONVECTION (1st-order upwind)
+    // 2. CONVECTION
     // =========================================================
-    for (const auto& f : flux.convection())
-    {
-        convectionScheme_.assemble(f, sys);
-    }
+    convection_.assemble(flux, sys);
 
     // =========================================================
     // 3. SOURCES + BCs

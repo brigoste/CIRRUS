@@ -10,6 +10,10 @@
 class FluxBuilder
 {
 public:
+    FluxBuilder(const DiffusionOperator& diffusion)
+        :
+        diffusion_(diffusion)
+    {}
     void buildFlux(
         const MeshBase& mesh,
         const PhysicsModel& model,
@@ -17,5 +21,5 @@ public:
         FluxAccumulator& flux,
         const VerificationCase* verificationCase);
 private:
-    DiffusionOperator diffusion_;
+        const DiffusionOperator& diffusion_;
 };

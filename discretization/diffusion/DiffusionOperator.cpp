@@ -7,7 +7,9 @@
 void DiffusionOperator::apply(
     const MeshBase& mesh,
     const PhysicsModel& model,
-    FluxAccumulator& flux
+    const BoundaryPatchSystem& boundary,
+    FluxAccumulator& flux,
+    const VerificationCase* verificationCase
 ) const
 {
     if (flux.size() != mesh.ncells())
@@ -17,6 +19,9 @@ void DiffusionOperator::apply(
         );
     }
 
+    // =====================================================
+    // 1. INTERIOR FACES
+    // =====================================================
     for (std::size_t f = 0; f < mesh.nfaces(); ++f)
     {
         const Face& face = mesh.face(f);
@@ -24,15 +29,136 @@ void DiffusionOperator::apply(
         const std::size_t P = face.owner;
         const std::size_t N = face.neighbor;
 
-        // -------------------------------------------------
-        // Interior face
-        // -------------------------------------------------
         if (N != Face::INVALID)
         {
+            const double D = model.diffusionFaceCoefficient(face);
+
+            flux.addDiffusion(P, N, D);
+        }
+    }
+
+    // =====================================================
+    // 2. BOUNDARY FACES
+    // =====================================================
+    for (std::size_t g = 0; g < mesh.nBoundaryGroups(); ++g)
+    {
+        const auto* bc = boundary.getGroup(g);
+
+        if (!bc)
+        {
+            continue;
+        }
+
+        const auto& faces = mesh.boundaryFaces(g);
+
+        for (std::size_t f : faces)
+        {
+            const Face& face = mesh.face(f);
+            const std::size_t P = face.owner;
+
             const double D =
                 model.diffusionFaceCoefficient(face);
 
-            flux.addDiffusion(P, N, D);
+            switch (bc->type)
+            {
+                case bc::Type::Dirichlet:
+                {
+                    double value = bc->value;
+
+                    if (verificationCase)
+                    {
+                        value = verificationCase->exact(
+                            face.center.x[0],
+                            face.center.x[1]
+                        );
+                    }
+                    else
+                    {
+                        value =
+                            model.boundaryDirichletValue(*bc, face);
+                    }
+
+                    flux.addBoundaryDiffusion(
+                        P,
+                        D,
+                        value
+                    );
+
+                    break;
+                }
+
+                case bc::Type::Neumann:
+                {
+                    double boundaryFlux = bc->flux;
+
+                    if (verificationCase)
+                    {
+                        boundaryFlux =
+                            verificationCase->boundaryFlux(face);
+                    }
+
+                    flux.addSource(
+                        P,
+                        -boundaryFlux * face.area,
+                        0.0
+                    );
+
+                    break;
+                }
+
+                case bc::Type::Convective:
+                {
+                    double h = bc->h;
+                    double Tinf = bc->Tinf;
+
+                    if (verificationCase)
+                    {
+                        ConvectiveData robin =
+                            verificationCase->boundaryConvective(face);
+
+                        h = robin.h;
+                        Tinf = robin.T_inf;
+                    }
+
+                    const double hA = h * face.area;
+
+                    const double H =
+                        (hA * D) / (hA + D);
+
+                    flux.addSource(
+                        P,
+                        H * Tinf,
+                        -H
+                    );
+
+                    break;
+                }
+
+                default:
+                    break;
+            }
+        }
+    }
+}
+
+void DiffusionOperator::assemble(
+    const FluxAccumulator& flux,
+    LinearSystem& sys
+) const
+{
+    for (const auto& f : flux.diffusion())
+    {
+        const auto P = f.P;
+        const auto N = f.N;
+        const double D = f.D;
+
+        if (f.type == FaceType::Interior)
+        {
+            sys.addCoeff(P, P,  D);
+            sys.addCoeff(P, N, -D);
+
+            sys.addCoeff(N, N,  D);
+            sys.addCoeff(N, P, -D);
         }
     }
 }

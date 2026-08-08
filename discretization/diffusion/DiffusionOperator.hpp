@@ -3,14 +3,26 @@
 #include "mesh/MeshBase.hpp"
 #include "physics/PhysicsModel.hpp"
 #include "discretization/FluxAccumulator.hpp"
+#include "mesh/BoundaryPatchSystem.hpp"
+#include "test/verification/VerificationCase.hpp"
+#include "linear_system/LinearSystem.hpp"
 
-class DiffusionOperator
+#include "discretization/operators/Operator.hpp"
+
+class DiffusionOperator : public Operator
 {
 public:
 
     void apply(
         const MeshBase& mesh,
         const PhysicsModel& model,
-        FluxAccumulator& flux
+        const BoundaryPatchSystem& boundary,
+        FluxAccumulator& flux,
+        const VerificationCase* verificationCase = nullptr
     ) const;
+
+    void assemble(
+        const FluxAccumulator& flux,
+        LinearSystem& sys
+    ) const override;
 };

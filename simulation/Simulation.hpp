@@ -18,6 +18,7 @@
 #include "discretization/convection/CentralDifferenceScheme.hpp"
 #include "discretization/FiniteVolumeOperator.hpp"
 #include "discretization/operators/GradientOperator.hpp"
+#include "discretization/diffusion/DiffusionOperator.hpp"
 #include "solver/CG.hpp"
 #include "solver/SOR.hpp"
 #include "solver/TDMA.hpp"
@@ -76,10 +77,13 @@ private:
 
     LinearSystem sys_;
     std::unique_ptr<FluxAccumulator> flux_;
-    
+
     CentralDifferenceScheme convectionScheme_;
+    ConvectionOperator convection_;
+    DiffusionOperator diffusion_;
     std::unique_ptr<FiniteVolumeOperator> fvOperator_;
     std::unique_ptr<GradientOperator> gradient_;
+    
     
     SimulationConfig cfg_;
     bool assembled_;

@@ -4,7 +4,7 @@ GradientOperator::GradientOperator(
     std::unique_ptr<GradientScheme> scheme
 )
 :
-scheme_(std::move(scheme))
+    scheme_(std::move(scheme))
 {
     if (!scheme_)
     {

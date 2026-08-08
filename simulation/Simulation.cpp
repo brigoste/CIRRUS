@@ -31,8 +31,9 @@ void Simulation::initializeFields()
 // ============================================================
 
 Simulation::Simulation(const SimulationConfig& cfg)
-: cfg_(cfg),
-  assembled_(false)
+    : convection_(convectionScheme_),
+      cfg_(cfg),
+      assembled_(false)
 {
     // 1. Physics
     physics_ = PhysicsFactory::create(cfg.physics);
@@ -88,7 +89,8 @@ Simulation::Simulation(const SimulationConfig& cfg)
 
     fvOperator_ =
         std::make_unique<FiniteVolumeOperator>(
-            convectionScheme_
+            convection_,
+            diffusion_
         );
 
 
@@ -118,7 +120,7 @@ void Simulation::assemble()
     flux_->reset();
     sys_.clear();
 
-    FluxBuilder fluxBuilder;
+    FluxBuilder fluxBuilder(diffusion_);
 
     fluxBuilder.buildFlux( *mesh_, *physics_, boundary_, *flux_, verificationCase_.get()); 
 
