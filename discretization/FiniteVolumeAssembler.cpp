@@ -6,7 +6,7 @@
 
 void FiniteVolumeAssembler::assemble(
     const FluxAccumulator& flux,
-    LinearSystem& sys) const
+    EquationSystem& sys) const
 {
     // =========================================================
     // 1. DIFFUSION

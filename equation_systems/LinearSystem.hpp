@@ -4,7 +4,7 @@
 #include <utility>
 #include <vector>
 
-#include "linear_system/EquationSystem.hpp"
+#include "equation_systems/EquationSystem.hpp"
 
 // ============================================================
 // Sparse scalar linear system

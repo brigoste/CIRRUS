@@ -29,7 +29,7 @@ Future:
 - [x] Field registry infrastructure
 - [x] Simulation integration with FieldRegistry
 - [x] Generic operator framework 
-- [ ] Generic equation system abstraction  --------------------> next
+- [x] Generic equation system abstraction
 - [ ] Matrix/vector assembly interface
 
 Future:

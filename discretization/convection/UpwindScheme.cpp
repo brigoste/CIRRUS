@@ -4,7 +4,7 @@
 
 void UpwindScheme::assemble(
     const FaceConvection& face,
-    LinearSystem& sys
+    EquationSystem& sys
 ) const
 {
     const auto P = face.P;

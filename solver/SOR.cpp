@@ -1,6 +1,6 @@
 #include <algorithm>
 #include <vector>
-#include <linear_system/LinearSystem.hpp>
+#include <equation_systems/LinearSystem.hpp>
 #include <cmath>
 #include <stdexcept>
 #include <string>

@@ -1,5 +1,5 @@
 #include "solver/preconditioners/ILU0Preconditioner.hpp"
-#include "linear_system/LinearSystem.hpp"
+#include "equation_systems/LinearSystem.hpp"
 
 #include <stdexcept>
 

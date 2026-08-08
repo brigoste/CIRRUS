@@ -11,7 +11,7 @@
 #include "physics/PhysicsModel.hpp"
 #include "physics/PhysicsFactory.hpp"
 #include "physics/HeatPhysicsModel.hpp"
-#include "linear_system/LinearSystem.hpp"
+#include "equation_systems/LinearSystem.hpp"
 #include "bc/BoundaryFace.hpp"
 
 #include "discretization/convection/UpwindScheme.hpp"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "linear_system/LinearSystem.hpp"
+#include "equation_systems/LinearSystem.hpp"
 #include "mesh/primitives/Point.hpp"
 #include "mesh/primitives/Vector.hpp"
 #include <vector>

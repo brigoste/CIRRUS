@@ -1,6 +1,6 @@
 #pragma once
 
-#include "linear_system/LinearSystem.hpp"
+#include "equation_systems/LinearSystem.hpp"
 #include "solver/preconditioners/Preconditioner.hpp"
 
 #include <vector>

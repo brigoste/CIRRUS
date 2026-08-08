@@ -4,7 +4,7 @@
 #include "config/PathContext.hpp"
 #include "test/verification/VerificationCaseFactory.hpp"
 #include "mesh/MeshBase.hpp"
-#include "linear_system/LinearSystem.hpp"
+#include "equation_systems/LinearSystem.hpp"
 #include <fstream>
 
 class VerificationRunner

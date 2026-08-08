@@ -1,7 +1,7 @@
-#include "linear_system/Residual.hpp"
+#include "equation_systems/Residual.hpp"
 
 #include "fields/ScalarField.hpp"
-#include "linear_system/LinearSystem.hpp"
+#include "equation_systems/LinearSystem.hpp"
 
 std::vector<double> computeResidual(
     const LinearSystem& sys,

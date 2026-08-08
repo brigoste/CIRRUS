@@ -1,6 +1,6 @@
 #pragma once
 
-#include "linear_system/LinearSystem.hpp"
+#include "equation_systems/LinearSystem.hpp"
 #include <vector>
 
 // 1D-only solver (tridiagonal system)

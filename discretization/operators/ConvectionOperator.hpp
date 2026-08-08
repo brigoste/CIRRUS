@@ -13,7 +13,7 @@ public:
 
     void assemble(
         const FluxAccumulator& flux,
-        LinearSystem& sys
+        EquationSystem& sys
     ) const override;
 
 private:

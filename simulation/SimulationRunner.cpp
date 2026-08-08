@@ -1,6 +1,6 @@
 #include "simulation/SimulationRunner.hpp"
 #include "simulation/Simulation.hpp"
-#include "linear_system/Residual.hpp"
+#include "equation_systems/Residual.hpp"
 #include "postprocessing/BoundaryReconstructor.hpp"
 #include "io/OutputManager.hpp"
 #include "io/OutputData.hpp"

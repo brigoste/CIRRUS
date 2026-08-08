@@ -1,7 +1,7 @@
 #pragma once
 
 #include "discretization/FaceConvection.hpp"
-#include "linear_system/LinearSystem.hpp"
+#include "equation_systems/EquationSystem.hpp"
 
 class ConvectionScheme
 {
@@ -11,6 +11,6 @@ public:
 
     virtual void assemble(
         const FaceConvection& face,
-        LinearSystem& sys
+        EquationSystem& sys
     ) const = 0;
 };

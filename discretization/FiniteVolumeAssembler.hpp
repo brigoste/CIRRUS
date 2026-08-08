@@ -1,6 +1,6 @@
 #pragma once
 
-#include "linear_system/LinearSystem.hpp"
+#include "equation_systems/EquationSystem.hpp"
 #include "discretization/FluxAccumulator.hpp"
 #include "discretization/diffusion/DiffusionOperator.hpp"
 #include "discretization/operators/ConvectionOperator.hpp"
@@ -20,7 +20,7 @@ public:
 
     void assemble(
         const FluxAccumulator& flux,
-        LinearSystem& sys
+        EquationSystem& sys
     ) const;
 
 private:

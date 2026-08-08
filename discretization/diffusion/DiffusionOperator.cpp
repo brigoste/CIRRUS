@@ -5,7 +5,7 @@
 
 void DiffusionOperator::assemble(
     const FluxAccumulator& flux,
-    LinearSystem& sys
+    EquationSystem& sys
 ) const
 {
     for (const auto& f : flux.diffusion())

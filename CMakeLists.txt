@@ -35,7 +35,7 @@ file(GLOB_RECURSE CIRRUS_SOURCES
     ${PROJECT_SOURCE_DIR}/discretization/*.cpp
     ${PROJECT_SOURCE_DIR}/fields/*.cpp
     ${PROJECT_SOURCE_DIR}/io/*.cpp
-    ${PROJECT_SOURCE_DIR}/linear_system/*.cpp
+    ${PROJECT_SOURCE_DIR}/equation_systems/*.cpp
     ${PROJECT_SOURCE_DIR}/postprocessing/*.cpp
     ${PROJECT_SOURCE_DIR}/physics/*.cpp
     ${PROJECT_SOURCE_DIR}/simulation/*.cpp

@@ -1,6 +1,6 @@
 #include "solver/CG.hpp"
 #include "utils/LinearAlgebraUtils.hpp"
-#include "linear_system/LinearSystem.hpp"
+#include "equation_systems/LinearSystem.hpp"
 
 #include "utils/Timer.hpp"
 

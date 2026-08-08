@@ -42,36 +42,15 @@ Simulation::Simulation(const SimulationConfig& cfg)
     physics_ = PhysicsFactory::create(cfg.physics);
 
     // 2. Mesh
-    if (cfg.mesh.type == "line1D")
-    {
-        mesh_ = std::make_unique<Mesh1D>(
-            cfg.mesh.nx,
-            cfg.mesh.lx
-        );
-    }
-    else if (cfg.mesh.type == "quad2D")
-    {
-        mesh_ = std::make_unique<QuadMesh2D>(
-            cfg.mesh.nx,
-            cfg.mesh.ny,
-            cfg.mesh.lx,
-            cfg.mesh.ly
-        );
-    }
-    else
-    {
-        throw std::runtime_error(
-            "Unsupported mesh type: " + cfg.mesh.type
-        );
-    }
+    if (cfg.mesh.type == "line1D") { mesh_ = std::make_unique<Mesh1D>( cfg.mesh.nx, cfg.mesh.lx ); }
+    else if (cfg.mesh.type == "quad2D") { mesh_ = std::make_unique<QuadMesh2D>( cfg.mesh.nx, cfg.mesh.ny, cfg.mesh.lx, cfg.mesh.ly ); }
+    else { throw std::runtime_error( "Unsupported mesh type: " + cfg.mesh.type ); }
 
     // 3. Fields
     initializeFields();
 
     // 4. Solver data
-    flux_ = std::make_unique<FluxAccumulator>(
-        mesh_->ncells()
-    );
+    flux_ = std::make_unique<FluxAccumulator>( mesh_->ncells() );
 
     sys_.resize(mesh_->ncells());
 

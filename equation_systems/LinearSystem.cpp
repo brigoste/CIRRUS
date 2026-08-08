@@ -1,4 +1,4 @@
-#include "linear_system/LinearSystem.hpp"
+#include "equation_systems/LinearSystem.hpp"
 
 #include <algorithm>
 

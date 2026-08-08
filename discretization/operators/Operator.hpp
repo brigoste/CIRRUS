@@ -1,7 +1,7 @@
 #pragma once
 
 #include "discretization/FluxAccumulator.hpp"
-#include "linear_system/LinearSystem.hpp"
+#include "equation_systems/EquationSystem.hpp"
 
 class Operator
 {
@@ -11,6 +11,6 @@ public:
 
     virtual void assemble(
         const FluxAccumulator& flux,
-        LinearSystem& sys
+        EquationSystem& sys
     ) const = 0;
 };

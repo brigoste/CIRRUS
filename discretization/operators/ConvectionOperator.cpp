@@ -9,7 +9,7 @@ ConvectionOperator::ConvectionOperator(
 
 void ConvectionOperator::assemble(
     const FluxAccumulator& flux,
-    LinearSystem& sys
+    EquationSystem& sys
 ) const
 {
     for (const auto& f : flux.convection())
