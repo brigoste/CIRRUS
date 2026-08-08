@@ -28,8 +28,8 @@ Future:
 - [x] Vector field storage
 - [x] Field registry infrastructure
 - [x] Simulation integration with FieldRegistry
-- [ ] Generic operator framework   --------------------> next
-- [ ] Generic equation system abstraction
+- [x] Generic operator framework 
+- [ ] Generic equation system abstraction  --------------------> next
 - [ ] Matrix/vector assembly interface
 
 Future:

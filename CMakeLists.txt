@@ -53,8 +53,6 @@ file(GLOB_RECURSE CIRRUS_SOURCES
     ${PROJECT_SOURCE_DIR}/mesh/primitives/Point.cpp
     ${PROJECT_SOURCE_DIR}/mesh/MeshGeometry.cpp
 
-    # Outdated:
-    #   ${PROJECT_SOURCE_DIR}/system/*.cpp
 )
 
 # ----------------------------------------
