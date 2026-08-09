@@ -21,7 +21,7 @@ double Convective2D::source(double x, double y) const
     return -k_ * laplacian(x,y);
 }
 
-double Convective2D::boundaryFlux(const Face& face) const
+double Convective2D::manufacturedBoundaryFlux(const Face& face) const
 {
     const double x = face.center.x[0];
     const double y = face.center.x[1];
@@ -35,7 +35,7 @@ double Convective2D::boundaryFlux(const Face& face) const
     return -k_ * dTdn;
 }
 
-ConvectiveData Convective2D::boundaryConvective(const Face& face) const
+ConvectiveData Convective2D::manufacturedConvectiveBoundary(const Face& face) const
 {
     ConvectiveData convective{};
 

@@ -6,6 +6,7 @@
 #include "mesh/BoundaryPatchSystem.hpp"
 #include "test/verification/VerificationCase.hpp"
 #include <stdexcept>
+#include <iostream>
 
 void DiffusionFluxBuilder::apply(
     const MeshBase& mesh,
@@ -71,26 +72,22 @@ void DiffusionFluxBuilder::apply(
                     {
                         value = verificationCase->exact( face.center.x[0], face.center.x[1] );
                     }
-                    else
-                    {
-                        value = model.boundaryDirichletValue(*bc, face);
-                    }
 
                     flux.addBoundaryDiffusion( P, D, value );
-
+                    
                     break;
                 }
 
                 case bc::Type::Neumann:
                 {
-                    double boundaryFlux = bc->flux;
+                    double manufacturedBoundaryFlux = bc->flux;
 
                     if (verificationCase)
                     {
-                        boundaryFlux = verificationCase->boundaryFlux(face);
+                        manufacturedBoundaryFlux = verificationCase->manufacturedBoundaryFlux(face);
                     }
 
-                    flux.addSource( P, -boundaryFlux * face.area, 0.0 );
+                    flux.addSource( P, -manufacturedBoundaryFlux * face.area, 0.0 );
 
                     break;
                 }
@@ -102,7 +99,7 @@ void DiffusionFluxBuilder::apply(
 
                     if (verificationCase)
                     {
-                        ConvectiveData robin = verificationCase->boundaryConvective(face);
+                        ConvectiveData robin = verificationCase->manufacturedConvectiveBoundary(face);
 
                         h = robin.h;
                         Tinf = robin.T_inf;

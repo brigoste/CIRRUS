@@ -168,7 +168,7 @@ std::vector<double> GMRES(
 
         for (std::size_t i = 0; i < N; ++i)
         {
-            V[0][i] = z[i] / betaPreconditioned;
+            V[0][i] = z[i] / beta;      // betaPreconditioned?
         }
 
         // Reset Hessenberg matrix and Givens data
@@ -284,16 +284,6 @@ std::vector<double> GMRES(
             g[j + 1] = -sn[j] * g1 + cs[j] * g2;
 
             const double residualEstimate = std::abs(g[j + 1]);
-
-            // if (totalIterations % 50 == 0)
-            // {
-            //     std::cout
-            //         << "GMRES iter "
-            //         << totalIterations
-            //         << ": residual = "
-            //         << residualEstimate
-            //         << '\n';
-            // }
 
             // -------------------------------------------------
             // Solve/update if converged

@@ -44,8 +44,7 @@ public:
     // =========================================================
     void addDiffusion(std::size_t P, std::size_t N, double D)
     {
-        if (N == Face::INVALID) { diffusion_.push_back({P, N, D, FaceType::Boundary}); }
-        else { diffusion_.push_back({P, N, D, FaceType::Interior}); }
+        diffusion_.push_back({P, N, D});
     }
     void addBoundaryDiffusion(std::size_t P, double D, double value)
     {

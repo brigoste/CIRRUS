@@ -30,10 +30,10 @@
 
     "solver": {
       "type": "GMRES",
-      "preconditioner": "Jacobi",
+      "preconditioner": "ILU0",
       "tol": 1e-8,
       "max_iter": 5000,
-      "restart": 100
+      "restart": 10
     },
 
     "boundary_conditions": [

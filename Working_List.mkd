@@ -47,7 +47,11 @@ Future:
 - [x] SOR
 - [x] Conjugate Gradient (CG)
 - [x] BiCGSTAB
-- [ ] GMRES
+- [x] GMRES
+
+Performance notes:
+
+- GMRES restart sensitivity characterized
 
 ### Preconditioners
 
@@ -56,6 +60,11 @@ Future:
 - [x] ILU(0)
 - [ ] SSOR
 - [ ] Algebraic Multigrid (AMG)
+
+- Jacobi preconditioning verified but currently computationally expensive
+- ILU(0) verified and improves convergence relative to Jacobi
+- Preconditioner performance should be revisited during solver optimization
+
 
 ### Matrix Infrastructure
 
@@ -162,9 +171,17 @@ Future:
 
 - [x] Diffusion flux framework
 - [x] Convective flux framework
+- [x] Source contribution framework
 - [ ] Generic face flux interface
 - [ ] Separate flux calculation from discretization
 - [ ] Face interpolation framework
+
+Optimization / architecture notes:
+
+- Keep flux evaluation independent from equation assembly where practical
+- Minimize repeated face/cell property lookups
+- Preserve compatibility with matrix-free operators
+- Design interfaces with future SIMD/OpenMP/GPU execution in mind
 
 ---
 

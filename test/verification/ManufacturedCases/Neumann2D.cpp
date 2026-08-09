@@ -19,7 +19,7 @@ double Neumann2D::laplacian(double, double) const
     return 2.0*c_ + 2.0*d_;
 }
 
-double Neumann2D::boundaryFlux(const Face& face) const
+double Neumann2D::manufacturedBoundaryFlux(const Face& face) const
 {
     const double x = face.center.x[0];
     const double y = face.center.x[1];

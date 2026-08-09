@@ -31,13 +31,13 @@ public:
     virtual double laplacian(double x, double y) const = 0;
     virtual double source(double x, double y) const = 0;
 
-    virtual double boundaryFlux(const Face&) const
+    virtual double manufacturedBoundaryFlux(const Face&) const
     {
         throw std::runtime_error(
             "Neumann boundary flux not implemented for this verification case."
         );
     }
-    virtual ConvectiveData boundaryConvective(const Face&) const
+    virtual ConvectiveData manufacturedConvectiveBoundary(const Face&) const
     {
         throw std::runtime_error(
             "Convective boundary data not implemented for this verification case."

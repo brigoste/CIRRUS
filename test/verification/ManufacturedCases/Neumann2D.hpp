@@ -64,7 +64,7 @@ public:
 
     double laplacian(double x, double y = 0.0) const override;
 
-    double boundaryFlux(const Face& face) const override;
+    double manufacturedBoundaryFlux(const Face& face) const override;
     
     double l2AcceptanceThreshold() const override { return 5e-2; }
     double linfAcceptanceThreshold() const override { return 5e-2; }

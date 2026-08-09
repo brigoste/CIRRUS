@@ -26,15 +26,6 @@ public:
     virtual double convectionFaceFlux(const Face& face) const = 0;
     virtual double diffusionCoefficient() const = 0;
 
-    // =====================================================
-    // Boundary handling
-    // =====================================================
-    virtual double boundaryDirichletValue( const BoundaryPatchSystem::Condition& bc, const Face& face) const
-    {
-        (void)face;
-        return bc.value;
-    }
-
     virtual double reconstructBoundaryValue( const BoundaryPatchSystem::Condition& bc, double phiCell, double dx, bool isLeft) const = 0;
 
     // =====================================================

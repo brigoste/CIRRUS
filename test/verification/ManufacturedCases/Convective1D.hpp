@@ -25,7 +25,7 @@ public:
 
     double source(double x, double y) const override;
 
-    ConvectiveData boundaryConvective(const Face& face) const override;
+    ConvectiveData manufacturedConvectiveBoundary(const Face& face) const override;
 
     double l2AcceptanceThreshold() const override                       { return 5e-2; }
 

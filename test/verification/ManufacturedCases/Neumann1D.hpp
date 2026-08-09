@@ -51,7 +51,7 @@ public:
 
     double l2AcceptanceThreshold() const override       { return 1e-3; }
     double linfAcceptanceThreshold() const override     { return 1e-3; }
-    double boundaryFlux(const Face&) const override     { return qR_; }
+    double manufacturedBoundaryFlux(const Face&) const override     { return qR_; }
 
 private:
 

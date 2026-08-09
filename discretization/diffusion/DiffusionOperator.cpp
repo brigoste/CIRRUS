@@ -14,13 +14,10 @@ void DiffusionOperator::assemble(
         const auto N = f.N;
         const double D = f.D;
 
-        if (f.type == FaceType::Interior)
-        {
-            sys.addCoeff(P, P,  D);
-            sys.addCoeff(P, N, -D);
+        sys.addCoeff(P, P,  D);
+        sys.addCoeff(P, N, -D);
 
-            sys.addCoeff(N, N,  D);
-            sys.addCoeff(N, P, -D);
-        }
+        sys.addCoeff(N, N,  D);
+        sys.addCoeff(N, P, -D);
     }
 }
