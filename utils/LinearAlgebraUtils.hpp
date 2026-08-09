@@ -1,6 +1,6 @@
 #pragma once
 
-#include "equation_systems/LinearSystem.hpp"
+#include "equation_systems/LinearEquationSystem.hpp"
 #include "mesh/primitives/Point.hpp"
 #include "mesh/primitives/Vector.hpp"
 #include <vector>
@@ -13,7 +13,7 @@ namespace LA
 // --------------------------------------------------
 // Matrix-vector product: y = A x
 // --------------------------------------------------
-inline void matvec(const LinearSystem& sys, const std::vector<double>& x, std::vector<double>& y)
+inline void matvec(const LinearEquationSystem& sys, const std::vector<double>& x, std::vector<double>& y)
 {
     const std::size_t N = sys.size();
 
@@ -114,7 +114,7 @@ inline double norm2(const std::vector<double>& x)
 // --------------------------------------------------
 // Residual: r = b - A x
 // --------------------------------------------------
-inline void residual(const LinearSystem& sys, const std::vector<double>& x, std::vector<double>& r)
+inline void residual(const LinearEquationSystem& sys, const std::vector<double>& x, std::vector<double>& r)
 {
     const std::size_t N = sys.size();
 
@@ -122,8 +122,6 @@ inline void residual(const LinearSystem& sys, const std::vector<double>& x, std:
     { 
         throw std::runtime_error("residual: dimension mismatch"); 
     }
-
-    const auto& b = sys.RHS();
 
     for (std::size_t i = 0; i < N; ++i)
     {
@@ -134,7 +132,7 @@ inline void residual(const LinearSystem& sys, const std::vector<double>& x, std:
             Ax += aij * x[j]; 
         }
 
-        r[i] = b[i] - Ax;
+        r[i] = sys.rhs(i) - Ax;
     }
 }
 

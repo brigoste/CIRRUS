@@ -84,7 +84,8 @@ void SimulationRunner::run(
     auto output =
         OutputBuilder::build(
             sim,
-            temperature);
+            temperature,
+            residual);
     
     // -----------------------------
     // Write outputs

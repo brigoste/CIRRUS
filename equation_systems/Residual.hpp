@@ -2,13 +2,13 @@
 
 #include <vector>
 
-class LinearSystem;
+class LinearEquationSystem;
 class ScalarField;
 
 std::vector<double> computeResidual(
-    const LinearSystem& sys,
+    const LinearEquationSystem& sys,
     const std::vector<double>& x);
 
 std::vector<double> computeResidual(
-    const LinearSystem& sys,
+    const LinearEquationSystem& sys,
     const ScalarField& field);

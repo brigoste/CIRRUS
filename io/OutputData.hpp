@@ -17,6 +17,6 @@ struct OutputData
 
     std::shared_ptr<PointField> reconstructedField;
 
-    const std::vector<double>& rhs;
-    const std::vector<double>& residual;
+    std::vector<double> rhs;
+    std::vector<double> residual;
 };

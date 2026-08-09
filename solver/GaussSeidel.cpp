@@ -1,9 +1,16 @@
-#include "equation_systems/LinearSystem.hpp"
-#include <vector>
+#include "solver/GaussSeidel.hpp"
+#include "equation_systems/LinearEquationSystem.hpp"
+
+#include <algorithm>
 #include <cmath>
 #include <stdexcept>
+#include <string>
+#include <vector>
 
-std::vector<double> GaussSeidel( const LinearSystem& sys, int max_iter, double tol)
+std::vector<double> GaussSeidel(
+    const LinearEquationSystem& sys,
+    int max_iter,
+    double tol)
 {
     const std::size_t N = sys.size();
 
@@ -22,30 +29,36 @@ std::vector<double> GaussSeidel( const LinearSystem& sys, int max_iter, double t
 
             for (const auto& [j, aij] : row)
             {
-                if (j == i) 
-                { 
-                    diag = aij; 
+                if (j == i)
+                {
+                    diag = aij;
                 }
-                else 
-                { 
-                    sum += aij * x[j]; 
+                else
+                {
+                    sum += aij * x[j];
                 }
             }
 
-            if (std::abs(diag) < 1e-14) 
-            { 
-                throw std::runtime_error("Zero diagonal in GS"); 
+            if (std::abs(diag) < 1e-14)
+            {
+                throw std::runtime_error(
+                    "Zero diagonal in GS"
+                );
             }
 
             double x_new = (sys.rhs(i) - sum) / diag;
 
-            maxRes = std::max(maxRes, std::abs(x_new - x[i]));
+            maxRes = std::max(
+                maxRes,
+                std::abs(x_new - x[i])
+            );
+
             x[i] = x_new;
         }
 
-        if (maxRes < tol) 
-        { 
-            break; 
+        if (maxRes < tol)
+        {
+            break;
         }
     }
 

@@ -8,40 +8,31 @@
 
 #include "postprocessing/BoundaryReconstructor.hpp"
 
-#include <vector>
+#include "equation_systems/LinearEquationSystem.hpp"
+
 #include <memory>
 
 OutputData OutputBuilder::build(
     const Simulation& sim,
-    const ScalarField& field)
+    const ScalarField& field,
+    const std::vector<double>& residual)
 {
-    auto reconstructed = 
-    std::make_shared<PointField>(
-        BoundaryReconstructor::reconstruct(
-            sim.mesh(),
-            sim.boundary(),
-            sim.model(),
-            field));
+    auto reconstructed =
+        std::make_shared<PointField>(
+            BoundaryReconstructor::reconstruct(
+                sim.mesh(),
+                sim.boundary(),
+                sim.model(),
+                field));
+    
+    const auto& sys = sim.system();
 
-    std::vector<FieldOutput> fields;
+    std::vector<double> rhs(sys.size());
 
-    fields.push_back(
-        FieldOutput{
-            field.name(),
-            &field,
-            nullptr
-        });
-
-    fields.push_back(
-        FieldOutput{
-            "reconstructed",
-            nullptr,
-            reconstructed.get()
-        });
-
-    std::vector<double> residual(
-        field.size(),
-        0.0);
+    for (std::size_t i = 0; i < sys.size(); ++i)
+    {
+        rhs[i] = sys.rhs(i);
+    }
 
     return OutputData{
         sim.mesh(),
@@ -53,7 +44,7 @@ OutputData OutputBuilder::build(
             }
         },
         reconstructed,
-        sim.system().RHS(),
+        std::move(rhs),
         residual
     };
 }

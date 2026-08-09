@@ -1,5 +1,10 @@
 #pragma once
-#include "equation_systems/LinearSystem.hpp"
+
 #include <vector>
 
-std::vector<double> GaussSeidel( const LinearSystem& sys, int max_iter, double tol);
+class LinearEquationSystem;
+
+std::vector<double> GaussSeidel(
+    const LinearEquationSystem& sys,
+    int max_iter,
+    double tol);

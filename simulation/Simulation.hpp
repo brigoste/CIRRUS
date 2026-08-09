@@ -29,6 +29,8 @@
 #include "solver/BiCGSTAB.hpp"
 #include "solver/SolverMethod.hpp"
 
+#include "equation_systems/LinearEquationSystem.hpp"
+
 // ============================================================
 // Simulation = composition root
 // ============================================================
@@ -47,7 +49,7 @@ public:
     // external accessors
     // -------------------------
     const MeshBase& mesh() const                                        { return *mesh_; }
-    const LinearSystem& system() const                                  { return sys_; }
+    const LinearEquationSystem& system() const                                  { return sys_; }
     const BoundaryPatchSystem& boundary() const                         { return boundary_; }
     const PhysicsModel& model() const noexcept                          { return *physics_; }
 

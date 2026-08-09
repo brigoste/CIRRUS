@@ -17,6 +17,8 @@
 #include "utils/Timer.hpp"
 #include "fields/FieldNames.hpp"
 
+#include "equation_systems/Residual.hpp"
+
 #include <iostream>
 #include <filesystem>
 #include <iomanip>
@@ -301,6 +303,13 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                 norms.linf
             });
 
+            std::vector<double> residual;
+
+            {
+                // Timer timer("Residual calculation");
+                residual = computeResidual(sim.system(), temperature);
+            }
+
             // DEBUGGING
             std::cout << "REFINEMENT DATA: "
                     << levelCfg.mesh.nx
@@ -336,7 +345,8 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                 auto output =
                     OutputBuilder::build(
                         sim,
-                        temperature);
+                        temperature,
+                        residual);
 
                 OutputManager::write(
                     output,

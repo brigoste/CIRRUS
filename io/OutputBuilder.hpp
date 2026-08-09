@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 struct OutputData;
 
 class Simulation;
@@ -11,5 +13,6 @@ public:
 
     static OutputData build(
         const Simulation& sim,
-        const ScalarField& field);
+        const ScalarField& field,
+        const std::vector<double>& residual = {});
 };

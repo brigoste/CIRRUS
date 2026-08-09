@@ -1,12 +1,14 @@
-#include <algorithm>
-#include <vector>
-#include <equation_systems/LinearSystem.hpp>
+#include "solver/SOR.hpp"
+#include "equation_systems/LinearEquationSystem.hpp"
+
 #include <cmath>
 #include <stdexcept>
 #include <string>
+#include <algorithm>
+#include <vector>
 
 std::vector<double> SOR(
-    const LinearSystem& sys,
+    const LinearEquationSystem& sys,
     int max_iter,
     double tol,
     double omega)
