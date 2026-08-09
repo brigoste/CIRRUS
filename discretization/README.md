@@ -443,7 +443,7 @@ This establishes a generic interface for future discretization operators.
 
 ```text
 diffusion/DiffusionOperator.cpp
-diffusion/DiffusionOperator.hpp
+operators/DiffusionOperator.hpp
 ```
 
 The `DiffusionOperator` performs matrix assembly for diffusion contributions.

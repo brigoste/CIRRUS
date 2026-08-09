@@ -33,7 +33,7 @@ void Simulation::initializeFields()
 
 Simulation::Simulation(const SimulationConfig& cfg)
     : convection_(convectionScheme_),
-      diffusion_(),
+      diffusion_(diffusionScheme_),
       fvOperator_(convection_, diffusion_),
       cfg_(cfg),
       assembled_(false)

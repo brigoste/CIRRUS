@@ -2,7 +2,7 @@
 
 #include "equation_systems/EquationSystem.hpp"
 #include "discretization/FluxAccumulator.hpp"
-#include "discretization/diffusion/DiffusionOperator.hpp"
+#include "discretization/operators/DiffusionOperator.hpp"
 #include "discretization/operators/ConvectionOperator.hpp"
 
 class FiniteVolumeAssembler

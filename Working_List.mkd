@@ -167,13 +167,14 @@ Future:
 
 ---
 
-## Flux Infrastructure
 
 - [x] Diffusion flux framework
 - [x] Convective flux framework
-- [x] Source contribution framework
-- [ ] Generic face flux interface
+- [ ] Generic face contribution interface
 - [ ] Separate flux calculation from discretization
+    - [x] Convection
+    - [ ] Diffusion
+    - [x] Source terms
 - [ ] Face interpolation framework
 
 Optimization / architecture notes:

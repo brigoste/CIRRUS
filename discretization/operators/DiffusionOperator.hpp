@@ -1,14 +1,22 @@
 #pragma once
 
 #include "discretization/operators/Operator.hpp"
-#include "discretization/builders/DiffusionFluxBuilder.hpp"
+#include "discretization/diffusion/DiffusionScheme.hpp"
 
 class DiffusionOperator : public Operator
 {
 public:
 
+    explicit DiffusionOperator(
+        const DiffusionScheme& scheme
+    );
+
     void assemble(
         const FluxAccumulator& flux,
         EquationSystem& sys
     ) const override;
+
+private:
+
+    const DiffusionScheme& scheme_;
 };

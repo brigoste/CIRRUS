@@ -16,7 +16,8 @@
 
 #include "discretization/convection/UpwindScheme.hpp"
 #include "discretization/convection/CentralDifferenceScheme.hpp"
-#include "discretization/diffusion/DiffusionOperator.hpp"
+#include "discretization/diffusion/StandardDiffusionScheme.hpp"
+#include "discretization/operators/DiffusionOperator.hpp"
 #include "discretization/operators/ConvectionOperator.hpp"
 #include "discretization/builders/DiffusionFluxBuilder.hpp"
 #include "discretization/FiniteVolumeAssembler.hpp"
@@ -87,6 +88,7 @@ private:
     std::unique_ptr<FluxAccumulator> flux_;
 
     CentralDifferenceScheme convectionScheme_;
+    StandardDiffusionScheme diffusionScheme_;
 
     ConvectionOperator convection_;
     DiffusionOperator diffusion_;
