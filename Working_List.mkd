@@ -30,7 +30,7 @@ Future:
 - [x] Simulation integration with FieldRegistry
 - [x] Generic operator framework 
 - [x] Generic equation system abstraction
-- [ ] Matrix/vector assembly interface
+- [x] Matrix/vector assembly interface
 
 Future:
 - Matrix-free operator evaluation
@@ -59,7 +59,7 @@ Future:
 
 ### Matrix Infrastructure
 
-- [ ] Sparse matrix storage
+- [x] Sparse matrix storage
 - [ ] CSR format
 - [ ] Block matrix support
 - [ ] Matrix diagnostics

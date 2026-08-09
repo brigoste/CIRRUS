@@ -115,12 +115,20 @@ void Simulation::solve()
 
     switch (solverCfg.method)
     {
+        case solver::Method::GMRES:
+        {
+            auto M = createPreconditioner(solverCfg.preconditioner);
+            M->setup(sys_);
+            std::cout << "Preconditioner: " << M->name() << "\n";
+            phi = GMRES( sys_, solverCfg.max_iter, solverCfg.tol, solverCfg.restart, *M);
+            break;
+        }
         case solver::Method::BiCGSTAB:
         {
             auto M = createPreconditioner( solverCfg.preconditioner );
             M->setup(sys_);
             std::cout << "Preconditioner: " << M->name() << "\n";
-            phi = BiCGSTAB(sys_,solverCfg.max_iter,solverCfg.tol,*M);
+            phi = BiCGSTAB(sys_, solverCfg.max_iter, solverCfg.tol, *M);
             break;
         }
 

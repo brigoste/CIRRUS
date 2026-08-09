@@ -15,7 +15,8 @@ namespace solver
         GS,
         SOR,
         CG,
-        BiCGSTAB
+        BiCGSTAB,
+        GMRES
     };
 
     // =========================================================
@@ -28,6 +29,7 @@ namespace solver
         if (s == "SOR")  return Method::SOR;
         if (s == "CG")   return Method::CG;
         if (s == "BiCGSTAB") return Method::BiCGSTAB;
+        if (s == "GMRES")     return Method::GMRES;
 
         throw std::runtime_error("Unknown solver method: " + s);
     }
@@ -41,6 +43,7 @@ namespace solver
             case Method::SOR:       return "SOR";
             case Method::CG:        return "CG";
             case Method::BiCGSTAB:  return "BiCGSTAB";
+            case Method::GMRES:     return "GMRES";
         }
         return "UNKNOWN";
     }

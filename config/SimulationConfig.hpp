@@ -70,8 +70,9 @@ struct SolverConfig
     int max_iter = 1000;
     double tol   = 1e-10;
     double omega = 1.0;
-
+    int restart = 10;
     PreconditionerType preconditioner = PreconditionerType::None;
+    
 };
 
 //==================================================
@@ -241,6 +242,7 @@ inline void from_json(const nlohmann::json& j, SolverConfig& s)
     s.tol            = j.value("tol", 1e-10);
     s.max_iter       = j.value("max_iter", 1000);
     s.omega          = j.value("omega", 1.0);
+    s.restart        = j.value("restart", 10);
     s.preconditioner = j.value("preconditioner", PreconditionerType::None);
 }
 

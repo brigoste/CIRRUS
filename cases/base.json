@@ -18,6 +18,8 @@
 
   "solver": {
     "type": "SOR",
+    "preconditioner": "None",
+    "restart": 30,
     "tol": 1e-8,
     "max_iter": 5000,
     "omega": 1.0

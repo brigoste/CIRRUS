@@ -27,6 +27,7 @@
 #include "solver/TDMA.hpp"
 #include "solver/GaussSeidel.hpp"
 #include "solver/BiCGSTAB.hpp"
+#include "solver/GMRES.hpp"
 #include "solver/SolverMethod.hpp"
 
 #include "equation_systems/LinearEquationSystem.hpp"

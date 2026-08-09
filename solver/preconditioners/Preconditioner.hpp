@@ -8,8 +8,7 @@
 
 class LinearEquationSystem;
 
-inline PreconditionerType preconditioner_from_string(
-    const std::string& s)
+inline PreconditionerType preconditioner_from_string(const std::string& s)
 {
     if (s == "None")   
     {
