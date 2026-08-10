@@ -1,0 +1,11 @@
+We can't push/pull from the repo. That makes this stupid, but this is the best way to do this:
+
+Pull:
+- Just find and copy/paste the changed files into the direcotry. 
+- Alternatively, clone a new repo and delete the old one. It is faster.
+
+Push:
+- git add .
+- git commit -m "Enter message"
+- git show --state -oneline HEAD     or     git show --format= --name-only HEAD
+- Upload specified files to the github repo manually.
