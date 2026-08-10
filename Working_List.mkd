@@ -147,8 +147,8 @@ Future:
 - [x] JSON serialization/deserialization of gradient scheme
 - [x] Verification-case gradient scheme override
 - [x] Report gradient scheme in verification output
-- [ ] Verify multiple gradient schemes through MMS
-- [ ] Compare gradient-scheme accuracy/order
+- [x] Verify multiple gradient schemes through MMS
+- [x] Compare gradient-scheme accuracy/order
 
 ## Convection Discretization
 
@@ -391,15 +391,36 @@ Future:
 - [x] Report gradient scheme in verification results
 - [x] Implement least-squares gradient
 - [x] Verify gradient implementation with manufactured analytical field
-- [ ] Compare gradient schemes through mesh refinement
-
+- [x] Compare gradient schemes through mesh refinement
+### Interpolation / Reconstruction Infrastructure
+- [x] Establish pluggable convection scheme interface
+- [x] Implement first-order upwind interpolation
+- [x] Implement central differencing
+- [x] Separate convection discretization from finite-volume assembly
+- [ ] Generalize face-value interpolation/reconstruction framework
+- [ ] Support gradient-based reconstruction
+- [ ] Implement second-order upwind reconstruction
+- [ ] Implement QUICK reconstruction
+- [ ] Implement MUSCL reconstruction
+- [ ] Add bounded/TVD reconstruction
+- [ ] Add flux limiter framework
+- [ ] Verify reconstruction schemes through MMS refinement studies
 ### Convection Infrastructure
-- [x] Extract convection discretization from finite volume assembly
+- [x] Extract convection discretization from finite-volume assembly
 - [x] Implement UpwindScheme
 - [x] Implement CentralDifferenceScheme
 - [x] Verify first/second-order behavior through MMS refinement studies
 - [x] Achieve second-order Advection-Diffusion convergence
 
+## Next Architectural Step
+
+The immediate goal is to make the relationship explicit:
+
+Cell values → gradient/reconstruction → face value → convective flux → equation assembly
+
+This will let higher-order convection schemes reuse the same face-flux infrastructure rather than embedding reconstruction logic inside FiniteVolumeOperator.
+
+That distinction is worth keeping in the roadmap because it is exactly where we want CIRRUS to go architecturally.
 
 # Recommended Development Order
 1. Integrate FieldRegistry into Simulation
