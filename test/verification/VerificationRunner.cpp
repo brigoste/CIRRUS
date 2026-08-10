@@ -538,7 +538,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             << std::setw(20) << "Case"
             << std::setw(12) << "Solver"
             << std::setw(16) << "Convection"
-            << std::setw(12) << "Gradient"
+            << std::setw(16) << "Gradient"
             << std::setw(10) << "Mesh"
             << std::setw(14) << "L2 Error"
             << std::setw(12) << "Accuracy"
@@ -546,7 +546,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             << std::setw(10) << "Order"
             << "\n";
 
-    std::cout << std::string(110, '-') << "\n";
+    std::cout << std::string(119, '-') << "\n";
 
     std::cout << std::scientific << std::setprecision(3);
 
@@ -556,7 +556,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                 << std::setw(20) << s.caseName
                 << std::setw(12) << s.solver
                 << std::setw(16) << s.convection
-                << std::setw(12) << s.gradient
+                << std::setw(16) << s.gradient
                 << std::setw(10) << s.meshSize
                 << std::setw(14) << s.l2
                 << std::setw(12) << (s.accuracyPassed ? "PASS" : "FAIL");
