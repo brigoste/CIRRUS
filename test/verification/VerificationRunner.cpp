@@ -31,6 +31,7 @@ struct VerificationSummary
     std::string meshType;
     std::string meshSize;
     std::string gradient;
+    std::string convection;
 
     double l2;
     double linf;
@@ -410,6 +411,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                 finestSummary.meshType = meshType;
                 finestSummary.meshSize = meshSize;
                 finestSummary.gradient = gradientToString(levelCfg.discretization.gradientScheme);
+                finestSummary.convection = interpolationToString(levelCfg.discretization.interpolationScheme);
 
                 finestSummary.l2 = norms.l2_rms;
                 finestSummary.linf = norms.linf;
@@ -533,27 +535,29 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
     std::cout << "================================================================================\n\n";
 
     std::cout << std::left
-            << std::setw(24) << "Case"
+            << std::setw(20) << "Case"
             << std::setw(12) << "Solver"
+            << std::setw(16) << "Convection"
             << std::setw(12) << "Gradient"
-            << std::setw(12) << "Mesh"
+            << std::setw(10) << "Mesh"
             << std::setw(14) << "L2 Error"
             << std::setw(12) << "Accuracy"
             << std::setw(14) << "Convergence"
             << std::setw(10) << "Order"
             << "\n";
 
-    std::cout << std::string(98, '-') << "\n";
+    std::cout << std::string(110, '-') << "\n";
 
     std::cout << std::scientific << std::setprecision(3);
 
     for (const auto& s : summary)
     {
         std::cout << std::left
-                << std::setw(24) << s.caseName
+                << std::setw(20) << s.caseName
                 << std::setw(12) << s.solver
+                << std::setw(16) << s.convection
                 << std::setw(12) << s.gradient
-                << std::setw(12) << s.meshSize
+                << std::setw(10) << s.meshSize
                 << std::setw(14) << s.l2
                 << std::setw(12) << (s.accuracyPassed ? "PASS" : "FAIL");
 

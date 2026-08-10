@@ -11,6 +11,7 @@
 #include "mesh/BoundaryPatchSystem.hpp"
 
 #include "discretization/gradient/GradientType.hpp"
+#include "discretization/interpolators/InterpolationType.hpp"
 #include "solver/preconditioners/Preconditioner.hpp"
 
 #include <unordered_map>
@@ -82,6 +83,7 @@ struct SolverConfig
 struct DiscretizationConfig
 {
     GradientType gradientScheme = GradientType::GreenGauss;
+    InterpolationType interpolationScheme = InterpolationType::CentralLinear;
 };
 
 //==================================================
@@ -269,7 +271,8 @@ inline void from_json(const nlohmann::json& j, RefinementConfig& r)
 // -------------------- GRADIENT --------------------------------
 inline void from_json(const nlohmann::json& j, DiscretizationConfig& d)
 {
-    d.gradientScheme = gradientFromString( j.value( "gradientScheme", "green_gauss" ));
+    d.gradientScheme      = gradientFromString( j.value( "gradientScheme", "green_gauss" ));
+    d.interpolationScheme =  interpolationFromString(j.value("interpolationScheme", "centralLinear"));
 }
 
 // ------------------------- Read Config for Verification ------------

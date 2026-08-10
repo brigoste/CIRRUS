@@ -14,9 +14,10 @@
 #include "equation_systems/LinearSystem.hpp"
 #include "bc/BoundaryFace.hpp"
 
-#include "discretization/convection/UpwindScheme.hpp"
-#include "discretization/convection/CentralDifferenceScheme.hpp"
 #include "discretization/diffusion/StandardDiffusionScheme.hpp"
+#include "discretization/interpolators/CentralLinearInterpolation.hpp"
+#include "discretization/interpolators/UpwindInterpolation.hpp"
+#include "discretization/interpolators/InterpolationScheme.hpp"
 #include "discretization/operators/DiffusionOperator.hpp"
 #include "discretization/operators/ConvectionOperator.hpp"
 #include "discretization/builders/DiffusionFluxBuilder.hpp"
@@ -87,8 +88,9 @@ private:
     LinearSystem sys_;
     std::unique_ptr<FluxAccumulator> flux_;
 
-    CentralDifferenceScheme convectionScheme_;
     StandardDiffusionScheme diffusionScheme_;
+
+    std::unique_ptr<InterpolationScheme> interpolation_;
 
     ConvectionOperator convection_;
     DiffusionOperator diffusion_;

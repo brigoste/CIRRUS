@@ -17,7 +17,7 @@ void ConvectionFluxBuilder::apply(
         {
             const double F = model.convectionFaceFlux(face);
 
-            flux.addConvection(P, N, F);
+            flux.addConvection(P, N, f, F);
         }
     }
 }

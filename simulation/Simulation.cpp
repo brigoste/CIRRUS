@@ -3,6 +3,8 @@
 #include "mesh/Mesh1D.hpp"
 #include "mesh/QuadMesh2D.hpp"
 #include "discretization/FluxBuilder.hpp"
+#include "discretization/interpolators/InterpolationFactory.hpp"
+#include "discretization/interpolators/InterpolationType.hpp"
 #include "test/verification/VerificationCaseFactory.hpp"
 #include "test/verification/VerificationCase.hpp"
 
@@ -32,7 +34,8 @@ void Simulation::initializeFields()
 // ============================================================
 
 Simulation::Simulation(const SimulationConfig& cfg)
-    : convection_(convectionScheme_),
+    : interpolation_(makeInterpolationScheme(cfg.discretization.interpolationScheme)),
+      convection_(*interpolation_),
       diffusion_(diffusionScheme_),
       fvOperator_(convection_, diffusion_),
       cfg_(cfg),
@@ -88,6 +91,7 @@ void Simulation::assemble()
     );
 
     fvOperator_.assemble(
+        *mesh_,
         *flux_,
         sys_
     );
@@ -109,8 +113,8 @@ void Simulation::solve()
     }
 
     std::cout << "System Type: " << physics::to_string(cfg_.physics.type) << "\n";
+    std::cout << "Convection: " << interpolationToString(cfg_.discretization.interpolationScheme) << "\n";
     std::cout << "Solver: " << solver::to_string(cfg_.solver.method) << "\n";
-
     std::vector<double> phi;
 
     switch (solverCfg.method)

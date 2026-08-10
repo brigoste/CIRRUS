@@ -4,6 +4,7 @@
 #include "discretization/FluxAccumulator.hpp"
 #include "discretization/operators/DiffusionOperator.hpp"
 #include "discretization/operators/ConvectionOperator.hpp"
+#include "mesh/MeshBase.hpp"
 
 class FiniteVolumeAssembler
 {
@@ -19,6 +20,7 @@ public:
     {}
 
     void assemble(
+        const MeshBase& mesh,
         const FluxAccumulator& flux,
         EquationSystem& sys
     ) const;

@@ -8,7 +8,8 @@
   },
 
   "discretization": {
-      "gradientScheme":"green_gauss"
+      "gradientScheme":"green_gauss",
+      "interpolationScheme": "centralLinear"
   },
 
   "physics": {

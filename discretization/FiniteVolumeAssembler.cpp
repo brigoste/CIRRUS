@@ -5,18 +5,19 @@
 // =========================================================
 
 void FiniteVolumeAssembler::assemble(
+    const MeshBase& mesh,
     const FluxAccumulator& flux,
     EquationSystem& sys) const
 {
     // =========================================================
     // 1. DIFFUSION
     // =========================================================
-    diffusion_.assemble(flux, sys);
+    diffusion_.assemble(mesh, flux, sys);
 
     // =========================================================
     // 2. CONVECTION
     // =========================================================
-    convection_.assemble(flux, sys);
+    convection_.assemble(mesh, flux, sys);
 
     // =========================================================
     // 3. SOURCES + BCs

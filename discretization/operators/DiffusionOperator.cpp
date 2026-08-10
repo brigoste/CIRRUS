@@ -1,4 +1,5 @@
 #include "discretization/operators/DiffusionOperator.hpp"
+#include "discretization/FluxAccumulator.hpp"
 
 DiffusionOperator::DiffusionOperator(
     const DiffusionScheme& scheme
@@ -8,6 +9,7 @@ DiffusionOperator::DiffusionOperator(
 {}
 
 void DiffusionOperator::assemble(
+    const MeshBase& /*mesh*/,
     const FluxAccumulator& flux,
     EquationSystem& sys
 ) const

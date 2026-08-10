@@ -51,9 +51,9 @@ public:
         cells_[P].Sp -= D;
         cells_[P].Su += D * value;  
     }
-    void addConvection(std::size_t P, std::size_t N, double F) 
+    void addConvection(std::size_t P, std::size_t N, std::size_t face, double F) 
     { 
-        convection_.push_back({P, N, F}); 
+        convection_.push_back({P, N, face, F}); 
     }
     void addSource(std::size_t c, double Su, double Sp)
     {
