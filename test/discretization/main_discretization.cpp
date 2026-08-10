@@ -2,7 +2,7 @@
 
 void runGreenGaussTest();
 void runLeastSquaresTest();
-void runQuadraticGradientTest();
+void runCubicGradientTest();
 
 int main()
 {
@@ -15,8 +15,8 @@ int main()
     runLeastSquaresTest();
     std::cout << "\n";
     
-    std::cout << "---- Quadratic Gradient Tests ----\n\n";
-    runQuadraticGradientTest();
+    std::cout << "---- Gradient Verification Tests ----\n\n";
+    runCubicGradientTest();
 
     std::cout << "\n==============================\n";
     std::cout << " COMPLETE\n";
