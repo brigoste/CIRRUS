@@ -390,7 +390,7 @@ Future:
 - [x] Allow verification cases to override gradient scheme
 - [x] Report gradient scheme in verification results
 - [x] Implement least-squares gradient
-- [ ] Verify least-squares gradient with MMS
+- [x] Verify gradient implementation with manufactured analytical field
 - [ ] Compare gradient schemes through mesh refinement
 
 ### Convection Infrastructure
