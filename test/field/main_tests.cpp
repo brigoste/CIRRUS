@@ -15,7 +15,7 @@ int main()
     runFieldRegistryTest();
 
     std::cout << "\n================================\n";
-    std::cout << " All Tests Passed\n";
+    std::cout << " All Field Tests Passed\n";
     std::cout << "================================\n";
 
     return 0;
