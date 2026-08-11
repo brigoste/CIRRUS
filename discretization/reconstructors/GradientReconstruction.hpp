@@ -19,6 +19,7 @@ public:
         std::size_t owner,
         const Face& face,
         const ScalarField& field,
-        const VectorField& gradient
+        const VectorField& gradient,
+        double /*flux*/
     ) const override;
 };
