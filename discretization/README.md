@@ -2,11 +2,11 @@
 
 The `discretization/` module contains the finite-volume discretization framework used by CIRRUS.
 
-Its primary responsibility is to transform physical-model information, mesh geometry, and boundary conditions into discrete flux contributions and ultimately into a linear system suitable for solution.
+Its primary responsibility is to transform physical-model information, mesh geometry, and boundary conditions into discrete contributions and ultimately into a linear system suitable for solution.
 
 The framework is deliberately divided into two major stages:
 
-1. **Flux construction** — determine the physical/discretization contributions at faces and cells.
+1. **Flux construction** — determine the physical and discretization contributions associated with faces, boundaries, and cells.
 2. **Operator assembly** — convert those contributions into matrix and right-hand-side terms.
 
 This separation keeps the discretization logic independent of the details of the linear-system implementation.
@@ -59,9 +59,12 @@ discretization/
 │   └── UpwindReconstruction.hpp
 │
 ├── CellResidual.hpp
+├── FaceContribution.hpp
 ├── FaceConvection.hpp
 ├── FaceDiffusion.hpp
+├── BoundaryDiffusion.hpp
 ├── FaceType.hpp
+├── MatrixContribution.hpp
 ├── FiniteVolumeAssembler.cpp
 ├── FiniteVolumeAssembler.hpp
 ├── FluxAccumulator.hpp
@@ -69,7 +72,13 @@ discretization/
 └── FluxBuilder.hpp
 ```
 
-The important architectural change is that **convection schemes are reconstruction schemes**. The face convective flux is constructed independently and the selected reconstruction determines how that flux is distributed into matrix coefficients.
+The important architectural changes are:
+
+* `FaceConvection` and `FaceDiffusion` now inherit from a common `FaceContribution` base.
+* Boundary diffusion is represented explicitly through `BoundaryDiffusion`.
+* Matrix entries generated during operator assembly are represented by `MatrixContribution`.
+* `FluxAccumulator` acts as the intermediate representation for both physical/discretization data and generated algebraic contributions.
+* Convection schemes are reconstruction schemes. The physical convective flux is constructed independently from the choice of reconstruction.
 
 ---
 
@@ -84,7 +93,7 @@ The overall discretization pipeline is:
                                     │
                                     ▼
                          ┌─────────────────────┐
-                         │    FluxBuilder      │
+                         │     FluxBuilder     │
                          │    (orchestrator)   │
                          └──────────┬──────────┘
                                     │
@@ -101,15 +110,15 @@ The overall discretization pipeline is:
                          ┌─────────────────────┐
                          │  FluxAccumulator    │
                          │                     │
-                         │ • diffusion fluxes  │
-                         │ • convection fluxes │
-                         │ • cell Su / Sp      │
+                         │ • face contributions│
+                         │ • cell residuals    │
+                         │ • matrix entries    │
                          └──────────┬──────────┘
                                     │
                                     ▼
                        ┌────────────────────────┐
-                       │ FiniteVolumeAssembler   │
-                       │      (orchestrator)    │
+                       │ FiniteVolumeAssembler  │
+                       │      (orchestrator)     │
                        └────────────┬───────────┘
                                     │
                     ┌───────────────┴───────────────┐
@@ -124,29 +133,29 @@ The overall discretization pipeline is:
                    │                     │ReconstructionScheme │
                    │                     └──────────┬──────────┘
                    │                                │
-                   │                    ┌───────────┴───────────┐
-                   │                    │                       │
-                   │                    ▼                       ▼
-                   │             ┌──────────────┐       ┌──────────────┐
-                   │             │   Gradient   │       │   Central    │
-                   │             │ Reconstruction│       │ Reconstruction│
-                   │             └──────────────┘       └──────────────┘
+                   │                    ┌───────────┼───────────┐
+                   │                    │           │           │
+                   │                    ▼           ▼           ▼
+                   │             ┌────────────┐ ┌──────────┐ ┌──────────┐
+                   │             │ Gradient   │ │ Central  │ │ Upwind   │
+                   │             │Reconstruction│ │Reconstruction│ │Reconstruction│
+                   │             └────────────┘ └──────────┘ └──────────┘
                    │
-                   │                    ┌──────────────┐
-                   │                    │    Upwind    │
-                   │                    │ Reconstruction│
-                   │                    └──────────────┘
-                   │
-                   └──────────────┬────────────────┘
-                                  ▼
-                         ┌─────────────────────┐
-                         │    LinearSystem     │
-                         │                     │
-                         │    Matrix + RHS     │
-                         └─────────────────────┘
+                   └──────────────────┬────────────────────────┐
+                                      │                        │
+                                      ▼                        ▼
+                              Matrix contributions       Cell residuals
+                                      │                        │
+                                      └───────────┬────────────┘
+                                                  ▼
+                                        ┌─────────────────────┐
+                                        │    LinearSystem     │
+                                        │                     │
+                                        │    Matrix + RHS     │
+                                        └─────────────────────┘
 ```
 
-The important architectural boundary is:
+The important architectural boundary remains:
 
 ```text
              FLUX CONSTRUCTION
@@ -202,37 +211,42 @@ FluxBuilder
 
 The builders write their contributions into the same `FluxAccumulator`.
 
-This provides a single entry point for constructing the complete set of discretization contributions for a simulation.
+This provides a single entry point for constructing the complete set of discretization information required for a simulation.
 
 ---
 
 ## `builders/`
 
-The builder classes translate mesh, physics, and boundary-condition information into discrete flux contributions.
+The builder classes translate mesh, physics, and boundary-condition information into discrete contributions.
 
-They **do not assemble the linear system**.
+They **do not directly assemble the final linear system**.
 
 ### `DiffusionFluxBuilder`
 
-Constructs diffusion-related flux contributions.
+Constructs diffusion-related contributions.
 
 Responsibilities include:
 
 * Iterating over relevant faces.
 * Computing face diffusion coefficients.
-* Adding interior diffusion couplings.
+* Adding interior diffusion contributions.
 * Processing Dirichlet boundary conditions.
 * Processing Neumann boundary conditions.
 * Processing convective/Robin boundary conditions.
 * Handling manufactured verification boundary conditions.
 
-For an interior face, diffusion is represented by a coupling between the owner and neighbor cells:
+For an interior face, the builder creates a `FaceDiffusion` contribution:
 
 ```text
-P <──── D ────> N
+P
+N
+face
+D
 ```
 
-Boundary contributions are represented through the cell residual information stored in `FluxAccumulator`.
+For a Dirichlet boundary, it creates a `BoundaryDiffusion` contribution.
+
+The boundary contribution is then converted into cell residual terms by `FluxAccumulator`.
 
 ---
 
@@ -240,19 +254,21 @@ Boundary contributions are represented through the cell residual information sto
 
 Constructs convection flux information for interior faces.
 
-For each interior face it obtains the physical face flux and stores:
+For each interior face it obtains the physical face flux and creates a `FaceConvection` contribution:
 
 ```text
-(P, N, F)
+P
+N
+face
+F
 ```
-
-in the `FluxAccumulator`.
 
 Here:
 
 * `P` is the owner cell.
 * `N` is the neighbor cell.
 * `F` is the face convective flux.
+* `face` identifies the corresponding mesh face.
 
 The builder does **not** decide how `F` is discretized.
 
@@ -270,8 +286,8 @@ For each cell it:
 
 1. Obtains the physical source from the `PhysicsModel`.
 2. Multiplies the source by the cell volume.
-3. Adds the resulting contribution to `Su`.
-4. Adds manufactured verification forcing when a verification case requires it.
+3. Adds the resulting contribution to the cell residual.
+4. Adds manufactured verification forcing when required.
 
 The builder therefore handles both physical sources and verification-specific forcing without coupling the rest of the discretization framework directly to the verification system.
 
@@ -285,22 +301,23 @@ The builder therefore handles both physical sources and verification-specific fo
 FluxAccumulator.hpp
 ```
 
-`FluxAccumulator` is the intermediate data structure between flux construction and linear-system assembly.
+`FluxAccumulator` is the intermediate representation between flux construction and operator/algebraic assembly.
 
-It stores three categories of information:
+It stores three broad categories of discretization information:
 
 ```text
 FluxAccumulator
 │
-├── CellResidual
-│   ├── Su
-│   └── Sp
+├── Face contributions
+│   ├── FaceDiffusion
+│   ├── FaceConvection
+│   └── BoundaryDiffusion
 │
-├── FaceDiffusion
-│   └── diffusion contributions
+├── Cell residuals
+│   └── CellResidual
 │
-└── FaceConvection
-    └── convection contributions
+└── Matrix contributions
+    └── MatrixContribution
 ```
 
 The accumulator is reset and reused for each assembly:
@@ -309,13 +326,185 @@ The accumulator is reset and reused for each assembly:
 flux.reset();
 ```
 
-This avoids repeatedly reconstructing the entire data structure during iterative simulation assembly.
+This removes the previous assembly's contributions without requiring the entire accumulator to be reconstructed.
 
-`FluxAccumulator` is intentionally non-copyable and supports move semantics to avoid accidental copying of potentially large flux data.
+`FluxAccumulator` is intentionally non-copyable and supports move semantics to avoid accidental copying of potentially large discretization data.
+
+The accumulator also provides a common insertion interface for contribution objects. This keeps contribution construction separate from the storage mechanism.
+
+Conceptually:
+
+```text
+Builder / Operator
+       │
+       │ creates contribution
+       ▼
+FluxAccumulator
+       │
+       │ stores contribution
+       ▼
+Assembly
+```
 
 ---
 
-# 3. Flux Data Structures
+# 3. Contribution Data Structures
+
+The contribution hierarchy provides a common representation for face-based data.
+
+## `FaceContribution`
+
+```text
+FaceContribution.hpp
+```
+
+`FaceContribution` contains the common connectivity information shared by face-based contributions:
+
+```cpp
+struct FaceContribution
+{
+    std::size_t P = 0;
+    std::size_t N = Face::INVALID;
+    std::size_t face = 0;
+};
+```
+
+Where:
+
+* `P` is the owner cell.
+* `N` is the neighbor cell.
+* `face` identifies the mesh face.
+
+`Face::INVALID` is used for the neighbor when a face does not have a neighboring cell.
+
+Specialized face contributions extend this common structure.
+
+```text
+FaceContribution
+       │
+       ├── FaceDiffusion
+       │      └── D
+       │
+       └── FaceConvection
+              └── F
+```
+
+This avoids duplicating the common owner/neighbor/face information in every face contribution type.
+
+---
+
+## `FaceDiffusion`
+
+```text
+FaceDiffusion.hpp
+```
+
+Represents an interior diffusion contribution associated with a face.
+
+It extends `FaceContribution` with the diffusion coefficient:
+
+```text
+P
+N
+face
+D
+```
+
+The contribution is constructed by `DiffusionFluxBuilder` and later consumed by `DiffusionOperator`.
+
+---
+
+## `FaceConvection`
+
+```text
+FaceConvection.hpp
+```
+
+Represents an interior convection contribution.
+
+It extends `FaceContribution` with the physical face flux:
+
+```text
+P
+N
+face
+F
+```
+
+The stored `F` represents the physical convective flux.
+
+Its conversion into matrix coefficients is performed later by `ConvectionOperator` and the configured reconstruction scheme.
+
+---
+
+## `BoundaryDiffusion`
+
+```text
+BoundaryDiffusion.hpp
+```
+
+Represents a diffusion contribution associated with a Dirichlet boundary.
+
+It contains the owner cell and the diffusion information required to convert the boundary value into implicit and explicit cell contributions:
+
+```text
+P
+D
+value
+```
+
+The contribution is constructed during boundary flux construction and consumed by `FluxAccumulator`.
+
+For a Dirichlet boundary, the resulting terms are conceptually:
+
+```text
+Sp -= D
+Su += D φ_boundary
+```
+
+This makes the boundary treatment explicit rather than embedding the boundary calculation directly into the final matrix assembly.
+
+---
+
+## `MatrixContribution`
+
+```text
+MatrixContribution.hpp
+```
+
+Represents a single algebraic matrix entry contribution:
+
+```cpp
+struct MatrixContribution
+{
+    std::size_t row = 0;
+    std::size_t column = 0;
+    double coefficient = 0.0;
+};
+```
+
+A matrix contribution represents:
+
+```text
+A[row,column] += coefficient
+```
+
+This provides a common intermediate representation for operator-generated matrix terms.
+
+For example, standard diffusion produces:
+
+```text
+(P,P,+D)
+(P,N,-D)
+(N,N,+D)
+(N,P,-D)
+```
+
+The operator does not need to know how those entries are ultimately stored in the `LinearSystem`.
+
+---
+
+# 4. Cell Residual
 
 ## `CellResidual`
 
@@ -338,100 +527,16 @@ Where:
 * `Su` is the explicit source/RHS contribution.
 * `Sp` is the implicit linearized source contribution.
 
-The final assembly converts these values into linear-system contributions.
-
----
-
-## `FaceDiffusion`
+These terms eventually become linear-system contributions:
 
 ```text
-FaceDiffusion.hpp
-```
-
-Represents a diffusion contribution associated with a face.
-
-It contains the owner, neighbor, and diffusion coefficient/conductance:
-
-```text
-P
-N
-D
-```
-
-where:
-
-* `P` is the owner cell.
-* `N` is the neighboring cell.
-* `D` is the diffusion coefficient.
-
-Face information is used by the diffusion operator to construct the corresponding matrix coupling.
-
----
-
-## `FaceConvection`
-
-```text
-FaceConvection.hpp
-```
-
-Represents a convection flux between two cells:
-
-```text
-P
-N
-F
-face
-```
-
-where:
-
-* `P` is the owner cell.
-* `N` is the neighboring cell.
-* `F` is the face convective flux.
-* `face` identifies the corresponding mesh face.
-
-The stored `F` represents the physical face flux. Its conversion into matrix coefficients is performed by the selected reconstruction scheme.
-
-This distinction is important:
-
-```text
-ConvectionFluxBuilder
-        │
-        │ determines physical F
-        ▼
-FaceConvection
-        │
-        │ discretizes F
-        ▼
-ReconstructionScheme
-        │
-        ▼
-Matrix contributions
+Su → RHS
+Sp → diagonal coefficient
 ```
 
 ---
 
-## `FaceType`
-
-```text
-FaceType.hpp
-```
-
-Identifies the type of face contribution:
-
-```cpp
-enum class FaceType
-{
-    Interior,
-    Boundary
-};
-```
-
-This provides explicit classification of face-based discretization data.
-
----
-
-# 4. Reconstruction
+# 5. Reconstruction
 
 The reconstruction layer defines how a cell-centered field is represented at a face.
 
@@ -441,7 +546,7 @@ The central abstraction is:
 ReconstructionScheme
 ```
 
-A reconstruction may provide a **stencil**:
+A reconstruction may provide a stencil:
 
 ```text
 φ_f = Σ w_i φ_i
@@ -468,14 +573,14 @@ struct ReconstructionStencil
 };
 ```
 
-For example, a two-cell reconstruction may produce:
+For example:
 
 ```text
-cell P       weight wP
-cell N       weight wN
+cell P → weight wP
+cell N → weight wN
 ```
 
-such that:
+produces:
 
 ```text
 φ_f = wP φ_P + wN φ_N
@@ -501,9 +606,12 @@ virtual ReconstructionStencil stencil(
     std::size_t owner,
     const Face& face,
     const ScalarField& field,
-    const VectorField& gradient
+    const VectorField& gradient,
+    double flux
 ) const;
 ```
+
+The reconstruction receives the physical face flux because some reconstruction schemes, such as upwind reconstruction, require the flux direction to determine the upstream cell.
 
 The base implementation rejects schemes that do not provide a cell-value stencil.
 
@@ -519,11 +627,11 @@ ReconstructionStencil
       φ_f
 ```
 
-This means a scheme only needs to implement the stencil when its reconstruction can be expressed as a linear combination of cell values.
+This means a scheme can implement its reconstruction as a reusable linear stencil.
 
 ---
 
-# 5. Reconstruction Schemes
+# 6. Reconstruction Schemes
 
 The current reconstruction implementations are:
 
@@ -567,15 +675,13 @@ P → (1 - α)
 N → α
 ```
 
-This allows the reconstruction to remain valid on nonuniform and non-orthogonal meshes rather than assuming a fixed `α = 0.5`.
-
-For a linear manufactured field, central reconstruction is exact within the tested interior-face configuration.
+This allows the reconstruction to remain valid on nonuniform meshes rather than assuming a fixed `α = 0.5`.
 
 ---
 
 ## `UpwindReconstruction`
 
-Upwind reconstruction selects the upstream cell based on the sign of the face convective flux `F`.
+Upwind reconstruction selects the upstream cell based on the sign of the physical face convective flux `F`.
 
 Conceptually:
 
@@ -599,7 +705,7 @@ P ◄───────── N
 
 Thus the reconstruction depends on the **direction of the physical face flux**.
 
-The important separation is:
+The separation is:
 
 ```text
 ConvectionFluxBuilder
@@ -608,7 +714,7 @@ ConvectionFluxBuilder
         ▼
 FaceConvection
         │
-        │ passes F
+        │ provides F
         ▼
 UpwindReconstruction
         │
@@ -617,13 +723,13 @@ UpwindReconstruction
 ReconstructionStencil
 ```
 
-The reconstruction therefore does not compute the physical convection flux itself. It uses the flux to determine which cell is upwind.
+The reconstruction therefore does not compute the physical convection flux itself.
 
 ---
 
 ## `GradientReconstruction`
 
-Gradient reconstruction evaluates a face value using the owner-cell value and the reconstructed cell gradient.
+Gradient reconstruction evaluates a face value using the owner-cell value and cell gradient.
 
 Conceptually:
 
@@ -637,7 +743,7 @@ This provides a higher-order reconstruction pathway without coupling gradient ca
 
 ---
 
-# 6. Reconstruction Factory
+# 7. Reconstruction Factory
 
 ```text
 reconstructors/ReconstructionFactory.cpp
@@ -655,19 +761,15 @@ ReconstructionType
         └── Upwind   ──► UpwindReconstruction
 ```
 
-The active reconstruction is configured through the simulation configuration:
-
-```text
-discretization.reconstructionScheme
-```
+The active reconstruction is configured through the simulation configuration.
 
 This allows verification cases and simulations to select different reconstruction strategies without changing the finite-volume assembly code.
 
 ---
 
-# 7. Operators
+# 8. Operators
 
-The operator layer converts accumulated flux information into linear-system contributions.
+The operator layer converts accumulated discretization information into algebraic contributions.
 
 The fundamental abstraction is `Operator`.
 
@@ -679,7 +781,7 @@ operators/Operator.hpp
 
 Defines the common operator interface for matrix assembly.
 
-An operator consumes discretization information and contributes to the final algebraic system.
+An operator consumes discretization information and generates `MatrixContribution` objects and/or cell residual contributions.
 
 The operator layer does not determine the physical fluxes themselves.
 
@@ -692,9 +794,9 @@ operators/DiffusionOperator.cpp
 operators/DiffusionOperator.hpp
 ```
 
-`DiffusionOperator` performs matrix assembly for diffusion contributions.
+`DiffusionOperator` performs matrix assembly for stored diffusion contributions.
 
-For an interior face coupling:
+For an interior face:
 
 ```text
        P       N
@@ -702,34 +804,78 @@ P     +D      -D
 N     -D      +D
 ```
 
-or equivalently:
+The operator generates the equivalent matrix contributions:
 
-```cpp
-A[P,P] += D;
-A[P,N] -= D;
-A[N,N] += D;
-A[N,P] -= D;
+```text
+(P,P,+D)
+(P,N,-D)
+(N,N,+D)
+(N,P,-D)
+```
+
+Conceptually:
+
+```text
+FaceDiffusion
+      │
+      ▼
+DiffusionOperator
+      │
+      ▼
+MatrixContribution
+      │
+      ▼
+LinearSystem
 ```
 
 The construction of `D` occurs earlier in `DiffusionFluxBuilder`.
 
-Thus:
+This maintains the separation:
 
 ```text
-DiffusionFluxBuilder
-        │
-        │ determines D
-        ▼
-FluxAccumulator
-        │
-        │ stores D
-        ▼
-DiffusionOperator
-        │
-        │ assembles coefficients
-        ▼
-LinearSystem
+DiffusionFluxBuilder → determines D
+DiffusionOperator    → determines matrix entries
 ```
+
+---
+
+## `StandardDiffusionScheme`
+
+```text
+diffusion/StandardDiffusionScheme.cpp
+diffusion/DiffusionScheme.hpp
+```
+
+The diffusion scheme determines how a `FaceDiffusion` contribution is translated into matrix coefficients.
+
+For the standard two-point diffusion discretization:
+
+```text
+A[P,P] += D
+A[P,N] -= D
+
+A[N,N] += D
+A[N,P] -= D
+```
+
+The scheme therefore owns the discretization-specific matrix pattern, while `DiffusionOperator` coordinates application of the scheme to the stored face contributions.
+
+Conceptually:
+
+```text
+FaceDiffusion
+      │
+      ▼
+DiffusionOperator
+      │
+      ▼
+DiffusionScheme
+      │
+      ▼
+MatrixContribution
+```
+
+This provides an extension point for future diffusion discretization schemes without requiring changes to the flux builder.
 
 ---
 
@@ -742,13 +888,13 @@ operators/ConvectionOperator.hpp
 
 `ConvectionOperator` assembles stored convection fluxes.
 
-For each interior face it obtains:
+For each face:
 
 ```text
 F = FaceConvection.F
 ```
 
-and passes the face information and flux to the configured `ReconstructionScheme`.
+The operator passes the face information and physical flux to the configured `ReconstructionScheme`.
 
 The reconstruction returns a stencil:
 
@@ -756,13 +902,15 @@ The reconstruction returns a stencil:
 φ_f = Σ w_i φ_i
 ```
 
-The convection operator then converts that stencil into matrix contributions:
+The convection operator then converts the stencil into matrix contributions.
+
+For each stencil entry:
 
 ```text
 coefficient = F w_i
 ```
 
-and applies the contribution to both owner and neighbor equations.
+and the contribution is applied to both owner and neighbor equations with the appropriate sign.
 
 Conceptually:
 
@@ -784,55 +932,10 @@ ReconstructionScheme
 ReconstructionStencil
       │
       ▼
-Matrix contributions
+MatrixContribution
 ```
 
 This means `ConvectionOperator` does not need to know which reconstruction scheme is active.
-
----
-
-# 8. Finite-Volume Assembly
-
-## `FiniteVolumeAssembler`
-
-```text
-FiniteVolumeAssembler.cpp
-FiniteVolumeAssembler.hpp
-```
-
-`FiniteVolumeAssembler` is the high-level finite-volume assembly coordinator.
-
-Its current sequence is:
-
-```text
-1. Diffusion
-2. Convection
-3. Sources / implicit terms
-```
-
-Conceptually:
-
-```text
-FluxAccumulator
-      │
-      ├── diffusion ──────► DiffusionOperator
-      │
-      ├── convection ─────► ConvectionOperator
-      │                              │
-      │                              ▼
-      │                    ReconstructionScheme
-      │
-      └── Su / Sp ─────────► LinearSystem
-```
-
-For cell-centered source contributions:
-
-```cpp
-sys.addRHS(c, flux[c].Su);
-sys.addCoeff(c, c, -flux[c].Sp);
-```
-
-`FiniteVolumeAssembler` therefore provides the common finite-volume assembly pathway without requiring individual operators to know about one another.
 
 ---
 
@@ -863,7 +966,7 @@ GradientScheme
     └── LeastSquaresGradient
 ```
 
-The gradient schemes provide cell gradients that can be consumed by reconstruction schemes that require gradient information.
+The gradient schemes provide cell gradients that can be consumed by reconstruction schemes requiring gradient information.
 
 For example:
 
@@ -882,11 +985,79 @@ GradientReconstruction
 
 Gradient calculation is therefore a dependency of specific reconstruction strategies rather than an unconditional operation performed by the finite-volume assembler.
 
-This keeps the current solve path free of unnecessary gradient dependencies when a reconstruction such as Upwind or Central does not require them.
+This keeps the solve path free of unnecessary gradient dependencies when a reconstruction such as Upwind or Central does not require them.
 
 ---
 
-# 10. Current Assembly Sequence
+# 10. Finite-Volume Assembly
+
+## `FiniteVolumeAssembler`
+
+```text
+FiniteVolumeAssembler.cpp
+FiniteVolumeAssembler.hpp
+```
+
+`FiniteVolumeAssembler` is the high-level finite-volume assembly coordinator.
+
+Its current sequence is:
+
+```text
+1. Diffusion
+2. Convection
+3. Sources / implicit terms
+4. Apply accumulated matrix contributions
+```
+
+Conceptually:
+
+```text
+FluxAccumulator
+      │
+      ├── diffusion ──────► DiffusionOperator
+      │
+      ├── convection ─────► ConvectionOperator
+      │                              │
+      │                              ▼
+      │                    ReconstructionScheme
+      │
+      ├── Su / Sp
+      │
+      └── MatrixContribution
+                     │
+                     ▼
+              LinearSystem
+```
+
+The accumulator therefore provides a common intermediate representation regardless of whether a contribution originated from:
+
+* a physical source,
+* a boundary condition,
+* diffusion,
+* convection, or
+* a reconstruction-generated matrix coupling.
+
+For cell residual contributions:
+
+```text
+Su → RHS
+Sp → diagonal coefficient
+```
+
+For matrix contributions:
+
+```text
+(row, column, coefficient)
+        │
+        ▼
+A[row,column] += coefficient
+```
+
+The discretization framework therefore does not require operators to directly manipulate the internal storage of the final linear system.
+
+---
+
+# 11. Current Assembly Sequence
 
 A simulation assembly proceeds conceptually as follows.
 
@@ -920,23 +1091,24 @@ The builders populate:
 FluxAccumulator
 ```
 
+with face contributions and cell residual information.
+
 ---
 
 ## Step 3 — Assemble diffusion
 
-`DiffusionOperator` reads the diffusion contributions and adds the corresponding matrix coefficients.
+`DiffusionOperator` reads the stored diffusion contributions and passes them through the configured `DiffusionScheme`.
 
-For an interior connection:
+The scheme produces matrix contributions such as:
 
 ```text
-        D
-P ───────────── N
-
-A[P,P] += D
-A[P,N] -= D
-A[N,N] += D
-A[N,P] -= D
+(P,P,+D)
+(P,N,-D)
+(N,N,+D)
+(N,P,-D)
 ```
+
+These are stored as `MatrixContribution` objects.
 
 ---
 
@@ -957,8 +1129,8 @@ For example:
 ```text
 Upwind:
 
-F > 0  → φ_f = φ_P
-F < 0  → φ_f = φ_N
+F > 0 → φ_f = φ_P
+F < 0 → φ_f = φ_N
 ```
 
 or:
@@ -969,29 +1141,49 @@ Central:
 φ_f = (1 - α)φ_P + αφ_N
 ```
 
-The resulting stencil is converted into matrix coefficients.
+The resulting stencil is converted into `MatrixContribution` objects.
 
 ---
 
-## Step 5 — Assemble sources and implicit terms
+## Step 5 — Apply cell residuals
 
-Cell residual data is converted into matrix and RHS contributions:
+Cell residual information is converted into algebraic contributions:
 
 ```text
 Su → RHS
 Sp → diagonal coefficient
 ```
 
-Specifically:
+Conceptually:
 
-```cpp
-sys.addRHS(c, flux[c].Su);
-sys.addCoeff(c, c, -flux[c].Sp);
+```text
+CellResidual
+      │
+      ├── Su ──► RHS
+      └── Sp ──► diagonal
 ```
 
 ---
 
-## Step 6 — Solve
+## Step 6 — Apply matrix contributions
+
+The accumulated matrix contributions are applied to the final `LinearSystem`:
+
+```text
+MatrixContribution
+      │
+      ▼
+LinearSystem
+      │
+      ▼
+A[row,column] += coefficient
+```
+
+This provides a clean boundary between the discretization framework and the linear-system implementation.
+
+---
+
+## Step 7 — Solve
 
 After assembly, the resulting `LinearSystem` is passed to the selected linear solver.
 
@@ -999,34 +1191,41 @@ The discretization layer itself does not solve the system.
 
 ---
 
-# 11. Separation of Responsibilities
+# 12. Separation of Responsibilities
 
 The current architecture intentionally separates several concerns.
 
-| Component                | Responsibility                                |
-| ------------------------ | --------------------------------------------- |
-| `FluxBuilder`            | Coordinates flux construction                 |
-| `DiffusionFluxBuilder`   | Constructs diffusion flux data                |
-| `ConvectionFluxBuilder`  | Constructs physical convection flux data      |
-| `SourceFluxBuilder`      | Constructs source data                        |
-| `FluxAccumulator`        | Stores intermediate discretization data       |
-| `DiffusionOperator`      | Assembles diffusion matrix contributions      |
-| `ConvectionOperator`     | Coordinates convection matrix assembly        |
-| `ReconstructionScheme`   | Determines face-value reconstruction          |
-| `UpwindReconstruction`   | Selects upstream cell from flux direction     |
-| `CentralReconstruction`  | Computes central face-value weights           |
-| `GradientReconstruction` | Reconstructs face values using cell gradients |
-| `GradientScheme`         | Computes cell gradients                       |
-| `FiniteVolumeAssembler`  | Coordinates complete FV matrix assembly       |
-| `LinearSystem`           | Stores the final discrete algebraic system    |
+| Component                | Responsibility                                                     |
+| ------------------------ | ------------------------------------------------------------------ |
+| `FluxBuilder`            | Coordinates flux construction                                      |
+| `DiffusionFluxBuilder`   | Constructs diffusion contributions and handles diffusion BCs       |
+| `ConvectionFluxBuilder`  | Constructs physical convection flux data                           |
+| `SourceFluxBuilder`      | Constructs source data                                             |
+| `FaceContribution`       | Stores common face connectivity                                    |
+| `FaceDiffusion`          | Stores interior diffusion face data                                |
+| `FaceConvection`         | Stores interior convection face data                               |
+| `BoundaryDiffusion`      | Stores Dirichlet diffusion boundary data                           |
+| `CellResidual`           | Stores explicit and implicit cell source terms                     |
+| `MatrixContribution`     | Represents a single matrix-entry contribution                      |
+| `FluxAccumulator`        | Stores intermediate discretization and algebraic contribution data |
+| `DiffusionOperator`      | Coordinates diffusion matrix assembly                              |
+| `DiffusionScheme`        | Determines diffusion discretization coefficients                   |
+| `ConvectionOperator`     | Coordinates convection matrix assembly                             |
+| `ReconstructionScheme`   | Determines face-value reconstruction                               |
+| `UpwindReconstruction`   | Selects upstream cell from flux direction                          |
+| `CentralReconstruction`  | Computes central face-value weights                                |
+| `GradientReconstruction` | Reconstructs face values using cell gradients                      |
+| `GradientScheme`         | Computes cell gradients                                            |
+| `FiniteVolumeAssembler`  | Coordinates complete FV matrix assembly                            |
+| `LinearSystem`           | Stores the final discrete algebraic system                         |
 
 The key principle is:
 
-> **Builders determine the physical/discretization data; reconstruction schemes determine how face values are represented; operators determine how those contributions enter the algebraic system.**
+> **Builders determine physical/discretization data; contribution types represent that data; reconstruction schemes determine how face values are represented; operators convert those representations into algebraic contributions; and the finite-volume assembler applies those contributions to the linear system.**
 
 ---
 
-# 12. Verification
+# 13. Verification
 
 The discretization framework is accompanied by verification tests for the numerical components.
 
@@ -1044,7 +1243,9 @@ Current verification coverage includes:
 * Boundary-condition handling.
 * Linear-system assembly.
 
-The current verification results demonstrate approximately second-order convergence for the applicable gradient and reconstruction verification cases.
+The verification framework can override discretization configuration on a per-case basis, allowing different reconstruction and gradient schemes to be tested without modifying the base simulation configuration.
+
+The current verification results demonstrate approximately second-order convergence for applicable gradient and central-reconstruction cases.
 
 For example, the current central reconstruction verification produces approximately second-order convergence:
 
@@ -1065,11 +1266,9 @@ Case                Solver  Reconstruction  Gradient    Mesh    L2 Error
 Sinusoidal2D        GMRES   Upwind          green_gauss 50x50   1.645e-04
 ```
 
-The verification framework can override the discretization configuration on a per-case basis, allowing different reconstruction and gradient schemes to be tested without modifying the base simulation configuration.
-
 ---
 
-# 13. Extension Points
+# 14. Extension Points
 
 The current structure is intended to support future extensions without requiring major changes to the existing assembly framework.
 
@@ -1097,6 +1296,23 @@ The `ConvectionOperator` does not need to change.
 
 ---
 
+## Additional diffusion schemes
+
+New diffusion discretizations can implement `DiffusionScheme`.
+
+For example:
+
+```text
+DiffusionScheme
+    │
+    ├── StandardDiffusionScheme
+    └── FutureDiffusionScheme
+```
+
+The `DiffusionOperator` can remain unchanged while the scheme determines the matrix contribution pattern.
+
+---
+
 ## Additional gradient schemes
 
 Additional gradient algorithms can implement `GradientScheme`:
@@ -1112,26 +1328,35 @@ These can then be consumed by gradient-dependent reconstruction schemes.
 
 ---
 
-## Additional physical fluxes
+## Additional contribution types
 
-The builder pattern can be extended with specialized builders if future governing equations require additional physical contributions.
+The contribution hierarchy can be extended when a discretization mechanism requires information not represented by the current structures.
+
+Face-based contributions should inherit from:
+
+```text
+FaceContribution
+```
+
+when they share owner/neighbor/face connectivity.
 
 For example:
 
 ```text
-FluxBuilder
-    │
-    ├── DiffusionFluxBuilder
-    ├── ConvectionFluxBuilder
-    ├── SourceFluxBuilder
-    └── TurbulenceFluxBuilder
+FaceContribution
+       │
+       ├── FaceDiffusion
+       ├── FaceConvection
+       └── FutureFaceContribution
 ```
+
+This keeps common connectivity centralized while allowing specialized contribution data to remain local to each discretization mechanism.
 
 ---
 
 ## Additional operators
 
-The `Operator` abstraction allows additional matrix-assembly components to be introduced without changing the fundamental flux representation.
+The `Operator` abstraction allows additional matrix-assembly components to be introduced without changing the fundamental contribution representation.
 
 For example:
 
@@ -1145,7 +1370,7 @@ Operator
 
 ---
 
-# 14. Design Goals
+# 15. Design Goals
 
 The discretization framework is being developed around several architectural goals.
 
@@ -1156,6 +1381,14 @@ Mesh connectivity and physical fluxes are represented primarily through faces ra
 ### Separation of construction and assembly
 
 Flux construction and matrix assembly are distinct stages.
+
+### Explicit contribution representation
+
+Physical and discretization data are represented through dedicated contribution structures rather than being immediately written into the final linear system.
+
+### Shared face connectivity
+
+Common owner, neighbor, and face information is represented by `FaceContribution` and inherited by specialized face contributions.
 
 ### Reconstruction independence
 
@@ -1179,16 +1412,20 @@ Gradient calculation is only required when the active reconstruction or discreti
 
 ### Extensibility
 
-New reconstruction schemes, gradient schemes, operators, and flux mechanisms should be addable without requiring changes to unrelated components.
+New reconstruction schemes, gradient schemes, contribution types, operators, and flux mechanisms should be addable without requiring changes to unrelated components.
 
 ---
 
-# 15. Current Status
+# 16. Current Status
 
 The finite-volume framework currently supports:
 
 * Face-based diffusion discretization.
 * Face-based convection flux construction.
+* Common `FaceContribution` abstraction.
+* `FaceDiffusion` and `FaceConvection` specialized contributions.
+* Explicit `BoundaryDiffusion` representation.
+* Explicit `MatrixContribution` representation.
 * Upwind reconstruction.
 * Central reconstruction.
 * Gradient-based reconstruction.
@@ -1216,22 +1453,39 @@ Flux Builders
       ▼
 FluxAccumulator
       │
-      ├──────────────┐
-      ▼              ▼
-Diffusion        Convection
-Operator         Operator
-                     │
-                     ▼
-             ReconstructionScheme
-                │    │    │
-                ▼    ▼    ▼
-             Gradient Central Upwind
+      ├── FaceContribution
+      │     ├── FaceDiffusion
+      │     └── FaceConvection
+      │
+      ├── BoundaryDiffusion
+      │
+      ├── CellResidual
+      │
+      └── MatrixContribution
                 │
                 ▼
-             LinearSystem
-                  │
-                  ▼
-                Solver
+        FiniteVolumeAssembler
+                │
+        ┌───────┴────────┐
+        ▼                ▼
+   Diffusion         Convection
+   Operator           Operator
+        │                │
+        ▼                ▼
+DiffusionScheme  ReconstructionScheme
+                         │
+                 ┌───────┼───────┐
+                 ▼       ▼       ▼
+              Gradient Central  Upwind
+                 │
+                 ▼
+          Matrix Contributions
+                 │
+                 ▼
+            LinearSystem
+                 │
+                 ▼
+               Solver
 ```
 
 The next architectural targets are:
@@ -1242,6 +1496,9 @@ Finite Volume Framework
     ├── [x] Generic face-based assembly
     ├── [x] Boundary condition framework
     ├── [x] Face abstraction
+    ├── [x] FaceContribution hierarchy
+    ├── [x] Boundary diffusion contribution
+    ├── [x] MatrixContribution representation
     ├── [x] Scalar field storage
     ├── [x] Vector field storage
     ├── [x] Field registry infrastructure
@@ -1257,4 +1514,4 @@ Finite Volume Framework
     └── [ ] Matrix/vector assembly interface
 ```
 
-These future abstractions should build on the existing separation between flux construction, reconstruction, operator assembly, and the linear-system layer rather than collapsing those responsibilities back together.
+These future abstractions should build on the existing separation between flux construction, contribution representation, reconstruction, operator assembly, and the linear-system layer rather than collapsing those responsibilities back together.
