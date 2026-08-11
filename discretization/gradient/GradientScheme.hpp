@@ -4,7 +4,6 @@
 #include "fields/VectorField.hpp"
 #include "mesh/MeshBase.hpp"
 
-
 class GradientScheme
 {
 public:
