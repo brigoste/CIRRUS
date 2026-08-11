@@ -7,10 +7,7 @@
 // Construction
 // ============================================================
 
-LinearSystem::LinearSystem(std::size_t n)
-{
-    resize(n);
-}
+LinearSystem::LinearSystem(std::size_t n) { resize(n); }
 
 // ============================================================
 // SIZING
@@ -24,10 +21,7 @@ void LinearSystem::resize(std::size_t n)
     b_.assign(n, 0.0);
 }
 
-std::size_t LinearSystem::size() const
-{
-    return n_;
-}
+std::size_t LinearSystem::size() const { return n_; }
 
 // ============================================================
 // MATRIX ASSEMBLY
@@ -57,28 +51,15 @@ void LinearSystem::addCoeff(
 // RHS ASSEMBLY
 // ============================================================
 
-void LinearSystem::addRHS(
-    std::size_t i,
-    double val)
-{
-    b_[i] += val;
-}
+void LinearSystem::addRHS( std::size_t i, double val) { b_[i] += val; }
 
-void LinearSystem::setRHS(
-    std::size_t i,
-    double val)
-{
-    b_[i] = val;
-}
+void LinearSystem::setRHS( std::size_t i, double val) { b_[i] = val; }
 
 // ============================================================
 // ACCESSORS
 // ============================================================
 
-double LinearSystem::rhs(std::size_t i) const
-{
-    return b_[i];
-}
+double LinearSystem::rhs(std::size_t i) const { return b_[i]; }
 
 double LinearSystem::coeff(
     std::size_t i,
@@ -86,39 +67,23 @@ double LinearSystem::coeff(
 {
     for (const auto& [col, value] : A_[i])
     {
-        if (col == j)
-        {
-            return value;
-        }
+        if (col == j) { return value; }
     }
 
     return 0.0;
 }
 
-std::vector<double>& LinearSystem::RHS()
-{
-    return b_;
-}
+std::vector<double>& LinearSystem::RHS() { return b_; }
 
-const std::vector<double>& LinearSystem::RHS() const
-{
-    return b_;
-}
+const std::vector<double>& LinearSystem::RHS() const { return b_; }
 
 // ============================================================
 // SPARSE MATRIX ACCESS
 // ============================================================
 
-const std::vector<std::pair<std::size_t, double>>&
-LinearSystem::row(std::size_t i) const
-{
-    return A_[i];
-}
+const std::vector<std::pair<std::size_t, double>>& LinearSystem::row(std::size_t i) const { return A_[i]; }
 
-double LinearSystem::diagonal(std::size_t i) const
-{
-    return coeff(i, i);
-}
+double LinearSystem::diagonal(std::size_t i) const { return coeff(i, i); }
 
 // ============================================================
 // RESET
@@ -126,16 +91,9 @@ double LinearSystem::diagonal(std::size_t i) const
 
 void LinearSystem::clear()
 {
-    for (auto& row : A_)
-    {
-        row.clear();
-    }
+    for (auto& row : A_) { row.clear(); }
 
-    std::fill(
-        b_.begin(),
-        b_.end(),
-        0.0
-    );
+    std::fill( b_.begin(), b_.end(), 0.0 );
 }
 
 // ============================================================
@@ -146,10 +104,7 @@ std::size_t LinearSystem::nnz() const
 {
     std::size_t count = 0;
 
-    for (const auto& row : A_)
-    {
-        count += row.size();
-    }
+    for (const auto& row : A_) { count += row.size(); }
 
     return count;
 }
@@ -165,18 +120,12 @@ void LinearSystem::matvec(
 {
     const std::size_t N = size();
 
-    if (x.size() != N)
-    {
-        throw std::runtime_error( "LinearSystem::matvec: vector size mismatch" );
-    }
+    if (x.size() != N) { throw std::runtime_error( "LinearSystem::matvec: vector size mismatch" ); }
 
     y.assign(N, 0.0);
 
     for (std::size_t i = 0; i < N; ++i)
     {
-        for (const auto& [j, aij] : A_[i])
-        {
-            y[i] += aij * x[j];
-        }
+        for (const auto& [j, aij] : A_[i]) { y[i] += aij * x[j]; }
     }
 }
