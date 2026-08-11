@@ -2,6 +2,7 @@
 
 #include "discretization/operators/Operator.hpp"
 #include "discretization/convection/ConvectionScheme.hpp"
+#include "discretization/reconstructors/ReconstructionScheme.hpp"
 #include "mesh/MeshBase.hpp"
 
 class EquationSystem;
@@ -12,7 +13,9 @@ class VectorField;
 class ConvectionOperator
 {
 public:
-    explicit ConvectionOperator(const ConvectionScheme& scheme);
+    explicit ConvectionOperator(
+        const ConvectionScheme& convection,
+        const ReconstructionScheme& reconstruction);
 
     void assemble(
         const MeshBase& mesh,
@@ -23,5 +26,6 @@ public:
     ) const;
 
 private:
-    const ConvectionScheme& scheme_;
+    const ConvectionScheme& convection_;
+    const ReconstructionScheme& reconstruction_;
 };
