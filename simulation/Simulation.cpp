@@ -7,6 +7,7 @@
 #include "test/verification/VerificationCase.hpp"
 #include "discretization/convection/ConvectionFactory.hpp"
 #include "discretization/gradient/GradientScheme.hpp"
+#include "discretization/reconstructors/ReconstructionScheme.hpp"
 
 #include "solver/preconditioners/PreconditionerFactory.hpp"
 
@@ -41,8 +42,10 @@ void Simulation::initializeFields()
 
 Simulation::Simulation(const SimulationConfig& cfg)
     : convectionScheme_(makeConvectionScheme(cfg.discretization.convectionScheme)),
-      gradientScheme_(makeGradientScheme(cfg.discretization.gradientScheme)),  
-      convection_(*convectionScheme_),
+      gradientScheme_(makeGradientScheme(cfg.discretization.gradientScheme)),
+      reconstructionScheme_(makeReconstructionScheme(cfg.discretization.reconstructionScheme)),  
+      convection_(*convectionScheme_, 
+                  *reconstructionScheme_),
       diffusion_(diffusionScheme_),
       fvOperator_(convection_, diffusion_),
       cfg_(cfg),
