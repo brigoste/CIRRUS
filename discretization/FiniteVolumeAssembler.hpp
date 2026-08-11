@@ -21,7 +21,7 @@ public:
 
     void assemble(
         const MeshBase& mesh,
-        const FluxAccumulator& flux,
+        FluxAccumulator& flux,
         const ScalarField& field,
         const VectorField& gradient,
         EquationSystem& sys
@@ -30,5 +30,4 @@ public:
 private:
     const ConvectionOperator& convection_;
     const DiffusionOperator& diffusion_;
-
 };
