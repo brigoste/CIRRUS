@@ -31,7 +31,7 @@ struct VerificationSummary
     std::string meshType;
     std::string meshSize;
     std::string gradient;
-    std::string convection;
+    std::string reconstruction;
 
     double l2;
     double linf;
@@ -141,6 +141,11 @@ SimulationConfig VerificationRunner::applyVerificationOverrides( const Simulatio
     if (verif.overrideBoundary) 
     { 
         cfg.boundary = verif.boundary; 
+    }
+
+    if (verif.overrideDiscretization)
+    {
+        cfg.discretization = verif.discretization;
     }
 
     return cfg;
@@ -411,7 +416,8 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                 finestSummary.meshType = meshType;
                 finestSummary.meshSize = meshSize;
                 finestSummary.gradient = gradientToString(levelCfg.discretization.gradientScheme);
-                finestSummary.convection = convectionToString(levelCfg.discretization.convectionScheme);
+                std::cout << "Reconstruction scheme: " << reconstructionToString(levelCfg.discretization.reconstructionScheme) << '\n';
+                finestSummary.reconstruction = reconstructionToString(levelCfg.discretization.reconstructionScheme);
 
                 finestSummary.l2 = norms.l2_rms;
                 finestSummary.linf = norms.linf;
@@ -537,7 +543,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
     std::cout << std::left
             << std::setw(20) << "Case"
             << std::setw(12) << "Solver"
-            << std::setw(16) << "Convection"
+            << std::setw(16) << "Reconstruction"
             << std::setw(16) << "Gradient"
             << std::setw(10) << "Mesh"
             << std::setw(14) << "L2 Error"
@@ -555,7 +561,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
         std::cout << std::left
                 << std::setw(20) << s.caseName
                 << std::setw(12) << s.solver
-                << std::setw(16) << s.convection
+                << std::setw(16) << s.reconstruction
                 << std::setw(16) << s.gradient
                 << std::setw(10) << s.meshSize
                 << std::setw(14) << s.l2
