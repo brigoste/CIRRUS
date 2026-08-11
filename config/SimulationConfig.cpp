@@ -58,8 +58,7 @@ VerificationSuite loadVerificationSuite(const std::filesystem::path& path)
     return j.at("verificationSuite").get<VerificationSuite>();
 }
 
-VerificationCaseConfig loadVerificationCase(
-    const std::filesystem::path& path)
+VerificationCaseConfig loadVerificationCase(const std::filesystem::path& path)
 {
     std::ifstream file(path);
 
@@ -100,6 +99,12 @@ VerificationCaseConfig loadVerificationCase(
     {
         cfg.refinement = j.at("refinement").get<RefinementConfig>();
         cfg.overrideRefinement = true;
+    }
+
+    if (j.contains("discretization"))
+    {
+        cfg.discretization = j.at("discretization").get<DiscretizationConfig>();
+        cfg.overrideDiscretization = true;
     }
 
     if (j.contains("params")) { cfg.params = j.at("params"); }
