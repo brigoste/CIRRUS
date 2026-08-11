@@ -4,8 +4,8 @@
 
 struct FaceConvection
 {
-    std::size_t P;
-    std::size_t N;
-    std::size_t face;
-    double F;
+    std::size_t P = 0;
+    std::size_t N = 0;
+    std::size_t face = 0;
+    double F = 0;
 };
