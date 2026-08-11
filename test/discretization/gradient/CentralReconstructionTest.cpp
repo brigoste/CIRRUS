@@ -148,7 +148,8 @@ bool runCentralReconstructionTest()
                 P,
                 face,
                 phi,
-                gradient
+                gradient,
+                0.0
             );
 
         double reconstructedFromStencil = 0.0;
@@ -176,7 +177,8 @@ bool runCentralReconstructionTest()
                 P,
                 face,
                 phi,
-                gradient
+                gradient,
+                0.0
             );
 
         if (!nearlyEqual(
@@ -214,7 +216,8 @@ bool runCentralReconstructionTest()
                 P,
                 face,
                 phi,
-                gradient
+                gradient,
+                0.0
             );
         }
         catch (const std::runtime_error&)
@@ -355,7 +358,8 @@ bool runCentralReconstructionTest()
                     P,
                     face,
                     refinementPhi,
-                    refinementGradient
+                    refinementGradient,
+                    0.0
                 );
 
             double reconstructed = 0.0;
@@ -487,4 +491,3 @@ bool runCentralReconstructionTest()
 
     return allPassed;
 }
-
