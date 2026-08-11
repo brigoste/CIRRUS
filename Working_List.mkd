@@ -4,98 +4,170 @@
 
 ## Mesh
 
-- [x] 1D structured mesh
-- [x] 2D structured quadrilateral mesh
-- [ ] 3D structured mesh
-- [ ] Unstructured mesh support
-- [ ] Mesh connectivity abstraction
-- [ ] Cell/face/vertex topology management
+* [x] 1D structured mesh
+* [x] 2D structured quadrilateral mesh
+* [ ] 3D structured mesh
+* [ ] Unstructured mesh support
+* [ ] Mesh connectivity abstraction
+* [ ] Cell/face/vertex topology management
 
 Future:
-- Adaptive mesh refinement (AMR)
-- Mesh quality metrics
-- Mesh optimization
-- Topology optimization
+
+* Adaptive mesh refinement (AMR)
+* Mesh quality metrics
+* Mesh optimization
+* Topology optimization
+
+Optimization notes:
+
+* Keep mesh connectivity cache-friendly
+* Avoid repeated geometric calculations during assembly
+* Store frequently accessed cell/face geometry in contiguous data where practical
+* Design mesh interfaces for future OpenMP/GPU traversal
 
 ---
 
 ## Finite Volume Framework
 
-- [x] Generic face-based assembly
-- [x] Boundary condition framework
-- [x] Face abstraction
-- [x] Scalar field storage
-- [x] Vector field storage
-- [x] Field registry infrastructure
-- [x] Simulation integration with FieldRegistry
-- [x] Generic operator framework 
-- [x] Generic equation system abstraction
-- [x] Matrix/vector assembly interface
+* [x] Generic face-based assembly
+* [x] Boundary condition framework
+* [x] Face abstraction
+* [x] Generic face contribution interface
+* [x] Scalar field storage
+* [x] Vector field storage
+* [x] Field registry infrastructure
+* [x] Simulation integration with FieldRegistry
+* [x] Generic operator framework
+* [x] Generic equation system abstraction
+* [x] Matrix/vector assembly interface
+* [x] Separate flux calculation from discretization
+
+  * [x] Convection
+  * [x] Diffusion
+  * [x] Source terms
+* [x] Face interpolation/reconstruction framework
+* [x] Boundary-face contribution framework
+* [ ] Physics-independent finite-volume assembly
+
+Current contribution hierarchy:
+
+```text
+FaceContribution
+├── FaceDiffusion
+└── FaceConvection
+```
+
+Additional contribution types are used for non-interior-face and algebraic contributions, such as:
+
+```text
+BoundaryDiffusion
+MatrixContribution
+CellResidual
+```
+
+`FluxAccumulator` provides the common intermediate representation between flux construction and operator assembly.
 
 Future:
-- Matrix-free operator evaluation
-- Automatic differentiation support
+
+* Matrix-free operator evaluation
+* Automatic differentiation support
+
+Architecture / optimization notes:
+
+* Keep flux evaluation independent from equation assembly where practical
+* Minimize repeated face/cell property lookups
+* Avoid unnecessary temporary objects during face loops
+* Preserve compatibility with matrix-free operators
+* Design interfaces with future SIMD/OpenMP/GPU execution in mind
+* Favor data-oriented access patterns in assembly-critical loops
+* Keep contribution objects lightweight and trivially movable
+* Prefer batching contributions before matrix insertion where practical
 
 ---
 
-## Linear Algebra Infrastructure
+# Linear Algebra Infrastructure
 
-### Linear Solvers
+## Linear Solvers
 
-- [x] TDMA
-- [x] Gauss-Seidel
-- [x] SOR
-- [x] Conjugate Gradient (CG)
-- [x] BiCGSTAB
-- [x] GMRES
+* [x] TDMA
+* [x] Gauss-Seidel
+* [x] SOR
+* [x] Conjugate Gradient (CG)
+* [x] BiCGSTAB
+* [x] GMRES
 
 Performance notes:
 
-- GMRES restart sensitivity characterized
+* GMRES restart sensitivity characterized
+* Solver performance should eventually be benchmarked systematically
+* Avoid premature optimization before representative workloads are established
 
-### Preconditioners
+---
 
-- [x] None
-- [x] Jacobi
-- [x] ILU(0)
-- [ ] SSOR
-- [ ] Algebraic Multigrid (AMG)
+## Preconditioners
 
-- Jacobi preconditioning verified but currently computationally expensive
-- ILU(0) verified and improves convergence relative to Jacobi
-- Preconditioner performance should be revisited during solver optimization
+* [x] None
+* [x] Jacobi
+* [x] ILU(0)
+* [ ] SSOR
+* [ ] Algebraic Multigrid (AMG)
 
+Performance notes:
 
-### Matrix Infrastructure
+* Jacobi preconditioning verified but currently computationally expensive
+* ILU(0) verified and improves convergence relative to Jacobi
+* Preconditioner performance should be revisited during solver optimization
+* Memory footprint and setup cost should be measured alongside iteration count
+* AMG should be considered when larger 2D/3D problems expose solver scalability limits
 
-- [x] Sparse matrix storage
-- [ ] CSR format
-- [ ] Block matrix support
-- [ ] Matrix diagnostics
-- [ ] Condition number estimation
+---
+
+## Matrix Infrastructure
+
+* [x] Sparse matrix storage
+* [ ] CSR format
+* [ ] Block matrix support
+* [ ] Matrix diagnostics
+* [ ] Condition number estimation
+
+Optimization notes:
+
+* Evaluate CSR before implementing more sophisticated sparse formats
+* Reduce allocation and copying during matrix assembly
+* Investigate matrix sparsity patterns and memory locality
+* Consider matrix-free methods for operators where explicit matrix storage becomes a bottleneck
 
 ---
 
 # Verification Framework
 
-- [x] Verification suite
-- [x] JSON case loading
-- [x] Accuracy checks
-- [x] Manufactured solution verification (MMS)
-- [x] Mesh refinement studies
-- [x] Order-of-convergence calculations
-- [x] CSV output
-- [x] JSON output
-- [ ] Refactor verification to consume Field objects
-- [ ] Generalized field error norms
-- [ ] Richardson extrapolation
-- [ ] Grid Convergence Index (GCI)
-- [ ] Automated regression verification
+* [x] Verification suite
+* [x] JSON case loading
+* [x] Accuracy checks
+* [x] Manufactured solution verification (MMS)
+* [x] Mesh refinement studies
+* [x] Order-of-convergence calculations
+* [x] CSV output
+* [x] JSON output
+* [ ] Refactor verification to consume Field objects
+* [ ] Generalized field error norms
+* [ ] Richardson extrapolation
+* [ ] Grid Convergence Index (GCI)
+* [ ] Automated regression verification
 
 Future:
-- Automatic grid convergence studies
-- Grid independence detection
-- Adaptive mesh recommendations
+
+* Automatic grid convergence studies
+* Grid independence detection
+* Adaptive mesh recommendations
+
+Verification notes:
+
+* Continue using MMS for individual numerical components where analytical behavior is known
+* Test exactness properties separately from asymptotic convergence
+* Prefer component-level verification before solver-level verification
+* Track observed order rather than relying only on absolute error
+* Add regression tests for previously verified numerical behavior
 
 ---
 
@@ -103,21 +175,21 @@ Future:
 
 ## Heat Diffusion
 
-- [x] 1D
-- [x] 2D
-- [ ] 3D
-- [ ] Variable material properties
+* [x] 1D
+* [x] 2D
+* [ ] 3D
+* [ ] Variable material properties
 
 ---
 
 ## Advection-Diffusion
 
-- [x] 2D steady-state
-- [x] First-order upwind convection
-- [x] Central differencing
-- [ ] Second-order convection schemes
-- [ ] 3D
-- [ ] Transient
+* [x] 2D steady-state
+* [x] First-order upwind convection
+* [x] Central differencing
+* [ ] Second-order convection schemes
+* [ ] 3D
+* [ ] Transient
 
 ---
 
@@ -125,64 +197,131 @@ Future:
 
 ## Field Types
 
-- [x] ScalarField
-- [x] VectorField
-- [x] FieldRegistry
-- [ ] TensorField
-- [ ] BoundaryField
-- [ ] Field interpolation
+* [x] ScalarField
+* [x] VectorField
+* [x] FieldRegistry
+* [ ] TensorField
+* [ ] BoundaryField
+* [ ] Field interpolation
+
+Optimization notes:
+
+* Prefer contiguous field storage
+* Minimize repeated bounds/validity checks in hot loops where safe
+* Preserve simple field access semantics while enabling optimized iteration
+* Evaluate AoS vs SoA layouts when vector/tensor fields become performance-critical
 
 ---
 
 ## Gradient Operators
 
-- [x] Green-Gauss gradient
-- [x] Least-squares gradient
-- [ ] Gradient limiting
+* [x] Green-Gauss gradient
+* [x] Least-squares gradient
+* [ ] Gradient limiting
+
+### Gradient Configuration & Verification
+
+* [x] Configurable gradient scheme
+* [x] JSON serialization/deserialization of gradient scheme
+* [x] Verification-case gradient scheme override
+* [x] Report gradient scheme in verification output
+* [x] Verify multiple gradient schemes through MMS
+* [x] Compare gradient-scheme accuracy/order
+
+Verification status:
+
+* Green-Gauss verified
+* Least-squares verified
+* Both demonstrate expected second-order behavior for the tested manufactured field
+
+Optimization notes:
+
+* Avoid recomputing geometric coefficients unnecessarily
+* Reuse face/cell geometry during gradient evaluation
+* Consider precomputing reusable least-squares coefficients
+* Keep gradient interfaces compatible with future parallel face/cell traversal
 
 ---
 
-## Gradient Configuration & Verification
-- [x] Configurable gradient scheme
-- [x] JSON serialization/deserialization of gradient scheme
-- [x] Verification-case gradient scheme override
-- [x] Report gradient scheme in verification output
-- [x] Verify multiple gradient schemes through MMS
-- [x] Compare gradient-scheme accuracy/order
+# Reconstruction / Interpolation Infrastructure
 
-## Convection Discretization
+* [x] Establish pluggable reconstruction scheme interface
+* [x] Implement GradientReconstruction
+* [x] Implement CentralReconstruction
+* [x] Integrate reconstruction selection into configuration
+* [x] Integrate reconstruction with convection operator
+* [x] Separate reconstruction from convection discretization
+* [x] Generalize face-value interpolation/reconstruction framework
+* [x] Verify CentralReconstruction exactness for linear fields
+* [x] Verify CentralReconstruction second-order convergence
+* [x] Verify GradientReconstruction through MMS refinement studies
+* [ ] Implement second-order upwind reconstruction
+* [ ] Implement QUICK reconstruction
+* [ ] Implement MUSCL reconstruction
+* [ ] Add bounded/TVD reconstruction
+* [ ] Add flux limiter framework
 
-- [x] First-order upwind
-- [x] Central differencing
-- [ ] Second-order upwind
-- [ ] QUICK
-- [ ] MUSCL reconstruction
-- [ ] TVD schemes
-- [ ] Flux limiters
-- [x] Pluggable convection scheme interface
-- [x] Verified second-order advection-diffusion convergence
+Architecture:
+
+```text
+Cell values
+    ↓
+Gradient / Reconstruction
+    ↓
+Face value / reconstruction stencil
+    ↓
+Convection discretization
+    ↓
+Matrix contributions
+    ↓
+Linear system
+```
+
+Design goals:
+
+* Reconstruction schemes should not know how equation coefficients are assembled
+* Convection schemes should consume reconstructed face values or reconstruction stencils
+* Gradient-based and non-gradient-based reconstruction should share a common interface
+* Boundary-face behavior should be explicit and consistently handled
+* Reconstruction should support both direct face-value evaluation and stencil-based evaluation where applicable
+
+Optimization notes:
+
+* Avoid recomputing interpolation coefficients for static meshes
+* Consider caching geometric reconstruction coefficients
+* Keep reconstruction operations lightweight enough for face-loop execution
+* Avoid virtual dispatch in extremely hot loops if profiling demonstrates measurable overhead
+* Preserve a clean polymorphic interface until profiling demonstrates that dispatch is a bottleneck
+* Design reconstruction data structures so they can eventually support SIMD/OpenMP/GPU execution
+
+---
+
+# Convection Discretization
+
+* [x] Extract convection discretization from finite-volume assembly
+* [x] Implement UpwindScheme
+* [x] Implement CentralDifferenceScheme
+* [x] Pluggable convection scheme interface
+* [x] Verify upwind convection behavior through MMS
+* [x] Verify second-order central/reconstructed convection behavior through MMS
+* [x] Achieve second-order Advection-Diffusion convergence
+* [ ] Implement second-order upwind
+* [ ] Implement QUICK
+* [ ] Implement MUSCL
+* [ ] Add bounded/TVD schemes
+* [ ] Add flux limiter framework
+
+Optimization notes:
+
+* Keep face-flux evaluation separate from reconstruction
+* Minimize repeated access to owner/neighbor fields
+* Evaluate whether flux coefficients can be precomputed for static meshes
+* Benchmark central vs upwind vs higher-order schemes on representative meshes
+* Consider branch reduction in boundary/interior face loops after correctness is established
 
 Future:
-- Bounded high-resolution convection schemes
 
----
-
-
-- [x] Diffusion flux framework
-- [x] Convective flux framework
-- [ ] Generic face contribution interface
-- [ ] Separate flux calculation from discretization
-    - [x] Convection
-    - [ ] Diffusion
-    - [x] Source terms
-- [ ] Face interpolation framework
-
-Optimization / architecture notes:
-
-- Keep flux evaluation independent from equation assembly where practical
-- Minimize repeated face/cell property lookups
-- Preserve compatibility with matrix-free operators
-- Design interfaces with future SIMD/OpenMP/GPU execution in mind
+* Bounded high-resolution convection schemes
 
 ---
 
@@ -190,16 +329,24 @@ Optimization / architecture notes:
 
 ## Nonlinear Solver Framework
 
-- [ ] Residual evaluation
-- [ ] Iteration controller
-- [ ] Convergence criteria
-- [ ] Under-relaxation framework
-- [ ] Residual history output
-- [ ] Adaptive stopping criteria
+* [ ] Residual evaluation
+* [ ] Iteration controller
+* [ ] Convergence criteria
+* [ ] Under-relaxation framework
+* [ ] Residual history output
+* [ ] Adaptive stopping criteria
 
 Future:
-- Automatic relaxation tuning
-- Solver selection
+
+* Automatic relaxation tuning
+* Solver selection
+
+Optimization notes:
+
+* Separate convergence logic from equation assembly
+* Avoid unnecessary residual recomputation
+* Profile solver time between assembly, preconditioning, and linear solve
+* Preserve residual history only at requested/reporting intervals when memory becomes significant
 
 ---
 
@@ -207,81 +354,92 @@ Future:
 
 ## Governing Equations
 
-- [ ] Continuity equation
-- [ ] Momentum equations
+* [ ] Continuity equation
+* [ ] Momentum equations
 
 ---
 
 ## Primitive Variables
 
-- [ ] Pressure field
-- [ ] Velocity field
+* [ ] Pressure field
+* [ ] Velocity field
 
 ---
 
 ## Pressure-Velocity Coupling
 
-- [ ] SIMPLE
-- [ ] SIMPLEC
-- [ ] SIMPLER
-- [ ] PISO
+* [ ] SIMPLE
+* [ ] SIMPLEC
+* [ ] SIMPLER
+* [ ] PISO
 
 ---
 
 ## Pressure Equation
 
-- [ ] Pressure correction equation
-- [ ] Rhie-Chow interpolation
+* [ ] Pressure correction equation
+* [ ] Rhie-Chow interpolation
 
 ---
 
 ## Boundary Conditions
 
-- [ ] Velocity inlet
-- [ ] Pressure outlet
-- [ ] No-slip wall
-- [ ] Symmetry
-- [ ] Periodic boundaries
+* [ ] Velocity inlet
+* [ ] Pressure outlet
+* [ ] No-slip wall
+* [ ] Symmetry
+* [ ] Periodic boundaries
 
 Future:
-- Engineering outputs:
-  - Lift
-  - Drag
-  - Pressure loss
-  - Heat transfer coefficients
+
+* Engineering outputs:
+
+  * Lift
+  * Drag
+  * Pressure loss
+  * Heat transfer coefficients
 
 ---
 
 # Transient Solvers
 
-- [ ] Explicit Euler
-- [ ] Implicit Euler
-- [ ] Crank-Nicolson
-- [ ] Adaptive timestep control
+* [ ] Explicit Euler
+* [ ] Implicit Euler
+* [ ] Crank-Nicolson
+* [ ] Adaptive timestep control
+
+Optimization notes:
+
+* Minimize allocation between timesteps
+* Reuse matrices and solver/preconditioner structures when coefficients are unchanged
+* Avoid unnecessary field copies
+* Eventually benchmark timestep cost separately from nonlinear/linear iteration cost
 
 ---
 
 # Turbulence Models
 
-- [ ] Mixing-length model
-- [ ] k-epsilon
-- [ ] k-omega SST
+* [ ] Mixing-length model
+* [ ] k-epsilon
+* [ ] k-omega SST
 
 Future:
-- Turbulence model calibration
-- Model optimization
+
+* Turbulence model calibration
+* Model optimization
 
 ---
 
 # Multiphysics
 
-- [ ] Conjugate heat transfer
-- [ ] Buoyancy
-- [ ] Species transport
-- [ ] Radiation
+* [ ] Conjugate heat transfer
+* [ ] Buoyancy
+* [ ] Species transport
+* [ ] Radiation
 
 Future:
-- Multi-objective optimization
+
+* Multi-objective optimization
 
 ---
 
@@ -289,57 +447,97 @@ Future:
 
 ## Profiling and Optimization
 
-- [ ] Profiling framework
-- [ ] Benchmark suite
-- [ ] Memory diagnostics
-- [ ] Cache-friendly data layouts
-- [ ] Sparse matrix optimization
-- [ ] SIMD vectorization
-- [ ] Matrix-free operators
+* [ ] Profiling framework
+* [ ] Benchmark suite
+* [ ] Memory diagnostics
+* [ ] Cache-friendly data layouts
+* [ ] Sparse matrix optimization
+* [ ] SIMD vectorization
+* [ ] Matrix-free operators
+
+Optimization strategy:
+
+1. Establish correctness first
+2. Build representative verification/benchmark cases
+3. Profile before changing performance-critical code
+4. Identify dominant costs
+5. Optimize the dominant kernel
+6. Re-run numerical verification
+7. Compare performance against the baseline
+8. Preserve optimizations only when they provide measurable benefit
+
+Performance metrics:
+
+* Total runtime
+* Assembly time
+* Linear solver time
+* Preconditioner setup time
+* Preconditioner application time
+* Number of linear iterations
+* Memory usage
+* Matrix nonzero count
+* Time per cell/face
+* Scaling with mesh size
 
 Future:
-- Automatic performance regression testing
+
+* Automatic performance regression testing
 
 ---
 
 # Parallel Computing
 
-- [ ] OpenMP
-- [ ] MPI
-- [ ] GPU acceleration (CUDA/HIP)
+* [ ] OpenMP
+* [ ] MPI
+* [ ] GPU acceleration (CUDA/HIP)
 
 Future:
-- Load balancing
-- Hybrid CPU/GPU execution
+
+* Load balancing
+* Hybrid CPU/GPU execution
+
+Optimization notes:
+
+* Parallel architecture should be considered during data-structure design rather than added as a final abstraction
+* Avoid unnecessary shared mutable state
+* Identify naturally parallel cell/face operations
+* Preserve deterministic behavior where practical for verification
 
 ---
 
 # Input / Output
 
-- [x] VTK output
-- [ ] Restart files
-- [ ] Probe output
-- [ ] Case management system
-- [ ] Geometry input format
+* [x] VTK output
+* [ ] Restart files
+* [ ] Probe output
+* [ ] Case management system
+* [ ] Geometry input format
+
+Optimization notes:
+
+* Avoid coupling solver kernels directly to output formatting
+* Keep output operations outside hot numerical loops
+* Support selective field output to reduce I/O overhead
+* Consider asynchronous output for large transient simulations
 
 ---
 
 # User Interface / Case Setup
 
-- [ ] Solver selection interface
-- [ ] Geometry definition interface
-- [ ] Boundary condition editor
-- [ ] Material property database
-- [ ] Simulation setup GUI
+* [ ] Solver selection interface
+* [ ] Geometry definition interface
+* [ ] Boundary condition editor
+* [ ] Material property database
+* [ ] Simulation setup GUI
 
 ---
 
 # Documentation
 
-- [ ] Theory manual
-- [ ] Verification manual
-- [ ] Developer guide
-- [ ] User manual
+* [ ] Theory manual
+* [ ] Verification manual
+* [ ] Developer guide
+* [ ] User manual
 
 ---
 
@@ -347,103 +545,313 @@ Future:
 
 ## Engineering Optimization
 
-- [ ] Heat sink optimization
-- [ ] Channel geometry optimization
-- [ ] Airfoil optimization
-- [ ] Pressure-loss minimization
-- [ ] Lift-to-drag optimization
+* [ ] Heat sink optimization
+* [ ] Channel geometry optimization
+* [ ] Airfoil optimization
+* [ ] Pressure-loss minimization
+* [ ] Lift-to-drag optimization
 
 ---
 
 ## Geometry Optimization
 
-- [ ] Shape optimization
-- [ ] Mesh morphing
-- [ ] Topology optimization
+* [ ] Shape optimization
+* [ ] Mesh morphing
+* [ ] Topology optimization
 
 ---
 
 ## Inverse Problems
 
-- [ ] Material property estimation
-- [ ] Boundary condition reconstruction
-- [ ] Source identification
+* [ ] Material property estimation
+* [ ] Boundary condition reconstruction
+* [ ] Source identification
 
 ---
 
 ## Advanced Methods
 
-- [ ] Adjoint methods
-- [ ] Multi-objective optimization
-- [ ] Surrogate modeling
-- [ ] Bayesian optimization
-- [ ] Robust optimization
+* [ ] Adjoint methods
+* [ ] Multi-objective optimization
+* [ ] Surrogate modeling
+* [ ] Bayesian optimization
+* [ ] Robust optimization
 
+---
 
 # Current Milestone
 
 ## Numerical Discretization Infrastructure
+
 ### Gradient Infrastructure
-- [x] Implement Green-Gauss gradient
-- [x] Add configurable gradient scheme
-- [x] Integrate gradient scheme into simulation configuration
-- [x] Allow verification cases to override gradient scheme
-- [x] Report gradient scheme in verification results
-- [x] Implement least-squares gradient
-- [x] Verify gradient implementation with manufactured analytical field
-- [x] Compare gradient schemes through mesh refinement
-### Interpolation / Reconstruction Infrastructure
-- [x] Establish pluggable convection scheme interface
-- [x] Implement first-order upwind interpolation
-- [x] Implement central differencing
-- [x] Separate convection discretization from finite-volume assembly
-- [ ] Generalize face-value interpolation/reconstruction framework
-- [x] Support gradient-based reconstruction
-- [ ] Implement second-order upwind reconstruction
-- [ ] Implement QUICK reconstruction
-- [ ] Implement MUSCL reconstruction
-- [ ] Add bounded/TVD reconstruction
-- [ ] Add flux limiter framework
-- [ ] Verify reconstruction schemes through MMS refinement studies
+
+* [x] Implement Green-Gauss gradient
+* [x] Add configurable gradient scheme
+* [x] Integrate gradient scheme into simulation configuration
+* [x] Allow verification cases to override gradient scheme
+* [x] Report gradient scheme in verification results
+* [x] Implement least-squares gradient
+* [x] Verify gradient implementation with manufactured analytical field
+* [x] Compare gradient schemes through mesh refinement
+
+### Reconstruction / Interpolation Infrastructure
+
+* [x] Establish pluggable reconstruction scheme interface
+* [x] Implement GradientReconstruction
+* [x] Implement CentralReconstruction
+* [x] Implement UpwindReconstruction
+* [x] Integrate reconstruction selection into configuration
+* [x] Integrate reconstruction with convection operator
+* [x] Separate reconstruction from convection discretization
+* [x] Generalize face-value interpolation/reconstruction framework
+* [x] Verify CentralReconstruction exactness for linear fields
+* [x] Verify CentralReconstruction second-order convergence
+* [x] Verify GradientReconstruction through MMS refinement studies
+* [ ] Implement second-order upwind reconstruction
+* [ ] Implement QUICK reconstruction
+* [ ] Implement MUSCL reconstruction
+* [ ] Add bounded/TVD reconstruction
+* [ ] Add flux limiter framework
+
 ### Convection Infrastructure
-- [x] Extract convection discretization from finite-volume assembly
-- [x] Implement UpwindScheme
-- [x] Implement CentralDifferenceScheme
-- [x] Verify first/second-order behavior through MMS refinement studies
-- [x] Achieve second-order Advection-Diffusion convergence
 
-## Next Architectural Step
+* [x] Extract convection discretization from finite-volume assembly
+* [x] Implement UpwindScheme
+* [x] Implement CentralDifferenceScheme
+* [x] Pluggable convection scheme interface
+* [x] Verify upwind convection behavior through MMS
+* [x] Verify second-order central/reconstructed convection behavior through MMS
+* [x] Achieve second-order Advection-Diffusion convergence
+* [ ] Implement second-order upwind
+* [ ] Implement QUICK
+* [ ] Implement MUSCL
+* [ ] Add bounded/TVD schemes
+* [ ] Add flux limiter framework
 
-The immediate goal is to make the relationship explicit:
+### Flux Contribution Infrastructure
 
-Cell values → gradient/reconstruction → face value → convective flux → equation assembly
+* [x] Establish generic `FaceContribution` base structure
+* [x] Derive `FaceDiffusion` from `FaceContribution`
+* [x] Derive `FaceConvection` from `FaceContribution`
+* [x] Add `BoundaryDiffusion` contribution type
+* [x] Add `MatrixContribution` type
+* [x] Refactor `FluxAccumulator` to store matrix contributions
+* [x] Refactor diffusion flux construction to produce contribution objects
+* [x] Separate interior diffusion flux construction from diffusion operator assembly
+* [x] Refactor boundary diffusion handling into contribution-based interface
+* [ ] Generalize all boundary contributions into a common contribution interface
+* [ ] Refactor source contributions into explicit contribution objects where beneficial
+* [ ] Refactor convection contribution insertion to use contribution objects consistently
+* [ ] Remove remaining direct matrix/source mutation from flux-construction code
+* [ ] Consolidate contribution insertion into a clean assembly pathway
 
-This will let higher-order convection schemes reuse the same face-flux infrastructure rather than embedding reconstruction logic inside FiniteVolumeOperator.
+### Current Architectural Boundary
 
-That distinction is worth keeping in the roadmap because it is exactly where we want CIRRUS to go architecturally.
+The numerical data flow is now explicitly separated:
+
+```text
+Physical Model / Mesh / BCs
+            │
+            ▼
+      Flux Construction
+            │
+            ▼
+     FluxAccumulator
+            │
+            ├── FaceDiffusion
+            ├── FaceConvection
+            ├── Boundary contributions
+            ├── CellResidual
+            └── MatrixContribution
+            │
+            ▼
+      Operator Assembly
+            │
+            ├── DiffusionOperator
+            ├── ConvectionOperator
+            └── Other operators
+            │
+            ▼
+       LinearSystem
+            │
+            ▼
+          Solver
+```
+
+The face contribution hierarchy is now:
+
+```text
+FaceContribution
+├── FaceDiffusion
+└── FaceConvection
+```
+
+This provides a common representation for quantities that originate from interior faces while allowing each physical/discretization mechanism to carry its own additional data.
+
+The important separation is:
+
+```text
+Flux construction
+    ↓
+Contribution objects
+    ↓
+FluxAccumulator
+    ↓
+Operator assembly
+    ↓
+LinearSystem
+```
+
+Rather than directly modifying matrix entries during flux construction, the framework is moving toward an intermediate contribution representation.
+
+### Reconstruction / Convection Boundary
+
+The convection path remains explicitly separated:
+
+```text
+FaceConvection
+      │
+      ▼
+ConvectionOperator
+      │
+      ▼
+ReconstructionScheme
+      │
+      ├── Upwind
+      ├── Central
+      └── Gradient
+      │
+      ▼
+ReconstructionStencil
+      │
+      ▼
+MatrixContribution
+      │
+      ▼
+LinearSystem
+```
+
+The reconstruction layer determines how the face value is represented, while the convection operator converts that representation into algebraic contributions.
+
+### Verification Status
+
+The numerical discretization infrastructure has been verified independently of the final solver:
+
+* Central reconstruction is exact for linear manufactured fields.
+* Central reconstruction demonstrates approximately second-order convergence for quadratic manufactured fields.
+* Gradient-based reconstruction has been verified through mesh-refinement studies.
+* Green-Gauss and least-squares gradients demonstrate approximately second-order convergence for the tested manufactured field.
+* Upwind convection is configurable and produces the expected more dissipative first-order behavior.
+* Central/reconstructed convection supports the second-order Advection-Diffusion verification case.
+* Face-based diffusion assembly is verified.
+* Face-based convection assembly is verified.
+* Boundary diffusion handling is verified.
+* Contribution-based flux accumulation builds successfully across the verification suite.
+
+The verification framework can distinguish:
+
+```text
+Reconstruction scheme
+Gradient scheme
+Convection scheme
+Solver
+Preconditioner
+Mesh
+```
+
+and report the resulting accuracy and convergence behavior.
+
+---
 
 # Recommended Development Order
-1. Integrate FieldRegistry into Simulation
-2. Complete generic equation/operator framework
-3. Finish generalized flux infrastructure
-4. Complete gradient operator framework
-- Green-Gauss ✅
-- Least-squares
-- Scheme selection/dispatch
-5. Implement interpolation/reconstruction framework
-6. Add second-order convection schemes
-7. Add nonlinear iteration framework
-8. Assemble momentum equation system
-9. Implement pressure correction equation
-10. Develop SIMPLE family algorithms
-11. Add transient solver framework
-12. Add turbulence models
-13. Expand multiphysics capability
-14. Strengthen verification
-- Richardson extrapolation
-- GCI
-- regression verification
-15. Optimize memory layout and solver performance
-16. Add parallel computing
-17. Add engineering optimization capabilities
-18. Develop geometry and topology optimization
+
+1. ~~Integrate FieldRegistry into Simulation~~
+
+2. ~~Complete generic equation/operator framework~~
+
+3. ~~Complete generalized flux infrastructure~~
+
+   * ~~Generic face contribution interface~~
+   * ~~Separate diffusion flux calculation from assembly~~
+   * ~~Boundary diffusion contribution representation~~
+   * ~~Matrix contribution representation~~
+   * Refactor remaining direct source/matrix mutations into contribution-based assembly
+   * Generalize boundary contributions where the abstraction provides real value
+
+4. ~~Complete gradient infrastructure~~
+
+   * Green-Gauss
+   * Least-squares
+   * Scheme selection/dispatch
+   * Verification and mesh-refinement studies
+
+5. ~~Complete reconstruction/interpolation framework~~
+
+   * Central reconstruction
+   * Gradient reconstruction
+   * Upwind reconstruction
+   * General face-value reconstruction interface
+   * Configuration and verification-case selection
+
+6. ~~Complete core convection discretization infrastructure~~
+
+   * Upwind
+   * Central differencing
+   * Reconstruction/convection separation
+   * Component-level MMS verification
+   * Second-order Advection-Diffusion verification
+
+7. **Finish contribution/assembly cleanup**
+
+   * Refactor `addSource()` usage where appropriate
+   * Refactor `addMatrixContribution()` usage into explicit `MatrixContribution` objects
+   * Consolidate contribution insertion
+   * Ensure flux builders do not directly mutate the final algebraic system
+   * Verify the refactored assembly path
+
+8. **Add higher-order convection schemes**
+
+   * Second-order upwind
+   * QUICK
+   * MUSCL
+   * TVD / flux limiters
+
+9. **Strengthen numerical verification**
+
+   * Component-level MMS
+   * Richardson extrapolation
+   * Grid Convergence Index (GCI)
+   * Automated regression verification
+
+10. **Implement nonlinear iteration framework**
+
+11. **Assemble momentum equation system**
+
+12. **Implement pressure correction equation**
+
+13. **Develop SIMPLE family algorithms**
+
+14. **Add transient solver framework**
+
+15. **Add turbulence models**
+
+16. **Expand multiphysics capability**
+
+17. **Profile and optimize representative workloads**
+
+* Memory layout
+* Sparse matrix performance
+* Assembly kernels
+* Solver/preconditioner performance
+* SIMD/OpenMP
+* Matrix-free evaluation
+
+18. **Add parallel computing**
+
+* OpenMP
+* MPI
+* GPU acceleration
+
+19. **Add engineering optimization capabilities**
+
+20. **Develop geometry and topology optimization**
