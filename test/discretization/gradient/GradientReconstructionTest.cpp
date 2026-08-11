@@ -50,7 +50,8 @@ double computeFaceL2Error(
                 P,
                 face,
                 field,
-                gradient
+                gradient,
+                0.0
             );
 
         const double x = face.center[0];
