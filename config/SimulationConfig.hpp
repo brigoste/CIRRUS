@@ -12,6 +12,7 @@
 
 #include "discretization/gradient/GradientType.hpp"
 #include "discretization/convection/ConvectionType.hpp"
+#include "discretization/reconstructors/ReconstructionType.hpp"
 #include "solver/preconditioners/Preconditioner.hpp"
 
 #include <unordered_map>
@@ -49,15 +50,15 @@ struct PhysicsConfig
 {
     physics::PhysicsType type = physics::PhysicsType::Heat;
 
-    double k                = 1.0;
-    double gamma            = 0.0;
-    double rho              = 1.0;
+    double k                  = 1.0;
+    double gamma              = 0.0;
+    double rho                = 1.0;
 
-    double ux               = 0.0;
-    double uy               = 0.0;
-    double uz               = 0.0;
+    double ux                 = 0.0;
+    double uy                 = 0.0;
+    double uz                 = 0.0;
     
-    double volumetricSource = 0.0;
+    double volumetricSource   = 0.0;
 };
 
 //==================================================
@@ -84,6 +85,7 @@ struct DiscretizationConfig
 {
     GradientType gradientScheme = GradientType::GreenGauss;
     ConvectionType convectionScheme = ConvectionType::CentralLinear;
+    ReconstructionType reconstructionScheme = ReconstructionType::Gradient;
 };
 
 //==================================================
@@ -273,6 +275,7 @@ inline void from_json(const nlohmann::json& j, DiscretizationConfig& d)
 {
     d.gradientScheme      = gradientFromString( j.value( "gradientScheme", "green_gauss" ));
     d.convectionScheme = convectionFromString( j.value("convectionScheme", "centralLinear"));
+    d.reconstructionScheme = reconstructionTypeFromString( j.value("reconstructionScheme", "Gradient"));
 }
 
 // ------------------------- Read Config for Verification ------------
