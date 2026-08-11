@@ -2,12 +2,14 @@
 
 #include "discretization/diffusion/DiffusionScheme.hpp"
 
+class FluxAccumulator;
+
 class StandardDiffusionScheme : public DiffusionScheme
 {
 public:
 
     void assemble(
         const FaceDiffusion& face,
-        EquationSystem& sys
+        FluxAccumulator& flux
     ) const override;
 };
