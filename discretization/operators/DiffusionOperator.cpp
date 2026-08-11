@@ -10,12 +10,11 @@ DiffusionOperator::DiffusionOperator(
 
 void DiffusionOperator::assemble(
     const MeshBase& /*mesh*/,
-    const FluxAccumulator& flux,
-    EquationSystem& sys
+    FluxAccumulator& flux
 ) const
 {
     for (const auto& f : flux.diffusion())
     {
-        scheme_.assemble(f, sys);
+        scheme_.assemble(f, flux);
     }
 }
