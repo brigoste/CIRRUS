@@ -16,9 +16,15 @@
     },
 
     "refinement": {
-      "enabled": false,
+      "enabled": true,
       "levels": [25, 50, 100, 200],
       "expected_order": 2.0
+    },
+
+    "discretization": {
+        "gradientScheme": "green_gauss",
+        "convectionScheme": "CentralLinear",
+        "reconstructionScheme": "Central"
     },
 
     "physics": {
