@@ -5,10 +5,7 @@
 class UpwindScheme : public ConvectionScheme
 {
 public:
-    ConvectionCoefficients coefficients(
-    const MeshBase& mesh,
-    const FaceConvection& face,
-    const ScalarField& field,
-    const VectorField& gradient
+    double faceCoefficient(
+        const FaceConvection& face
     ) const override;
 };
