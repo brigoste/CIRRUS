@@ -6,7 +6,7 @@
 
 void FiniteVolumeAssembler::assemble(
     const MeshBase& mesh,
-    const FluxAccumulator& flux,
+    FluxAccumulator& flux,
     const ScalarField& field,
     const VectorField& gradient,
     EquationSystem& sys) const
@@ -14,12 +14,21 @@ void FiniteVolumeAssembler::assemble(
     // =========================================================
     // 1. DIFFUSION
     // =========================================================
-    diffusion_.assemble(mesh, flux, sys);
+    diffusion_.assemble(mesh, flux);
 
     // =========================================================
     // 2. CONVECTION
     // =========================================================
-    convection_.assemble( mesh, flux, field, gradient, sys );
+    convection_.assemble(mesh, flux, field, gradient);
+
+    for (const auto& contribution : flux.matrixContributions())
+    {
+        sys.addCoeff(
+            contribution.row,
+            contribution.column,
+            contribution.coefficient
+        );
+    }
 
     // =========================================================
     // 3. SOURCES + BCs
