@@ -15,7 +15,6 @@ public:
 
     virtual void assemble(
         const MeshBase& mesh,
-        const FluxAccumulator& flux,
-        EquationSystem& sys
+        FluxAccumulator& flux
     ) const = 0;
 };
