@@ -13,8 +13,7 @@ public:
 
     void assemble(
         const MeshBase& mesh,
-        const FluxAccumulator& flux,
-        EquationSystem& sys
+        FluxAccumulator& flux
     ) const override;
 
 private:
