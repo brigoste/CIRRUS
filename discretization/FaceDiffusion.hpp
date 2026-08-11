@@ -1,10 +1,8 @@
 #pragma once
 
-#include <cstddef>
+#include "discretization/FaceContribution.hpp"
 
-struct FaceDiffusion
+struct FaceDiffusion : FaceContribution
 {
-    std::size_t P;
-    std::size_t N;
-    double D;
+    double D = 0.0;
 };
