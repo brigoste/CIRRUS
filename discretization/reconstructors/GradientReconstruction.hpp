@@ -10,7 +10,7 @@ public:
 
     double reconstruct(
         const MeshBase& mesh,
-        std::size_t cell,
+        std::size_t owner,
         const Face& face,
         const ScalarField& field,
         const VectorField& gradient
