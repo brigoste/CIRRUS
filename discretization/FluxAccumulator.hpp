@@ -6,7 +6,9 @@
 #include "discretization/CellResidual.hpp"
 #include "discretization/FaceDiffusion.hpp"
 #include "discretization/FaceConvection.hpp"
+#include "discretization/BoundaryDiffusion.hpp"
 #include "discretization/MatrixContribution.hpp"
+#include "discretization/SourceContribution.hpp"
 
 class FluxAccumulator
 {
@@ -35,54 +37,25 @@ public:
         matrixContributions_.clear();
     }
 
-    void addDiffusion(
-        std::size_t P,
-        std::size_t N,
-        std::size_t face,
-        double D
-    )
+    void addDiffusion(const FaceDiffusion& contribution) { diffusion_.push_back(contribution); }
+    void addBoundaryDiffusion(const BoundaryDiffusion& contribution)
     {
-        diffusion_.push_back({P, N, face, D});
-    }
+        const auto P = contribution.P;
+        const auto D = contribution.D;
+        const auto value = contribution.value;
 
-    void addBoundaryDiffusion(
-        std::size_t P,
-        double D,
-        double value
-    )
-    {
         cells_[P].Sp -= D;
         cells_[P].Su += D * value;
     }
-
-    void addConvection(
-        std::size_t P,
-        std::size_t N,
-        std::size_t face,
-        double F
-    )
+    void addConvection(const FaceConvection& contribution) { convection_.push_back(contribution); }
+    void addSource( const SourceContribution& contribution )
     {
-        convection_.push_back({P, N, face, F});
-    }
+        const auto c = contribution.cell;
 
-    void addSource(
-        std::size_t c,
-        double Su,
-        double Sp
-    )
-    {
-        cells_[c].Su += Su;
-        cells_[c].Sp += Sp;
+        cells_[c].Su += contribution.Su;
+        cells_[c].Sp += contribution.Sp;
     }
-
-    void addMatrixContribution(
-        std::size_t row,
-        std::size_t column,
-        double coefficient
-    )
-    {
-        matrixContributions_.push_back({row, column, coefficient});
-    }
+    void addMatrixContribution( const MatrixContribution& contribution ) { matrixContributions_.push_back(contribution); }
 
     const CellResidual& operator[](std::size_t i) const { return cells_[i]; }
     const auto& diffusion() const { return diffusion_; }
