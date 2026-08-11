@@ -292,14 +292,8 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             double hy = levelCfg.mesh.ly / levelCfg.mesh.ny;
 
             double h = 0.0;
-            if (levelCfg.mesh.type == "line1D") 
-            {
-                h = hx; 
-            }
-            else if (levelCfg.mesh.type == "quad2D") 
-            { 
-                h = std::max(hx, hy); 
-            }
+            if (levelCfg.mesh.type == "line1D") { h = hx; }
+            else if (levelCfg.mesh.type == "quad2D") { h = std::max(hx, hy); }
 
             refinement.levels.push_back({
                 levelCfg.mesh.nx,
@@ -334,10 +328,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             // -------------------------------------------------
             std::filesystem::path levelOutputDir = caseOutputDir;
 
-            if (refinementEnabled)
-            {
-                levelOutputDir /= "L" + std::to_string(level + 1);
-            }
+            if (refinementEnabled) { levelOutputDir /= "L" + std::to_string(level + 1); }
 
             std::filesystem::create_directories(levelOutputDir);
 
@@ -369,10 +360,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             // Plotting
             // -------------------------------------------------
             {
-                if (suite.plot_enabled)
-                {
-                    runPlot(paths, csvPath);
-                }
+                if (suite.plot_enabled) { runPlot(paths, csvPath); }
             }
 
             // -------------------------------------------------
@@ -391,18 +379,9 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
 
             std::string meshSize;
 
-            if (meshType == "line1D") 
-            { 
-                meshSize = std::to_string(caseCfg.mesh.nx) + "x1"; 
-            }
-            else if (meshType == "quad2D") 
-            { 
-                meshSize = std::to_string(caseCfg.mesh.nx) + "x" + std::to_string(caseCfg.mesh.ny); 
-            }
-            else 
-            { 
-                meshSize = std::to_string(mesh.ncells()) + " cells"; 
-            }
+            if (meshType == "line1D") { meshSize = std::to_string(caseCfg.mesh.nx) + "x1"; }
+            else if (meshType == "quad2D") { meshSize = std::to_string(caseCfg.mesh.nx) + "x" + std::to_string(caseCfg.mesh.ny); }
+            else { meshSize = std::to_string(mesh.ncells()) + " cells"; }
 
             double l2_tol = sim.verificationCase()->l2AcceptanceThreshold();
             double linf_tol = sim.verificationCase()->linfAcceptanceThreshold();
@@ -466,15 +445,9 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                 }
             }
 
-            if (validL2 > 0) 
-            { 
-                refinement.observedOrderL2 /= static_cast<double>(validL2); 
-            }
+            if (validL2 > 0)  {  refinement.observedOrderL2 /= static_cast<double>(validL2);  }
 
-            if (validLinf > 0) 
-            { 
-                refinement.observedOrderLinf /= static_cast<double>(validLinf); 
-            }
+            if (validLinf > 0) { refinement.observedOrderLinf /= static_cast<double>(validLinf); }
 
             refinement.passed = validL2 > 0 && validLinf > 0 && std::abs(refinement.observedOrderL2   - expectedOrder) <= orderTolerance && std::abs(refinement.observedOrderLinf - expectedOrder) <= orderTolerance;
 
