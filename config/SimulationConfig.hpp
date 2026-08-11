@@ -11,7 +11,7 @@
 #include "mesh/BoundaryPatchSystem.hpp"
 
 #include "discretization/gradient/GradientType.hpp"
-#include "discretization/convection/ConvectionType.hpp"
+// #include "discretization/convection/ConvectionType.hpp"
 #include "discretization/reconstructors/ReconstructionType.hpp"
 #include "solver/preconditioners/Preconditioner.hpp"
 
@@ -84,7 +84,7 @@ struct SolverConfig
 struct DiscretizationConfig
 {
     GradientType gradientScheme = GradientType::GreenGauss;
-    ConvectionType convectionScheme = ConvectionType::CentralLinear;
+    // ConvectionType convectionScheme = ConvectionType::CentralLinear;
     ReconstructionType reconstructionScheme = ReconstructionType::Gradient;
 };
 
@@ -274,7 +274,7 @@ inline void from_json(const nlohmann::json& j, RefinementConfig& r)
 inline void from_json(const nlohmann::json& j, DiscretizationConfig& d)
 {
     d.gradientScheme      = gradientFromString( j.value( "gradientScheme", "green_gauss" ));
-    d.convectionScheme = convectionFromString( j.value("convectionScheme", "centralLinear"));
+    // d.convectionScheme = convectionFromString( j.value("convectionScheme", "centralLinear"));
     d.reconstructionScheme = reconstructionTypeFromString( j.value("reconstructionScheme", "Gradient"));
 }
 
@@ -389,4 +389,5 @@ inline void from_json( const nlohmann::json& j, SimulationConfig& cfg)
 inline void to_json( nlohmann::json& j, const DiscretizationConfig& d )
 {
     j["gradientScheme"] = gradientToString(d.gradientScheme);
+    j["reconstructionScheme"] = reconstructionToString(d.reconstructionScheme);
 }
