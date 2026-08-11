@@ -1,7 +1,6 @@
 #pragma once
 
 #include "discretization/operators/Operator.hpp"
-#include "discretization/convection/ConvectionScheme.hpp"
 #include "discretization/reconstructors/ReconstructionScheme.hpp"
 #include "mesh/MeshBase.hpp"
 
@@ -14,18 +13,15 @@ class ConvectionOperator
 {
 public:
     explicit ConvectionOperator(
-        const ConvectionScheme& convection,
         const ReconstructionScheme& reconstruction);
 
     void assemble(
         const MeshBase& mesh,
-        const FluxAccumulator& flux,
+        FluxAccumulator& flux,
         const ScalarField& field,
-        const VectorField& gradient,
-        EquationSystem& sys
+        const VectorField& gradient
     ) const;
 
 private:
-    const ConvectionScheme& convection_;
     const ReconstructionScheme& reconstruction_;
 };
