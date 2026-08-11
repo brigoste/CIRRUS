@@ -58,8 +58,7 @@ Mesh1D::Mesh1D(std::size_t N, double L)
             face.neighbor = Face::INVALID;
             face.normal = Vector(-1.0, 0.0, 0.0);
 
-            auto d = face.center - centers_[0];
-            face.dPN = Vector(d.x[0], d.x[1], d.x[2]);
+            face.dPN = face.center - centers_[0];
 
             boundaryGroups_[toGroup(Patch::LEFT)].push_back(f);
         }
@@ -69,8 +68,7 @@ Mesh1D::Mesh1D(std::size_t N, double L)
             face.neighbor = Face::INVALID;
             face.normal = Vector(1.0, 0.0, 0.0);
 
-            auto d = face.center - centers_[N_ - 1];
-            face.dPN = Vector(d.x[0], d.x[1], d.x[2]);
+            face.dPN = face.center - centers_[N_ - 1];
 
             boundaryGroups_[toGroup(Patch::RIGHT)].push_back(f);
         }
@@ -80,8 +78,7 @@ Mesh1D::Mesh1D(std::size_t N, double L)
             face.neighbor = f;
             face.normal = Vector(1.0, 0.0, 0.0);
 
-            auto d = centers_[f] - centers_[f-1];
-            face.dPN = Vector(d.x[0], d.x[1], d.x[2]);
+            face.dPN = centers_[f] - centers_[f-1];
         }
     }
 
