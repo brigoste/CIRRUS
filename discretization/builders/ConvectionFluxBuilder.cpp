@@ -16,8 +16,7 @@ void ConvectionFluxBuilder::apply(
         if (N != Face::INVALID)
         {
             const double F = model.convectionFaceFlux(face);
-
-            flux.addConvection(P, N, f, F);
+            flux.addConvection({P, N, f, F});
         }
     }
 }
