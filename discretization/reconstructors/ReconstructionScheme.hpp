@@ -4,9 +4,9 @@
 #include <stdexcept>
 
 #include "discretization/reconstructors/ReconstructionStencil.hpp"
+#include "fields/ScalarField.hpp"
 
 class MeshBase;
-class ScalarField;
 class VectorField;
 struct Face;
 
@@ -16,22 +16,33 @@ public:
 
     virtual ~ReconstructionScheme() = default;
 
-    virtual double reconstruct(                 //gives you a linear representation of that reconstruction:
-        const MeshBase& mesh,
-        std::size_t owner,
-        const Face& face,
-        const ScalarField& field,
-        const VectorField& gradient
-    ) const = 0;
-    
-    virtual ReconstructionStencil stencil(      //gives you the actual face value:
+    virtual ReconstructionStencil stencil(      // returns coefficients such that φ_f = Σ w_i φ_i
         const MeshBase& /*mesh*/,
         std::size_t /*owner*/,
         const Face& /*face*/,
         const ScalarField& /*field*/,
-        const VectorField& /*gradient*/
-    ) const 
+        const VectorField& /*gradient*/,
+        double /*flux*/
+    ) const
     {
         throw std::runtime_error( "Reconstruction scheme does not provide a cell-value stencil." );
     }
+
+    virtual double reconstruct(                 // directly evaluates φ_f     ---> May not be necessary
+        const MeshBase& mesh,
+        std::size_t owner,
+        const Face& face,
+        const ScalarField& field,
+        const VectorField& gradient,
+        double flux
+    ) const
+    {
+        const auto stencil = this->stencil(mesh, owner, face, field, gradient, flux);
+
+        double value = 0.0;
+
+        for (const auto& [cell, weight] : stencil.weights) { value += weight * field[cell]; }
+
+        return value;
+    }      
 };
