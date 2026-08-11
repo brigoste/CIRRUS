@@ -1,11 +1,8 @@
 #pragma once
 
-#include <cstddef>
+#include "discretization/FaceContribution.hpp"
 
-struct FaceConvection
+struct FaceConvection : FaceContribution
 {
-    std::size_t P = 0;
-    std::size_t N = 0;
-    std::size_t face = 0;
-    double F = 0;
+    double F = 0.0;
 };
