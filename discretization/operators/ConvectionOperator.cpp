@@ -47,8 +47,8 @@ void ConvectionOperator::assemble(
         {
             const double coefficient = F * weight;
 
-            flux.addMatrixContribution(f.P, cell, coefficient);
-            flux.addMatrixContribution(f.N, cell, -coefficient);
+            flux.addMatrixContribution({f.P, cell, coefficient});
+            flux.addMatrixContribution({f.N, cell, -coefficient});
         }
     }
 }
