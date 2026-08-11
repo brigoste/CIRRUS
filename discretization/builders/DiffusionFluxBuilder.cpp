@@ -37,7 +37,8 @@ void DiffusionFluxBuilder::apply(
         {
             const double D = model.diffusionFaceCoefficient(face);
 
-            flux.addDiffusion(P, N, D);
+            FaceDiffusion contribution({ P, N, f, D });
+            flux.addDiffusion(contribution);
         }
     }
 
@@ -68,12 +69,10 @@ void DiffusionFluxBuilder::apply(
                 {
                     double value = bc->value;
 
-                    if (verificationCase)
-                    {
-                        value = verificationCase->exact( face.center.x[0], face.center.x[1] );
-                    }
+                    if (verificationCase) { value = verificationCase->exact( face.center.x[0], face.center.x[1] ); }
 
-                    flux.addBoundaryDiffusion( P, D, value );
+                    BoundaryDiffusion contribution({P, Face::INVALID, f, D, value});
+                    flux.addBoundaryDiffusion( contribution );
                     
                     break;
                 }
@@ -82,12 +81,9 @@ void DiffusionFluxBuilder::apply(
                 {
                     double manufacturedBoundaryFlux = bc->flux;
 
-                    if (verificationCase)
-                    {
-                        manufacturedBoundaryFlux = verificationCase->manufacturedBoundaryFlux(face);
-                    }
+                    if (verificationCase) { manufacturedBoundaryFlux = verificationCase->manufacturedBoundaryFlux(face); }
 
-                    flux.addSource( P, -manufacturedBoundaryFlux * face.area, 0.0 );
+                    flux.addSource( {P, -manufacturedBoundaryFlux * face.area, 0.0} );
 
                     break;
                 }
@@ -109,7 +105,7 @@ void DiffusionFluxBuilder::apply(
 
                     const double H = (hA * D) / (hA + D);
 
-                    flux.addSource( P, H * Tinf, -H );
+                    flux.addSource( {P, H * Tinf, -H} );
 
                     break;
                 }
