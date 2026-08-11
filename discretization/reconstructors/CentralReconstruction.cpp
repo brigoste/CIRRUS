@@ -14,7 +14,8 @@ ReconstructionStencil CentralReconstruction::stencil(
     std::size_t owner,
     const Face& face,
     const ScalarField& /*field*/,
-    const VectorField& /*gradient*/
+    const VectorField& /*gradient*/,
+    double /*flux*/
 ) const
 {
     if (face.neighbor == Face::INVALID) { throw std::runtime_error( "CentralReconstruction: boundary face encountered." ); }
@@ -44,7 +45,8 @@ double CentralReconstruction::reconstruct(
     std::size_t owner,
     const Face& face,
     const ScalarField& field,
-    const VectorField& /*gradient*/
+    const VectorField& /*gradient*/,
+    double /*flux*/
 ) const
 {
     if (face.neighbor == Face::INVALID) { throw std::runtime_error( "CentralReconstruction: boundary face encountered." ); }
