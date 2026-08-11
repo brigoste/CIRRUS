@@ -411,7 +411,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                 finestSummary.meshType = meshType;
                 finestSummary.meshSize = meshSize;
                 finestSummary.gradient = gradientToString(levelCfg.discretization.gradientScheme);
-                finestSummary.convection = interpolationToString(levelCfg.discretization.interpolationScheme);
+                finestSummary.convection = convectionToString(levelCfg.discretization.convectionScheme);
 
                 finestSummary.l2 = norms.l2_rms;
                 finestSummary.linf = norms.linf;

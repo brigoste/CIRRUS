@@ -3,10 +3,10 @@
 #include "mesh/Mesh1D.hpp"
 #include "mesh/QuadMesh2D.hpp"
 #include "discretization/FluxBuilder.hpp"
-#include "discretization/interpolators/InterpolationFactory.hpp"
-#include "discretization/interpolators/InterpolationType.hpp"
 #include "test/verification/VerificationCaseFactory.hpp"
 #include "test/verification/VerificationCase.hpp"
+#include "discretization/convection/ConvectionFactory.hpp"
+#include "discretization/gradient/GradientScheme.hpp"
 
 #include "solver/preconditioners/PreconditionerFactory.hpp"
 
@@ -28,14 +28,21 @@ void Simulation::initializeFields()
         FieldLocation::Cell,
         physics_->initialSolutionValue()
     );
+    gradient_ = std::make_unique<VectorField>(
+        "SolutionGradient",
+        *mesh_,
+        FieldLocation::Cell,
+        Vector{}
+    );
 }
 // ============================================================
 // Constructor
 // ============================================================
 
 Simulation::Simulation(const SimulationConfig& cfg)
-    : interpolation_(makeInterpolationScheme(cfg.discretization.interpolationScheme)),
-      convection_(*interpolation_),
+    : convectionScheme_(makeConvectionScheme(cfg.discretization.convectionScheme)),
+      gradientScheme_(makeGradientScheme(cfg.discretization.gradientScheme)),  
+      convection_(*convectionScheme_),
       diffusion_(diffusionScheme_),
       fvOperator_(convection_, diffusion_),
       cfg_(cfg),
@@ -90,9 +97,19 @@ void Simulation::assemble()
         verificationCase_.get()
     );
 
+    auto& solutionField = fields_.scalar(physics_->solutionField());
+
+    gradientScheme_->compute(
+        *mesh_,
+        solutionField,
+        *gradient_
+    );
+
     fvOperator_.assemble(
         *mesh_,
         *flux_,
+        solutionField,
+        *gradient_,
         sys_
     );
 
@@ -113,7 +130,7 @@ void Simulation::solve()
     }
 
     std::cout << "System Type: " << physics::to_string(cfg_.physics.type) << "\n";
-    std::cout << "Convection: " << interpolationToString(cfg_.discretization.interpolationScheme) << "\n";
+    std::cout << "Convection: " << convectionToString(cfg_.discretization.convectionScheme) << "\n";
     std::cout << "Solver: " << solver::to_string(cfg_.solver.method) << "\n";
     std::vector<double> phi;
 

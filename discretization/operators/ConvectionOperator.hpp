@@ -1,16 +1,27 @@
 #pragma once
 
 #include "discretization/operators/Operator.hpp"
-#include "discretization/interpolators/InterpolationScheme.hpp"
+#include "discretization/convection/ConvectionScheme.hpp"
 #include "mesh/MeshBase.hpp"
 
-class ConvectionOperator : public Operator
+class EquationSystem;
+class FluxAccumulator;
+class ScalarField;
+class VectorField;
+
+class ConvectionOperator
 {
 public:
-    explicit ConvectionOperator(const InterpolationScheme& interpolation);
+    explicit ConvectionOperator(const ConvectionScheme& scheme);
 
-    void assemble( const MeshBase& mesh, const FluxAccumulator& flux, EquationSystem& sys ) const override;
+    void assemble(
+        const MeshBase& mesh,
+        const FluxAccumulator& flux,
+        const ScalarField& field,
+        const VectorField& gradient,
+        EquationSystem& sys
+    ) const;
 
 private:
-    const InterpolationScheme& interpolation_;
+    const ConvectionScheme& scheme_;
 };

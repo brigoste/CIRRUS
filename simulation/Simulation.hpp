@@ -15,14 +15,19 @@
 #include "bc/BoundaryFace.hpp"
 
 #include "discretization/diffusion/StandardDiffusionScheme.hpp"
-#include "discretization/interpolators/CentralLinearInterpolation.hpp"
-#include "discretization/interpolators/UpwindInterpolation.hpp"
-#include "discretization/interpolators/InterpolationScheme.hpp"
+#include "discretization/convection/ConvectionFactory.hpp"
+#include "discretization/convection/CentralDifferenceScheme.hpp"
+#include "discretization/convection/UpwindScheme.hpp"
 #include "discretization/operators/DiffusionOperator.hpp"
 #include "discretization/operators/ConvectionOperator.hpp"
 #include "discretization/builders/DiffusionFluxBuilder.hpp"
 #include "discretization/FiniteVolumeAssembler.hpp"
 #include "discretization/FluxBuilder.hpp"
+#include "discretization/convection/ConvectionScheme.hpp"
+#include "discretization/gradient/GradientScheme.hpp"
+#include "discretization/gradient/GradientType.hpp"
+#include "discretization/gradient/GradientFactory.hpp"
+#include "discretization/reconstructors/ReconstructionScheme.hpp"
 
 #include "solver/CG.hpp"
 #include "solver/SOR.hpp"
@@ -90,7 +95,11 @@ private:
 
     StandardDiffusionScheme diffusionScheme_;
 
-    std::unique_ptr<InterpolationScheme> interpolation_;
+    std::unique_ptr<ConvectionScheme> convectionScheme_;
+    std::unique_ptr<GradientScheme> gradientScheme_;
+    std::unique_ptr<ReconstructionScheme> reconstructionScheme_;
+
+    std::unique_ptr<VectorField> gradient_;
 
     ConvectionOperator convection_;
     DiffusionOperator diffusion_;

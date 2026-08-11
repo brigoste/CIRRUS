@@ -3,6 +3,7 @@
 void runGreenGaussTest();
 void runLeastSquaresTest();
 void runCubicGradientTest();
+void runGradientReconstructionTest();
 
 int main()
 {
@@ -17,6 +18,9 @@ int main()
     
     std::cout << "---- Gradient Verification Tests ----\n\n";
     runCubicGradientTest();
+
+    std::cout << "---- Gradient Reconstruction Tests ----\n\n";
+    runGradientReconstructionTest();
 
     std::cout << "\n==============================\n";
     std::cout << " COMPLETE\n";

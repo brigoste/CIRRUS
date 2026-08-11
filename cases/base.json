@@ -9,7 +9,7 @@
 
   "discretization": {
       "gradientScheme":"green_gauss",
-      "interpolationScheme": "centralLinear"
+      "convectionScheme": "centralLinear"
   },
 
   "physics": {

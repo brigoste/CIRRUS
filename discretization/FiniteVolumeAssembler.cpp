@@ -7,6 +7,8 @@
 void FiniteVolumeAssembler::assemble(
     const MeshBase& mesh,
     const FluxAccumulator& flux,
+    const ScalarField& field,
+    const VectorField& gradient,
     EquationSystem& sys) const
 {
     // =========================================================
@@ -17,7 +19,7 @@ void FiniteVolumeAssembler::assemble(
     // =========================================================
     // 2. CONVECTION
     // =========================================================
-    convection_.assemble(mesh, flux, sys);
+    convection_.assemble( mesh, flux, field, gradient, sys );
 
     // =========================================================
     // 3. SOURCES + BCs

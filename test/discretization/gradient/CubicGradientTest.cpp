@@ -6,7 +6,8 @@
 
 #include "mesh/QuadMesh2D.hpp"
 
-#include <cmath>#include "discretization/gradient/GreenGaussGradient.hpp"
+#include <cmath>
+#include "discretization/gradient/GreenGaussGradient.hpp"
 #include "discretization/gradient/LeastSquaresGradient.hpp"
 
 #include "fields/ScalarField.hpp"

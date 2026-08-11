@@ -398,7 +398,7 @@ Future:
 - [x] Implement central differencing
 - [x] Separate convection discretization from finite-volume assembly
 - [ ] Generalize face-value interpolation/reconstruction framework
-- [ ] Support gradient-based reconstruction
+- [x] Support gradient-based reconstruction
 - [ ] Implement second-order upwind reconstruction
 - [ ] Implement QUICK reconstruction
 - [ ] Implement MUSCL reconstruction
