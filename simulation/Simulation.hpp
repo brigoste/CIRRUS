@@ -28,6 +28,7 @@
 #include "discretization/gradient/GradientType.hpp"
 #include "discretization/gradient/GradientFactory.hpp"
 #include "discretization/reconstructors/ReconstructionScheme.hpp"
+#include "discretization/reconstructors/ReconstructionFactory.hpp"
 
 #include "solver/CG.hpp"
 #include "solver/SOR.hpp"
