@@ -1,6 +1,7 @@
 #include "discretization/reconstructors/ReconstructionFactory.hpp"
 #include "discretization/reconstructors/GradientReconstruction.hpp"
 #include "discretization/reconstructors/CentralReconstruction.hpp"
+#include "discretization/reconstructors/UpwindReconstruction.hpp"
 
 #include <stdexcept>
 
@@ -14,6 +15,9 @@ std::unique_ptr<ReconstructionScheme> makeReconstructionScheme(ReconstructionTyp
 
         case ReconstructionType::Central:
             return std::make_unique<CentralReconstruction>();
+
+        case ReconstructionType::Upwind:
+            return std::make_unique<UpwindReconstruction>();
     }
 
     throw std::runtime_error( "Unsupported reconstruction scheme." );
