@@ -4,6 +4,7 @@ void runGreenGaussTest();
 void runLeastSquaresTest();
 void runCubicGradientTest();
 void runGradientReconstructionTest();
+void runCentralReconstructionTest();
 
 int main()
 {
@@ -21,6 +22,9 @@ int main()
 
     std::cout << "---- Gradient Reconstruction Tests ----\n\n";
     runGradientReconstructionTest();
+
+    std::cout << "---- Central Reconstruction Test ----\n\n";
+    runCentralReconstructionTest();
 
     std::cout << "\n==============================\n";
     std::cout << " COMPLETE\n";
