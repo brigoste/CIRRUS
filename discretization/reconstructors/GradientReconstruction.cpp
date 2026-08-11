@@ -8,16 +8,16 @@
 
 double GradientReconstruction::reconstruct(
     const MeshBase& mesh,
-    std::size_t cell,
+    std::size_t owner,
     const Face& face,
     const ScalarField& field,
     const VectorField& gradient
 ) const
 {
-    const Point& xP = mesh.cellCenter(cell);
+    const Point& xP = mesh.cellCenter(owner);
     const Point& xF = face.center;
 
     const Point displacement = xF - xP;
 
-    return field[cell] + LA::dot(displacement, gradient[cell]);
+    return field[owner] + LA::dot(displacement, gradient[owner]);
 }
