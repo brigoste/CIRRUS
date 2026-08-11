@@ -1,7 +1,8 @@
 #pragma once
 
 #include "discretization/FaceDiffusion.hpp"
-#include "equation_systems/EquationSystem.hpp"
+
+class FluxAccumulator;
 
 class DiffusionScheme
 {
@@ -10,6 +11,6 @@ public:
 
     virtual void assemble(
         const FaceDiffusion& face,
-        EquationSystem& sys
+        FluxAccumulator& flux
     ) const = 0;
 };
