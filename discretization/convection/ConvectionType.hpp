@@ -11,10 +11,10 @@ enum class ConvectionType
 
 inline ConvectionType convectionFromString(const std::string& name)
 {
-    if (name == "centralLinear")
+    if (name == "CentralLinear")
         return ConvectionType::CentralLinear;
 
-    if (name == "upwind")
+    if (name == "Upwind")
         return ConvectionType::Upwind;
 
     throw std::runtime_error(
@@ -27,10 +27,10 @@ inline std::string convectionToString(ConvectionType type)
     switch (type)
     {
         case ConvectionType::CentralLinear:
-            return "centralLinear";
+            return "CentralLinear";
 
         case ConvectionType::Upwind:
-            return "upwind";
+            return "Upwind";
     }
 
     return "unknown";
