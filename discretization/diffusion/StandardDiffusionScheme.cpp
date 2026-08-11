@@ -11,9 +11,9 @@ void StandardDiffusionScheme::assemble(
     const auto N = face.N;
     const double D = face.D;
 
-    flux.addMatrixContribution(P, P,  D);
-    flux.addMatrixContribution(P, N, -D);
+    flux.addMatrixContribution({P, P, D});
+    flux.addMatrixContribution({P, N, -D});
 
-    flux.addMatrixContribution(N, N,  D);
-    flux.addMatrixContribution(N, P, -D);
+    flux.addMatrixContribution({N, N,  D});
+    flux.addMatrixContribution({N, P, -D});
 }
