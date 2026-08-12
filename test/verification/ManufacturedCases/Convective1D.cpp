@@ -28,8 +28,8 @@ ConvectiveData Convective1D::manufacturedConvectiveBoundary(const Face& face) co
 
     constexpr double h = 10.0;
 
-    robin.h = h;
-    robin.T_inf = T + (k_ * dTdx) / h;     // Backward implmentation. We solve for T_inf from the manufactured solution.
+    robin.transferCoefficient = h;
+    robin.referenceValue = T + (k_ * dTdx) / h;     // Backward implmentation. We solve for T_inf from the manufactured solution.
 
     return robin;
 }

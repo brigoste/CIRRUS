@@ -11,8 +11,8 @@ public:
     {
         double value = 0.0;
         double flux  = 0.0;
-        double h     = 0.0;
-        double Tinf  = 0.0;
+        double transferCoefficient     = 0.0;  // h for heat transfer
+        double referenceValue  = 0.0;
 
         bc::Type type = bc::Type::None;
     };

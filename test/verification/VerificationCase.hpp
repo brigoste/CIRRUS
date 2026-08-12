@@ -9,8 +9,8 @@
 // Abstraction for all tests we use to verify.
 struct ConvectiveData
 {
-    double h;
-    double T_inf;
+    double transferCoefficient;
+    double referenceValue;
 };
 
 struct RadiativeData

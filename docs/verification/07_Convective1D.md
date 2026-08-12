@@ -18,7 +18,7 @@ $$
 
 This case verifies:
 
-* correct application of convective boundary conditions
+* correct application of Robin (convective) boundary conditions
 * correct incorporation of the heat transfer coefficient
 * correct coupling between the solution temperature and ambient temperature
 * second-order spatial accuracy of the diffusion discretization

@@ -18,8 +18,8 @@ public:
         :
         k_(cfg.physics.k)
     {
-        convectiveBC_.h = 10.0;
-        convectiveBC_.T_inf = 93.0;
+        convectiveBC_.transferCoefficient = 10.0;
+        convectiveBC_.referenceValue = 93.0;
     }
 
 

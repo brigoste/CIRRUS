@@ -88,24 +88,23 @@ void DiffusionFluxBuilder::apply(
                     break;
                 }
 
-                case bc::Type::Convective:
+                case bc::Type::Robin:
                 {
-                    double h = bc->h;
-                    double Tinf = bc->Tinf;
+                    double transferCoefficient = bc->transferCoefficient;
+                    double referenceValue = bc->referenceValue;
 
                     if (verificationCase)
                     {
                         ConvectiveData robin = verificationCase->manufacturedConvectiveBoundary(face);
 
-                        h = robin.h;
-                        Tinf = robin.T_inf;
+                        transferCoefficient = robin.transferCoefficient;
+                        referenceValue = robin.referenceValue;
                     }
 
-                    const double hA = h * face.area;
-
+                    const double hA = transferCoefficient * face.area;
                     const double H = (hA * D) / (hA + D);
 
-                    flux.addSource( {P, H * Tinf, -H} );
+                    flux.addSource({P, H * referenceValue, -H});
 
                     break;
                 }

@@ -37,7 +37,7 @@
       },
       {
         "group": 1,
-        "type": "Convective",
+        "type": "Robin",
         "h": 10.0,
         "ambientTemperature": 84.0
       }

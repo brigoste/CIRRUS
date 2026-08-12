@@ -232,7 +232,7 @@ Responsibilities include:
 * Adding interior diffusion contributions.
 * Processing Dirichlet boundary conditions.
 * Processing Neumann boundary conditions.
-* Processing convective/Robin boundary conditions.
+* Processing Robin boundary conditions.
 * Handling manufactured verification boundary conditions.
 
 For an interior face, the builder creates a `FaceDiffusion` contribution:

@@ -206,6 +206,7 @@ inline void from_json(const nlohmann::json& j, PhysicsConfig& p)
 }
 
 // ----------------- Boundary --------------------------
+// ----------------- Boundary --------------------------
 inline void from_json(const nlohmann::json& j, BoundaryConfig& b)
 {
     b.group = j.value("group", 0);
@@ -215,9 +216,9 @@ inline void from_json(const nlohmann::json& j, BoundaryConfig& b)
     b.condition.type = type;
 
     b.condition.value = 0.0;
-    b.condition.flux  = 0.0;
-    b.condition.h     = 0.0;
-    b.condition.Tinf  = 0.0;
+    b.condition.flux = 0.0;
+    b.condition.transferCoefficient = 0.0;
+    b.condition.referenceValue = 0.0;
 
     switch (type)
     {
@@ -229,9 +230,9 @@ inline void from_json(const nlohmann::json& j, BoundaryConfig& b)
             b.condition.flux = j.value("flux", 0.0);
             break;
 
-        case bc::Type::Convective:
-            b.condition.h    = j.value("h", 0.0);
-            b.condition.Tinf = j.value("Tinf", 0.0);
+        case bc::Type::Robin: 
+            b.condition.transferCoefficient = j.value("transferCoefficient", 0.0);
+            b.condition.referenceValue = j.value("referenceValue", 0.0);
             break;
 
         default:

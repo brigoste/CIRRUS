@@ -47,8 +47,8 @@ double AdvectionDiffusionPhysicsModel::reconstructBoundaryValue(
         case bc::Type::Neumann:
             return phiCell + bc.flux * dx / gamma;
 
-        case bc::Type::Convective:
-            return (gamma * phiCell + bc.h * dx * bc.Tinf) / (gamma + bc.h * dx);
+        case bc::Type::Robin:
+            return (gamma * phiCell + bc.transferCoefficient * dx * bc.referenceValue) / (gamma + bc.transferCoefficient * dx);
 
         default:
             throw std::runtime_error("Unsupported BC type");

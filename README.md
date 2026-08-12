@@ -7,7 +7,7 @@ Solver aims to deal with fluid flows and heat transfer in 1D, 2D, and 3D space u
 
 Geometry discretization deals only in uniform, cartesian grid layouts. Further updates may seek to expand these capabilites.
 
-Heat transfer implementations will use Dirichlect, Neumann, Robin, convective, and symmetry boundary conditions. 
+Heat transfer implementations will use Dirichlect, Neumann, Robin, and symmetry boundary conditions. 
 
 To compile and run, you can use the scripts/build.txt (user configuration or validation tests) and scripts/test.txt (field test validation) files.
 

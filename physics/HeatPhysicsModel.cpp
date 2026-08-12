@@ -49,8 +49,8 @@ double HeatPhysicsModel::reconstructBoundaryValue(
         case bc::Type::Neumann:
             return phiCell + bc.flux * dx / k;
 
-        case bc::Type::Convective:
-            return (k * phiCell + bc.h * dx * bc.Tinf) / (k + bc.h * dx);
+        case bc::Type::Robin:
+            return (k * phiCell + bc.transferCoefficient * dx * bc.referenceValue) / (k + bc.transferCoefficient * dx);
 
         default:
             throw std::runtime_error("Unsupported BC type");

@@ -276,8 +276,8 @@ SimulationConfig fromJson(
 
         bc.condition.value = 0.0;
         bc.condition.flux  = 0.0;
-        bc.condition.h     = 0.0;
-        bc.condition.Tinf  = 0.0;
+        bc.condition.transferCoefficient     = 0.0;
+        bc.condition.referenceValue  = 0.0;
 
         switch (bc.condition.type)
         {
@@ -299,9 +299,9 @@ SimulationConfig fromJson(
                 bc.condition.flux = bcJson.at("flux").get<double>();
                 break;
 
-            case bc::Type::Convective:
-                bc.condition.h = bcJson.at("h").get<double>();
-                bc.condition.Tinf = bcJson.at("Tinf").get<double>();
+            case bc::Type::Robin:
+                bc.condition.transferCoefficient = bcJson.at("h").get<double>();
+                bc.condition.referenceValue = bcJson.at("Tinf").get<double>();
                 break;
 
             default:

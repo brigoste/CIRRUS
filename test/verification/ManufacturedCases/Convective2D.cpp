@@ -52,8 +52,8 @@ ConvectiveData Convective2D::manufacturedConvectiveBoundary(const Face& face) co
 
     const double dTdn = dTdx*face.normal.x + dTdy*face.normal.y;
 
-    convective.h = h;
-    convective.T_inf = T + (k_*dTdn)/h;
+    convective.transferCoefficient = h;
+    convective.referenceValue = T + (k_*dTdn)/h;
 
     return convective;
 }

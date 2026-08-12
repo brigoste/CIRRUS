@@ -9,7 +9,7 @@ namespace bc
     {
         Dirichlet,
         Neumann,
-        Convective,
+        Robin,
         Radiative,
         Mixed,
         None
@@ -19,7 +19,7 @@ namespace bc
     {
         if (s == "Dirichlet")  return Type::Dirichlet;
         if (s == "Neumann")    return Type::Neumann;
-        if (s == "Convective") return Type::Convective;
+        if (s == "Robin")      return Type::Robin;
         if (s == "Radiative")  return Type::Radiative;
         if (s == "Mixed")      return Type::Mixed;
         if (s == "None")       return Type::None;
@@ -33,7 +33,7 @@ namespace bc
         {
             case Type::Dirichlet:  return "Dirichlet";
             case Type::Neumann:    return "Neumann";
-            case Type::Convective: return "Convective";
+            case Type::Robin:      return "Robin";
             case Type::Radiative:  return "Radiative";
             case Type::Mixed:      return "Mixed";
             case Type::None:       return "None";
