@@ -10,18 +10,10 @@ PathContext buildPaths(
     PathContext p;
 
     p.projectRoot = std::filesystem::absolute(projectRoot);
-
-    p.outputRoot =
-        p.projectRoot / cfg.io.output_root;
-
-    p.verificationRoot =
-        p.outputRoot / "verification";
-
-    p.scriptRoot =
-        p.projectRoot / "scripts";
-
-    p.pythonExecutable =
-        cfg.io.python_executable;
+    p.outputRoot = p.projectRoot / cfg.io.output_root;
+    p.verificationRoot = p.outputRoot / "verification";
+    p.scriptRoot = p.projectRoot / "scripts";
+    p.pythonExecutable = cfg.io.python_executable;
 
     return p;
 }
