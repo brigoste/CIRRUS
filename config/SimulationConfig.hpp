@@ -93,6 +93,7 @@ struct DiscretizationConfig
 struct IOConfig
 {
     std::string output_root = "output";
+    std::string python_executable = "python";
     bool plot_enabled = true;
 };
 
@@ -146,6 +147,8 @@ struct VerificationSuite
 
     std::string case_directory = "cases/verification";
 
+    std::string python_executable = "python";
+
     struct Output
     {
         std::string directory = "verification";
@@ -182,7 +185,7 @@ SimulationConfig fromJson(const nlohmann::json& j);
 // ------------------------- Physics --------------------------
 inline void from_json(const nlohmann::json& j, PhysicsConfig& p)
 {
-    p.k      = j.value("k", 1.0);
+    p.k      = j.value("transferCoefficient", 1.0);
     p.gamma  = j.value("gamma", 0.0);
     p.rho    = j.value("rho", 1.0);
     p.ux     = j.value("ux", 0.0);
@@ -320,6 +323,8 @@ inline void from_json(const nlohmann::json& j, VerificationSuite& v)
     v.enabled      = j.value("enabled", false);
     v.plot_enabled = j.value("plot_enabled", true);
 
+    v.python_executable = j.value("python_executable", "python");
+
     v.cases.clear();
 
     if (j.contains("cases"))
@@ -331,12 +336,12 @@ inline void from_json(const nlohmann::json& j, VerificationSuite& v)
             v.cases.push_back(entry);
         }
     }
+
     if (j.contains("caseConfigs"))
     {
         for (auto& [name, cfg] : j["caseConfigs"].items())
         {
-            VerificationCaseConfig entry =
-                cfg.get<VerificationCaseConfig>();
+            VerificationCaseConfig entry = cfg.get<VerificationCaseConfig>();
 
             entry.name = name;
 
@@ -344,16 +349,9 @@ inline void from_json(const nlohmann::json& j, VerificationSuite& v)
         }
     }
 
-    v.case_directory = j.value(
-        "case_directory",
-        "cases/verification"
-    );
+    v.case_directory = j.value( "case_directory", "cases/verification" );
 
-    if (j.contains("output"))
-    {
-        v.output.directory =
-            j.at("output").value("directory", "verification");
-    }
+    if (j.contains("output")) { v.output.directory = j.at("output").value("directory", "verification"); }
 }
 
 inline void from_json( const nlohmann::json& j, SimulationConfig& cfg)
@@ -366,6 +364,7 @@ inline void from_json( const nlohmann::json& j, SimulationConfig& cfg)
     {
         cfg.io.output_root = j.at("paths").value("output_root", "output");
         cfg.io.plot_enabled = j.at("paths").value("plot_enabled", true);
+        cfg.io.python_executable = j.at("paths").value("python_executable", "python");
     }
     if (j.contains("boundary_conditions")) { cfg.boundary = j.at("boundary_conditions").get<std::vector<BoundaryConfig>>(); }
     if (j.contains("discretization")) { cfg.discretization = j.at("discretization") .get<DiscretizationConfig>(); }
