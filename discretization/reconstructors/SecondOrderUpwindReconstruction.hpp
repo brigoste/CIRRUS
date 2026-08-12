@@ -1,0 +1,17 @@
+#pragma once
+
+#include "discretization/reconstructors/ReconstructionScheme.hpp"
+
+class SecondOrderUpwindReconstruction : public ReconstructionScheme
+{
+public:
+
+    double reconstruct(
+        const MeshBase& mesh,
+        std::size_t owner,
+        const Face& face,
+        const ScalarField& field,
+        const VectorField& gradient,
+        double flux
+    ) const override;
+};
