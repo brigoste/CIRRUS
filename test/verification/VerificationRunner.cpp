@@ -340,8 +340,8 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             if (refinementEnabled) { levelOutputDir /= "L" + std::to_string(level + 1); }
 
             std::filesystem::create_directories(levelOutputDir);
-
-            auto csvPath = levelOutputDir / (caseName + ".csv");
+            // all .csv files are named solution.csv to simplify plotting. They are nested under their test, so this shouldn't be confusing.
+            auto csvPath = levelOutputDir / ("solution.csv");       
             auto vtkPath = levelOutputDir / (caseName + ".vtu");
             auto jsonPath = levelOutputDir / (caseName + ".json");
             // -------------------------------------------------
@@ -523,7 +523,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
     std::cout << "================================================================================\n\n";
 
     std::cout << std::left
-            << std::setw(20) << "Case"
+            << std::setw(26) << "Case"
             << std::setw(12) << "Solver"
             << std::setw(16) << "Reconstruction"
             << std::setw(16) << "Gradient"
@@ -534,14 +534,14 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             << std::setw(10) << "Order"
             << "\n";
 
-    std::cout << std::string(119, '-') << "\n";
+    std::cout << std::string(130, '-') << "\n";
 
     std::cout << std::scientific << std::setprecision(3);
 
     for (const auto& s : summary)
     {
         std::cout << std::left
-                << std::setw(20) << s.caseName
+                << std::setw(26) << s.caseName
                 << std::setw(12) << s.solver
                 << std::setw(16) << s.reconstruction
                 << std::setw(16) << s.gradient
