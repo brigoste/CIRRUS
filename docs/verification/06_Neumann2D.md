@@ -243,7 +243,7 @@ Example configuration:
     },
 
     "solver": {
-      "type": "CG",
+      "method": "CG",
       "tol": 1e-8,
       "max_iter": 5000
     },

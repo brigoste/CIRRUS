@@ -21,7 +21,7 @@ QUIET=0
 CLEAN=0
 CLEAN_CACHE=0
 
-CONFIG_PATH="$PROJECT_DIR/cases/verification/verification_suite.json"
+CONFIG_PATH="$PROJECT_DIR/cases/user/User_default.json"
 
 ############################################################
 # Parse arguments
@@ -58,8 +58,16 @@ while [[ $# -gt 0 ]]; do
             RUN=0
             ;;
 
+        --verification)
+            CONFIG_PATH="$PROJECT_DIR/cases/verification/verification_suite.json"
+            ;;
+
         --config)
             shift
+            if [[ $# -eq 0 ]]; then
+                echo "Error: --config requires a file path."
+                exit 1
+            fi
             CONFIG_PATH="$1"
             ;;
 
@@ -76,9 +84,7 @@ while [[ $# -gt 0 ]]; do
             ;;
 
         --help)
-
-cat << EOF
-
+            cat <<EOF
 ===================== CIRRUS BUILD SYSTEM =====================
 
 Usage:
@@ -87,35 +93,30 @@ Usage:
 
 Build
 
-    -c          Clean build
-    -cc         Remove CMake cache
-    -i          Incremental build
+-c                  Clean build
+-cc                 Remove CMake cache
+-i                  Incremental build
 
-    -d          Debug
-
-    -r          Release
+-d                  Debug
+-r                  Release
 
 Run
 
-    --run
-    --norun
-
-    --config <file>
+--run               Run after building
+--norun             Build only
+--verification      Run verification suite
+--config <file>     Run specified configuration
 
 Other
 
-    --plot
-
-    --log
-
-    --quiet
+--plot              Generate plots after run
+--log               Write build output to build.log
+--quiet             Suppress build configuration output
 
 ==============================================================
-
 EOF
-
-exit 0
-;;
+            exit 0
+            ;;
 
         *)
             echo "Unknown option: $1"
@@ -132,12 +133,20 @@ done
 ############################################################
 
 if [[ $QUIET -eq 0 ]]; then
+    echo "======================================"
+    echo "Build Type : $BUILD_TYPE"
+    echo "Config     : $CONFIG_PATH"
+    echo "======================================"
+fi
 
-echo "======================================"
-echo "Build Type : $BUILD_TYPE"
-echo "Config     : $CONFIG_PATH"
-echo "======================================"
+############################################################
+# Validate configuration
+############################################################
 
+if [[ ! -f "$CONFIG_PATH" ]]; then
+    echo "Configuration file not found:"
+    echo "  $CONFIG_PATH"
+    exit 1
 fi
 
 ############################################################
@@ -145,11 +154,8 @@ fi
 ############################################################
 
 if [[ $LOG -eq 1 ]]; then
-
-LOGFILE="$PROJECT_DIR/build.log"
-
-echo "===== CIRRUS BUILD LOG =====" > "$LOGFILE"
-
+    LOGFILE="$PROJECT_DIR/build.log"
+    echo "===== CIRRUS BUILD LOG =====" > "$LOGFILE"
 fi
 
 ############################################################
@@ -163,7 +169,6 @@ if [[ $CLEAN -eq 1 ]]; then
 fi
 
 mkdir -p build
-
 cd build
 
 if [[ $CLEAN_CACHE -eq 1 ]]; then
@@ -175,11 +180,9 @@ fi
 ############################################################
 
 if [[ ! -f CMakeCache.txt ]]; then
-
-cmake -G Ninja \
-    -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
-    ..
-
+    cmake -G Ninja \
+        -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
+        ..
 fi
 
 ############################################################
@@ -201,30 +204,21 @@ fi
 ############################################################
 
 if [[ $RUN -eq 1 ]]; then
-
-if [[ -f CIRRUS ]]; then
-
-./CIRRUS --config "$CONFIG_PATH"
-
-else
-
-echo "Executable not found."
-
+    if [[ -f "$PROJECT_DIR/build/CIRRUS" ]]; then
+        cd "$PROJECT_DIR"
+        ./build/CIRRUS --config "$CONFIG_PATH"
+    else
+        echo "Executable not found."
+        exit 1
+    fi
 fi
-
-fi
-
 ############################################################
 # Plot
 ############################################################
 
 if [[ $PLOT -eq 1 ]]; then
-
-python3 "$PROJECT_DIR/scripts/Plot.py"
-
+    python3 "$PROJECT_DIR/scripts/Plot.py"
 fi
-
-############################################################
 
 echo
 echo "Build complete."

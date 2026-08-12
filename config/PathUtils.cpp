@@ -13,6 +13,11 @@ PathContext buildPaths(
 
     p.outputRoot = p.projectRoot / cfg.io.output_root;
 
+    std::cout << "PATH DEBUG:\n"
+          << "  projectRoot = " << p.projectRoot << '\n'
+          << "  config output_root = " << cfg.io.output_root << '\n'
+          << "  outputRoot = " << p.outputRoot << '\n';
+
     p.verificationRoot = p.outputRoot / "verification";
 
     p.scriptRoot = p.projectRoot / "scripts";
@@ -23,16 +28,17 @@ PathContext buildPaths(
     }
     else
     {
-        p.pythonExecutable = "python";
+        p.pythonExecutable = "python3";
     } 
 
-    if (!std::filesystem::exists(p.pythonExecutable) &&
-    p.pythonExecutable != "python")
+    const std::string check = p.pythonExecutable.string() + " --version > /dev/null 2>&1";
+
+    if (std::system(check.c_str()) != 0)
     {
         std::cerr
-            << "WARNING: Python executable not found: "
+            << "WARNING: Python executable not available: "
             << p.pythonExecutable
-            << "\n";
+            << '\n';
     }
 
     return p;

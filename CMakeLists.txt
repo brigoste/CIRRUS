@@ -44,6 +44,7 @@ file(GLOB_RECURSE CIRRUS_SOURCES
     ${PROJECT_SOURCE_DIR}/test/verification/*.cpp
     ${PROJECT_SOURCE_DIR}/test/verification/ManufacturedCases/*.cpp
     ${PROJECT_SOURCE_DIR}/utils/*.cpp
+    ${PROJECT_SOURCE_DIR}/diagnostics/MemoryDiagnostics.cpp
 
     # Update as we get 2D/3D meshes working
     # ${PROJECT_SOURCE_DIR}/mesh/*.cpp

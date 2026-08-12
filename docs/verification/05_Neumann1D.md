@@ -160,7 +160,7 @@ The refinement study demonstrates the expected second-order spatial convergence 
     },
 
     "solver": {
-      "type": "TDMA",
+      "method": "TDMA",
       "tol": 1e-8,
       "max_iter": 5000
     },

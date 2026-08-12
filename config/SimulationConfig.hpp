@@ -11,7 +11,6 @@
 #include "mesh/BoundaryPatchSystem.hpp"
 
 #include "discretization/gradient/GradientType.hpp"
-// #include "discretization/convection/ConvectionType.hpp"
 #include "discretization/reconstructors/ReconstructionType.hpp"
 #include "solver/preconditioners/Preconditioner.hpp"
 
@@ -84,7 +83,6 @@ struct SolverConfig
 struct DiscretizationConfig
 {
     GradientType gradientScheme = GradientType::GreenGauss;
-    // ConvectionType convectionScheme = ConvectionType::CentralLinear;
     ReconstructionType reconstructionScheme = ReconstructionType::Gradient;
 };
 
@@ -120,23 +118,19 @@ struct VerificationCaseConfig
     bool linf = true;
     bool plot_enabled = true;
 
-    bool overrideMesh = false;
     MeshConfig mesh;
-
-    bool overridePhysics = false;
     PhysicsConfig physics;
-
-    bool overrideSolver = false;
     SolverConfig solver;
-
-    bool overrideBoundary = false;
     std::vector<BoundaryConfig> boundary;
-
-    bool overrideRefinement = false;
     RefinementConfig refinement;
-
-    bool overrideDiscretization = false;
     DiscretizationConfig discretization;
+
+    bool overrideMesh = false;
+    bool overridePhysics = false;
+    bool overrideSolver = false;
+    bool overrideBoundary = false;
+    bool overrideRefinement = false;
+    bool overrideDiscretization = false;
 
     nlohmann::json params;
 };
@@ -169,10 +163,6 @@ struct SimulationConfig
     DiscretizationConfig discretization;
 
     std::vector<BoundaryConfig> boundary;
-
-    VerificationSuite verificationSuite;
-
-    VerificationCaseConfig verification;
 };
 
 //==================================================
@@ -182,8 +172,6 @@ struct SimulationConfig
 SimulationConfig defaultConfig();
 
 SimulationConfig loadConfig(const std::filesystem::path& path);
-
-SimulationConfig resolveCaseConfig( const SimulationConfig& cfg, const VerificationCaseConfig& entry);
 
 nlohmann::json mergeJson( nlohmann::json base, const nlohmann::json& override_);
 
@@ -205,7 +193,6 @@ inline void from_json(const nlohmann::json& j, PhysicsConfig& p)
     if (j.contains("type")) { p.type = physics::physicsFromString(j.at("type").get<std::string>());}
 }
 
-// ----------------- Boundary --------------------------
 // ----------------- Boundary --------------------------
 inline void from_json(const nlohmann::json& j, BoundaryConfig& b)
 {
@@ -243,7 +230,7 @@ inline void from_json(const nlohmann::json& j, BoundaryConfig& b)
 // -------------- SolverConfig --------------------
 inline void from_json(const nlohmann::json& j, SolverConfig& s)
 {
-    s.method         = j.value("type", solver::Method::TDMA);
+    s.method         = j.value("method", solver::Method::CG);
     s.tol            = j.value("tol", 1e-10);
     s.max_iter       = j.value("max_iter", 1000);
     s.omega          = j.value("omega", 1.0);
@@ -275,7 +262,6 @@ inline void from_json(const nlohmann::json& j, RefinementConfig& r)
 inline void from_json(const nlohmann::json& j, DiscretizationConfig& d)
 {
     d.gradientScheme      = gradientFromString( j.value( "gradientScheme", "green_gauss" ));
-    // d.convectionScheme = convectionFromString( j.value("convectionScheme", "centralLinear"));
     d.reconstructionScheme = reconstructionTypeFromString( j.value("reconstructionScheme", "Gradient"));
 }
 
@@ -288,12 +274,6 @@ inline void from_json(const nlohmann::json& j, VerificationCaseConfig& v)
     v.l2           = j.value("l2", true);
     v.linf         = j.value("linf", true);
     v.plot_enabled = j.value("plot_enabled", true);
-
-    if (j.contains("refinement"))
-    {
-        v.refinement = j.at("refinement").get<RefinementConfig>();
-        v.overrideRefinement = true;
-    }
 
     if (j.contains("mesh"))
     {
@@ -317,6 +297,12 @@ inline void from_json(const nlohmann::json& j, VerificationCaseConfig& v)
     {
         v.boundary = j.at("boundary_conditions").get<std::vector<BoundaryConfig>>();
         v.overrideBoundary = true;
+    }
+
+    if (j.contains("refinement"))
+    {
+        v.refinement = j.at("refinement").get<RefinementConfig>();
+        v.overrideRefinement = true;
     }
 
     if (j.contains("discretization"))
@@ -382,7 +368,6 @@ inline void from_json( const nlohmann::json& j, SimulationConfig& cfg)
         cfg.io.plot_enabled = j.at("paths").value("plot_enabled", true);
     }
     if (j.contains("boundary_conditions")) { cfg.boundary = j.at("boundary_conditions").get<std::vector<BoundaryConfig>>(); }
-    if (j.contains("verificationCase"))    { cfg.verification = j.at("verificationCase").get<VerificationCaseConfig>(); }
     if (j.contains("discretization")) { cfg.discretization = j.at("discretization") .get<DiscretizationConfig>(); }
 
 }

@@ -206,7 +206,7 @@ is therefore verified.
     },
 
     "solver": {
-      "type": "TDMA",
+      "method": "TDMA",
       "tol": 1e-8,
       "max_iter": 5000
     },

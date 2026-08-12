@@ -332,7 +332,7 @@ The following configuration was used:
     },
 
     "solver": {
-      "type": "BiCGSTAB",
+      "method": "BiCGSTAB",
       "tol": 1e-8,
       "max_iter": 5000
     },

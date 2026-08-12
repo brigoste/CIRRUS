@@ -13,6 +13,11 @@
       "ly": 1.0
     },
 
+    "discretization": {
+        "gradientScheme": "green_gauss",
+        "reconstructionScheme": "Central"
+    },
+
     "refinement": {
       "enabled": true,
       "levels": [40, 80, 160, 320],
@@ -29,7 +34,7 @@
     },
 
     "solver": {
-      "type": "BiCGSTAB",
+      "method": "BiCGSTAB",
       "tol": 1e-8,
       "max_iter": 5000,
       "preconditioner": "None",

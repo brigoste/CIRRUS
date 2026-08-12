@@ -14,6 +14,8 @@
 #include "io/OutputManager.hpp"
 #include "io/OutputBuilder.hpp"
 
+#include "diagnostics/MemoryDiagnostics.hpp"
+
 #include "utils/Timer.hpp"
 #include "fields/FieldNames.hpp"
 
@@ -82,6 +84,21 @@ struct RefinementSummary
     bool passed = true;
 };
 
+SimulationConfig VerificationRunner::applyVerificationOverrides(
+    const SimulationConfig& base,
+    const VerificationCaseConfig& verif)
+{
+    SimulationConfig cfg = base;
+
+    if (verif.overrideMesh) { cfg.mesh = verif.mesh; }
+    if (verif.overridePhysics) { cfg.physics = verif.physics; }
+    if (verif.overrideSolver) { cfg.solver = verif.solver; }
+    if (verif.overrideBoundary) { cfg.boundary = verif.boundary; }
+    if (verif.overrideDiscretization) { cfg.discretization = verif.discretization; }
+
+    return cfg;
+}
+
 VerificationCaseConfig VerificationRunner::loadVerificationCase( const std::filesystem::path& path)
 {
     std::ifstream file(path);
@@ -117,38 +134,6 @@ VerificationCaseConfig VerificationRunner::loadVerificationCase( const std::file
 
 
     return j["verificationCase"].get<VerificationCaseConfig>();
-}
-
-SimulationConfig VerificationRunner::applyVerificationOverrides( const SimulationConfig& base, const VerificationCaseConfig& verif)
-{
-    SimulationConfig cfg = base;
-
-    if (verif.overrideMesh) 
-    { 
-        cfg.mesh = verif.mesh; 
-    }
-
-    if (verif.overridePhysics) 
-    { 
-        cfg.physics = verif.physics; 
-    }
-
-    if (verif.overrideSolver) 
-    {
-        cfg.solver = verif.solver; 
-    }
-
-    if (verif.overrideBoundary) 
-    { 
-        cfg.boundary = verif.boundary; 
-    }
-
-    if (verif.overrideDiscretization)
-    {
-        cfg.discretization = verif.discretization;
-    }
-
-    return cfg;
 }
 
 void VerificationRunner::run( const SimulationConfig& baseCfg, const VerificationSuite& suite, const PathContext& paths)
@@ -196,7 +181,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
         auto verificationCase = loadVerificationCase(casePath);
 
         SimulationConfig caseCfg = applyVerificationOverrides(baseCfg, verificationCase);
-
+        
         auto caseOutputDir = verificationRoot / caseName;
 
         std::filesystem::create_directories(caseOutputDir);
@@ -244,6 +229,8 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                         << "\n  physics = " << physics::to_string(levelCfg.physics.type)
                         << "\n";
 
+            const auto levelStartMemory = MemoryDiagnostics::currentRSS();
+
             Simulation sim(levelCfg);
 
             auto casePtr = VerificationCaseFactory::create(caseName, levelCfg);
@@ -258,10 +245,32 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                 sim.assemble();
             }
 
+            const auto afterAssemblyMemory = MemoryDiagnostics::currentRSS();
+
             {
                 // Timer timer("Solver");
                 sim.solve();
             }
+
+            {
+                const auto afterSolveMemory = MemoryDiagnostics::currentRSS(); 
+                const auto peakMemory = MemoryDiagnostics::peakRSS(); 
+                const double levelStartMB = static_cast<double>(levelStartMemory) / (1024.0 * 1024.0); 
+                const double assemblyMB = static_cast<double>(afterAssemblyMemory) / (1024.0 * 1024.0); 
+                const double solveMB = static_cast<double>(afterSolveMemory) / (1024.0 * 1024.0); 
+                const double peakMB = static_cast<double>(peakMemory) / (1024.0 * 1024.0); 
+                const double peakIncreaseMB = static_cast<double>(peakMemory - levelStartMemory) / (1024.0 * 1024.0); 
+                std::cout << "\n================ MEMORY DIAGNOSTICS ================\n" 
+                          << "Start RSS:           "  << levelStartMB                 << " MB\n" 
+                          << "After assembly:      "  << assemblyMB                   << " MB\n"
+                          << "After solve:         "  << solveMB                      << " MB\n"
+                          
+                          << "\nAssembly Increase:   "  << (assemblyMB - levelStartMB)  << " MB\n"
+                          << "Solver Increase:     "  << (solveMB - assemblyMB)       << " MB\n"
+                          << "Peak RSS:            "  << peakMB                       << " MB\n" 
+                          << "Peak increase:       "  << peakIncreaseMB               << " MB\n" 
+                          << "====================================================\n\n";
+            }   
 
             auto& temperature = sim.fields().scalar(FieldName::Temperature);
 

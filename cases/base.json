@@ -13,7 +13,7 @@
   },
 
   "solver": {
-    "type": "SOR",
+    "method": "SOR",
     "preconditioner": "None",
     "restart": 30,
     "tol": 1e-8,
@@ -35,15 +35,8 @@
   ],
 
   "paths": {
-    "python_executable": "python"
-  },
-
-  "verificationSuite": {
-    "enabled": true,
-    "plot_enabled": false,
-
-    "output": {
-      "directory": "verification"
-    }
+    "output_root": "output",
+    "python_executable": "python3"
   }
+  
 }

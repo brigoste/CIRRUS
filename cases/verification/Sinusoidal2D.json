@@ -5,8 +5,6 @@
     "name": "Sinusoidal2D",
     "type": "manufactured",
 
-    "plot_enabled": false,
-
     "mesh": {
       "type": "quad2D",
       "nx": 50,
@@ -16,7 +14,7 @@
     },
 
     "refinement": {
-      "enabled": false,
+      "enabled": true,
       "levels": [25, 50, 100, 200],
       "expected_order": 2.0
     },
@@ -34,7 +32,7 @@
     },
 
     "solver": {
-      "type": "GMRES",
+      "method": "GMRES",
       "preconditioner": "ILU0",
       "tol": 1e-8,
       "max_iter": 5000,

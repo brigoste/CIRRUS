@@ -41,18 +41,26 @@ void SimulationRunner::run(
         validate(cfg);      // Makes sure solver/model pairings are ok.
     }
 
+    std::cout << "USER CONFIG:\n"
+          << "  mesh.type = " << cfg.mesh.type << '\n'
+          << "  mesh.nx   = " << cfg.mesh.nx << '\n'
+          << "  mesh.ny   = " << cfg.mesh.ny << '\n'
+          << "  physics   = " << physics::to_string(cfg.physics.type) << '\n'
+          << "  solver    = " << solver::to_string(cfg.solver.method) << '\n';
+
     Simulation sim(cfg);
 
     {
         // Timer timer("Assembly");
         sim.assemble();
     }
-
+    
     std::cout << "# of cells = " << sim.mesh().ncells()
               << "\n# of faces = " << sim.mesh().nfaces()
               << "\n";
 
     sim.solve();
+
     const auto& temperature = sim.fields().scalar(FieldName::Temperature);
     const auto& mesh = sim.mesh();
     const auto& system = sim.system();

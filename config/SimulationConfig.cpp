@@ -71,42 +71,12 @@ VerificationCaseConfig loadVerificationCase(const std::filesystem::path& path)
 
     cfg.name = path.stem().string();
 
-    if (j.contains("mesh"))
-    {
-        cfg.mesh = j.at("mesh").get<MeshConfig>();
-        cfg.overrideMesh = true;
-    }
-
-    if (j.contains("physics"))
-    {
-        cfg.physics = j.at("physics").get<PhysicsConfig>();
-        cfg.overridePhysics = true;
-    }
-
-    if (j.contains("solver"))
-    {
-        cfg.solver = j.at("solver").get<SolverConfig>();
-        cfg.overrideSolver = true;
-    }
-
-    if (j.contains("boundary_conditions"))
-    {
-        cfg.boundary = j.at("boundary_conditions") .get<std::vector<BoundaryConfig>>();
-        cfg.overrideBoundary = true;
-    }
-
-    if (j.contains("refinement"))
-    {
-        cfg.refinement = j.at("refinement").get<RefinementConfig>();
-        cfg.overrideRefinement = true;
-    }
-
-    if (j.contains("discretization"))
-    {
-        cfg.discretization = j.at("discretization").get<DiscretizationConfig>();
-        cfg.overrideDiscretization = true;
-    }
-
+    if (j.contains("mesh")) { cfg.mesh = j.at("mesh").get<MeshConfig>(); }
+    if (j.contains("physics")) { cfg.physics = j.at("physics").get<PhysicsConfig>(); }
+    if (j.contains("solver")) { cfg.solver = j.at("solver").get<SolverConfig>(); }
+    if (j.contains("boundary_conditions")) { cfg.boundary = j.at("boundary_conditions") .get<std::vector<BoundaryConfig>>(); }
+    if (j.contains("refinement")) { cfg.refinement = j.at("refinement").get<RefinementConfig>(); }
+    if (j.contains("discretization")) { cfg.discretization = j.at("discretization").get<DiscretizationConfig>(); }
     if (j.contains("params")) { cfg.params = j.at("params"); }
 
     return cfg;
@@ -122,33 +92,27 @@ SimulationConfig defaultConfig()
 
     cfg.mesh.type = "line1D";
     cfg.mesh.nx = 50;
+    cfg.mesh.ny = 1;
     cfg.mesh.lx = 1.0;
+    cfg.mesh.ly = 1.0;
 
+    cfg.physics.type = physics::PhysicsType::Heat;
     cfg.physics.k = 1.0;
 
     cfg.solver.method = solver::Method::SOR;
     cfg.solver.tol = 1e-8;
     cfg.solver.max_iter = 5000;
     cfg.solver.omega = 1.0;
+    cfg.solver.restart = 10;
+    cfg.solver.preconditioner = PreconditionerType::None;
 
-    cfg.verificationSuite.enabled = false;
-    cfg.verificationSuite.cases.clear();
-    cfg.verificationSuite.output.directory = "output/verification";
+    cfg.io.output_root = "output";
+    cfg.io.plot_enabled = true;
 
-    return cfg;
-}
+    cfg.discretization.gradientScheme = GradientType::GreenGauss;
+    cfg.discretization.reconstructionScheme = ReconstructionType::Gradient;
 
-SimulationConfig resolveCaseConfig( const SimulationConfig& base, const VerificationCaseConfig& entry)
-{
-    SimulationConfig cfg = base;
-
-    if (entry.overrideMesh) { cfg.mesh = entry.mesh; }
-
-    if (entry.overridePhysics) { cfg.physics = entry.physics; }
-
-    if (entry.overrideSolver) { cfg.solver = entry.solver; }
-
-    if (entry.overrideBoundary) { cfg.boundary = entry.boundary; }
+    cfg.boundary.clear();
 
     return cfg;
 }
@@ -203,14 +167,12 @@ SimulationConfig loadConfig( const std::filesystem::path& path)
     // -------------------------------------------------
     // Build config from defaults
     // -------------------------------------------------
-    std::cout << "DEBUG CONFIG AFTER MERGE:\n";
     std::cout << j.dump(2) << "\n";
 
     return fromJson(j);
 }
 
-SimulationConfig fromJson(
-    const nlohmann::json& j)
+SimulationConfig fromJson(const nlohmann::json& j)
 {
     SimulationConfig cfg = defaultConfig();
 
@@ -240,23 +202,15 @@ SimulationConfig fromJson(
     // -------------------------------------------------
     // Solver
     // -------------------------------------------------
-    cfg.solver.method   = j.at("solver").at("type").get<solver::Method>();
-    cfg.solver.tol      = j.at("solver").at("tol").get<double>();
-    cfg.solver.max_iter = j.at("solver").at("max_iter").get<int>();
-    cfg.solver.omega    = j.at("solver").at("omega").get<double>();
-
+    cfg.solver          = j.at("solver").get<SolverConfig>();
     // -------------------------------------------------
     // Output paths (normalized)
     // -------------------------------------------------
     if (j.contains("paths"))
     {
-        std::string raw = j.at("paths").at("output_root").get<std::string>();
+        const auto& paths = j.at("paths");
 
-        std::filesystem::path p(raw);
-
-        if (!p.is_absolute()) { p = std::filesystem::current_path().parent_path() / p; }
-
-        cfg.io.output_root = p.string();
+        cfg.io.output_root = paths.value("output_root", cfg.io.output_root);
     }
 
     // -------------------------------------------------
@@ -314,72 +268,7 @@ SimulationConfig fromJson(
     // -------------------------------------------------
     // Verification (safe parsing)
     // -------------------------------------------------
-    if (j.contains("verificationSuite"))
-    {
-        const auto& v = j.at("verificationSuite");
-
-        cfg.verificationSuite.enabled = v.value("enabled", false);
-        cfg.verificationSuite.plot_enabled = v.value("plot_enabled", false);
-        cfg.verificationSuite.cases.clear();
-
-        if (v.contains("cases"))
-        {
-            const auto& configs = v.value("caseConfigs", nlohmann::json::object());
-
-            for (const auto& c : v.at("cases"))
-            {
-                VerificationCaseConfig entry;
-                entry.name = c.get<std::string>();
-
-                if (configs.contains(entry.name))
-                {
-                    const auto& jc = configs.at(entry.name);
-
-                    entry.params = jc.value("params", nlohmann::json::object());
-
-                    // ---- Mesh override ----
-                    if (jc.contains("mesh"))
-                    {
-                        entry.mesh = jc.value("mesh", MeshConfig{});
-                        entry.overrideMesh = true;
-                    }
-                    //     Mesh refinement for grid convergence
-                    if (jc.contains("refinement"))
-                    {
-                        entry.refinement = jc.value("refinement", RefinementConfig{});
-                        entry.overrideRefinement = true;
-                    }
-                    // ---- Physics override ----
-                    if (jc.contains("physics"))
-                    {
-                        entry.physics = jc.value("physics", PhysicsConfig{});
-                        entry.overridePhysics = true;
-                    }
-
-                    // ---- Solver override ----
-                    if (jc.contains("solver"))
-                    {
-                        entry.solver = jc.value("solver", SolverConfig{});
-                        entry.overrideSolver = true;
-                    }
-
-                    // ---- Boundary override ----
-                    if (jc.contains("boundary_conditions"))
-                    {
-                        entry.boundary = jc.value("boundary_conditions", std::vector<BoundaryConfig>{});
-                        entry.overrideBoundary = true;
-                    }
-                }
-                else { entry.params = {}; }
-
-                cfg.verificationSuite.cases.push_back(std::move(entry));
-            }
-        }
-
-        if (v.contains("output")) { cfg.verificationSuite.output.directory = v.at("output").value("directory", "output/verification"); }
-    }
-
-    
+   
     if (j.contains("verificationSuite") && j["verificationSuite"].contains("caseConfigs"))
     {
         for (auto& [k, v] : j["verificationSuite"]["caseConfigs"].items()) { std::cout << "  " << k << "\n";}

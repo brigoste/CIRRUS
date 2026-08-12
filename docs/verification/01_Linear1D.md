@@ -256,7 +256,7 @@ The following configuration was used to execute the verification case:
     },
 
     "solver": {
-      "type": "TDMA",
+      "method": "TDMA",
       "tol": 1e-8,
       "max_iter": 5000
     },

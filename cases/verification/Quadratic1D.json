@@ -5,8 +5,6 @@
     "name": "Quadratic1D",
     "type": "manufactured",
 
-    "plot_enabled": true,
-
     "mesh": {
       "type": "line1D",
       "nx": 20,
@@ -26,7 +24,7 @@
     },
 
     "solver": {
-      "type": "CG",
+      "method": "CG",
       "tol": 1e-8,
       "max_iter": 5000
     },
