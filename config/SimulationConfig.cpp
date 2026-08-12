@@ -107,7 +107,7 @@ SimulationConfig defaultConfig()
     cfg.solver.preconditioner = PreconditionerType::None;
 
     cfg.io.output_root = "output";
-    cfg.io.plot_enabled = true;
+    cfg.io.plot_enabled = false;
 
     cfg.discretization.gradientScheme = GradientType::GreenGauss;
     cfg.discretization.reconstructionScheme = ReconstructionType::Gradient;
@@ -167,7 +167,7 @@ SimulationConfig loadConfig( const std::filesystem::path& path)
     // -------------------------------------------------
     // Build config from defaults
     // -------------------------------------------------
-    std::cout << j.dump(2) << "\n";
+    // std::cout << j.dump(2) << "\n";
 
     return fromJson(j);
 }
@@ -192,7 +192,7 @@ SimulationConfig fromJson(const nlohmann::json& j)
     // -------------------------------------------------
     cfg.physics.type    = physics::physicsFromString(j.at("physics").at("type").get<std::string>());
 
-    cfg.physics.k       = j.at("physics").value("k", 0.0);
+    cfg.physics.k       = j.at("physics").value("transferCoefficient", 0.0);
     cfg.physics.gamma   = j.at("physics").value("gamma", 0.0);
 
     cfg.physics.rho     = j.at("physics").value("rho", 1.0);
@@ -211,6 +211,8 @@ SimulationConfig fromJson(const nlohmann::json& j)
         const auto& paths = j.at("paths");
 
         cfg.io.output_root = paths.value("output_root", cfg.io.output_root);
+        cfg.io.python_executable = paths.value("python_executable", "python");
+        cfg.io.plot_enabled = paths.value("plot_enabled", true);
     }
 
     // -------------------------------------------------
@@ -254,8 +256,8 @@ SimulationConfig fromJson(const nlohmann::json& j)
                 break;
 
             case bc::Type::Robin:
-                bc.condition.transferCoefficient = bcJson.at("h").get<double>();
-                bc.condition.referenceValue = bcJson.at("Tinf").get<double>();
+                bc.condition.transferCoefficient = bcJson.at("transferCoefficient").get<double>();
+                bc.condition.referenceValue = bcJson.at("referenceValue").get<double>();
                 break;
 
             default:
