@@ -692,107 +692,189 @@ Optimization notes:
 
 ## Numerical Discretization Infrastructure
 
-### Gradient Infrastructure
+## Updated Current Worklist
 
-* [x] Implement Green-Gauss gradient
-* [x] Add configurable gradient scheme
-* [x] Integrate gradient scheme into simulation configuration
-* [x] Allow verification cases to override gradient scheme
-* [x] Report gradient scheme in verification results
-* [x] Implement least-squares gradient
-* [x] Verify gradient implementation with manufactured analytical field
-* [x] Compare gradient schemes through mesh refinement
+### 1. Finish contribution / assembly cleanup
 
-### Reconstruction / Interpolation Infrastructure
+* [x] Refactor `SourceContribution` so sources are accumulated as contribution objects
+* [x] Refactor `MatrixContribution` so matrix terms are accumulated as contribution objects
+* [x] Apply source contributions during `FiniteVolumeAssembler` assembly
+* [x] Apply matrix contributions during `FiniteVolumeAssembler` assembly
+* [x] Preserve boundary-diffusion contributions through the contribution pathway
+* [x] Verify refactored assembly against the verification suite
+* [x] Ensure flux builders do not directly mutate the final algebraic system
+* [x] Audit remaining addSource() usage; retain contribution-based insertion where appropriate
+* [x] Audit `addMatrixContribution()` usage for unnecessary temporary or duplicated contributions
+* [x] Remove remaining redundant/legacy contribution pathways
 
-* [x] Establish pluggable reconstruction scheme interface
-* [x] Implement GradientReconstruction
-* [x] Implement CentralReconstruction
-* [x] Implement UpwindReconstruction
-* [x] Integrate reconstruction selection into configuration
-* [x] Integrate reconstruction with convection operator
-* [x] Separate reconstruction from convection discretization
-* [x] Generalize face-value interpolation/reconstruction framework
-* [x] Verify CentralReconstruction exactness for linear fields
-* [x] Verify CentralReconstruction second-order convergence
-* [x] Verify GradientReconstruction through MMS refinement studies
-* [ ] Implement second-order upwind reconstruction
-* [ ] Implement QUICK reconstruction
-* [ ] Implement MUSCL reconstruction
-* [ ] Add bounded/TVD reconstruction
-* [ ] Add flux limiter framework
-
-### Convection Infrastructure
-
-* [x] Extract convection discretization from finite-volume assembly
-* [x] Implement UpwindScheme
-* [x] Implement CentralDifferenceScheme
-* [x] Pluggable convection scheme interface
-* [x] Verify upwind convection behavior through MMS
-* [x] Verify second-order central/reconstructed convection behavior through MMS
-* [x] Achieve second-order Advection-Diffusion convergence
-* [ ] Implement second-order upwind
-* [ ] Implement QUICK
-* [ ] Implement MUSCL
-* [ ] Add bounded/TVD schemes
-* [ ] Add flux limiter framework
-
-### Flux Contribution Infrastructure
-
-* [x] Establish generic `FaceContribution` base structure
-* [x] Derive `FaceDiffusion` from `FaceContribution`
-* [x] Derive `FaceConvection` from `FaceContribution`
-* [x] Add `BoundaryDiffusion` contribution type
-* [x] Add `MatrixContribution` type
-* [x] Refactor `FluxAccumulator` to store matrix contributions
-* [x] Refactor diffusion flux construction to produce contribution objects
-* [x] Separate interior diffusion flux construction from diffusion operator assembly
-* [x] Refactor boundary diffusion handling into contribution-based interface
-* [ ] Generalize all boundary contributions into a common contribution interface
-* [ ] Refactor source contributions into explicit contribution objects where beneficial
-* [ ] Refactor convection contribution insertion to use contribution objects consistently
-* [ ] Remove remaining direct matrix/source mutation from flux-construction code
-* [ ] Consolidate contribution insertion into a clean assembly pathway
-
-### User / Verification Execution
-
-* [x] Establish user simulation mode
-* [x] Establish verification execution mode
-* [x] Add `--verification` build/run option
-* [x] Add `--config <case>` execution option
-* [x] Add default user case
-* [x] Separate user output from verification output
-* [x] Resolve project-root vs build-root output paths
-* [x] Linux/WSL Python execution support
-* [ ] Cross-platform plotting execution
-* [ ] Improve user-facing runtime diagnostics
-* [ ] Add explicit case/config validation
-
-### Verification Status
-
-The numerical discretization infrastructure has been verified independently of the final solver:
-
-* Central reconstruction is exact for linear manufactured fields.
-* Central reconstruction demonstrates approximately second-order convergence for quadratic manufactured fields.
-* Gradient-based reconstruction has been verified through mesh-refinement studies.
-* Green-Gauss and least-squares gradients demonstrate approximately second-order convergence for the tested manufactured field.
-* Upwind convection is configurable and produces the expected first-order behavior.
-* Central/reconstructed convection supports second-order Advection-Diffusion convergence.
-* Face-based diffusion assembly is verified.
-* Face-based convection assembly is verified.
-* Boundary diffusion handling is verified.
-* Contribution-based flux accumulation builds successfully across the verification suite.
-* User-defined cases can now be executed independently of verification cases.
-
-Representative Advection-Diffusion result:
+**Current architecture:**
 
 ```text
-Scheme      Mesh       L2 Error       Order
-Upwind      320x320    5.731e-04      ~0.95
-Central     320x320    4.061e-06      ~2.00
+Flux construction
+      ↓
+Contribution objects
+      ↓
+FluxAccumulator
+      ↓
+FiniteVolumeAssembler
+      ↓
+EquationSystem
+      ↓
+LinearSystem
+      ↓
+Solver
 ```
 
-This is exactly the kind of result the verification framework is supposed to expose: the numerical behavior of the discretization is now distinguishable and measurable.
+---
+
+### 2. Finish plotting / output integration
+
+* [x] Integrate plotting into `SimulationRunner`
+* [x] Integrate plotting into `VerificationRunner`
+* [x] Use configured Python executable
+* [x] Handle Windows/MSYS2 path conversion
+* [x] Remove duplicate plotting invocation from `build.sh`
+* [x] Use `solution.csv` consistently for plotting
+* [x] Verify user-case plotting
+* [x] Verify verification-case plotting
+* [x] Remove remaining plotting/debug diagnostics
+* [x] Decide whether plot failures should be warnings or fatal errors
+* [x] Eventually replace `std::system()` with a more robust process-launch mechanism if portability becomes important
+
+---
+
+### 3. Strengthen verification infrastructure
+
+* [x] Verify contribution-based assembly with all verification cases
+* [x] Verify multiple reconstruction schemes
+* [x] Verify multiple gradient schemes
+* [x] Verify second-order convergence remains intact after refactoring
+* [x] Verify verification output paths and refinement-level organization
+* [ ] Add automated regression verification
+* [ ] Add Richardson extrapolation
+* [ ] Add Grid Convergence Index (GCI)
+* [ ] Improve verification diagnostics/reporting
+
+**Important:** The recent verification run demonstrated:
+
+```text
+Accuracy Checks       8/8
+Mesh Refinement       5/5
+Overall                13/13
+```
+
+and you also successfully switched reconstruction and gradient schemes while retaining approximately second-order convergence. That's an important architectural verification milestone.
+
+---
+
+### 4. Next major development target: higher-order convection
+
+* Reconstruction schemes
+  * [ ] Implement second-order upwind reconstruction
+  * [ ] Implement QUICK reconstruction
+  * [ ] Implement MUSCL reconstruction
+  * [ ] Verify each reconstruction scheme independently
+  * [ ] Verify expected order of accuracy
+* Bounded high-resolution schemes
+  * [ ] Define flux-limiter interface
+  * [ ] Implement basic flux limiter
+  * [ ] Implement bounded/TVD reconstruction
+  * [ ] Verify boundedness
+  * [ ] Verify accuracy on smooth fields
+  * [ ] Test behavior near discontinuities/sharp gradients
+* Scheme comparison
+  * [ ] Compare accuracy
+  * [ ] Compare numerical diffusion
+  * [ ] Compare boundedness/overshoot behavior
+  * [ ] Compare solver convergence
+  * [ ] Benchmark representative cases
+
+---
+
+### 5. Then move toward nonlinear solver infrastructure
+
+* [ ] Residual evaluation
+* [ ] Iteration controller
+* [ ] Convergence criteria
+* [ ] Under-relaxation framework
+* [ ] Residual history output
+* [ ] Adaptive stopping criteria
+
+---
+
+## Current Milestone
+
+### Numerical Discretization Infrastructure
+
+The following are now effectively complete:
+
+* Gradient infrastructure
+* Gradient scheme selection
+* Green-Gauss verification
+* Least-squares verification
+* Reconstruction framework
+* Central reconstruction
+* Gradient reconstruction
+* Upwind reconstruction
+* Convection/discretization separation
+* Upwind convection
+* Central convection
+* Second-order Advection-Diffusion verification
+* Face-based diffusion assembly
+* Face-based convection assembly
+* Boundary diffusion handling
+* `SourceContribution`
+* `MatrixContribution`
+* Contribution-based flux accumulation
+* Contribution-based algebraic assembly
+* Refactored contribution insertion pathway
+* Verification of the refactored assembly pathway
+* User-case execution
+* Verification-suite execution
+* User-case plotting
+* Verification-case plotting
+* Cross-platform Python/plotting execution
+
+### Current Verification Status
+
+The refactored numerical infrastructure has been exercised across the verification suite with multiple reconstruction and gradient configurations.
+
+Current verification baseline:
+
+```text
+Accuracy Checks       8/8
+Mesh Refinement       5/5
+Overall                13/13
+```
+
+Representative reconstruction/gradient combinations have retained approximately second-order convergence, including:
+
+* Central reconstruction + Green-Gauss
+* Gradient reconstruction + Green-Gauss
+* Upwind reconstruction + Green-Gauss
+* Central reconstruction + least-squares
+* Gradient reconstruction + least-squares
+
+This establishes a strong numerical baseline before introducing higher-order convection schemes.
+
+### Immediate Priority
+
+The contribution/assembly refactor is now complete and should no longer block numerical development.
+
+Recommended immediate order:
+
+1. ~~Finish contribution/assembly cleanup~~
+2. ~~Verify refactored assembly pathway~~
+3. ~~Complete user/verification case execution infrastructure~~
+4. ~~Complete user/verification plotting infrastructure~~
+5. **Implement second-order upwind reconstruction**
+6. **Verify second-order upwind with MMS**
+7. **Implement QUICK**
+8. **Implement MUSCL**
+9. **Add bounded/TVD reconstruction**
+10. **Add flux limiter framework**
+11. **Strengthen automated verification**
+12. **Begin nonlinear solver infrastructure**
 
 ---
 
@@ -808,8 +890,8 @@ This is exactly the kind of result the verification framework is supposed to exp
    * ~~Separate diffusion flux calculation from assembly~~
    * ~~Boundary diffusion contribution representation~~
    * ~~Matrix contribution representation~~
-   * Refactor remaining direct source/matrix mutations into contribution-based assembly
-   * Generalize boundary contributions where the abstraction provides real value
+   * ~~Refactor remaining direct source/matrix mutations into contribution-based assembly~~
+   * ~~Generalize boundary contributions where the abstraction provides real value~~
 
 4. ~~Complete gradient infrastructure~~
 
@@ -834,21 +916,21 @@ This is exactly the kind of result the verification framework is supposed to exp
    * Component-level MMS verification
    * Second-order Advection-Diffusion verification
 
-7. **Finish contribution/assembly cleanup**
+7. **~~Finish contribution/assembly cleanup~~**
 
-   * Refactor `addSource()` usage where appropriate
-   * Refactor `addMatrixContribution()` usage into explicit `MatrixContribution` objects
-   * Consolidate contribution insertion
-   * Ensure flux builders do not directly mutate the final algebraic system
-   * Verify the refactored assembly path
+   * ~~Refactor `addSource()` usage where appropriate~~
+   * ~~Refactor `addMatrixContribution()` usage into explicit `MatrixContribution` objects~~
+   * ~~Consolidate contribution insertion~~
+   * ~~Ensure flux builders do not directly mutate the final algebraic system~~
+   * ~~Verify the refactored assembly path~~
 
-8. **Complete user/verification case execution infrastructure**
+8. **~~Complete user/verification case execution infrastructure~~**
 
    * ~~User-defined case execution~~
    * ~~Verification suite execution~~
    * ~~Command-line case selection~~
    * ~~Project-level output handling~~
-   * Cross-platform Python/plotting execution
+   * ~~Cross-platform Python/plotting execution~~
    * Configuration validation and diagnostics
    * Case discovery/listing
 
@@ -865,6 +947,7 @@ This is exactly the kind of result the verification framework is supposed to exp
 * Richardson extrapolation
 * Grid Convergence Index (GCI)
 * Automated regression verification
+* Improved verification diagnostics/reporting
 
 11. **Implement nonlinear iteration framework**
 
@@ -910,7 +993,7 @@ Configuration
      │
      ├───────────────┐
      ▼               ▼
-User Case       Verification Suite
+ User Case      Verification Suite
      │               │
      ▼               ▼
 SimulationRunner  VerificationRunner
@@ -920,10 +1003,16 @@ SimulationRunner  VerificationRunner
        Numerical Core
              │
              ▼
-    Face Contributions
+    Flux Construction
              │
              ▼
-     Operator Assembly
+    Contribution Objects
+             │
+             ▼
+     Flux Accumulator
+             │
+             ▼
+      Operator Assembly
              │
              ▼
       Linear Equation
@@ -936,6 +1025,67 @@ SimulationRunner  VerificationRunner
            Output
 ```
 
-The core numerical infrastructure is now sufficiently modular that **user execution, verification, discretization selection, gradient selection, reconstruction selection, solver selection, and preconditioning are independently configurable**.
+The numerical architecture now has a clean separation between:
 
-The next major architectural task is therefore **assembly cleanup**, followed by higher-order convection schemes and stronger verification metrics.
+```text
+Physical Model / Mesh / BCs
+            ↓
+     Flux Construction
+            ↓
+   Contribution Objects
+            ↓
+     Flux Accumulator
+            ↓
+     Operator Assembly
+            ↓
+      Linear System
+            ↓
+   Solver / Preconditioner
+```
+
+In particular, flux construction no longer needs to know how the final algebraic system is represented. `SourceContribution` and `MatrixContribution` provide an explicit intermediate representation between physical/discretization calculations and algebraic assembly.
+
+The execution layer is also now sufficiently mature to support:
+
+* User-defined simulation cases
+* Verification suites
+* Configurable mesh/physics/solver/discretization settings
+* Configurable reconstruction schemes
+* Configurable gradient schemes
+* User-case plotting
+* Verification-case plotting
+* Cross-platform Python execution
+
+The current numerical baseline is verified across the existing suite with **13/13 verification checks passing**, including approximately second-order convergence for representative reconstruction and gradient combinations.
+
+### Next Major Development Target
+
+**Higher-order convection discretization.**
+
+The next phase of CIRRUS should focus on increasing spatial accuracy while preserving the modular boundary established by the current reconstruction/convection architecture:
+
+```text
+Cell Values
+     ↓
+Gradient / Reconstruction
+     ↓
+Face Reconstruction
+     ↓
+Convection Discretization
+     ↓
+MatrixContribution
+     ↓
+Operator Assembly
+     ↓
+Linear System
+```
+
+The immediate objective is to implement and independently verify:
+
+1. Second-order upwind
+2. QUICK
+3. MUSCL
+4. Bounded/TVD reconstruction
+5. Flux limiter infrastructure
+
+Once these schemes are established, CIRRUS will have a significantly stronger foundation for nonlinear flow solvers, including the eventual SIMPLE-family pressure-velocity coupling framework.
