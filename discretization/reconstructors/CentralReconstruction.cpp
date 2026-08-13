@@ -12,12 +12,13 @@
 ReconstructionStencil CentralReconstruction::stencil(
     const MeshBase& mesh,
     std::size_t owner,
-    const Face& face,
+    std::size_t f,
     const ScalarField& /*field*/,
     const VectorField& /*gradient*/,
     double /*flux*/
 ) const
 {
+    const Face& face = mesh.face(f);
     if (face.neighbor == Face::INVALID) { throw std::runtime_error( "CentralReconstruction: boundary face encountered." ); }
 
     const Point& xP = mesh.cellCenter(owner);
@@ -43,12 +44,13 @@ ReconstructionStencil CentralReconstruction::stencil(
 double CentralReconstruction::reconstruct(
     const MeshBase& mesh,
     std::size_t owner,
-    const Face& face,
+    std::size_t f,
     const ScalarField& field,
     const VectorField& /*gradient*/,
     double /*flux*/
 ) const
 {
+    const Face& face = mesh.face(f);
     if (face.neighbor == Face::INVALID) { throw std::runtime_error( "CentralReconstruction: boundary face encountered." ); }
 
     const Point& xP = mesh.cellCenter(owner);
