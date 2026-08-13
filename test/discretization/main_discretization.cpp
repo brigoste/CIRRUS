@@ -5,6 +5,7 @@ void runLeastSquaresTest();
 void runCubicGradientTest();
 void runGradientReconstructionTest();
 void runCentralReconstructionTest();
+void runSecondOrderUpwindFallbackTest();
 
 int main()
 {
@@ -25,6 +26,9 @@ int main()
 
     std::cout << "---- Central Reconstruction Test ----\n\n";
     runCentralReconstructionTest();
+
+    std::cout << "---- Second-Order Upwind Fallback Test ----\n\n";
+    runSecondOrderUpwindFallbackTest();
 
     std::cout << "\n==============================\n";
     std::cout << " COMPLETE\n";
