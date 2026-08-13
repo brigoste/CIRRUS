@@ -17,7 +17,7 @@ public:
     double reconstruct(
         const MeshBase& mesh,
         std::size_t owner,
-        const Face& face,
+        std::size_t f,
         const ScalarField& field,
         const VectorField& gradient,
         double /*flux*/
