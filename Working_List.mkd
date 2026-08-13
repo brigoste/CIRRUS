@@ -207,23 +207,57 @@ Advection-Diffusion:
 * [x] 2D steady-state
 * [x] First-order upwind convection
 * [x] Central differencing
-* [ ] Second-order convection schemes
+* [x] Second-order convection schemes
 * [ ] 3D
 * [ ] Transient
 
 Verification status:
 
 * [x] MMS verification infrastructure
+* [x] Second-order upwind refinement study
 * [x] Upwind behavior verified
 * [x] Central differencing verified
 * [x] Second-order convergence demonstrated with Central reconstruction/convection
-* [ ] Second-order upwind
+* [x] Second-order upwind verified
 
 Important numerical observation:
 
 * Upwind currently exhibits approximately first-order convergence, as expected
 * Central/reconstructed formulation demonstrates approximately second-order convergence
+* Second-order upwind demonstrates approximately second-order convergence on both Convective2D and AdvectionDiffusion2D
 * Higher-order convection work should preserve this verification framework
+* Boundary-adjacent upwind cells use first-order upwind fallback when a second-order upstream stencil cannot be constructed
+
+### Second-Order Upwind Verification
+
+Representative refinement results:
+
+Convective2D
+    Observed L2 order   ≈ 2.00071
+    Observed Linf order ≈ 1.99881
+    Status                PASS
+
+AdvectionDiffusion2D
+    Observed L2 order   ≈ 1.9582
+    Observed Linf order ≈ 1.94134
+    Status                PASS
+
+The second-order-upwind reconstruction therefore satisfies the expected second-order asymptotic behavior for the current verification cases.
+
+The reconstruction also has an explicit boundary fallback:
+
+Second-order upstream stencil available
+
+                ↓
+    φ_f = 1.5 φ_U - 0.5 φ_UU
+
+No upstream cell available
+    
+                ↓
+            φ_f = φ_U
+
+
+The fallback is verified independently at the stencil level.
 
 ---
 
@@ -276,13 +310,13 @@ Optimization notes:
 * Keep gradient interfaces compatible with future parallel face/cell traversal
 
 ---
+Reconstruction / Interpolation Infrastructure
 
-# Reconstruction / Interpolation Infrastructure
-
-* [x] Establish pluggable reconstruction scheme interface
 * [x] Implement GradientReconstruction
-* [x] Implement CentralReconstruction
+* [x] Establish pluggable reconstruction scheme interface
 * [x] Implement UpwindReconstruction
+* [x] Implement SecondOrderUpwindReconstruction
+* [x] Implement CentralReconstruction
 * [x] Integrate reconstruction selection into configuration
 * [x] Integrate reconstruction with convection operator
 * [x] Separate reconstruction from convection discretization
@@ -290,7 +324,9 @@ Optimization notes:
 * [x] Verify CentralReconstruction exactness for linear fields
 * [x] Verify CentralReconstruction second-order convergence
 * [x] Verify GradientReconstruction through MMS refinement studies
-* [ ] Implement second-order upwind reconstruction
+* [x] Verify SecondOrderUpwind stencil construction
+* [x] Verify SecondOrderUpwind boundary fallback
+* [x] Verify SecondOrderUpwind second-order convergence
 * [ ] Implement QUICK reconstruction
 * [ ] Implement MUSCL reconstruction
 * [ ] Add bounded/TVD reconstruction
@@ -298,7 +334,6 @@ Optimization notes:
 
 Architecture:
 
-```text
 Cell values
     ↓
 Gradient / Reconstruction
@@ -310,24 +345,23 @@ Convection discretization
 Matrix contributions
     ↓
 Linear system
-```
 
 Design goals:
 
-* Reconstruction schemes should not know how equation coefficients are assembled
-* Convection schemes should consume reconstructed face values or reconstruction stencils
-* Gradient-based and non-gradient-based reconstruction should share a common interface
-* Boundary-face behavior should be explicit and consistently handled
-* Reconstruction should support both direct face-value evaluation and stencil-based evaluation where applicable
+Reconstruction schemes should not know how equation coefficients are assembled
+Convection schemes should consume reconstructed face values or reconstruction stencils
+Gradient-based and non-gradient-based reconstruction should share a common interface
+Boundary-face behavior should be explicit and consistently handled
+Reconstruction should support both direct face-value evaluation and stencil-based evaluation where applicable
 
 Optimization notes:
 
-* Avoid recomputing interpolation coefficients for static meshes
-* Consider caching geometric reconstruction coefficients
-* Keep reconstruction operations lightweight enough for face-loop execution
-* Avoid virtual dispatch in extremely hot loops if profiling demonstrates measurable overhead
-* Preserve a clean polymorphic interface until profiling demonstrates that dispatch is a bottleneck
-* Design reconstruction data structures so they can eventually support SIMD/OpenMP/GPU execution
+Avoid recomputing interpolation coefficients for static meshes
+Consider caching geometric reconstruction coefficients
+Keep reconstruction operations lightweight enough for face-loop execution
+Avoid virtual dispatch in extremely hot loops if profiling demonstrates measurable overhead
+Preserve a clean polymorphic interface until profiling demonstrates that dispatch is a bottleneck
+Design reconstruction data structures so they can eventually support SIMD/OpenMP/GPU execution
 
 ---
 
@@ -340,7 +374,7 @@ Optimization notes:
 * [x] Verify upwind convection behavior through MMS
 * [x] Verify second-order central/reconstructed convection behavior through MMS
 * [x] Achieve second-order Advection-Diffusion convergence
-* [ ] Implement second-order upwind
+* [x] Implement second-order upwind
 * [ ] Implement QUICK
 * [ ] Implement MUSCL
 * [ ] Add bounded/TVD schemes
@@ -353,6 +387,13 @@ Optimization notes:
 * Evaluate whether flux coefficients can be precomputed for static meshes
 * Benchmark central vs upwind vs higher-order schemes on representative meshes
 * Consider branch reduction in boundary/interior face loops after correctness is established
+
+Verification notes:
+
+* Second-order upwind verified on Convective2D
+* Second-order upwind verified on AdvectionDiffusion2D
+* Refinement studies demonstrate approximately second-order convergence in both cases
+* Boundary-adjacent upwind cells fall back to first-order upwind when an upstream cell is unavailable
 
 Future:
 
@@ -770,11 +811,11 @@ and you also successfully switched reconstruction and gradient schemes while ret
 ### 4. Next major development target: higher-order convection
 
 * Reconstruction schemes
-  * [ ] Implement second-order upwind reconstruction
+  * [x] Implement second-order upwind reconstruction
   * [ ] Implement QUICK reconstruction
   * [ ] Implement MUSCL reconstruction
-  * [ ] Verify each reconstruction scheme independently
-  * [ ] Verify expected order of accuracy
+  * [x] Verify each reconstruction scheme independently
+  * [x] Verify expected order of accuracy
 * Bounded high-resolution schemes
   * [ ] Define flux-limiter interface
   * [ ] Implement basic flux limiter
@@ -816,6 +857,11 @@ The following are now effectively complete:
 * Central reconstruction
 * Gradient reconstruction
 * Upwind reconstruction
+* **Second-order upwind reconstruction**
+* **Second-order upwind stencil construction**
+* **Second-order upwind boundary fallback**
+* **Second-order upwind MMS verification**
+* **Second-order upwind refinement verification**
 * Convection/discretization separation
 * Upwind convection
 * Central convection
@@ -854,12 +900,44 @@ Representative reconstruction/gradient combinations have retained approximately 
 * Upwind reconstruction + Green-Gauss
 * Central reconstruction + least-squares
 * Gradient reconstruction + least-squares
+* **Second-order upwind + least-squares**
 
-This establishes a strong numerical baseline before introducing higher-order convection schemes.
+Second-order upwind has been independently verified on both:
+
+* `Convective2D`
+* `AdvectionDiffusion2D`
+
+Observed refinement orders:
+
+```text
+Convective2D
+    L2   ≈ 2.00071
+    Linf ≈ 1.99881
+
+AdvectionDiffusion2D
+    L2   ≈ 1.9582
+    Linf ≈ 1.94134
+```
+
+Both satisfy the expected second-order behavior for the current verification cases.
+
+Second-order upwind also has an independently tested boundary fallback. When an upstream cell cannot be constructed because the upwind cell lies adjacent to an inflow boundary, the reconstruction falls back to first-order upwind:
+
+```text
+Second-order stencil available
+        ↓
+φ_f = 1.5 φ_U - 0.5 φ_UU
+
+No upstream cell available
+        ↓
+φ_f = φ_U
+```
+
+This establishes the current numerical infrastructure as a verified baseline for further higher-order convection development.
 
 ### Immediate Priority
 
-The contribution/assembly refactor is now complete and should no longer block numerical development.
+The contribution/assembly refactor is complete and should no longer block numerical development.
 
 Recommended immediate order:
 
@@ -867,8 +945,8 @@ Recommended immediate order:
 2. ~~Verify refactored assembly pathway~~
 3. ~~Complete user/verification case execution infrastructure~~
 4. ~~Complete user/verification plotting infrastructure~~
-5. **Implement second-order upwind reconstruction**
-6. **Verify second-order upwind with MMS**
+5. ~~Implement second-order upwind reconstruction~~
+6. ~~Verify second-order upwind with MMS~~
 7. **Implement QUICK**
 8. **Implement MUSCL**
 9. **Add bounded/TVD reconstruction**
@@ -905,8 +983,10 @@ Recommended immediate order:
    * Central reconstruction
    * Gradient reconstruction
    * Upwind reconstruction
+   * ~~Second-order upwind reconstruction~~
    * General face-value reconstruction interface
    * Configuration and verification-case selection
+   * ~~Independent stencil/fallback verification~~
 
 6. ~~Complete core convection discretization infrastructure~~
 
@@ -936,7 +1016,7 @@ Recommended immediate order:
 
 9. **Add higher-order convection schemes**
 
-   * Second-order upwind
+   * ~~Second-order upwind~~
    * QUICK
    * MUSCL
    * TVD / flux limiters
@@ -1045,24 +1125,7 @@ Physical Model / Mesh / BCs
 
 In particular, flux construction no longer needs to know how the final algebraic system is represented. `SourceContribution` and `MatrixContribution` provide an explicit intermediate representation between physical/discretization calculations and algebraic assembly.
 
-The execution layer is also now sufficiently mature to support:
-
-* User-defined simulation cases
-* Verification suites
-* Configurable mesh/physics/solver/discretization settings
-* Configurable reconstruction schemes
-* Configurable gradient schemes
-* User-case plotting
-* Verification-case plotting
-* Cross-platform Python execution
-
-The current numerical baseline is verified across the existing suite with **13/13 verification checks passing**, including approximately second-order convergence for representative reconstruction and gradient combinations.
-
-### Next Major Development Target
-
-**Higher-order convection discretization.**
-
-The next phase of CIRRUS should focus on increasing spatial accuracy while preserving the modular boundary established by the current reconstruction/convection architecture:
+The reconstruction/convection boundary is now also well established:
 
 ```text
 Cell Values
@@ -1080,12 +1143,50 @@ Operator Assembly
 Linear System
 ```
 
-The immediate objective is to implement and independently verify:
+The reconstruction API supports both direct face-value evaluation and stencil-based evaluation. Reconstruction schemes that participate in matrix assembly expose a cell-value stencil, allowing the convection operator to remain independent of the details of the reconstruction scheme.
 
-1. Second-order upwind
-2. QUICK
-3. MUSCL
-4. Bounded/TVD reconstruction
-5. Flux limiter infrastructure
+The execution layer is also now sufficiently mature to support:
+
+* User-defined simulation cases
+* Verification suites
+* Configurable mesh/physics/solver/discretization settings
+* Configurable reconstruction schemes
+* Configurable gradient schemes
+* User-case plotting
+* Verification-case plotting
+* Cross-platform Python execution
+
+The current numerical baseline is verified across the existing suite with **13/13 verification checks passing**, including approximately second-order convergence for representative reconstruction and gradient combinations.
+
+Second-order upwind has now been added to that verified baseline and demonstrates approximately second-order convergence for both `Convective2D` and `AdvectionDiffusion2D`.
+
+### Next Major Development Target
+
+**Higher-order convection discretization.**
+
+The first higher-order reconstruction, second-order upwind, is now complete and verified. The next objective is to expand the available higher-order schemes while preserving the modular boundary established by the current reconstruction/convection architecture:
+
+1. **QUICK**
+2. **MUSCL**
+3. **Bounded/TVD reconstruction**
+4. **Flux limiter infrastructure**
+
+Each new scheme should follow the same development pattern:
+
+```text
+Implement
+    ↓
+Independent reconstruction/stencil test
+    ↓
+Boundary behavior test
+    ↓
+Component-level verification
+    ↓
+MMS refinement study
+    ↓
+Verify expected order
+    ↓
+Compare against existing schemes
+```
 
 Once these schemes are established, CIRRUS will have a significantly stronger foundation for nonlinear flow solvers, including the eventual SIMPLE-family pressure-velocity coupling framework.
