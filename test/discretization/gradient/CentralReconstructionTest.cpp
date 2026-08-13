@@ -146,7 +146,7 @@ bool runCentralReconstructionTest()
             reconstruction.stencil(
                 mesh,
                 P,
-                face,
+                f,
                 phi,
                 gradient,
                 0.0
@@ -175,7 +175,7 @@ bool runCentralReconstructionTest()
             reconstruction.reconstruct(
                 mesh,
                 P,
-                face,
+                f,
                 phi,
                 gradient,
                 0.0
@@ -214,7 +214,7 @@ bool runCentralReconstructionTest()
             reconstruction.stencil(
                 mesh,
                 P,
-                face,
+                f,
                 phi,
                 gradient,
                 0.0
@@ -356,7 +356,7 @@ bool runCentralReconstructionTest()
                 reconstruction.stencil(
                     refinementMesh,
                     P,
-                    face,
+                    f,
                     refinementPhi,
                     refinementGradient,
                     0.0
