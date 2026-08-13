@@ -26,15 +26,10 @@ public:
 
     void reset()
     {
-        for (auto& c : cells_)
-        {
-            c.Su = 0.0;
-            c.Sp = 0.0;
-        }
-
         diffusion_.clear();
         convection_.clear();
         matrixContributions_.clear();
+        sourceContributions_.clear();
     }
 
     void addDiffusion(const FaceDiffusion& contribution) { diffusion_.push_back(contribution); }
@@ -44,23 +39,21 @@ public:
         const auto D = contribution.D;
         const auto value = contribution.value;
 
-        cells_[P].Sp -= D;
-        cells_[P].Su += D * value;
+        sourceContributions_.push_back({
+            P,
+            D*value,
+            -D
+        });
     }
     void addConvection(const FaceConvection& contribution) { convection_.push_back(contribution); }
-    void addSource( const SourceContribution& contribution )
-    {
-        const auto c = contribution.cell;
-
-        cells_[c].Su += contribution.Su;
-        cells_[c].Sp += contribution.Sp;
-    }
+    void addSource( const SourceContribution& contribution ) { sourceContributions_.push_back(contribution); }
     void addMatrixContribution( const MatrixContribution& contribution ) { matrixContributions_.push_back(contribution); }
 
     const CellResidual& operator[](std::size_t i) const { return cells_[i]; }
     const auto& diffusion() const { return diffusion_; }
     const auto& convection() const { return convection_; }
     const auto& matrixContributions() const { return matrixContributions_; }
+    const std::vector<SourceContribution>& sourceContributions() const { return sourceContributions_; }
     std::size_t size() const { return cells_.size(); }
 
 private:
@@ -69,4 +62,5 @@ private:
     std::vector<FaceDiffusion> diffusion_;
     std::vector<FaceConvection> convection_;
     std::vector<MatrixContribution> matrixContributions_;
+    std::vector<SourceContribution> sourceContributions_;
 };
