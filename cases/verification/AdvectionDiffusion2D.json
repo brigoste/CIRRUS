@@ -15,7 +15,7 @@
 
     "discretization": {
         "gradientScheme": "least_squares",
-        "reconstructionScheme": "Central"
+        "reconstructionScheme": "secondOrderUpwind"
     },
 
     "refinement": {
