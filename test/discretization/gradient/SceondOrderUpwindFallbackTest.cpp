@@ -15,6 +15,7 @@ void runSecondOrderUpwindFallbackTest()
     // -------------------------------------------------
     // Test mesh
     // -------------------------------------------------
+    std::cout << "Testing switch from 2nd to 1st order reconstructor\n for handling boundary stencil.\n\n";
 
     // Small mesh so we can deliberately select a face
     // whose upwind cell lies against a boundary.
