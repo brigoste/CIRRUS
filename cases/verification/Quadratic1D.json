@@ -17,9 +17,14 @@
       "expected_order": 2.0
     },
 
+    "discretization": {
+        "gradientScheme": "green_gauss",
+        "reconstructionScheme": "Central"
+    },
+
     "physics": {
       "type": "heat",
-      "k": 100.0,
+      "transferCoefficient": 100.0,
       "volumetricSource": 20000.0
     },
 
