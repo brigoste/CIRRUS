@@ -34,9 +34,17 @@ void FiniteVolumeAssembler::assemble(
     // 3. SOURCES + BCs
     // =========================================================
 
-    for (std::size_t c = 0; c < flux.size(); ++c)
+    for (const auto& contribution : flux.sourceContributions())
     {
-        sys.addRHS(c, flux[c].Su);
-        sys.addCoeff(c, c, -flux[c].Sp);
+        sys.addRHS(
+            contribution.cell,
+            contribution.Su
+        );
+
+        sys.addCoeff(
+            contribution.cell,
+            contribution.cell,
+            -contribution.Sp
+        );
     }
 }
