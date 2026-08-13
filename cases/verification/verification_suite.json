@@ -3,7 +3,7 @@
     {
       "type": "verification_suite",
       "enabled": true,
-      "plot_enabled": true,
+      "plot_enabled": false,
       "python_executable": "python3",
 
       "cases":

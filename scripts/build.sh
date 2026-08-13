@@ -185,6 +185,20 @@ if [[ ! -f CMakeCache.txt ]]; then
         ..
 fi
 
+case "$OSTYPE" in
+    linux-gnu*)
+        PYTHON_EXECUTABLE="python3"
+        ;;
+    msys*|cygwin*|win32*)
+        PYTHON_EXECUTABLE="python"
+        ;;
+    *)
+        PYTHON_EXECUTABLE="python3"
+        ;;
+esac
+
+export CIRRUS_PYTHON_EXECUTABLE="$PYTHON_EXECUTABLE"
+
 ############################################################
 # Build
 ############################################################
@@ -206,18 +220,18 @@ fi
 if [[ $RUN -eq 1 ]]; then
     if [[ -f "$PROJECT_DIR/build/CIRRUS" ]]; then
         cd "$PROJECT_DIR"
-        ./build/CIRRUS --config "$CONFIG_PATH"
+
+        RUN_ARGS=(--config "$CONFIG_PATH")
+
+        if [[ $PLOT -eq 1 ]]; then
+            RUN_ARGS+=(--plot)
+        fi
+
+        ./build/CIRRUS "${RUN_ARGS[@]}"
     else
         echo "Executable not found."
         exit 1
     fi
-fi
-############################################################
-# Plot
-############################################################
-
-if [[ $PLOT -eq 1 ]]; then
-    python3 "$PROJECT_DIR/scripts/Plot.py"
 fi
 
 echo

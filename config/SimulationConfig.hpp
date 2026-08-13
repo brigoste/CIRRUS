@@ -93,7 +93,7 @@ struct DiscretizationConfig
 struct IOConfig
 {
     std::string output_root = "output";
-    std::string python_executable = "python";
+    std::string python_executable = "python3";
     bool plot_enabled = true;
 };
 
@@ -147,7 +147,7 @@ struct VerificationSuite
 
     std::string case_directory = "cases/verification";
 
-    std::string python_executable = "python";
+    std::string python_executable = "python3";
 
     struct Output
     {
@@ -322,8 +322,9 @@ inline void from_json(const nlohmann::json& j, VerificationSuite& v)
 {
     v.enabled      = j.value("enabled", false);
     v.plot_enabled = j.value("plot_enabled", true);
-
-    v.python_executable = j.value("python_executable", "python");
+    
+    const char* pythonEnv = std::getenv("CIRRUS_PYTHON_EXECUTABLE");
+    v.python_executable = pythonEnv ? pythonEnv : "python3";
 
     v.cases.clear();
 
@@ -363,7 +364,7 @@ inline void from_json( const nlohmann::json& j, SimulationConfig& cfg)
     if (j.contains("paths"))
     {
         cfg.io.output_root = j.at("paths").value("output_root", "output");
-        cfg.io.plot_enabled = j.at("paths").value("plot_enabled", true);
+        cfg.io.plot_enabled = j.at("paths").value("plot_enabled", false);
         cfg.io.python_executable = j.at("paths").value("python_executable", "python");
     }
     if (j.contains("boundary_conditions")) { cfg.boundary = j.at("boundary_conditions").get<std::vector<BoundaryConfig>>(); }

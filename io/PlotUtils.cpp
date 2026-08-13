@@ -14,16 +14,16 @@ void runPlot(
     std::string csv = csvFile.string();
 
 #ifdef _WIN32
-    // Use forward slashes for Python under the Windows/MSYS2 environment.
     std::replace(script.begin(), script.end(), '\\', '/');
     std::replace(csv.begin(), csv.end(), '\\', '/');
 #endif
 
-    // Paths are quoted in case there are spaces in the names
     const std::string cmd =
         paths.pythonExecutable.string() + " "
         "\"" + script + "\" "
         "\"" + csv + "\"";
+
+    // std::cout << "PLOT COMMAND: " << cmd << '\n';
 
     const int rc = std::system(cmd.c_str());
 

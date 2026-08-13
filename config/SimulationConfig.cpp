@@ -212,7 +212,7 @@ SimulationConfig fromJson(const nlohmann::json& j)
 
         cfg.io.output_root = paths.value("output_root", cfg.io.output_root);
         cfg.io.python_executable = paths.value("python_executable", "python");
-        cfg.io.plot_enabled = paths.value("plot_enabled", true);
+        cfg.io.plot_enabled = paths.value("plot_enabled", false);
     }
 
     // -------------------------------------------------

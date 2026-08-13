@@ -14,7 +14,7 @@
     },
 
     "discretization": {
-        "gradientScheme": "green_gauss",
+        "gradientScheme": "least_squares",
         "reconstructionScheme": "Central"
     },
 

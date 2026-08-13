@@ -22,6 +22,8 @@ int main(int argc, char* argv[])
         // Command line arguments
         // -------------------------------------------------
 
+        bool plotOverride = false;
+
         for (int i = 1; i < argc; ++i)
         {
             std::string arg = argv[i];
@@ -29,6 +31,10 @@ int main(int argc, char* argv[])
             if (arg == "--config" && i + 1 < argc)
             {
                 configPath = argv[++i];
+            }
+            else if (arg == "--plot")
+            {
+                plotOverride = true;
             }
         }
 
@@ -46,7 +52,7 @@ int main(int argc, char* argv[])
                 "Configuration file not found: "
                 + configPath.string()
             );
-        }
+        }        
 
         const std::filesystem::path projectRoot = std::filesystem::current_path();
 
@@ -71,7 +77,9 @@ int main(int argc, char* argv[])
 
             SimulationConfig cfg;
 
-            PathContext paths = buildPaths(cfg, projectRoot);
+            if (plotOverride) { suite.plot_enabled = true; }
+
+            PathContext paths = buildPaths(cfg, projectRoot);            
 
             VerificationRunner::run(
                 cfg,
@@ -88,8 +96,10 @@ int main(int argc, char* argv[])
         // -------------------------------------------------
         // Normal simulation mode
         // -------------------------------------------------
-
         SimulationConfig cfg = loadConfig(configPath);
+        
+        if (plotOverride) { cfg.io.plot_enabled = true; }
+        
         PathContext paths = buildPaths(cfg, projectRoot);
 
         std::cout << "\n================ USER SIMULATION MODE ================\n";

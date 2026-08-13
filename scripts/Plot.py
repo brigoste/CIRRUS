@@ -68,7 +68,8 @@ def main(filename):
         raise ValueError("Unknown dimensional structure")
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        main(sys.argv[1])
-    else:
-        main("output\\solution.csv")
+    if len(sys.argv) != 2:
+        print("Usage: python3 Plot.py <solution.csv>")
+        sys.exit(1)
+
+    main(sys.argv[1])
