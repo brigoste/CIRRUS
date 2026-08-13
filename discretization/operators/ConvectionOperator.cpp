@@ -28,16 +28,13 @@ void ConvectionOperator::assemble(
 
         const double F = f.F;
 
-        if (std::abs(F) < 1e-14)
-            continue;
-
-        const Face& face = mesh.face(f.face);
+        if (std::abs(F) < 1e-14) { continue; }
 
         const ReconstructionStencil stencil =
             reconstruction_.stencil(
                 mesh,
                 f.P,
-                face,
+                f.face,
                 field,
                 gradient,
                 F
