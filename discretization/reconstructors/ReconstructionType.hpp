@@ -7,7 +7,8 @@ enum class ReconstructionType
 {
     Gradient,
     Central,
-    Upwind
+    Upwind,
+    SecondOrderUpwind
 };
 
 inline ReconstructionType reconstructionTypeFromString(const std::string& value)
@@ -20,6 +21,9 @@ inline ReconstructionType reconstructionTypeFromString(const std::string& value)
 
     if (value == "Upwind")
         return ReconstructionType::Upwind;
+    
+    if (value == "secondOrderUpwind")
+        return ReconstructionType::SecondOrderUpwind;
 
     throw std::runtime_error(
         "Unknown reconstruction scheme: " + value
@@ -38,6 +42,9 @@ inline std::string reconstructionToString(ReconstructionType type)
 
         case ReconstructionType::Upwind:
             return "Upwind";
+
+        case ReconstructionType::SecondOrderUpwind:
+            return "secondOrderUpwind";
     }
 
     throw std::runtime_error(
