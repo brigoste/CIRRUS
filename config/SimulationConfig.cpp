@@ -238,12 +238,20 @@ SimulationConfig fromJson(const nlohmann::json& j)
         switch (bc.condition.type)
         {
             case bc::Type::Dirichlet:
-                if (!bcJson.contains("value")) { throw std::runtime_error( "Dirichlet boundary condition requires 'value'"); }
+                if (!bcJson.contains("value"))
+                {
+                    throw std::runtime_error(
+                        "Dirichlet boundary condition requires 'value'");
+                }
                 bc.condition.value = bcJson.at("value").get<double>();
                 break;
 
             case bc::Type::Neumann:
-                if (!bcJson.contains("flux")) { throw std::runtime_error("Neumann boundary condition requires 'flux'"); }
+                if (!bcJson.contains("flux"))
+                {
+                    throw std::runtime_error(
+                        "Neumann boundary condition requires 'flux'");
+                }
                 bc.condition.flux = bcJson.at("flux").get<double>();
                 break;
 
