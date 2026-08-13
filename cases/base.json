@@ -9,7 +9,7 @@
 
   "physics": {
     "type": "heat",
-    "k": 1.0
+    "transferCoefficient": 1.0
   },
 
   "solver": {
