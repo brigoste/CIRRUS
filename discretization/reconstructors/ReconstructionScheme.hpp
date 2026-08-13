@@ -19,7 +19,7 @@ public:
     virtual ReconstructionStencil stencil(      // returns coefficients such that φ_f = Σ w_i φ_i
         const MeshBase& /*mesh*/,
         std::size_t /*owner*/,
-        const Face& /*face*/,
+        std::size_t /*faceIndex*/,
         const ScalarField& /*field*/,
         const VectorField& /*gradient*/,
         double /*flux*/
@@ -31,13 +31,13 @@ public:
     virtual double reconstruct(                 // directly evaluates φ_f     ---> May not be necessary
         const MeshBase& mesh,
         std::size_t owner,
-        const Face& face,
+        std::size_t f,
         const ScalarField& field,
         const VectorField& gradient,
         double flux
     ) const
     {
-        const auto stencil = this->stencil(mesh, owner, face, field, gradient, flux);
+        const auto stencil = this->stencil(mesh, owner, f, field, gradient, flux);
 
         double value = 0.0;
 
