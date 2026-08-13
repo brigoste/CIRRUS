@@ -13,6 +13,11 @@
       "ly": 1.0
     },
 
+    "discretization": {
+        "gradientScheme": "least_squares",
+        "reconstructionScheme": "Central"
+    },
+
     "refinement": {
       "enabled": true,
       "levels": [16,32,64,128,256],
@@ -21,7 +26,7 @@
 
     "physics": {
       "type": "heat",
-      "k": 100.0,
+      "transferCoefficient": 100.0,
       "volumetricSource": 400.0
     },
 
@@ -40,8 +45,8 @@
         {
             "group": 1,
             "type": "Robin",
-            "h": 10.0,
-            "ambientTemperature": 93.0
+            "transferCoefficient": 10.0,
+            "referenceValue": 93.0
         },
         {
             "group": 2,
