@@ -48,7 +48,7 @@ double computeFaceL2Error(
             reconstruction.reconstruct(
                 mesh,
                 P,
-                face,
+                f,
                 field,
                 gradient,
                 0.0
