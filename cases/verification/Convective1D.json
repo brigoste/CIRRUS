@@ -19,7 +19,7 @@
 
     "physics": {
       "type": "heat",
-      "k": 100.0,
+      "transferCoefficient": 100.0,
       "volumetricSource": -200.0
     },
 
@@ -38,8 +38,8 @@
       {
         "group": 1,
         "type": "Robin",
-        "h": 10.0,
-        "ambientTemperature": 84.0
+        "transferCoefficient": 10.0,
+        "referenceValue": 84.0
       }
     ],
 
