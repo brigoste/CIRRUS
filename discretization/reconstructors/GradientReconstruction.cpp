@@ -9,12 +9,13 @@
 double GradientReconstruction::reconstruct(
     const MeshBase& mesh,
     std::size_t owner,
-    const Face& face,
+    std::size_t f,
     const ScalarField& field,
     const VectorField& gradient,
     double /*flux*/
 ) const
 {
+    const Face& face = mesh.face(f);
     const Point& xP = mesh.cellCenter(owner);
     const Point& xF = face.center;
 
@@ -26,7 +27,7 @@ double GradientReconstruction::reconstruct(
 // ReconstructionStencil GradientReconstruction::stencil(
 //         const MeshBase& mesh,
 //         std::size_t owner,
-//         const Face& face,
+//         std::size_t f,
 //         const ScalarField& field,
 //         const VectorField& gradient
 //     ) const
