@@ -33,7 +33,7 @@ public:
 
     double manufacturedBoundaryFlux(const Face& face) const override;
 
-    ConvectiveData manufacturedConvectiveBoundary(const Face& face) const override;
+    ConvectiveData manufacturedRobinBoundary(const Face& face) const override;
 
     double l2AcceptanceThreshold() const override                       { return 1e-3; }
     double linfAcceptanceThreshold() const override                     { return 2e-3; }
