@@ -97,7 +97,7 @@ SimulationConfig defaultConfig()
     cfg.mesh.ly = 1.0;
 
     cfg.physics.type = physics::PhysicsType::Heat;
-    cfg.physics.k = 1.0;
+    cfg.physics.transferCoefficient = 1.0;
 
     cfg.solver.method = solver::Method::SOR;
     cfg.solver.tol = 1e-8;
@@ -192,7 +192,7 @@ SimulationConfig fromJson(const nlohmann::json& j)
     // -------------------------------------------------
     cfg.physics.type    = physics::physicsFromString(j.at("physics").at("type").get<std::string>());
 
-    cfg.physics.k       = j.at("physics").value("transferCoefficient", 0.0);
+    cfg.physics.transferCoefficient       = j.at("physics").value("transferCoefficient", 0.0);
     cfg.physics.gamma   = j.at("physics").value("gamma", 0.0);
 
     cfg.physics.rho     = j.at("physics").value("rho", 1.0);
