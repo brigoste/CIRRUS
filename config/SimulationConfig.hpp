@@ -12,6 +12,7 @@
 
 #include "discretization/gradient/GradientType.hpp"
 #include "discretization/reconstructors/ReconstructionType.hpp"
+#include "discretization/reconstructors/tvd/FluxLimiterType.hpp"
 #include "solver/preconditioners/Preconditioner.hpp"
 
 #include <unordered_map>
@@ -84,6 +85,7 @@ struct DiscretizationConfig
 {
     GradientType gradientScheme = GradientType::GreenGauss;
     ReconstructionType reconstructionScheme = ReconstructionType::Gradient;
+    FluxLimiterType flux_limiter = FluxLimiterType::Minmod;
 };
 
 //==================================================
@@ -376,4 +378,5 @@ inline void to_json( nlohmann::json& j, const DiscretizationConfig& d )
 {
     j["gradientScheme"] = gradientToString(d.gradientScheme);
     j["reconstructionScheme"] = reconstructionToString(d.reconstructionScheme);
+    j["flux_limiter"] = fluxLimiterToString(d.flux_limiter);
 }

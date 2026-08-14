@@ -28,9 +28,12 @@ discretization/
 │
 ├── diffusion/
 │   ├── DiffusionScheme.hpp
-│   └── StandardDiffusionScheme.cpp
+│   ├── StandardDiffusionScheme.cpp
+│   └── StandardDiffusionScheme.hpp
 │
 ├── gradient/
+│   ├── GradientFactory.cpp
+│   ├── GradientFactory.hpp
 │   ├── GradientScheme.hpp
 │   ├── GradientType.hpp
 │   ├── GreenGaussGradient.cpp
@@ -46,25 +49,35 @@ discretization/
 │   └── Operator.hpp
 │
 ├── reconstructors/
-│   ├── CentralReconstruction.cpp
-│   ├── CentralReconstruction.hpp
-│   ├── GradientReconstruction.cpp
-│   ├── GradientReconstruction.hpp
+|   ├── basic/
+│   │   ├── CentralReconstruction.cpp
+│   │   ├── CentralReconstruction.hpp
+│   │   ├── GradientReconstruction.cpp
+│   │   ├── GradientReconstruction.hpp
+|   │   ├── UpwindReconstruction.cpp
+|   │   └── UpwindReconstruction.hpp
+│   ├── higher_order/
+│   │   ├── MusclReconstruction.cpp
+│   │   ├── MusclReconstruction.hpp
+│   │   ├── QuickReconstruction.cpp
+│   │   ├── QuickReconstruction.hpp
+|   │   ├── SecondOrderUpwindReconstruction.cpp
+|   │   └── SecondOrderUpwindReconstruction.hpp
 │   ├── ReconstructionFactory.cpp
 │   ├── ReconstructionFactory.hpp
 │   ├── ReconstructionScheme.hpp
 │   ├── ReconstructionStencil.hpp
 │   ├── ReconstructionType.hpp
-│   ├── UpwindReconstruction.cpp
-│   └── UpwindReconstruction.hpp
+│   ├── ReconstructionUtils.cpp
+│   └── ReconstructionUtils.hpp
 │
 ├── CellResidual.hpp
 ├── FaceContribution.hpp
 ├── FaceConvection.hpp
 ├── FaceDiffusion.hpp
 ├── BoundaryDiffusion.hpp
-├── FaceType.hpp
 ├── MatrixContribution.hpp
+├── SourceContribution.hpp
 ├── FiniteVolumeAssembler.cpp
 ├── FiniteVolumeAssembler.hpp
 ├── FluxAccumulator.hpp
@@ -138,7 +151,7 @@ The overall discretization pipeline is:
                    │                    ▼           ▼           ▼
                    │             ┌────────────┐ ┌──────────┐ ┌──────────┐
                    │             │ Gradient   │ │ Central  │ │ Upwind   │
-                   │             │Reconstruction│ │Reconstruction│ │Reconstruction│
+                   │             │ Reconst.   │ │ Reconst. │ │ Reconst. │
                    │             └────────────┘ └──────────┘ └──────────┘
                    │
                    └──────────────────┬────────────────────────┐
@@ -181,9 +194,8 @@ ConvectionOperator
       ▼
 ReconstructionScheme
       │
-      ├── CentralReconstruction
-      ├── UpwindReconstruction
-      └── GradientReconstruction
+      ├── basic/        -> Upwind/Gradient/Central
+      └── higher_order/ -> MUSCL/QUICK/2nd order Upwind
 ```
 
 ---

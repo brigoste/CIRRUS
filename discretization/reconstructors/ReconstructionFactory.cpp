@@ -2,9 +2,11 @@
 #include "discretization/reconstructors/basic/GradientReconstruction.hpp"
 #include "discretization/reconstructors/basic/CentralReconstruction.hpp"
 #include "discretization/reconstructors/basic/UpwindReconstruction.hpp"
-#include "discretization/reconstructors/basic/SecondOrderUpwindReconstruction.hpp"
-#include "discretization/reconstructors/basic/QuickReconstruction.hpp"
-#include "discretization/reconstructors/basic/MusclReconstruction.hpp"
+#include "discretization/reconstructors/higher_order/SecondOrderUpwindReconstruction.hpp"
+#include "discretization/reconstructors/higher_order/QuickReconstruction.hpp"
+#include "discretization/reconstructors/higher_order/MusclReconstruction.hpp"
+#include "discretization/reconstructors/tvd/TVDReconstruction.hpp"
+#include "discretization/reconstructors/tvd/MinmodLimiter.hpp"
 
 #include <stdexcept>
 
@@ -30,6 +32,11 @@ std::unique_ptr<ReconstructionScheme> makeReconstructionScheme(ReconstructionTyp
 
         case ReconstructionType::MUSCL:
             return std::make_unique<MusclReconstruction>();
+
+        case ReconstructionType::TVD:
+            return std::make_unique<TVDReconstruction>( 
+                std::make_unique<MinmodLimiter>() 
+            );
     }
 
     throw std::runtime_error( "Unsupported reconstruction scheme." );

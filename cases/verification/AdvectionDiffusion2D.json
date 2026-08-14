@@ -7,19 +7,20 @@
 
     "mesh": {
       "type": "quad2D",
-      "nx": 320,
-      "ny": 320,
+      "nx": 40,
+      "ny": 40,
       "lx": 1.0,
       "ly": 1.0
     },
 
     "discretization": {
         "gradientScheme": "least_squares",
-        "reconstructionScheme": "secondOrderUpwind"
+        "reconstructionScheme": "TVD",
+        "flux_limiter": "minmod"
     },
 
     "refinement": {
-      "enabled": true,
+      "enabled": false,
       "levels": [40, 80, 160, 320],
       "expected_order": 2.0
     },

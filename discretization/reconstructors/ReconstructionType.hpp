@@ -10,7 +10,8 @@ enum class ReconstructionType
     Upwind,
     SecondOrderUpwind,
     QUICK,
-    MUSCL
+    MUSCL,
+    TVD
 };
 
 inline ReconstructionType reconstructionTypeFromString(const std::string& value)
@@ -32,6 +33,9 @@ inline ReconstructionType reconstructionTypeFromString(const std::string& value)
     
     if (value == "MUSCL")
         return ReconstructionType::MUSCL;
+    
+    if (value == "TVD")
+        return ReconstructionType::TVD;
 
     throw std::runtime_error(
         "Unknown reconstruction scheme: " + value
@@ -59,6 +63,9 @@ inline std::string reconstructionToString(ReconstructionType type)
         
         case ReconstructionType::MUSCL:
             return "MUSCL";
+        
+        case ReconstructionType::TVD:
+            return "TVD";
     }
 
     throw std::runtime_error(
