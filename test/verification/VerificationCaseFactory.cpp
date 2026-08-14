@@ -13,7 +13,7 @@ std::unique_ptr<VerificationCase> VerificationCaseFactory::create(
     const std::string& name,
     const SimulationConfig& config)
 {
-    if (name == "Linear1D") { return std::make_unique<OneDLinear>(config); }
+    if (name == "Linear1D") { return std::make_unique<OneDLinear>(); }
 
     if (name == "Quadratic1D") { return std::make_unique<Quadratic1D>(config); }
 
