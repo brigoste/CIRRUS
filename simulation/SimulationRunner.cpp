@@ -6,7 +6,6 @@
 #include "io/OutputData.hpp"
 #include "io/PlotUtils.hpp"
 #include "io/OutputBuilder.hpp"
-#include "fields/FieldNames.hpp"
 
 #include "utils/Timer.hpp"
 
@@ -61,7 +60,7 @@ void SimulationRunner::run(
 
     sim.solve();
 
-    const auto& temperature = sim.fields().scalar(FieldName::Temperature);
+    const auto& solution = sim.solution();
     const auto& mesh = sim.mesh();
     const auto& system = sim.system();
 
@@ -71,14 +70,14 @@ void SimulationRunner::run(
 
     {
         // Timer timer("Residual calculation");
-        residual = computeResidual(system, temperature);
+        residual = computeResidual(system, solution);
     }
 
     PointField field;
 
     {
         // Timer timer("Boundary reconstruction");
-        field = BoundaryReconstructor::reconstruct( mesh, sim.boundary(), sim.model(), temperature);
+        field = BoundaryReconstructor::reconstruct( mesh, sim.boundary(), sim.model(), solution);
     }
 
     // -----------------------------
@@ -92,7 +91,7 @@ void SimulationRunner::run(
     auto output =
         OutputBuilder::build(
             sim,
-            temperature,
+            solution,
             residual);
     
     // -----------------------------
