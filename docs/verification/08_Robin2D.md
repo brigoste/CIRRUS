@@ -1,8 +1,8 @@
-# Convective2D Verification Case
+# Robin2D Verification Case
 
 ## Overview
 
-The `Convective2D` verification case validates the implementation of mixed thermal boundary conditions for the 2D steady heat equation.
+The `Robin2D` verification case validates the implementation of mixed thermal boundary conditions for the 2D steady heat equation.
 
 The case represents a rectangular domain with:
 
@@ -201,7 +201,7 @@ This allows the convective boundary condition to vary spatially through the manu
 
 ## Validation Criteria
 
-The `Convective2D` case is considered valid when:
+The `Robin2D` case is considered valid when:
 
 | Criterion                 | Requirement |
 | ------------------------- | ----------: |
@@ -268,7 +268,7 @@ Example configuration:
   "extends": "../base.json",
 
   "verificationCase": {
-    "name": "Convective2D",
+    "name": "Robin2D",
     "type": "manufactured",
 
     "mesh": {
@@ -327,8 +327,8 @@ Example configuration:
     },
 
     "output": {
-      "csv": "Convective2D.csv",
-      "summary": "Convective2D.json"
+      "csv": "Robin2D.csv",
+      "summary": "Robin2D.json"
     }
   }
 }
