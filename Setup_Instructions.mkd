@@ -200,8 +200,8 @@ For example:
 ```text
 cases/verification/
 ├── AdvectionDiffusion2D.json
-├── Convective1D.json
-├── Convective2D.json
+├── Robin1D.json
+├── Robin2D.json
 ├── Linear1D.json
 ├── Neumann1D.json
 ├── Neumann2D.json
