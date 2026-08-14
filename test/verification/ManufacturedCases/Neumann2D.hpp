@@ -35,7 +35,7 @@ public:
 
     explicit Neumann2D(const SimulationConfig& cfg)
     {
-        k_ = cfg.physics.k;
+        k_ = cfg.physics.transferCoefficient;
 
         T0_ = 100.0;
         a_ = 10.0;
