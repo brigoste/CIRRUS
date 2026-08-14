@@ -15,7 +15,6 @@
 #include "nlohmann/json.hpp"
 
 #include <fstream>
-#include <vector>
 #include <stdexcept>
 
 void VerificationIO::writeCSV(
