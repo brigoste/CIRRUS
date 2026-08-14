@@ -1,7 +1,7 @@
-#include "test/verification/ManufacturedCases/Convective2D.hpp"
+#include "test/verification/ManufacturedCases/Robin2D.hpp"
 #include "utils/MathConstants.hpp"
 
-double Convective2D::exact(double x, double y) const
+double Robin2D::exact(double x, double y) const
 {
     return T0_
          + a_*x
@@ -9,19 +9,19 @@ double Convective2D::exact(double x, double y) const
          + d_*std::cos(math::PI*y/Ly_);
 }
 
-double Convective2D::laplacian(double /*x*/, double y) const
+double Robin2D::laplacian(double /*x*/, double y) const
 {
     return 2.0*c_
          - d_*std::pow(math::PI/Ly_,2)
            *std::cos(math::PI*y/Ly_);
 }
 
-double Convective2D::source(double x, double y) const
+double Robin2D::source(double x, double y) const
 {
     return -k_ * laplacian(x,y);
 }
 
-double Convective2D::manufacturedBoundaryFlux(const Face& face) const
+double Robin2D::manufacturedBoundaryFlux(const Face& face) const
 {
     const double x = face.center.x[0];
     const double y = face.center.x[1];
@@ -35,9 +35,9 @@ double Convective2D::manufacturedBoundaryFlux(const Face& face) const
     return -k_ * dTdn;
 }
 
-ConvectiveData Convective2D::manufacturedRobinBoundary(const Face& face) const
+RobinData Robin2D::manufacturedRobinBoundary(const Face& face) const
 {
-    ConvectiveData convective{};
+    RobinData convective{};
 
     constexpr double h = 10.0;
 
