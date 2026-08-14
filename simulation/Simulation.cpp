@@ -204,3 +204,8 @@ void Simulation::bindBoundaryConditions(const SimulationConfig& cfg)
         boundary_.setGroup(bc.group, bc.condition);
     }
 }
+
+const ScalarField& Simulation::solution() const
+{
+    return fields_.scalar(physics_->solutionField());
+}
