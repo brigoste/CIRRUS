@@ -7,7 +7,7 @@
 #include <cmath>
 #include <algorithm>
 
-ErrorNormResults ErrorNorms::compute( const MeshBase& mesh, const ScalarField& numerical, const std::vector<double>& exact)
+ErrorNormResults ErrorNorms::compute( const MeshBase& mesh, const ScalarField& numerical, const ScalarField& exact)
 {
     if (numerical.size() != exact.size()) 
     {
@@ -35,7 +35,7 @@ ErrorNormResults ErrorNorms::compute( const MeshBase& mesh, const ScalarField& n
         linf = std::max(linf, std::abs(e) );
     }
 
-    result.l2_energy = std::sqrt(l2sum);
+    result.l2_weighted = std::sqrt(l2sum);
 
     if (volumeSum > 0.0) 
     { 
