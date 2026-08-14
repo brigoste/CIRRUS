@@ -95,7 +95,7 @@ void DiffusionFluxBuilder::apply(
 
                     if (verificationCase)
                     {
-                        ConvectiveData robin = verificationCase->manufacturedConvectiveBoundary(face);
+                        ConvectiveData robin = verificationCase->manufacturedRobinBoundary(face);
 
                         transferCoefficient = robin.transferCoefficient;
                         referenceValue = robin.referenceValue;
