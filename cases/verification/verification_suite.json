@@ -24,8 +24,8 @@
         "AdvectionDiffusion2D",
         "Neumann1D",
         "Neumann2D",
-        "Convective1D",
-        "Convective2D"
+        "Robin1D",
+        "Robin2D"
       ]
     }
 }
