@@ -9,7 +9,7 @@ class ScalarField;
 
 struct ErrorNormResults
 {
-    double l2_energy = 0.0;
+    double l2_weighted = 0.0;
     double l2_rms    = 0.0;
     double linf      = 0.0;
 };
@@ -21,6 +21,6 @@ public:
     static ErrorNormResults compute(
         const MeshBase& mesh,
         const ScalarField& numerical,
-        const std::vector<double>& exact
+        const ScalarField& exact
     );
 };
