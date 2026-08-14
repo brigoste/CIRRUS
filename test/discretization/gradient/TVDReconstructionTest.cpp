@@ -57,8 +57,7 @@ void runTVDReconstructionTest()
     {
         const Face& face = mesh.face(f);
 
-        if (face.neighbor == Face::INVALID)
-            continue;
+        if (face.neighbor == Face::INVALID) { continue; }
 
         const std::size_t owner = face.owner;
 
@@ -146,14 +145,11 @@ void runTVDReconstructionTest()
         const double phiU = field[upwind];
         const double phiD = field[downwind];
 
-        const double expected =
-            0.5 * phiU +
-            0.5 * phiD;
+        const double expected = 0.5 * phiU + 0.5 * phiD;
 
         TEST_ASSERT(std::abs(reconstructed - expected) < 1e-12);
 
-        const double exact =
-            face.center.x[0];
+        const double exact = face.center.x[0];
 
         TEST_ASSERT(std::abs(reconstructed - exact) < 1e-12);
     }
@@ -186,44 +182,28 @@ void runTVDReconstructionTest()
         // Locate the upstream cell for the selected face.
         const std::size_t upwind = face.owner;
 
-        const auto& upwindCell =
-            mesh.cell(upwind);
+        const auto& upwindCell = mesh.cell(upwind);
 
         std::size_t upstream = Face::INVALID;
 
         for (const std::size_t faceIndex : upwindCell.faces)
         {
-            if (faceIndex == testFace)
-                continue;
+            if (faceIndex == testFace) { continue; }
 
-            const Face& candidateFace =
-                mesh.face(faceIndex);
+            const Face& candidateFace = mesh.face(faceIndex);
 
-            std::size_t candidate =
-                Face::INVALID;
+            std::size_t candidate = Face::INVALID;
 
-            if (candidateFace.owner == upwind)
-            {
-                candidate = candidateFace.neighbor;
-            }
-            else if (candidateFace.neighbor == upwind)
-            {
-                candidate = candidateFace.owner;
-            }
+            if (candidateFace.owner == upwind) { candidate = candidateFace.neighbor; }
+            else if (candidateFace.neighbor == upwind) { candidate = candidateFace.owner; }
 
-            if (candidate == Face::INVALID)
-                continue;
+            if (candidate == Face::INVALID) { continue; }
 
-            const Vector dUC =
-                mesh.cellCenter(candidate) -
-                mesh.cellCenter(upwind);
+            const Vector dUC = mesh.cellCenter(candidate) - mesh.cellCenter(upwind);
 
-            const Vector direction =
-                mesh.cellCenter(face.neighbor) -
-                mesh.cellCenter(upwind);
+            const Vector direction = mesh.cellCenter(face.neighbor) - mesh.cellCenter(upwind);
 
-            const double projection =
-                LA::dot(dUC, direction);
+            const double projection = LA::dot(dUC, direction);
 
             if (projection < 0.0)
             {
@@ -248,10 +228,7 @@ void runTVDReconstructionTest()
                 1.0
             );
 
-        TEST_ASSERT(
-            std::abs(reconstructed - field[upwind]) <
-            1e-12
-        );
+        TEST_ASSERT( std::abs(reconstructed - field[upwind]) < 1e-12 );
     }
 
     // -------------------------------------------------
@@ -282,13 +259,9 @@ void runTVDReconstructionTest()
                 flux
             );
 
-        const double exact =
-            face.center.x[0];
+        const double exact = face.center.x[0];
 
-        TEST_ASSERT(
-            std::abs(reconstructed - exact) <
-            1e-12
-        );
+        TEST_ASSERT( std::abs(reconstructed - exact) < 1e-12 );
     }
 
     // -------------------------------------------------
@@ -322,25 +295,13 @@ void runTVDReconstructionTest()
 
         TEST_ASSERT(stencil.weights.size() == 2);
 
-        TEST_ASSERT(
-            stencil.weights[0].first ==
-            face.owner
-        );
+        TEST_ASSERT( stencil.weights[0].first == face.owner );
 
-        TEST_ASSERT(
-            stencil.weights[1].first ==
-            face.neighbor
-        );
+        TEST_ASSERT( stencil.weights[1].first == face.neighbor );
 
-        TEST_ASSERT(
-            std::abs(stencil.weights[0].second - 0.5) <
-            1e-12
-        );
+        TEST_ASSERT( std::abs(stencil.weights[0].second - 0.5) < 1e-12 );
 
-        TEST_ASSERT(
-            std::abs(stencil.weights[1].second - 0.5) <
-            1e-12
-        );
+        TEST_ASSERT( std::abs(stencil.weights[1].second - 0.5) < 1e-12 );
     }
 
     std::cout << "TVD Reconstruction test passed.\n";
