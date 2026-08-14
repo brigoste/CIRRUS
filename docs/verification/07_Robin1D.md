@@ -1,8 +1,8 @@
-# Convective1D Verification Case
+# Robin1D Verification Case
 
 ## Overview
 
-The `Convective1D` verification case validates the implementation of a convective boundary condition for the 1D steady heat equation.
+The `Robin1D` verification case validates the implementation of a convective boundary condition for the 1D steady heat equation.
 
 The case uses a manufactured quadratic temperature field with:
 
@@ -128,7 +128,7 @@ ensuring that the manufactured solution satisfies the imposed boundary condition
 
 ## Verification Results
 
-The following configuration was used to validate the implementation of the `Convective1D` manufactured solution.
+The following configuration was used to validate the implementation of the `Robin1D` manufactured solution.
 
 ### Acceptance Criteria
 
@@ -184,7 +184,7 @@ is therefore verified.
   "extends": "../base.json",
 
   "verificationCase": {
-    "name": "Convective1D",
+    "name": "Robin1D",
     "type": "manufactured",
 
     "mesh": {
@@ -231,8 +231,8 @@ is therefore verified.
     },
 
     "output": {
-      "csv": "Convective1D.csv",
-      "summary": "Convective1D.json"
+      "csv": "Robin1D.csv",
+      "summary": "Robin1D.json"
     }
   }
 }
