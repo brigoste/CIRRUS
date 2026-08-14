@@ -10,11 +10,18 @@
 #include <cstddef>
 #include <iostream>
 
+#define TEST_ASSERT(condition) \
+    do { \
+        if (!(condition)) \
+            throw std::runtime_error("Test assertion failed: " #condition); \
+    } while (false)
+
 void runMusclReconstructionTest()
 {
     // -------------------------------------------------
     // Test mesh
     // -------------------------------------------------
+    std::cout << "Testing MUSCL reconstruction stencil.\n\n";
 
     QuadMesh2D mesh(
         4,      // nx
@@ -65,7 +72,7 @@ void runMusclReconstructionTest()
         }
     }
 
-    assert(testFace != Face::INVALID);
+    TEST_ASSERT(testFace != Face::INVALID);
 
     const Face& face = mesh.face(testFace);
 
@@ -96,18 +103,18 @@ void runMusclReconstructionTest()
     // Verify stencil contains three cells
     // -------------------------------------------------
 
-    assert(positiveStencil.weights.size() == 3);
+    TEST_ASSERT(positiveStencil.weights.size() == 3);
 
     // -------------------------------------------------
     // Verify coefficients
     // -------------------------------------------------
 
-    // assert( std::abs(positiveStencil.weights[0].second + 0.25) < 1e-12 );
-    // assert( std::abs(positiveStencil.weights[1].second - 0.75) < 1e-12 );
-    // assert( std::abs(positiveStencil.weights[2].second - 0.50) < 1e-12 );
-    assert(std::abs(positiveStencil.weights[0].second + 0.125) < 1e-12);
-    assert(std::abs(positiveStencil.weights[1].second - 0.750) < 1e-12);
-    assert(std::abs(positiveStencil.weights[2].second - 0.375) < 1e-12);
+    // TEST_ASSERT( std::abs(positiveStencil.weights[0].second + 0.25) < 1e-12 );
+    // TEST_ASSERT( std::abs(positiveStencil.weights[1].second - 0.75) < 1e-12 );
+    // TEST_ASSERT( std::abs(positiveStencil.weights[2].second - 0.50) < 1e-12 );
+    TEST_ASSERT(std::abs(positiveStencil.weights[0].second + 0.125) < 1e-12);
+    TEST_ASSERT(std::abs(positiveStencil.weights[1].second - 0.750) < 1e-12);
+    TEST_ASSERT(std::abs(positiveStencil.weights[2].second - 0.375) < 1e-12);
     
 
     // Coefficients must form a consistent interpolation.
@@ -119,7 +126,7 @@ void runMusclReconstructionTest()
         coefficientSum += weight;
     }
 
-    assert( std::abs(coefficientSum - 1.0) < 1e-12 );
+    TEST_ASSERT( std::abs(coefficientSum - 1.0) < 1e-12 );
 
     // -------------------------------------------------
     // Verify upwind/downwind cell ordering
@@ -128,13 +135,13 @@ void runMusclReconstructionTest()
     const std::size_t positiveUpwind = face.owner;
     const std::size_t positiveDownwind = face.neighbor;
 
-    assert( positiveStencil.weights[1].first == positiveUpwind );
-    assert( positiveStencil.weights[2].first == positiveDownwind );
+    TEST_ASSERT( positiveStencil.weights[1].first == positiveUpwind );
+    TEST_ASSERT( positiveStencil.weights[2].first == positiveDownwind );
 
     // The first stencil entry should be a cell other
     // than the upwind/downwind cells.
-    assert( positiveStencil.weights[0].first != positiveUpwind );
-    assert( positiveStencil.weights[0].first != positiveDownwind );
+    TEST_ASSERT( positiveStencil.weights[0].first != positiveUpwind );
+    TEST_ASSERT( positiveStencil.weights[0].first != positiveDownwind );
 
     // -------------------------------------------------
     // Negative flux
@@ -156,15 +163,15 @@ void runMusclReconstructionTest()
             negativeFlux
         );
 
-    assert(negativeStencil.weights.size() == 3);
+    TEST_ASSERT(negativeStencil.weights.size() == 3);
 
     // Same coefficient structure.
-    // assert( std::abs(negativeStencil.weights[0].second + 0.25) < 1e-12 );
-    // assert( std::abs(negativeStencil.weights[1].second - 0.75) < 1e-12 );
-    // assert( std::abs(negativeStencil.weights[2].second - 0.50) < 1e-12 );
-    assert(std::abs(negativeStencil.weights[0].second + 0.125) < 1e-12);
-    assert(std::abs(negativeStencil.weights[1].second - 0.750) < 1e-12);
-    assert(std::abs(negativeStencil.weights[2].second - 0.375) < 1e-12);
+    // TEST_ASSERT( std::abs(negativeStencil.weights[0].second + 0.25) < 1e-12 );
+    // TEST_ASSERT( std::abs(negativeStencil.weights[1].second - 0.75) < 1e-12 );
+    // TEST_ASSERT( std::abs(negativeStencil.weights[2].second - 0.50) < 1e-12 );
+    TEST_ASSERT(std::abs(negativeStencil.weights[0].second + 0.125) < 1e-12);
+    TEST_ASSERT(std::abs(negativeStencil.weights[1].second - 0.750) < 1e-12);
+    TEST_ASSERT(std::abs(negativeStencil.weights[2].second - 0.375) < 1e-12);
 
     // Coefficients still sum to one.
     coefficientSum = 0.0;
@@ -175,16 +182,16 @@ void runMusclReconstructionTest()
         coefficientSum += weight;
     }
 
-    assert( std::abs(coefficientSum - 1.0) < 1e-12 );
+    TEST_ASSERT( std::abs(coefficientSum - 1.0) < 1e-12 );
 
     // Negative flow means the neighbor is now upwind.
     const std::size_t negativeUpwind = face.neighbor;
     const std::size_t negativeDownwind = face.owner;
 
-    assert( negativeStencil.weights[1].first == negativeUpwind );
-    assert( negativeStencil.weights[2].first == negativeDownwind );
-    assert( negativeStencil.weights[0].first != negativeUpwind );
-    assert( negativeStencil.weights[0].first != negativeDownwind );
+    TEST_ASSERT( negativeStencil.weights[1].first == negativeUpwind );
+    TEST_ASSERT( negativeStencil.weights[2].first == negativeDownwind );
+    TEST_ASSERT( negativeStencil.weights[0].first != negativeUpwind );
+    TEST_ASSERT( negativeStencil.weights[0].first != negativeDownwind );
 
     // -------------------------------------------------
     // Linear-field exactness
@@ -217,7 +224,7 @@ void runMusclReconstructionTest()
 
         const double exact = face.center.x[0];
 
-        assert( std::abs(reconstructed - exact) < 1e-12 );
+        TEST_ASSERT( std::abs(reconstructed - exact) < 1e-12 );
     }
 
     // -------------------------------------------------
@@ -237,7 +244,7 @@ void runMusclReconstructionTest()
 
         const double exact = face.center.x[0];
 
-        assert(
+        TEST_ASSERT(
             std::abs(reconstructed - exact)
             < 1e-12
         );
@@ -279,7 +286,7 @@ void runMusclReconstructionTest()
                 positiveFlux
             );
 
-        assert(
+        TEST_ASSERT(
             std::abs(reconstructed - expected)
             < 1e-12
         );

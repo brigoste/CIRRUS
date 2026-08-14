@@ -1,0 +1,513 @@
+# CIRRUS Reconstruction Schemes
+
+## Overview
+
+CIRRUS separates **gradient evaluation**, **face reconstruction**, and **convection discretization**.
+
+The reconstruction layer determines the approximation of a transported scalar field at a face:
+
+```text
+Cell values
+    ↓
+Gradient / Reconstruction
+    ↓
+Face value
+    ↓
+Convection discretization
+    ↓
+Matrix contributions
+```
+
+For the higher-order convection schemes, reconstruction is based on the local upwind direction.
+
+Define:
+
+* (U): upwind cell
+* (D): downwind cell
+* (UU): immediately upstream cell
+* (f): face
+* (\phi): transported scalar
+* (F): convective face flux
+
+For positive flux,
+
+$$
+F > 0
+$$
+
+the owner cell is the upwind cell. For negative flux,
+
+$$
+F < 0
+$$
+
+the neighbor cell is the upwind cell.
+
+The stencil orientation therefore reverses with the sign of the face flux.
+
+---
+
+# First-Order Upwind
+
+The first-order upwind reconstruction uses only the upwind cell:
+
+$$
+\boxed{
+\phi_f = \phi_U
+}
+$$
+
+The corresponding stencil is
+
+$$
+\boxed{
+\phi_f = 1\phi_U
+}
+$$
+
+This scheme is robust and bounded for many transport problems but is formally first-order accurate and introduces significant numerical diffusion.
+
+---
+
+# Central Differencing
+
+Central interpolation uses the owner and neighbor cells symmetrically:
+
+$$
+\boxed{
+\phi_f = \frac12\phi_U + \frac12\phi_D
+}
+$$
+
+For a uniform mesh and a smooth solution, central interpolation is second-order accurate.
+
+The corresponding stencil is
+
+$$
+\boxed{
+\phi_f =
+\frac12\phi_U
++
+\frac12\phi_D
+}
+$$
+
+Central differencing is nondissipative for linear interpolation but may produce oscillatory behavior when applied to strongly convection-dominated problems.
+
+---
+
+# Gradient Reconstruction
+
+Gradient reconstruction evaluates the field at the face by extrapolating from the upwind cell:
+
+$$
+\boxed{
+\phi_f =
+\phi_U
++
+\nabla\phi_U\cdot
+(\mathbf{x}_f-\mathbf{x}_U)
+}
+$$
+
+where:
+
+* (\nabla\phi_U) is the reconstructed cell gradient,
+* (\mathbf{x}_U) is the upwind-cell center,
+* (\mathbf{x}_f) is the face center.
+
+The accuracy of this reconstruction therefore depends directly on the accuracy of the gradient operator.
+
+CIRRUS currently supports:
+
+* Green-Gauss gradients
+* Least-squares gradients
+
+Both have been verified to demonstrate approximately second-order convergence for the tested manufactured field.
+
+---
+
+# Second-Order Upwind
+
+Second-order upwind reconstruction uses the upwind cell and the immediately upstream cell.
+
+For a uniform mesh, the face value is
+
+$$
+\boxed{
+\phi_f =
+\frac32\phi_U
+-
+
+\frac12\phi_{UU}
+}
+$$
+
+The stencil coefficients are therefore:
+
+$$
+\boxed{
+\left[
+-\frac12,
+\frac32
+\right]
+}
+$$
+
+for
+
+$$
+[\phi_{UU},\phi_U].
+$$
+
+This reconstruction is formally second-order accurate for smooth fields.
+
+Near an inflow boundary, an upstream cell may not exist. CIRRUS therefore falls back to first-order upwind reconstruction:
+
+$$
+\phi_f = \phi_U.
+$$
+
+This boundary fallback is an intentional part of the current implementation.
+
+---
+
+# QUICK
+
+QUICK stands for **Quadratic Upstream Interpolation for Convective Kinematics**.
+
+QUICK uses a three-cell quadratic interpolation stencil consisting of:
+
+* the immediately upstream cell,
+* the upwind cell,
+* the downwind cell.
+
+For a positive face flux on a uniform grid,
+
+$$
+\boxed{
+\phi_f =
+-\frac18\phi_{UU}
++
+\frac68\phi_U
++
+\frac38\phi_D
+}
+$$
+
+or
+
+$$
+\boxed{
+\phi_f =
+-\frac18\phi_{UU}
++
+\frac34\phi_U
++
+\frac38\phi_D
+}
+$$
+
+The coefficients sum to unity:
+
+$$
+-\frac18+\frac68+\frac38=1.
+$$
+
+The quadratic interpolation gives QUICK its higher-order accuracy on smooth uniform-grid solutions.
+
+Despite the higher-order interpolation, QUICK is not inherently bounded. Near steep gradients or discontinuities, it can generate overshoots and undershoots.
+
+This motivates the later addition of bounded/TVD schemes and flux limiters.
+
+---
+
+# MUSCL
+
+MUSCL stands for **Monotonic Upstream-centered Schemes for Conservation Laws**.
+
+Unlike QUICK, MUSCL is best understood as a **piecewise-linear reconstruction framework** rather than one single fixed stencil.
+
+The general reconstruction is
+
+$$
+\boxed{
+\phi_f =
+\phi_U
++
+\frac12\Delta\phi_U
+}
+$$
+
+where (\Delta\phi_U) represents the reconstructed change from the upwind-cell center to the face.
+
+For an unlimited linear reconstruction on a uniform mesh, a central slope can be written as
+
+$$
+\Delta\phi_U
+=
+
+\frac12
+\left(
+\phi_D-\phi_{UU}
+\right).
+$$
+
+Therefore,
+
+$$
+\boxed{
+\phi_f
+=
+
+\phi_U
++
+\frac14
+\left(
+\phi_D-\phi_{UU}
+\right)
+}
+$$
+
+or equivalently,
+
+$$
+\boxed{
+\phi_f =
+-\frac14\phi_{UU}
++
+\phi_U
++
+\frac14\phi_D
+}
+$$
+
+for the positive-flow orientation.
+
+The principal advantage of MUSCL is that the slope can subsequently be limited.
+
+---
+
+# MUSCL With a Limiter
+
+The bounded form introduces a slope limiter:
+
+$$
+\boxed{
+\phi_f
+=
+
+\phi_U
++
+\frac12
+\Psi(r_U)
+\Delta\phi_U
+}
+$$
+
+where (\Psi) is a limiter function and (r_U) describes the local smoothness of the solution.
+
+A commonly used gradient ratio is
+
+$$
+\boxed{
+r_U =
+\frac{\phi_U-\phi_{UU}}
+{\phi_D-\phi_U}
+}
+$$
+
+with appropriate handling when the denominator approaches zero.
+
+The limiter modifies the reconstruction according to the local solution behavior.
+
+In smooth regions, the limiter should preserve the desired high-order accuracy.
+
+Near extrema or discontinuities, the limiter reduces the reconstruction slope to prevent nonphysical oscillations.
+
+Common limiter families include:
+
+* Minmod
+* Van Leer
+* Van Albada
+* Superbee
+
+The eventual CIRRUS architecture should therefore separate:
+
+```text
+MUSCL Reconstruction
+        │
+        ▼
+   Slope Calculation
+        │
+        ▼
+   Flux Limiter
+        │
+        ▼
+    Face Value
+```
+
+rather than embedding a particular limiter directly into `MusclReconstruction`.
+
+---
+
+# QUICK vs MUSCL
+
+| Property           | Second-Order Upwind     | QUICK                           | MUSCL                                  |
+| ------------------ | ----------------------- | ------------------------------- | -------------------------------------- |
+| Order              | 2nd                     | Higher-order interpolation      | 2nd when properly reconstructed        |
+| Cells used         | (UU,U)                  | (UU,U,D)                        | (UU,U,D) typically                     |
+| Fixed stencil      | Yes                     | Yes                             | Not necessarily                        |
+| Gradient required  | No                      | No                              | Not necessarily                        |
+| Limiter capable    | Not inherently          | Not inherently                  | Yes                                    |
+| Bounded by default | No                      | No                              | Only with limiter                      |
+| Main purpose       | Reduce upwind diffusion | High-order smooth interpolation | High-resolution bounded reconstruction |
+
+---
+
+# Verification Requirements
+
+Each reconstruction scheme should be verified independently.
+
+For smooth manufactured solutions, CIRRUS should measure:
+
+* (L_2) error
+* (L_\infty) error
+* observed order of accuracy
+* convergence behavior
+* boundary behavior
+
+A successful second-order verification should demonstrate approximately
+
+$$
+p \approx 2
+$$
+
+where the observed order is calculated from two mesh levels as
+
+$$
+p =
+\frac{
+\log(E_h/E_{h/2})
+}{
+\log(2)
+}.
+$$
+
+The current verification framework should remain the primary mechanism for establishing the accuracy of higher-order reconstruction schemes.
+
+---
+
+# Boundary Handling
+
+Higher-order reconstruction requires additional upstream information.
+
+For a face near an inflow boundary, the required upstream stencil may not exist.
+
+CIRRUS currently handles this case by falling back to first-order upwind:
+
+$$
+\boxed{
+\phi_f = \phi_U
+}
+$$
+
+This provides a robust boundary treatment while retaining the higher-order reconstruction in the interior.
+
+Future work may replace this fallback with explicit higher-order boundary reconstruction once the necessary boundary stencil infrastructure is available.
+
+---
+
+# Current CIRRUS Reconstruction Architecture
+
+The intended architecture is:
+
+```text
+Cell values
+      │
+      ▼
+ReconstructionScheme
+      │
+      ├── UpwindReconstruction
+      ├── CentralReconstruction
+      ├── GradientReconstruction
+      ├── SecondOrderUpwindReconstruction
+      ├── QuickReconstruction
+      └── MusclReconstruction
+      │
+      ▼
+ReconstructionStencil
+      │
+      ▼
+ConvectionOperator
+      │
+      ▼
+MatrixContribution
+      │
+      ▼
+FluxAccumulator
+      │
+      ▼
+Operator Assembly
+```
+
+MUSCL should eventually become:
+
+```text
+MusclReconstruction
+        │
+        ▼
+ReconstructionUtils
+        │
+        ├── Upwind cell
+        ├── Downwind cell
+        └── Upstream cell
+        │
+        ▼
+Slope calculation
+        │
+        ▼
+Flux limiter
+        │
+        ▼
+ReconstructionStencil
+```
+
+This keeps the reconstruction mechanism independent from the algebraic assembly layer.
+
+---
+
+# Important Implementation Note
+
+A mathematical scheme definition should not be inferred solely from an existing coefficient list.
+
+In particular, the stencil
+
+$$
+-\frac14\phi_{UU}
++
+\frac34\phi_U
++
+\frac12\phi_D
+$$
+
+should not automatically be labeled as standard MUSCL.
+
+For a uniform mesh, substituting a linear field
+
+$$
+\phi(x)=ax+b
+$$
+
+provides a useful exactness check. A valid second-order reconstruction should reproduce the exact face value for a linear field.
+
+Therefore, each reconstruction test should include:
+
+1. constant-field exactness,
+2. linear-field exactness,
+3. known stencil coefficients,
+4. flux-direction reversal,
+5. boundary fallback behavior where applicable,
+6. mesh-refinement verification.
+
+The MMS refinement study remains the authoritative test of the complete discretization order.
