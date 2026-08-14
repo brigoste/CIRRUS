@@ -16,9 +16,8 @@ class Sinusoidal2D : public VerificationCase
 {
 public:
     explicit Sinusoidal2D(const SimulationConfig& cfg)
-    {
-        k_ = cfg.physics.k;
-    }
+        : k_(cfg.physics.transferCoefficient)
+    {}
 
     void initialize(const MeshBase&) override {}// Default: nothing needed 
 
