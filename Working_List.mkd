@@ -238,7 +238,7 @@ Important numerical observation:
 
 * Upwind currently exhibits approximately first-order convergence, as expected
 * Central/reconstructed formulation demonstrates approximately second-order convergence
-* Second-order upwind demonstrates approximately second-order convergence on both Convective2D and AdvectionDiffusion2D
+* Second-order upwind demonstrates approximately second-order convergence on both Robin2D and AdvectionDiffusion2D
 * Higher-order convection work should preserve this verification framework
 * Boundary-adjacent upwind cells use first-order upwind fallback when a second-order upstream stencil cannot be constructed
 
@@ -246,7 +246,7 @@ Important numerical observation:
 
 Representative refinement results:
 
-Convective2D
+Robin2D
     Observed L2 order   ≈ 2.00071
     Observed Linf order ≈ 1.99881
     Status                PASS
@@ -407,7 +407,7 @@ Optimization notes:
 
 Verification notes:
 
-* Second-order upwind verified on Convective2D
+* Second-order upwind verified on Robin2D
 * Second-order upwind verified on AdvectionDiffusion2D
 * Refinement studies demonstrate approximately second-order convergence in both cases
 * Boundary-adjacent upwind cells fall back to first-order upwind when an upstream cell is unavailable
@@ -942,13 +942,13 @@ Representative reconstruction/gradient combinations have retained approximately 
 
 Second-order upwind has been independently verified on both:
 
-* `Convective2D`
+* `Robin2D`
 * `AdvectionDiffusion2D`
 
 Observed refinement orders:
 
 ```text
-Convective2D
+Robin2D
     L2   ≈ 2.00071
     Linf ≈ 1.99881
 
@@ -1196,7 +1196,7 @@ The execution layer is also now sufficiently mature to support:
 
 The current numerical baseline is verified across the existing suite with **13/13 verification checks passing**, including approximately second-order convergence for representative reconstruction and gradient combinations.
 
-Second-order upwind has now been added to that verified baseline and demonstrates approximately second-order convergence for both `Convective2D` and `AdvectionDiffusion2D`.
+Second-order upwind has now been added to that verified baseline and demonstrates approximately second-order convergence for both `Robin2D` and `AdvectionDiffusion2D`.
 
 ### Next Major Development Target
 
