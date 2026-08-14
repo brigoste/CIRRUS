@@ -11,6 +11,12 @@
 #include <iostream>
 #include <memory>
 
+#define TEST_ASSERT(condition) \
+    do { \
+        if (!(condition)) \
+            throw std::runtime_error("Test assertion failed: " #condition); \
+    } while (false)
+
 void runTVDReconstructionTest()
 {
     // -------------------------------------------------
@@ -65,7 +71,7 @@ void runTVDReconstructionTest()
         }
     }
 
-    assert(testFace != Face::INVALID);
+    TEST_ASSERT(testFace != Face::INVALID);
 
     const Face& face = mesh.face(testFace);
 
@@ -93,7 +99,7 @@ void runTVDReconstructionTest()
                 flux
             );
 
-        assert(std::abs(reconstructed - 5.0) < 1e-12);
+        TEST_ASSERT(std::abs(reconstructed - 5.0) < 1e-12);
     }
 
     // -------------------------------------------------
@@ -144,12 +150,12 @@ void runTVDReconstructionTest()
             0.5 * phiU +
             0.5 * phiD;
 
-        assert(std::abs(reconstructed - expected) < 1e-12);
+        TEST_ASSERT(std::abs(reconstructed - expected) < 1e-12);
 
         const double exact =
             face.center.x[0];
 
-        assert(std::abs(reconstructed - exact) < 1e-12);
+        TEST_ASSERT(std::abs(reconstructed - exact) < 1e-12);
     }
 
     // -------------------------------------------------
@@ -226,7 +232,7 @@ void runTVDReconstructionTest()
             }
         }
 
-        assert(upstream != Face::INVALID);
+        TEST_ASSERT(upstream != Face::INVALID);
 
         field[upstream] = 1.0;
         field[upwind]   = 3.0;
@@ -242,7 +248,7 @@ void runTVDReconstructionTest()
                 1.0
             );
 
-        assert(
+        TEST_ASSERT(
             std::abs(reconstructed - field[upwind]) <
             1e-12
         );
@@ -279,7 +285,7 @@ void runTVDReconstructionTest()
         const double exact =
             face.center.x[0];
 
-        assert(
+        TEST_ASSERT(
             std::abs(reconstructed - exact) <
             1e-12
         );
@@ -314,24 +320,24 @@ void runTVDReconstructionTest()
                 1.0
             );
 
-        assert(stencil.weights.size() == 2);
+        TEST_ASSERT(stencil.weights.size() == 2);
 
-        assert(
+        TEST_ASSERT(
             stencil.weights[0].first ==
             face.owner
         );
 
-        assert(
+        TEST_ASSERT(
             stencil.weights[1].first ==
             face.neighbor
         );
 
-        assert(
+        TEST_ASSERT(
             std::abs(stencil.weights[0].second - 0.5) <
             1e-12
         );
 
-        assert(
+        TEST_ASSERT(
             std::abs(stencil.weights[1].second - 0.5) <
             1e-12
         );
