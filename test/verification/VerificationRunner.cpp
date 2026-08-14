@@ -272,7 +272,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                           << "====================================================\n\n";
             }   
 
-            auto& temperature = sim.fields().scalar(FieldName::Temperature);
+            auto& solution = sim.solution();
 
             // -------------------------------------------------
             // Exact solution evaluation
@@ -290,13 +290,14 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             {
                 const auto& xc = mesh.cellCenter(c);
 
-                exactField[c] = verifCase.exact(xc.x[0], xc.x[1]);
+                exactField[c] = verifCase.exact(xc.x[0], xc.x[1]);          
+                // This should change such that exact() accepts points, not x,y,z. This makes it dimension agnositc.
             }
 
             // -------------------------------------------------
             // Error norms
             // -------------------------------------------------
-            auto norms = ErrorNorms::compute(mesh, temperature, exactField);
+            auto norms = ErrorNorms::compute(mesh, solution, exactField);
             double hx = levelCfg.mesh.lx / levelCfg.mesh.nx;
             double hy = levelCfg.mesh.ly / levelCfg.mesh.ny;
 
@@ -316,7 +317,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
 
             {
                 // Timer timer("Residual calculation");
-                residual = computeResidual(sim.system(), temperature);
+                residual = computeResidual(sim.system(), solution);
             }
 
             // DEBUGGING
@@ -351,7 +352,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                 auto output =
                     OutputBuilder::build(
                         sim,
-                        temperature,
+                        solution,
                         residual);
 
                 OutputManager::write(
