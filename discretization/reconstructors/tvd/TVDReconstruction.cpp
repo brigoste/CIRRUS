@@ -10,8 +10,9 @@
 
 #include <cmath>
 #include <utility>
-
 #include <iostream>
+#include <limits>
+#include <algorithm>
 
 TVDReconstruction::TVDReconstruction(
     std::unique_ptr<FluxLimiter> limiter
@@ -45,7 +46,6 @@ ReconstructionStencil TVDReconstruction::stencil(
     // -------------------------------------------------
     // Boundary fallback
     // -------------------------------------------------
-
     if (cells.upstream == Face::INVALID)
     {
         return ReconstructionStencil{
@@ -54,6 +54,7 @@ ReconstructionStencil TVDReconstruction::stencil(
             }
         };
     }
+
 
     // -------------------------------------------------
     // Cell values
@@ -72,6 +73,23 @@ ReconstructionStencil TVDReconstruction::stencil(
     // -------------------------------------------------
     // Constant / locally flat field
     // -------------------------------------------------
+
+    // -------------------------------------------------
+    // Locally flat field
+    //
+    // No directional variation exists between the
+    // upwind and downwind cells, so the limiter ratio
+    // is undefined. Use first-order upwind.
+    // -------------------------------------------------
+
+    if (std::abs(deltaUD) < 1e-14)
+    {
+        return ReconstructionStencil{
+            {
+                {cells.upwind, 1.0}
+            }
+        };
+    }
 
     if (std::abs(deltaUD) < 1e-14)
     {
@@ -92,13 +110,8 @@ ReconstructionStencil TVDReconstruction::stencil(
     // -------------------------------------------------
     // Apply limiter
     // -------------------------------------------------
-
+    
     const double psi = limiter_->limit(r);
-
-    std::cout
-    << "r = " << r
-    << ", psi = " << psi
-    << '\n';
 
     // -------------------------------------------------
     // Limited face value
