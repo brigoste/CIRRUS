@@ -529,9 +529,9 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
     std::cout << "================================================================================\n\n";
 
     std::cout << std::left
-            << std::setw(26) << "Case"
+            << std::setw(22) << "Case"
             << std::setw(12) << "Solver"
-            << std::setw(16) << "Reconstruction"
+            << std::setw(20) << "Reconstruction"
             << std::setw(16) << "Gradient"
             << std::setw(10) << "Mesh"
             << std::setw(14) << "L2 Error"
@@ -547,9 +547,9 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
     for (const auto& s : summary)
     {
         std::cout << std::left
-                << std::setw(26) << s.caseName
+                << std::setw(22) << s.caseName
                 << std::setw(12) << s.solver
-                << std::setw(16) << s.reconstruction
+                << std::setw(20) << s.reconstruction
                 << std::setw(16) << s.gradient
                 << std::setw(10) << s.meshSize
                 << std::setw(14) << s.l2
