@@ -10,7 +10,6 @@
 #include "mesh/BoundaryPatchSystem.hpp"
 #include "physics/PhysicsModel.hpp"
 #include "physics/PhysicsFactory.hpp"
-#include "physics/HeatPhysicsModel.hpp"
 #include "equation_systems/LinearSystem.hpp"
 #include "bc/BoundaryFace.hpp"
 
@@ -73,6 +72,7 @@ public:
     void setVerificationCase(std::unique_ptr<VerificationCase> verificationCase);    
     FieldRegistry& fields()                                             { return fields_; }
     const FieldRegistry& fields() const                                 { return fields_; }
+    const ScalarField& solution() const;
     
 private:
     // -------------------------
@@ -80,7 +80,6 @@ private:
     // -------------------------
     void bindBoundaryConditions(const SimulationConfig& cfg);
     void initializeFields();
-    // std::size_t resolveBoundaryFace(const std::string& loc);
 
     std::unique_ptr<MeshBase> mesh_;
 
