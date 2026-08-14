@@ -16,7 +16,7 @@ double Convective1D::laplacian(double, double) const
     return 2.0;
 }
 
-ConvectiveData Convective1D::manufacturedConvectiveBoundary(const Face& face) const
+ConvectiveData Convective1D::manufacturedRobinBoundary(const Face& face) const
 {
     // Created for a right-boundary robin condition. For left, change dTdx in T_inf to dTdn.
     ConvectiveData robin{};
