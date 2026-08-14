@@ -35,7 +35,7 @@ double Convective2D::manufacturedBoundaryFlux(const Face& face) const
     return -k_ * dTdn;
 }
 
-ConvectiveData Convective2D::manufacturedConvectiveBoundary(const Face& face) const
+ConvectiveData Convective2D::manufacturedRobinBoundary(const Face& face) const
 {
     ConvectiveData convective{};
 
