@@ -7,14 +7,14 @@
 
     Case                    Solver      Mesh        L2 Error      Accuracy    Convergence   Order
     --------------------------------------------------------------------------------------------------
-    Convective1D            CG          200x1       6.250×10⁻⁶    PASS        PASS          2.000e+00
+    Robin1D            CG          200x1       6.250×10⁻⁶    PASS        PASS          2.000e+00
 */
 
-class Convective1D : public VerificationCase
+class Robin1D : public VerificationCase
 {
 public:
-    explicit Convective1D(const SimulationConfig& cfg)
-        : k_(cfg.physics.k)
+    explicit Robin1D(const SimulationConfig& cfg)
+        : k_(cfg.physics.transferCoefficient)
     {}
 
     void initialize(const MeshBase&) override {}
@@ -25,7 +25,7 @@ public:
 
     double source(double x, double y) const override;
 
-    ConvectiveData manufacturedRobinBoundary(const Face& face) const override;
+    RobinData manufacturedRobinBoundary(const Face& face) const override;
 
     double l2AcceptanceThreshold() const override                       { return 5e-2; }
 
