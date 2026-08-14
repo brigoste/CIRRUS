@@ -2,7 +2,7 @@
   "extends": "../base.json",
 
   "verificationCase": {
-    "name": "Convective1D",
+    "name": "Robin1D",
     "type": "manufactured",
 
     "mesh": {
@@ -49,8 +49,8 @@
     },
 
     "output": {
-      "csv": "Convective1D.csv",
-      "summary": "Convective1D.json"
+      "csv": "Robin1D.csv",
+      "summary": "Robin1D.json"
     }
   }
 }
