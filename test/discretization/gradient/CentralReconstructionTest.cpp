@@ -1,4 +1,4 @@
-#include "discretization/reconstructors/CentralReconstruction.hpp"
+#include "discretization/reconstructors/basic/CentralReconstruction.hpp"
 
 #include "fields/ScalarField.hpp"
 #include "fields/VectorField.hpp"

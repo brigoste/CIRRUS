@@ -1,10 +1,10 @@
 #include "discretization/reconstructors/ReconstructionFactory.hpp"
-#include "discretization/reconstructors/GradientReconstruction.hpp"
-#include "discretization/reconstructors/CentralReconstruction.hpp"
-#include "discretization/reconstructors/UpwindReconstruction.hpp"
-#include "discretization/reconstructors/SecondOrderUpwindReconstruction.hpp"
-#include "discretization/reconstructors/QuickReconstruction.hpp"
-#include "discretization/reconstructors/MusclReconstruction.hpp"
+#include "discretization/reconstructors/basic/GradientReconstruction.hpp"
+#include "discretization/reconstructors/basic/CentralReconstruction.hpp"
+#include "discretization/reconstructors/basic/UpwindReconstruction.hpp"
+#include "discretization/reconstructors/basic/SecondOrderUpwindReconstruction.hpp"
+#include "discretization/reconstructors/basic/QuickReconstruction.hpp"
+#include "discretization/reconstructors/basic/MusclReconstruction.hpp"
 
 #include <stdexcept>
 

@@ -1,4 +1,4 @@
-#include "discretization/reconstructors/UpwindReconstruction.hpp"
+#include "discretization/reconstructors/basic/UpwindReconstruction.hpp"
 
 #include "mesh/primitives/Face.hpp"
 

@@ -1,4 +1,4 @@
-#include "discretization/reconstructors/SecondOrderUpwindReconstruction.hpp"
+#include "discretization/reconstructors/higher_order/SecondOrderUpwindReconstruction.hpp"
 
 #include "mesh/QuadMesh2D.hpp"
 #include "fields/ScalarField.hpp"

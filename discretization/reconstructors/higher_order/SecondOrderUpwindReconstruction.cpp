@@ -1,4 +1,4 @@
-#include "SecondOrderUpwindReconstruction.hpp"
+#include "discretization/reconstructors/higher_order/SecondOrderUpwindReconstruction.hpp"
 
 #include "discretization/reconstructors/ReconstructionUtils.hpp"
 

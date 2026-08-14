@@ -1,4 +1,4 @@
-#include "discretization/reconstructors/CentralReconstruction.hpp"
+#include "discretization/reconstructors/basic/CentralReconstruction.hpp"
 
 #include "mesh/MeshBase.hpp"
 #include "mesh/primitives/Face.hpp"

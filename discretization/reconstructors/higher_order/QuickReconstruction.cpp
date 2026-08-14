@@ -1,4 +1,4 @@
-#include "discretization/reconstructors/QuickReconstruction.hpp"
+#include "discretization/reconstructors/higher_order/QuickReconstruction.hpp"
 
 #include "mesh/MeshBase.hpp"
 #include "mesh/primitives/Face.hpp"

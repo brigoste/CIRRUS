@@ -1,4 +1,4 @@
-#include "discretization/reconstructors/GradientReconstruction.hpp"
+#include "discretization/reconstructors/basic/GradientReconstruction.hpp"
 
 #include "mesh/MeshBase.hpp"
 #include "mesh/primitives/Point.hpp"

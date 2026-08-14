@@ -1,4 +1,4 @@
-#include "discretization/reconstructors/MusclReconstruction.hpp"
+#include "discretization/reconstructors/higher_order/MusclReconstruction.hpp"
 
 #include "mesh/QuadMesh2D.hpp"
 #include "fields/ScalarField.hpp"
