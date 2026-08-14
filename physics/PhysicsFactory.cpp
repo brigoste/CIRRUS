@@ -11,7 +11,7 @@ PhysicsFactory::create(const PhysicsConfig& cfg)
     switch (cfg.type)
     {
         case physics::PhysicsType::Heat:
-            return std::make_unique<HeatPhysicsModel>(cfg.k);
+            return std::make_unique<HeatPhysicsModel>(cfg.transferCoefficient);
 
         case physics::PhysicsType::AdvectionDiffusion:
             return std::make_unique<AdvectionDiffusionPhysicsModel>(cfg.gamma, cfg.rho, cfg.ux, cfg.uy, cfg.uz);
