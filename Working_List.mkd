@@ -375,8 +375,8 @@ Design reconstruction data structures so they can eventually support SIMD/OpenMP
 * [x] Verify second-order central/reconstructed convection behavior through MMS
 * [x] Achieve second-order Advection-Diffusion convergence
 * [x] Implement second-order upwind
-* [ ] Implement QUICK
-* [ ] Implement MUSCL
+* [x] Implement QUICK
+* [x] Implement MUSCL
 * [ ] Add bounded/TVD schemes
 * [ ] Add flux limiter framework
 
@@ -812,8 +812,8 @@ and you also successfully switched reconstruction and gradient schemes while ret
 
 * Reconstruction schemes
   * [x] Implement second-order upwind reconstruction
-  * [ ] Implement QUICK reconstruction
-  * [ ] Implement MUSCL reconstruction
+  * [x] Implement QUICK reconstruction
+  * [X] Implement MUSCL reconstruction
   * [x] Verify each reconstruction scheme independently
   * [x] Verify expected order of accuracy
 * Bounded high-resolution schemes
