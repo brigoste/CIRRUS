@@ -7,6 +7,7 @@ void runGradientReconstructionTest();
 void runCentralReconstructionTest();
 void runSecondOrderUpwindFallbackTest();
 void runQuickReconstructionTest();
+void runMusclReconstructionTest();
 
 int main()
 {
@@ -33,6 +34,9 @@ int main()
 
     std::cout << "\n---- QUICK Reconstruction Test ----\n\n";
     runQuickReconstructionTest();
+
+    std::cout << "\n---- MUSCL Reconstruction Test ----\n\n";
+    runMusclReconstructionTest();
 
     std::cout << "\n==============================\n";
     std::cout << " COMPLETE\n";
