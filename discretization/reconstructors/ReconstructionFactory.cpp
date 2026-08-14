@@ -3,6 +3,8 @@
 #include "discretization/reconstructors/CentralReconstruction.hpp"
 #include "discretization/reconstructors/UpwindReconstruction.hpp"
 #include "discretization/reconstructors/SecondOrderUpwindReconstruction.hpp"
+#include "discretization/reconstructors/QuickReconstruction.hpp"
+#include "discretization/reconstructors/MusclReconstruction.hpp"
 
 #include <stdexcept>
 
@@ -22,6 +24,12 @@ std::unique_ptr<ReconstructionScheme> makeReconstructionScheme(ReconstructionTyp
         
         case ReconstructionType::SecondOrderUpwind:
             return std::make_unique<SecondOrderUpwindReconstruction>();
+        
+        case ReconstructionType::QUICK:
+            return std::make_unique<QuickReconstruction>();
+
+        case ReconstructionType::MUSCL:
+            return std::make_unique<MusclReconstruction>();
     }
 
     throw std::runtime_error( "Unsupported reconstruction scheme." );
