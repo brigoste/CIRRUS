@@ -48,7 +48,21 @@ Optimization notes:
   * [x] Diffusion
   * [x] Source terms
 * [x] Face interpolation/reconstruction framework
-* [ ] Physics-independent finite-volume assembly
+* [x] Physics-independent finite-volume assembly
+
+## Finite Volume Framework
+
+...
+
+* [x] Physics-independent finite-volume assembly
+  * [x] Remove physics-specific primary-field assumptions from SimulationRunner
+  * [x] Remove physics-specific primary-field assumptions from VerificationRunner
+  * [x] Expose generic primary/solution field from Simulation
+  * [x] Verify OutputBuilder consumes generic solution fields
+  * [x] Verify BoundaryReconstructor consumes generic solution fields
+  * [x] Verify residual calculation is field-independent
+  * [x] Run existing heat verification cases unchanged
+  * [x] Run existing advection-diffusion verification cases unchanged
 
 Current contribution hierarchy:
 
@@ -157,9 +171,9 @@ Optimization notes:
 * [x] Multiple mesh refinement execution
 * [x] Solver/preconditioner reporting
 * [ ] Refactor verification to consume Field objects
+* [ ] Automated regression verification
 * [ ] Richardson extrapolation
 * [ ] Grid Convergence Index (GCI)
-* [ ] Automated regression verification
 
 Future:
 
@@ -310,13 +324,17 @@ Optimization notes:
 * Keep gradient interfaces compatible with future parallel face/cell traversal
 
 ---
-Reconstruction / Interpolation Infrastructure
+## Reconstruction / Interpolation Infrastructure
 
 * [x] Implement GradientReconstruction
 * [x] Establish pluggable reconstruction scheme interface
 * [x] Implement UpwindReconstruction
 * [x] Implement SecondOrderUpwindReconstruction
 * [x] Implement CentralReconstruction
+* [x] Implement QUICK reconstruction
+* [x] Implement MUSCL reconstruction
+* [x] Implement bounded/TVD reconstruction
+* [x] Implement flux limiter framework
 * [x] Integrate reconstruction selection into configuration
 * [x] Integrate reconstruction with convection operator
 * [x] Separate reconstruction from convection discretization
@@ -327,13 +345,16 @@ Reconstruction / Interpolation Infrastructure
 * [x] Verify SecondOrderUpwind stencil construction
 * [x] Verify SecondOrderUpwind boundary fallback
 * [x] Verify SecondOrderUpwind second-order convergence
-* [ ] Implement QUICK reconstruction
-* [ ] Implement MUSCL reconstruction
-* [ ] Add bounded/TVD reconstruction
-* [ ] Add flux limiter framework
+* [x] Verify QUICK reconstruction stencil
+* [x] Verify QUICK second-order convergence
+* [x] Verify MUSCL reconstruction stencil
+* [x] Verify MUSCL implementation
+* [x] Verify TVD reconstruction stencil
+* [x] Verify Minmod flux limiter independently
+* [ ] Verify TVD solver-level behavior on a non-linear manufactured field
 
 Architecture:
-
+```
 Cell values
     ↓
 Gradient / Reconstruction
@@ -345,6 +366,7 @@ Convection discretization
 Matrix contributions
     ↓
 Linear system
+```
 
 Design goals:
 
@@ -367,18 +389,13 @@ Design reconstruction data structures so they can eventually support SIMD/OpenMP
 
 # Convection Discretization
 
-* [x] Extract convection discretization from finite-volume assembly
-* [x] Implement UpwindScheme
-* [x] Implement CentralDifferenceScheme
-* [x] Pluggable convection scheme interface
-* [x] Verify upwind convection behavior through MMS
-* [x] Verify second-order central/reconstructed convection behavior through MMS
-* [x] Achieve second-order Advection-Diffusion convergence
-* [x] Implement second-order upwind
-* [x] Implement QUICK
-* [x] Implement MUSCL
-* [ ] Add bounded/TVD schemes
-* [ ] Add flux limiter framework
+- [x] Implement second-order upwind
+- [x] Implement QUICK
+- [x] Implement MUSCL
+- [x] Add bounded/TVD reconstruction framework
+- [ ] Verify TVD solver-level behavior on a non-linear field
+- [ ] Verify TVD convergence/order after nonlinear iteration framework
+- [ ] Add additional flux limiters
 
 Optimization notes:
 
@@ -416,6 +433,23 @@ Future:
 
 * Automatic relaxation tuning
 * Solver selection
+
+### TVD / nonlinear discretization dependency
+
+- TVD reconstruction depends on the current solution field.
+- The current linear assembly begins from a locally flat field, so the limiter may legitimately remain inactive.
+- Solver-level TVD verification should therefore wait until nonlinear iteration is available.
+- Use a non-linear manufactured solution so the limiter is actually exercised during the iterative solution.
+- Verify limiter activation using the evolving solution field rather than the initial field.
+
+### TVD verification note:
+
+- Minmod limiter verified independently through unit testing
+- TVD reconstruction stencil verified
+- TVD currently falls back to first-order upwind during initial linear assembly when the solution field is locally flat
+- Solver-level second-order convergence has not yet been established
+- Revisit after nonlinear iteration framework is implemented
+- Use a non-linear manufactured solution to exercise the limiter
 
 Optimization notes:
 
@@ -817,12 +851,16 @@ and you also successfully switched reconstruction and gradient schemes while ret
   * [x] Verify each reconstruction scheme independently
   * [x] Verify expected order of accuracy
 * Bounded high-resolution schemes
-  * [ ] Define flux-limiter interface
-  * [ ] Implement basic flux limiter
-  * [ ] Implement bounded/TVD reconstruction
-  * [ ] Verify boundedness
-  * [ ] Verify accuracy on smooth fields
-  * [ ] Test behavior near discontinuities/sharp gradients
+  * [x] Define flux-limiter interface
+  * [x] Implement basic flux limiter
+  * [x] Implement bounded/TVD reconstruction
+  * [x] Verify limiter behavior independently
+  * [x] Verify TVD reconstruction stencil independently
+  * [ ] Verify TVD solver-level behavior on a non-linear manufactured field
+  * [ ] Verify TVD boundedness / overshoot behavior
+  * [ ] Verify TVD accuracy on smooth non-linear fields
+  * [ ] Test TVD behavior near discontinuities / sharp gradients
+  * [ ] Add additional flux limiters
 * Scheme comparison
   * [ ] Compare accuracy
   * [ ] Compare numerical diffusion
