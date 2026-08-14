@@ -1,25 +1,25 @@
-#include "test/verification/ManufacturedCases/Convective1D.hpp"
+#include "test/verification/ManufacturedCases/Robin1D.hpp"
 #include <iostream>
 
-double Convective1D::exact(double x, double) const
+double Robin1D::exact(double x, double) const
 {
     return 1.0 + x + x*x;
 }
 
-double Convective1D::source(double x, double) const
+double Robin1D::source(double x, double) const
 {
     return -k_ * laplacian(x, 0.0);
 }
 
-double Convective1D::laplacian(double, double) const
+double Robin1D::laplacian(double, double) const
 {
     return 2.0;
 }
 
-ConvectiveData Convective1D::manufacturedRobinBoundary(const Face& face) const
+RobinData Robin1D::manufacturedRobinBoundary(const Face& face) const
 {
     // Created for a right-boundary robin condition. For left, change dTdx in T_inf to dTdn.
-    ConvectiveData robin{};
+    RobinData robin{};
 
     const double x = face.center.x[0];
 
