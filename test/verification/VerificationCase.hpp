@@ -1,22 +1,14 @@
 #pragma once
 #include "config/SimulationConfig.hpp"
-#include "nlohmann/json.hpp"
 #include "mesh/MeshBase.hpp"
 
 #include <stdexcept>
 
 // Abstraction for all tests we use to verify.
-struct ConvectiveData
+struct RobinData
 {
     double transferCoefficient;
     double referenceValue;
-};
-
-struct RadiativeData
-{
-    double emissivity;
-    double sigma;
-    double T_inf;
 };
 
 class VerificationCase
@@ -36,16 +28,10 @@ public:
             "Neumann boundary flux not implemented for this verification case."
         );
     }
-    virtual ConvectiveData manufacturedRobinBoundary(const Face&) const
+    virtual RobinData manufacturedRobinBoundary(const Face&) const
     {
         throw std::runtime_error(
-            "Convective boundary data not implemented for this verification case."
-        );
-    }
-    virtual RadiativeData boundaryRadiative(const Face&) const
-    {
-        throw std::runtime_error(
-            "Radiative boundary data not implemented for this verification case."
+            "Robin boundary data not implemented for this verification case."
         );
     }
 
