@@ -39,11 +39,7 @@ public:
         const auto D = contribution.D;
         const auto value = contribution.value;
 
-        sourceContributions_.push_back({
-            P,
-            D*value,
-            -D
-        });
+        sourceContributions_.push_back({ P,  D*value, -D });
     }
     void addConvection(const FaceConvection& contribution) { convection_.push_back(contribution); }
     void addSource( const SourceContribution& contribution ) { sourceContributions_.push_back(contribution); }
