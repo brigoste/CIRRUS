@@ -15,7 +15,7 @@ class Neumann1D : public VerificationCase
 public:
     explicit Neumann1D(const SimulationConfig& cfg)
     {
-        k_ = cfg.physics.k;
+        k_ = cfg.physics.transferCoefficient;
         volumetricSource_ = cfg.physics.volumetricSource;
         bool foundLeft = false;
         bool foundRight = false;
