@@ -277,7 +277,12 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             // -------------------------------------------------
             // Exact solution evaluation
             // -------------------------------------------------
-            std::vector<double> exactField(mesh.ncells());
+            ScalarField exactField(
+                "ExactSolution",
+                mesh,
+                FieldLocation::Cell,
+                0.0
+            );
 
             if (!sim.verificationCase()) 
             { 
@@ -290,7 +295,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             {
                 const auto& xc = mesh.cellCenter(c);
 
-                exactField[c] = verifCase.exact(xc.x[0], xc.x[1]);          
+                exactField[c] = verifCase.exact(xc.x[0], xc.x[1]);       
                 // This should change such that exact() accepts points, not x,y,z. This makes it dimension agnositc.
             }
 
