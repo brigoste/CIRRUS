@@ -1,5 +1,4 @@
 #pragma once
-#include "physics/HeatPhysicsModel.hpp"
 #include "config/SimulationConfig.hpp"
 #include "nlohmann/json.hpp"
 #include "mesh/MeshBase.hpp"
@@ -37,7 +36,7 @@ public:
             "Neumann boundary flux not implemented for this verification case."
         );
     }
-    virtual ConvectiveData manufacturedConvectiveBoundary(const Face&) const
+    virtual ConvectiveData manufacturedRobinBoundary(const Face&) const
     {
         throw std::runtime_error(
             "Convective boundary data not implemented for this verification case."
