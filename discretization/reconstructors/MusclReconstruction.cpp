@@ -1,7 +1,5 @@
 #include "discretization/reconstructors/MusclReconstruction.hpp"
-
 #include "discretization/reconstructors/ReconstructionUtils.hpp"
-
 #include "mesh/MeshBase.hpp"
 #include "mesh/primitives/Face.hpp"
 #include "fields/ScalarField.hpp"
