@@ -4,6 +4,7 @@
 #include "test/verification/VerificationCaseFactory.hpp"
 #include "test/verification/VerificationIO.hpp"
 #include "test/verification/ErrorMetrics.hpp"
+#include "test/verification/VerificationSummary.hpp"
 
 #include "config/PathContext.hpp"
 #include "config/SimulationConfig.hpp"
@@ -25,40 +26,7 @@
 #include <filesystem>
 #include <iomanip>
 
-// Verficiation Case Dictionary
-struct VerificationSummary
-{
-    std::string caseName;
-    std::string solver;
-    std::string meshType;
-    std::string meshSize;
-    std::string gradient;
-    std::string reconstruction;
 
-    double l2;
-    double linf;
-
-    double l2Tol;
-    double linfTol;
-
-    // Individual verification checks
-    bool accuracyPassed = false;
-
-    bool refinementEnabled = false;
-    bool refinementPassed = false;
-    double observedOrder = 0.0;
-
-    // Overall case status
-    bool passed() const
-    {
-        if (refinementEnabled)
-        {
-            return accuracyPassed && refinementPassed;
-        }
-
-        return accuracyPassed;
-    }
-};
 
 // Mesh Refinement studies
 struct RefinementLevel
@@ -202,10 +170,16 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
         RefinementSummary refinement;
         refinement.caseName = caseName;
 
-        VerificationSummary finestSummary;      // Added
-        bool finestSummaryValid = false;        // Added
+        VerificationSummary finestSummary;      
 
         const int nLevels = refinementEnabled ? refinementLevels.size() : 1;
+
+        if (refinementEnabled && refinementLevels.size() < 2)
+        {
+            throw std::runtime_error(
+                "Refinement is enabled for case '" + caseName +
+                "' but fewer than two refinement levels were provided.");
+        }
 
         for (int level = 0; level < nLevels; ++level)
         {
@@ -349,7 +323,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             // all .csv files are named solution.csv to simplify plotting. They are nested under their test, so this shouldn't be confusing.
             auto csvPath = levelOutputDir / ("solution.csv");       
             auto vtkPath = levelOutputDir / (caseName + ".vtu");
-            auto jsonPath = levelOutputDir / (caseName + ".json");
+            // auto jsonPath = levelOutputDir / (caseName + ".json");
             // -------------------------------------------------
             // Write outputs
             // -------------------------------------------------
@@ -364,11 +338,9 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                     output,
                     levelOutputDir);
 
-                VerificationIO::writeReport(
-                    caseName,
-                    norms.l2_rms,
-                    norms.linf,
-                    jsonPath);
+                // VerificationIO::writeReport(
+                //     finestSummary,
+                //     jsonPath);
             }
             
             // -------------------------------------------------
@@ -386,7 +358,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                     << "L2 Norm   : " << norms.l2_rms << "\n"
                     << "Linf Norm : " << norms.linf << "\n"
                     << "CSV Output: " << csvPath << "\n"
-                    << "JSON Output: " << jsonPath << "\n"
+                    // << "JSON Output: " << jsonPath << "\n"
                     << "VTK Output: " << vtkPath << "\n"
                     << "=============================================\n";
             
@@ -410,22 +382,21 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                 finestSummary.meshType = meshType;
                 finestSummary.meshSize = meshSize;
                 finestSummary.gradient = gradientToString(levelCfg.discretization.gradientScheme);
-                std::cout << "Reconstruction scheme: " << reconstructionToString(levelCfg.discretization.reconstructionScheme) << '\n';
+                // std::cout << "Reconstruction scheme: " << reconstructionToString(levelCfg.discretization.reconstructionScheme) << '\n';
                 finestSummary.reconstruction = reconstructionToString(levelCfg.discretization.reconstructionScheme);
 
-                finestSummary.l2 = norms.l2_rms;
-                finestSummary.linf = norms.linf;
+                finestSummary.l2Error = norms.l2_rms;
+                finestSummary.linfError = norms.linf;
 
-                finestSummary.l2Tol = l2_tol;
-                finestSummary.linfTol = linf_tol;
+                finestSummary.l2AcceptanceTol = l2_tol;
+                finestSummary.linfAcceptanceTol = linf_tol;
 
                 finestSummary.accuracyPassed = passed;
 
                 finestSummary.refinementEnabled = refinementEnabled;
                 finestSummary.refinementPassed = false;
-                finestSummary.observedOrder = 0.0;
-
-                finestSummaryValid = true;
+                finestSummary.l2Order = 0.0;
+                finestSummary.linfOrder = 0.0;
             }
         }
 
@@ -434,7 +405,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             std::size_t validL2 = 0;
             std::size_t validLinf = 0;
 
-            constexpr double orderTolerance = 0.1;                      // Increased to 10% as we were within 5% + numerical noise (+/- 0.000897)
+            constexpr double orderTolerance = 0.1;
 
             for (std::size_t i = 1; i < refinement.levels.size(); ++i)
             {
@@ -460,42 +431,62 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                 }
             }
 
-            if (validL2 > 0)  {  refinement.observedOrderL2 /= static_cast<double>(validL2);  }
-
-            if (validLinf > 0) { refinement.observedOrderLinf /= static_cast<double>(validLinf); }
-
-            refinement.passed = validL2 > 0 && validLinf > 0 && std::abs(refinement.observedOrderL2   - expectedOrder) <= orderTolerance && std::abs(refinement.observedOrderLinf - expectedOrder) <= orderTolerance;
-
-            for (auto& s : summary)
+            if (validL2 > 0)
             {
-                if (s.caseName == caseName  && s.refinementEnabled)
-                {
-                    s.refinementPassed = refinement.passed;
-                    s.observedOrder = refinement.observedOrderL2;
-                }
+                refinement.observedOrderL2 /=
+                    static_cast<double>(validL2);
             }
+
+            if (validLinf > 0)
+            {
+                refinement.observedOrderLinf /=
+                    static_cast<double>(validLinf);
+            }
+
+            refinement.passed =
+                validL2 > 0 &&
+                validLinf > 0 &&
+                std::abs(
+                    refinement.observedOrderL2 - expectedOrder)
+                    <= orderTolerance &&
+                std::abs(
+                    refinement.observedOrderLinf - expectedOrder)
+                    <= orderTolerance;
+
+            // Populate the case-level verification summary.
+            finestSummary.refinementPassed = refinement.passed;
+            finestSummary.l2Order =
+                refinement.observedOrderL2;
+            finestSummary.linfOrder =
+                refinement.observedOrderLinf;
 
             std::cout
                 << "\n================ REFINEMENT STUDY ================\n"
                 << "Case: " << refinement.caseName << "\n"
-                << "Observed L2 Order   : " << refinement.observedOrderL2 << "\n"
-                << "Observed Linf Order : " << refinement.observedOrderLinf << "\n"
-                << "Expected Order      : " << expectedOrder << "\n"
+                << "Observed L2 Order   : "
+                << refinement.observedOrderL2 << "\n"
+                << "Observed Linf Order : "
+                << refinement.observedOrderLinf << "\n"
+                << "Expected Order      : "
+                << expectedOrder << "\n"
                 << "Status              : "
                 << (refinement.passed ? "PASS" : "FAIL")
                 << "\n"
                 << "==================================================\n";
 
             refinementSummary.push_back(std::move(refinement));
-            finestSummary.refinementPassed = refinement.passed;
-            finestSummary.observedOrder = refinement.observedOrderL2;
         }
-        if (finestSummaryValid)
-        {
-            summary.push_back(finestSummary);
-        }
-    }
+    
+        const auto jsonPath = caseOutputDir / (caseName + ".json");
 
+        VerificationIO::writeReport(
+            finestSummary,
+            jsonPath);
+
+        std::cout << "JSON Output: " << jsonPath << "\n";
+
+        summary.push_back(finestSummary);
+    }
     std::size_t l2PassedCount = 0;
     std::size_t refinementPassedCount = 0;
 
@@ -537,10 +528,11 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             << std::setw(14) << "L2 Error"
             << std::setw(12) << "Accuracy"
             << std::setw(14) << "Convergence"
-            << std::setw(10) << "Order"
+            << std::setw(12) << "L2 Order"
+            << std::setw(13) << "Linf Order"
             << "\n";
 
-    std::cout << std::string(130, '-') << "\n";
+    std::cout << std::string(143, '-') << "\n";
 
     std::cout << std::scientific << std::setprecision(3);
 
@@ -552,22 +544,26 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                 << std::setw(20) << s.reconstruction
                 << std::setw(16) << s.gradient
                 << std::setw(10) << s.meshSize
-                << std::setw(14) << s.l2
+                << std::setw(14) << s.l2Error
                 << std::setw(12) << (s.accuracyPassed ? "PASS" : "FAIL");
 
         if (s.refinementEnabled)
         {
             std::cout << std::setw(14)
                     << (s.refinementPassed ? "PASS" : "FAIL")
-                    << std::setw(10)
-                    << s.observedOrder;
+                    << std::setw(12)
+                    << s.l2Order
+                    << std::setw(13)
+                    << s.linfOrder;
         }
         else
         {
             std::cout << std::setw(14)
-                    << "N/A"
-                    << std::setw(10)
-                    << "N/A";
+                    << "--"
+                    << std::setw(12)
+                    << "--"
+                    << std::setw(13)
+                    << "--";
         }
 
         std::cout << "\n";

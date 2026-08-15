@@ -985,10 +985,10 @@ Recommended immediate order:
 4. ~~Complete user/verification plotting infrastructure~~
 5. ~~Implement second-order upwind reconstruction~~
 6. ~~Verify second-order upwind with MMS~~
-7. **Implement QUICK**
-8. **Implement MUSCL**
-9. **Add bounded/TVD reconstruction**
-10. **Add flux limiter framework**
+7. ~~**Implement QUICK**~~
+8. ~~**Implement MUSCL**~~
+9. ~~**Add bounded/TVD reconstruction**~~
+10. ~~**Add flux limiter framework**~~
 11. **Strengthen automated verification**
 12. **Begin nonlinear solver infrastructure**
 
@@ -1055,8 +1055,8 @@ Recommended immediate order:
 9. **Add higher-order convection schemes**
 
    * ~~Second-order upwind~~
-   * QUICK
-   * MUSCL
+   * ~~QUICK~~
+   * ~~MUSCL~~
    * TVD / flux limiters
 
 10. **Strengthen numerical verification**

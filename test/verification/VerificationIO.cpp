@@ -1,4 +1,5 @@
 #include "test/verification/VerificationIO.hpp"
+#include "test/verification/VerificationSummary.hpp"
 
 #include "simulation/Simulation.hpp"
 
@@ -44,17 +45,37 @@ void VerificationIO::writeVTK(
 }
 
 void VerificationIO::writeReport(
-    const std::string& caseName,
-    double l2,
-    double linf,
+    const VerificationSummary& result,
     const std::filesystem::path& file)
 {
     nlohmann::json j;
 
-    j["verification"]["case"] = caseName;
+    j["verification"]["case"] = result.caseName;
+    j["verification"]["solver"] = result.solver;
 
-    j["error"]["L2"] = l2;
-    j["error"]["Linf"] = linf;
+    j["verification"]["mesh"]["type"] = result.meshType;
+    j["verification"]["mesh"]["size"] = result.meshSize;
+
+    j["verification"]["gradient"] = result.gradient;
+    j["verification"]["reconstruction"] = result.reconstruction;
+
+    j["accuracy"]["L2"] = result.l2Error;
+    j["accuracy"]["Linf"] = result.linfError;
+
+    j["accuracy"]["L2Tolerance"] = result.l2AcceptanceTol;
+    j["accuracy"]["LinfTolerance"] = result.linfAcceptanceTol;
+    j["accuracy"]["passed"] = result.accuracyPassed;
+
+    j["refinement"]["enabled"] = result.refinementEnabled;
+
+    if (result.refinementEnabled)
+    {
+        j["refinement"]["L2Order"] = result.l2Order;
+        j["refinement"]["LinfOrder"] = result.linfOrder;
+        j["refinement"]["passed"] = result.refinementPassed;
+    }
+
+    j["passed"] = result.passed();
 
     std::ofstream out(file);
 

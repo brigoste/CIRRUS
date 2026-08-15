@@ -1,5 +1,6 @@
 #pragma once
 
+#include "test/verification/VerificationSummary.hpp"
 #include <filesystem>
 #include <string>
 
@@ -21,8 +22,6 @@ public:
         const std::filesystem::path& path);
 
     static void writeReport(
-        const std::string& caseName,
-        double l2,
-        double linf,
+        const VerificationSummary& result,
         const std::filesystem::path& file);
 };
