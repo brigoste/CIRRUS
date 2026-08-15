@@ -38,7 +38,7 @@
       "method": "BiCGSTAB",
       "tol": 1e-8,
       "max_iter": 5000,
-      "preconditioner": "None",
+      "preconditioner": "Jacobi",
       "Preconditioner Options": "None, Jacobi, ILU0"
     },
 

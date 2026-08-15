@@ -26,31 +26,7 @@
 #include <filesystem>
 #include <iomanip>
 
-
-
-// Mesh Refinement studies
-struct RefinementLevel
-{
-    std::size_t nx;
-    std::size_t ny;
-
-    double h;
-
-    double l2;
-    double linf;
-};
-
-struct RefinementSummary
-{
-    std::string caseName;
-
-    std::vector<RefinementLevel> levels;
-
-    double observedOrderL2 = 0.0;
-    double observedOrderLinf = 0.0;
-
-    bool passed = true;
-};
+#include "test/verification/VerificationTools.hpp"
 
 SimulationConfig VerificationRunner::applyVerificationOverrides(
     const SimulationConfig& base,
