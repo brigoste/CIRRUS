@@ -170,10 +170,11 @@ Optimization notes:
 * [x] Verification result reporting
 * [x] Multiple mesh refinement execution
 * [x] Solver/preconditioner reporting
+* [x] Richardson extrapolation
+* [x] Grid Convergence Index (GCI)
 * [ ] Refactor verification to consume Field objects
 * [ ] Automated regression verification
-* [ ] Richardson extrapolation
-* [ ] Grid Convergence Index (GCI)
+* [ ] Improve verification diagnostics/reporting
 
 Future:
 
@@ -202,6 +203,25 @@ Advection-Diffusion:
     Upwind convection          ~1st order
     Central convection         ~2nd order
 ```
+
+---
+
+## Visualization
+
+* [x] Python/Pyplot visualization
+* [x] 1D plotting
+* [x] 2D plotting
+* [x] VTK output
+* [x] Paraview-compatible output
+* [x] Visualization backend selection
+* [x] Disable visualization
+* [x] User simulation visualization
+* [x] Verification visualization
+* [ ] Configuration-based visualization selection
+* [ ] Robust Paraview process launching
+* [ ] Cross-platform Paraview executable discovery
+* [ ] Visualization backend abstraction
+* [ ] GUI visualization integration
 
 ---
 
@@ -428,13 +448,31 @@ Future:
 * [ ] Under-relaxation framework
 * [ ] Residual history output
 * [ ] Adaptive stopping criteria
+* [ ] Nonlinear iteration state management
+* [ ] Solution-dependent matrix reassembly
+* [ ] Nonlinear convergence diagnostics
 
 Future:
 
 * Automatic relaxation tuning
 * Solver selection
+* Nonlinear acceleration
 
 ### TVD / nonlinear discretization dependency
+
+Current status:
+
+* [x] Flux limiter interface
+* [x] Minmod limiter
+* [x] TVD reconstruction
+* [x] Limiter unit verification
+* [x] Reconstruction stencil verification
+* [ ] Nonlinear iteration framework
+* [ ] TVD solver-level verification
+* [ ] TVD boundedness / overshoot verification
+* [ ] TVD accuracy on smooth nonlinear fields
+* [ ] TVD behavior near discontinuities
+* [ ] Additional flux limiters
 
 - TVD reconstruction depends on the current solution field.
 - The current linear assembly begins from a locally flat field, so the limiter may legitimately remain inactive.
@@ -623,7 +661,7 @@ Future:
 
 ---
 
-# Case Management / Execution
+# Configuration & Execution Infrastructure
 
 ## Configuration System
 
@@ -635,10 +673,12 @@ Future:
 * [x] Command-line configuration selection
 * [x] Default user case
 * [x] Verification-suite command-line selection
+* [x] Visualization selection
 * [ ] Configuration validation/error reporting improvements
 * [ ] Case discovery / case listing
 * [ ] Cleaner path-resolution abstraction
 * [ ] Cross-platform Python executable handling
+* [ ] Cross-platform visualization executable handling
 
 Current execution model:
 
@@ -691,10 +731,14 @@ Design goals:
 * [x] User simulation output
 * [x] Project-level output directory
 * [x] CSV output for verification workflows
+* [x] JSON output
+* [x] Python/Pyplot visualization
+* [x] ParaView-compatible VTK output
 * [ ] Restart files
 * [ ] Probe output
 * [ ] Case management system
 * [ ] Geometry input format
+* [ ] Selective field output
 
 Optimization notes:
 
@@ -707,12 +751,24 @@ Optimization notes:
 
 # User Interface / Case Setup
 
+## Configuration
+
 * [x] Basic JSON-based user case setup
 * [ ] Solver selection interface
 * [ ] Geometry definition interface
 * [ ] Boundary condition editor
 * [ ] Material property database
 * [ ] Simulation setup GUI
+
+## Visualization
+
+* [x] Pyplot visualization
+* [x] ParaView-compatible VTK output
+* [x] Visualization mode selection
+* [ ] GUI visualization controls
+* [ ] Integrated result viewer
+* [ ] Interactive field selection
+* [ ] Interactive mesh/result controls
 
 ---
 
@@ -769,56 +825,9 @@ Optimization notes:
 
 ## Updated Current Worklist
 
-### 1. Finish contribution / assembly cleanup
-
-* [x] Refactor `SourceContribution` so sources are accumulated as contribution objects
-* [x] Refactor `MatrixContribution` so matrix terms are accumulated as contribution objects
-* [x] Apply source contributions during `FiniteVolumeAssembler` assembly
-* [x] Apply matrix contributions during `FiniteVolumeAssembler` assembly
-* [x] Preserve boundary-diffusion contributions through the contribution pathway
-* [x] Verify refactored assembly against the verification suite
-* [x] Ensure flux builders do not directly mutate the final algebraic system
-* [x] Audit remaining addSource() usage; retain contribution-based insertion where appropriate
-* [x] Audit `addMatrixContribution()` usage for unnecessary temporary or duplicated contributions
-* [x] Remove remaining redundant/legacy contribution pathways
-
-**Current architecture:**
-
-```text
-Flux construction
-      ↓
-Contribution objects
-      ↓
-FluxAccumulator
-      ↓
-FiniteVolumeAssembler
-      ↓
-EquationSystem
-      ↓
-LinearSystem
-      ↓
-Solver
-```
-
 ---
 
-### 2. Finish plotting / output integration
-
-* [x] Integrate plotting into `SimulationRunner`
-* [x] Integrate plotting into `VerificationRunner`
-* [x] Use configured Python executable
-* [x] Handle Windows/MSYS2 path conversion
-* [x] Remove duplicate plotting invocation from `build.sh`
-* [x] Use `solution.csv` consistently for plotting
-* [x] Verify user-case plotting
-* [x] Verify verification-case plotting
-* [x] Remove remaining plotting/debug diagnostics
-* [x] Decide whether plot failures should be warnings or fatal errors
-* [x] Eventually replace `std::system()` with a more robust process-launch mechanism if portability becomes important
-
----
-
-### 3. Strengthen verification infrastructure
+### 1. Strengthen verification infrastructure
 
 * [x] Verify contribution-based assembly with all verification cases
 * [x] Verify multiple reconstruction schemes
@@ -842,7 +851,7 @@ and you also successfully switched reconstruction and gradient schemes while ret
 
 ---
 
-### 4. Next major development target: higher-order convection
+### 2. Next major development target: higher-order convection
 
 * Reconstruction schemes
   * [x] Implement second-order upwind reconstruction
@@ -870,7 +879,7 @@ and you also successfully switched reconstruction and gradient schemes while ret
 
 ---
 
-### 5. Then move toward nonlinear solver infrastructure
+### 3. Then move toward nonlinear solver infrastructure
 
 * [ ] Residual evaluation
 * [ ] Iteration controller
@@ -886,38 +895,50 @@ and you also successfully switched reconstruction and gradient schemes while ret
 ### Numerical Discretization Infrastructure
 
 The following are now effectively complete:
-
-* Gradient infrastructure
+ 
+* Generic face-based finite-volume assembly
+* Contribution-based algebraic assembly
+* Scalar/vector field infrastructure
+* FieldRegistry
 * Gradient scheme selection
-* Green-Gauss verification
-* Least-squares verification
+* Green-Gauss gradient
+* Least-squares gradient
 * Reconstruction framework
 * Central reconstruction
 * Gradient reconstruction
 * Upwind reconstruction
-* **Second-order upwind reconstruction**
-* **Second-order upwind stencil construction**
-* **Second-order upwind boundary fallback**
-* **Second-order upwind MMS verification**
-* **Second-order upwind refinement verification**
-* Convection/discretization separation
+* Second-order upwind reconstruction
+* QUICK reconstruction
+* MUSCL reconstruction
+* TVD reconstruction framework
+* Flux limiter framework
+* Minmod limiter
 * Upwind convection
 * Central convection
-* Second-order Advection-Diffusion verification
-* Face-based diffusion assembly
-* Face-based convection assembly
-* Boundary diffusion handling
-* `SourceContribution`
-* `MatrixContribution`
-* Contribution-based flux accumulation
-* Contribution-based algebraic assembly
-* Refactored contribution insertion pathway
-* Verification of the refactored assembly pathway
+* Higher-order convection infrastructure
+* GMRES
+* CG
+* BiCGSTAB
+* TDMA
+* Gauss-Seidel
+* SOR
+* Jacobi preconditioning
+* ILU(0) preconditioning
+* MMS verification
+* Mesh refinement studies
+* Observed-order calculations
+* Regression analysis
+* Richardson extrapolation
+* Grid Convergence Index
+* Verification JSON reporting
 * User-case execution
 * Verification-suite execution
 * User-case plotting
 * Verification-case plotting
-* Cross-platform Python/plotting execution
+* Pyplot visualization
+* VTK output
+* ParaView-compatible output
+* Visualization mode selection
 
 ### Current Verification Status
 
@@ -973,24 +994,57 @@ No upstream cell available
 
 This establishes the current numerical infrastructure as a verified baseline for further higher-order convection development.
 
-### Immediate Priority
+## Immediate Development Worklist
 
-The contribution/assembly refactor is complete and should no longer block numerical development.
+### 1. Verification automation
 
-Recommended immediate order:
+* [ ] Automated regression verification
+* [ ] Baseline result storage
+* [ ] Numerical regression thresholds
+* [ ] Automatic pass/fail criteria
+* [ ] Verification failure diagnostics
+* [ ] Verification summary improvements
 
-1. ~~Finish contribution/assembly cleanup~~
-2. ~~Verify refactored assembly pathway~~
-3. ~~Complete user/verification case execution infrastructure~~
-4. ~~Complete user/verification plotting infrastructure~~
-5. ~~Implement second-order upwind reconstruction~~
-6. ~~Verify second-order upwind with MMS~~
-7. ~~**Implement QUICK**~~
-8. ~~**Implement MUSCL**~~
-9. ~~**Add bounded/TVD reconstruction**~~
-10. ~~**Add flux limiter framework**~~
-11. **Strengthen automated verification**
-12. **Begin nonlinear solver infrastructure**
+### 2. Verification analysis
+
+* [x] Observed order
+* [x] Regression analysis
+* [x] Richardson extrapolation
+* [x] Grid Convergence Index
+* [ ] Integrate Richardson/GCI into verification reports
+* [ ] Add GCI acceptance criteria
+* [ ] Add refinement-study diagnostics
+
+### 3. Visualization / execution
+
+* [x] Pyplot backend
+* [x] ParaView-compatible VTK output
+* [x] Visualization mode enum
+* [x] User simulation visualization selection
+* [ ] Configuration-based visualization selection
+* [ ] Cross-platform ParaView launching
+* [ ] Replace `std::system()` with robust process launching
+* [ ] Eventually integrate visualization into GUI
+
+### 4. Nonlinear solver
+
+* [ ] Residual evaluation
+* [ ] Iteration controller
+* [ ] Convergence criteria
+* [ ] Under-relaxation
+* [ ] Residual history
+* [ ] Solution-dependent reassembly
+* [ ] Nonlinear convergence diagnostics
+
+### 5. TVD verification
+
+* [ ] Nonlinear manufactured solution
+* [ ] TVD solver-level verification
+* [ ] Boundedness verification
+* [ ] Overshoot/undershoot analysis
+* [ ] Smooth-field accuracy verification
+* [ ] Discontinuity/sharp-gradient test
+* [ ] Additional flux limiters
 
 ---
 

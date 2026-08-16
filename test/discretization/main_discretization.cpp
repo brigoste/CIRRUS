@@ -10,6 +10,8 @@ void runQuickReconstructionTest();
 void runMusclReconstructionTest();
 void runMinmodLimiterTest();
 void runTVDReconstructionTest();
+void runInterpolatorTest();
+void runPointValueQoITest();
 
 int main()
 {
@@ -46,9 +48,21 @@ int main()
     std::cout << "\n---- TVD Reconstruction Test ----\n\n";
     runTVDReconstructionTest();
 
+    std::cout << "================================\n";
+    std::cout << " Running CIRRUS Interpolator Unit Tests\n";
+    std::cout << "================================\n\n";
+
+    std::cout << "\n---- Interpolator Test ----\n\n";
+    runInterpolatorTest();
+
+    std::cout << "\n---- PointValueQoI Test ----\n\n";
+    runPointValueQoITest();
+
+    std::cout << " ----- All Interpolator Tests Passed ------\n";
+
     std::cout << "\n==============================\n";
     std::cout << " COMPLETE\n";
     std::cout << "==============================\n";
-
+    
     return 0;
 }

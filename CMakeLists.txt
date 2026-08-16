@@ -34,6 +34,7 @@ file(GLOB_RECURSE CIRRUS_SOURCES
     ${PROJECT_SOURCE_DIR}/bc/*.cpp
     ${PROJECT_SOURCE_DIR}/discretization/*.cpp
     ${PROJECT_SOURCE_DIR}/fields/*.cpp
+    ${PROJECT_SOURCE_DIR}/interpolators/*.cpp
     ${PROJECT_SOURCE_DIR}/io/*.cpp
     ${PROJECT_SOURCE_DIR}/equation_systems/*.cpp
     ${PROJECT_SOURCE_DIR}/postprocessing/*.cpp
@@ -43,6 +44,7 @@ file(GLOB_RECURSE CIRRUS_SOURCES
     ${PROJECT_SOURCE_DIR}/solver/preconditioners/*.cpp
     ${PROJECT_SOURCE_DIR}/test/verification/*.cpp
     ${PROJECT_SOURCE_DIR}/test/verification/ManufacturedCases/*.cpp
+    ${PROJECT_SOURCE_DIR}/verification/*.cpp
     ${PROJECT_SOURCE_DIR}/utils/*.cpp
     ${PROJECT_SOURCE_DIR}/diagnostics/MemoryDiagnostics.cpp
 

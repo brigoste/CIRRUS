@@ -423,18 +423,18 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
 
     std::cout << std::left
             << std::setw(22) << "Case"
-            << std::setw(12) << "Solver"
-            << std::setw(20) << "Reconstruction"
+            << std::setw(10) << "Solver"
+            << std::setw(18) << "Reconstruction"
             << std::setw(16) << "Gradient"
             << std::setw(10) << "Mesh"
-            << std::setw(14) << "L2 Error"
-            << std::setw(12) << "Accuracy"
+            << std::setw(12) << "L2 Error"
+            << std::setw(10) << "Accuracy"
             << std::setw(14) << "Convergence"
             << std::setw(12) << "L2 Order"
             << std::setw(13) << "Linf Order"
             << "\n";
 
-    std::cout << std::string(143, '-') << "\n";
+    std::cout << std::string(136, '-') << "\n";
 
     std::cout << std::scientific << std::setprecision(3);
 
@@ -442,12 +442,12 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
     {
         std::cout << std::left
                 << std::setw(22) << s.caseName
-                << std::setw(12) << s.solver
-                << std::setw(20) << s.reconstruction
+                << std::setw(10) << s.solver
+                << std::setw(18) << s.reconstruction
                 << std::setw(16) << s.gradient
                 << std::setw(10) << s.meshSize
-                << std::setw(14) << s.l2Error
-                << std::setw(12) << (s.accuracyPassed ? "PASS" : "FAIL");
+                << std::setw(12) << s.l2Error
+                << std::setw(10) << (s.accuracyPassed ? "PASS" : "FAIL");
 
         if (s.refinementEnabled)
         {

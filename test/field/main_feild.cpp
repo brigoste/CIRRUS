@@ -3,6 +3,7 @@
 void runScalarFieldTest();
 void runVectorFieldTest();
 void runFieldRegistryTest();
+void runInterpolatorTest();
 
 int main()
 {

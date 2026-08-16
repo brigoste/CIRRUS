@@ -1,9 +1,28 @@
 #pragma once
 
-#include "VerificationTools.hpp"
+#include "test/verification/VerificationTools.hpp"
+#include "mesh/primitives/Point.hpp"
+#include "fields/ScalarField.hpp"
+#include "fields/VectorField.hpp"
 
 namespace VerificationAnalyzer
 {
+
+    enum class QuantityType
+    {
+        ScalarValue,
+        VectorMagnitude
+    };
+
+    struct QuantityOfInterest
+    {
+        QuantityType type;
+        Point evalPoint;
+
+        const ScalarField* scalarField = nullptr;
+        const VectorField* vectorField = nullptr;
+    };
+
     double observedOrder(
         double errorCoarse,
         double errorFine,
