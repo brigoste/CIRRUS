@@ -1,0 +1,23 @@
+{
+    "accuracy": {
+        "L2": 0.06249999999995665,
+        "L2Tolerance": 0.07,
+        "Linf": 0.06250000000002842,
+        "LinfTolerance": 0.07,
+        "passed": true
+    },
+    "passed": true,
+    "refinement": {
+        "enabled": false
+    },
+    "verification": {
+        "case": "Quadratic1D",
+        "gradient": "green_gauss",
+        "mesh": {
+            "size": "20x1",
+            "type": "line1D"
+        },
+        "reconstruction": "Central",
+        "solver": "CG"
+    }
+}

@@ -1,0 +1,26 @@
+{
+    "accuracy": {
+        "L2": 6.408925330620509e-05,
+        "L2Tolerance": 0.001,
+        "Linf": 0.00011921825553429244,
+        "LinfTolerance": 0.002,
+        "passed": true
+    },
+    "passed": true,
+    "refinement": {
+        "L2Order": 2.0006332762151633,
+        "LinfOrder": 1.9989374458289382,
+        "enabled": true,
+        "passed": true
+    },
+    "verification": {
+        "case": "Robin2D",
+        "gradient": "least_squares",
+        "mesh": {
+            "size": "256x256",
+            "type": "quad2D"
+        },
+        "reconstruction": "secondOrderUpwind",
+        "solver": "CG"
+    }
+}

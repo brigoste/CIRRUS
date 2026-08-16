@@ -147,7 +147,7 @@ struct VerificationSuite
 
     std::unordered_map<std::string, VerificationCaseConfig> caseConfigs;
 
-    std::string case_directory = "cases/verification";
+    std::string case_directory = "cases/verification/case_setup";
 
     std::string python_executable = "python3";
 
@@ -352,7 +352,7 @@ inline void from_json(const nlohmann::json& j, VerificationSuite& v)
         }
     }
 
-    v.case_directory = j.value( "case_directory", "cases/verification" );
+    v.case_directory = j.value( "case_directory", "cases/verification/case_setup" );
 
     if (j.contains("output")) { v.output.directory = j.at("output").value("directory", "verification"); }
 }

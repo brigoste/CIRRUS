@@ -1,0 +1,26 @@
+{
+    "accuracy": {
+        "L2": 0.000573058703754384,
+        "L2Tolerance": 0.01,
+        "Linf": 0.0011500979130287803,
+        "LinfTolerance": 0.02,
+        "passed": true
+    },
+    "passed": true,
+    "refinement": {
+        "L2Order": 0.9499046595362729,
+        "LinfOrder": 0.9583974187838952,
+        "enabled": true,
+        "passed": true
+    },
+    "verification": {
+        "case": "AdvectionDiffusion2D",
+        "gradient": "least_squares",
+        "mesh": {
+            "size": "40x40",
+            "type": "quad2D"
+        },
+        "reconstruction": "TVD",
+        "solver": "BiCGSTAB"
+    }
+}

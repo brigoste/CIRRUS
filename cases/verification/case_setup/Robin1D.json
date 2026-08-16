@@ -1,35 +1,30 @@
 {
-  "extends": "../base.json",
+  "extends": "../../base.json",
 
   "verificationCase": {
-    "name": "Quadratic1D",
+    "name": "Robin1D",
     "type": "manufactured",
 
     "mesh": {
       "type": "line1D",
-      "nx": 20,
+      "nx": 200,
       "lx": 1.0
     },
 
     "refinement": {
       "enabled": false,
-      "levels": [10, 20, 40, 80, 160],
+      "levels": [25,50,100,200],
       "expected_order": 2.0
-    },
-
-    "discretization": {
-        "gradientScheme": "green_gauss",
-        "reconstructionScheme": "Central"
     },
 
     "physics": {
       "type": "heat",
       "transferCoefficient": 100.0,
-      "volumetricSource": 20000.0
+      "volumetricSource": -200.0
     },
 
     "solver": {
-      "method": "CG",
+      "method": "TDMA",
       "tol": 1e-8,
       "max_iter": 5000
     },
@@ -38,12 +33,13 @@
       {
         "group": 0,
         "type": "Dirichlet",
-        "value": 100.0
+        "value": 1.0
       },
       {
         "group": 1,
-        "type": "Dirichlet",
-        "value": 200.0
+        "type": "Robin",
+        "transferCoefficient": 10.0,
+        "referenceValue": 84.0
       }
     ],
 
@@ -53,8 +49,8 @@
     },
 
     "output": {
-      "csv": "Quadratic1D.csv",
-      "summary": "Quadratic1D.json"
+      "csv": "Robin1D.csv",
+      "summary": "Robin1D.json"
     }
   }
 }

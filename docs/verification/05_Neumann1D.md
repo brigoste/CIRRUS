@@ -135,7 +135,7 @@ The refinement study demonstrates the expected second-order spatial convergence 
 
 ```json
 {
-  "extends": "../base.json",
+  "extends": "../../base.json",
 
   "verificationCase": {
     "name": "Neumann1D",

@@ -295,7 +295,7 @@ The following configuration was used:
 
 ```json
 {
-  "extends": "../base.json",
+  "extends": "../../base.json",
 
   "verificationCase": {
     "name": "Sinusoidal2D",

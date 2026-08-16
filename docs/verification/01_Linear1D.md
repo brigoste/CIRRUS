@@ -229,7 +229,7 @@ The following configuration was used to execute the verification case:
 
 ```json
 {
-  "extends": "../base.json",
+  "extends": "../../base.json",
 
   "verificationCase": {
     "name": "Linear1D",

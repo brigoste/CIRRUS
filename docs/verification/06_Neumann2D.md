@@ -216,7 +216,7 @@ Example configuration:
 
 ```json
 {
-  "extends": "../base.json",
+  "extends": "../../base.json",
 
   "verificationCase": {
     "name": "Neumann2D",

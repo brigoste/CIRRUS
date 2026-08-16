@@ -284,7 +284,7 @@ The following configuration was used:
 
 ```json
 {
-  "extends": "../base.json",
+  "extends": "../../base.json",
 
   "verificationCase": {
     "name": "Quadratic1D",

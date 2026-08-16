@@ -1,0 +1,23 @@
+{
+    "accuracy": {
+        "L2": 2.0490258817797977e-13,
+        "L2Tolerance": 1e-10,
+        "Linf": 2.7000623958883807e-13,
+        "LinfTolerance": 1e-10,
+        "passed": true
+    },
+    "passed": true,
+    "refinement": {
+        "enabled": false
+    },
+    "verification": {
+        "case": "Linear1D",
+        "gradient": "green_gauss",
+        "mesh": {
+            "size": "20x1",
+            "type": "line1D"
+        },
+        "reconstruction": "Gradient",
+        "solver": "TDMA"
+    }
+}

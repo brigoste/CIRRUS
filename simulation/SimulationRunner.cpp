@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <cmath>
 
+
 void SimulationRunner::validate(
     const SimulationConfig& cfg
 )
@@ -29,7 +30,8 @@ void SimulationRunner::validate(
 
 void SimulationRunner::run(
     const SimulationConfig& cfg,
-    const PathContext& paths)
+    const PathContext& paths,
+    VisualizationMode graphics_backend)
 {
     // Timer totalTimer("SimulationRunner::run");
     
@@ -109,9 +111,25 @@ void SimulationRunner::run(
     // -----------------------------
     if (cfg.io.plot_enabled) {
         // Timer time("Plotting");
-
         auto csvPath = paths.outputRoot / "solution.csv";
-        
-        runPlot(paths, csvPath); 
+
+        switch (graphics_backend){
+            case (VisualizationMode::Pyplot):
+            {
+                runPlot(paths, csvPath);
+                break;
+            }
+            case (VisualizationMode::Paraview):
+            {
+                const std::string cmd = "paraview ./output/solution.vtu";
+                const int ct = std::system(cmd.c_str()); 
+                break;
+            }
+            case (VisualizationMode::None):
+            {
+                std::cout << "No Figure Generation\n";
+                break;            
+            }
+        }
     }
 }

@@ -181,7 +181,7 @@ is therefore verified.
 
 ```json
 {
-  "extends": "../base.json",
+  "extends": "../../base.json",
 
   "verificationCase": {
     "name": "Robin1D",

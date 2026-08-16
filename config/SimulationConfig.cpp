@@ -55,7 +55,13 @@ VerificationSuite loadVerificationSuite(const std::filesystem::path& path)
 
     if (!j.contains("verificationSuite")) { throw std::runtime_error( "Verification suite missing 'verificationSuite'"); }
 
-    return j.at("verificationSuite").get<VerificationSuite>();
+    VerificationSuite suite = j.at("verificationSuite").get<VerificationSuite>();
+
+    std::cout << "Resolved case directory: "
+            << suite.case_directory
+            << "\n";
+
+    return suite;
 }
 
 VerificationCaseConfig loadVerificationCase(const std::filesystem::path& path)

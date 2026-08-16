@@ -1,0 +1,26 @@
+{
+    "accuracy": {
+        "L2": 1.0278089605963539e-05,
+        "L2Tolerance": 0.005,
+        "Linf": 2.055493885277926e-05,
+        "LinfTolerance": 0.005,
+        "passed": true
+    },
+    "passed": true,
+    "refinement": {
+        "L2Order": 2.000478873054057,
+        "LinfOrder": 2.0003981772925865,
+        "enabled": true,
+        "passed": true
+    },
+    "verification": {
+        "case": "Sinusoidal2D",
+        "gradient": "least_squares",
+        "mesh": {
+            "size": "50x50",
+            "type": "quad2D"
+        },
+        "reconstruction": "Upwind",
+        "solver": "GMRES"
+    }
+}

@@ -5,6 +5,7 @@
 #include "test/verification/VerificationIO.hpp"
 #include "test/verification/ErrorMetrics.hpp"
 #include "test/verification/VerificationSummary.hpp"
+#include "test/verification/VerificationAnalyzer.hpp"
 
 #include "config/PathContext.hpp"
 #include "config/SimulationConfig.hpp"
@@ -47,11 +48,7 @@ VerificationCaseConfig VerificationRunner::loadVerificationCase( const std::file
 {
     std::ifstream file(path);
 
-    if (!file.is_open())
-    {
-        throw std::runtime_error(
-            "Cannot open verification case: " + path.string());
-    }
+    if (!file.is_open()) { throw std::runtime_error( "Cannot open verification case: " + path.string()); }
 
     nlohmann::json j;
     file >> j;
@@ -71,10 +68,7 @@ VerificationCaseConfig VerificationRunner::loadVerificationCase( const std::file
     }
 
 
-    if (!j.contains("verificationCase"))
-    {
-        throw std::runtime_error("Missing verificationCase block");
-    }
+    if (!j.contains("verificationCase")) { throw std::runtime_error("Missing verificationCase block"); }
 
 
     return j["verificationCase"].get<VerificationCaseConfig>();
@@ -83,10 +77,7 @@ VerificationCaseConfig VerificationRunner::loadVerificationCase( const std::file
 void VerificationRunner::run( const SimulationConfig& baseCfg, const VerificationSuite& suite, const PathContext& paths)
 {
     Timer verificationTimer("Verification Suite");
-    if (!suite.enabled) 
-    { 
-        return; 
-    }
+    if (!suite.enabled) { return; }
 
     std::cout << "\n================ VERIFICATION MODE ================\n";
     std::cout << "Verification enabled: " << suite.enabled << "\n";
@@ -102,7 +93,6 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
     // -------------------------------------------------
     
     std::vector<VerificationSummary> summary;
-    std::vector<RefinementSummary> refinementSummary;
 
     for (const auto& caseEntry : suite.cases)
     {
@@ -117,10 +107,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
 
         std::cout << "Loading verification case: " << casePath << "\n";
 
-        if (!std::filesystem::exists(casePath)) 
-        { 
-            throw std::runtime_error( "Missing verification case file: " + casePath.string()); 
-        }
+        if (!std::filesystem::exists(casePath)) { throw std::runtime_error( "Missing verification case file: " + casePath.string()); }
 
         auto verificationCase = loadVerificationCase(casePath);
 
@@ -140,36 +127,28 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
         // -------------------------------------------------
 
         bool refinementEnabled = verificationCase.refinement.enabled;
-        const auto& refinementLevels = verificationCase.refinement.levels;
+        const auto& refinementMeshSizes = verificationCase.refinement.levels;
         double expectedOrder = verificationCase.refinement.expected_order;
+        std::vector<RefinementLevel> refinementLevels;
+        VerificationSummary finestSummary;     
 
-        RefinementSummary refinement;
-        refinement.caseName = caseName;
+        const std::size_t nLevels = refinementEnabled ? refinementMeshSizes.size() : 1;
 
-        VerificationSummary finestSummary;      
-
-        const int nLevels = refinementEnabled ? refinementLevels.size() : 1;
-
-        if (refinementEnabled && refinementLevels.size() < 2)
+        if (refinementEnabled && refinementMeshSizes.size() < 2)
         {
-            throw std::runtime_error(
-                "Refinement is enabled for case '" + caseName +
-                "' but fewer than two refinement levels were provided.");
+            throw std::runtime_error( "Refinement is enabled for case '" + caseName + "' but fewer than two refinement levels were provided.");
         }
 
-        for (int level = 0; level < nLevels; ++level)
+        for (std::size_t level = 0; level < nLevels; ++level)
         {
             SimulationConfig levelCfg = caseCfg;
             // Timer levelTimer(  "  Level " + std::to_string(level) +  " (" + std::to_string(levelCfg.mesh.nx) + "x" + std::to_string(levelCfg.mesh.ny) + ")" );
             
             if (refinementEnabled)
             {
-                levelCfg.mesh.nx = refinementLevels[level];
+                levelCfg.mesh.nx = refinementMeshSizes[level];
 
-                if (levelCfg.mesh.type == "quad2D") 
-                {
-                    levelCfg.mesh.ny = refinementLevels[level]; 
-                }
+                if (levelCfg.mesh.type == "quad2D") { levelCfg.mesh.ny = refinementMeshSizes[level]; } 
             }
 
             std::cout << "Creating simulation:"
@@ -260,7 +239,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             if (levelCfg.mesh.type == "line1D") { h = hx; }
             else if (levelCfg.mesh.type == "quad2D") { h = std::max(hx, hy); }
 
-            refinement.levels.push_back({
+            refinementLevels.push_back({
                 levelCfg.mesh.nx,
                 levelCfg.mesh.ny,
                 h,
@@ -378,79 +357,32 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
 
         if (refinementEnabled)
         {
-            std::size_t validL2 = 0;
-            std::size_t validLinf = 0;
+            GridConvergenceStudy study = VerificationAnalyzer::analyzeRefinement(refinementLevels);
 
             constexpr double orderTolerance = 0.1;
 
-            for (std::size_t i = 1; i < refinement.levels.size(); ++i)
-            {
-                const auto& coarse = refinement.levels[i - 1];
-                const auto& fine   = refinement.levels[i];
+            const double l2Order = study.l2Regression.slope;
 
-                if (coarse.l2 > 0.0 && fine.l2 > 0.0)
-                {
-                    refinement.observedOrderL2 +=
-                        std::log(coarse.l2 / fine.l2) /
-                        std::log(coarse.h / fine.h);
+            const double linfOrder = study.linfRegression.slope;
 
-                    ++validL2;
-                }
+            const bool refinementPassed =
+                std::abs(l2Order - expectedOrder) <= orderTolerance &&
+                std::abs(linfOrder - expectedOrder) <= orderTolerance;
 
-                if (coarse.linf > 0.0 && fine.linf > 0.0)
-                {
-                    refinement.observedOrderLinf +=
-                        std::log(coarse.linf / fine.linf) /
-                        std::log(coarse.h / fine.h);
-
-                    ++validLinf;
-                }
-            }
-
-            if (validL2 > 0)
-            {
-                refinement.observedOrderL2 /=
-                    static_cast<double>(validL2);
-            }
-
-            if (validLinf > 0)
-            {
-                refinement.observedOrderLinf /=
-                    static_cast<double>(validLinf);
-            }
-
-            refinement.passed =
-                validL2 > 0 &&
-                validLinf > 0 &&
-                std::abs(
-                    refinement.observedOrderL2 - expectedOrder)
-                    <= orderTolerance &&
-                std::abs(
-                    refinement.observedOrderLinf - expectedOrder)
-                    <= orderTolerance;
-
-            // Populate the case-level verification summary.
-            finestSummary.refinementPassed = refinement.passed;
-            finestSummary.l2Order =
-                refinement.observedOrderL2;
-            finestSummary.linfOrder =
-                refinement.observedOrderLinf;
+            finestSummary.refinementPassed = refinementPassed;
+            finestSummary.l2Order = l2Order;
+            finestSummary.linfOrder = linfOrder;
 
             std::cout
                 << "\n================ REFINEMENT STUDY ================\n"
-                << "Case: " << refinement.caseName << "\n"
-                << "Observed L2 Order   : "
-                << refinement.observedOrderL2 << "\n"
-                << "Observed Linf Order : "
-                << refinement.observedOrderLinf << "\n"
-                << "Expected Order      : "
-                << expectedOrder << "\n"
+                << "Case: " << caseName << "\n"
+                << "Observed L2 Order   : " << l2Order << "\n"
+                << "Observed Linf Order : " << linfOrder << "\n"
+                << "Expected Order      : " << expectedOrder << "\n"
                 << "Status              : "
-                << (refinement.passed ? "PASS" : "FAIL")
+                << (refinementPassed ? "PASS" : "FAIL")
                 << "\n"
                 << "==================================================\n";
-
-            refinementSummary.push_back(std::move(refinement));
         }
     
         const auto jsonPath = caseOutputDir / (caseName + ".json");
@@ -471,19 +403,13 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
 
     for (const auto& s : summary)
     {
-        if (s.accuracyPassed) 
-        { 
-            ++l2PassedCount; 
-        }
+        if (s.accuracyPassed) { ++l2PassedCount; }
 
-        if (s.refinementEnabled)
+        if (s.refinementEnabled) 
         {
             ++refinementTotal;
 
-            if (s.refinementPassed) 
-            { 
-                ++refinementPassedCount; 
-            }
+            if (s.refinementPassed) { ++refinementPassedCount; }
         }
     }
 

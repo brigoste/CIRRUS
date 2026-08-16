@@ -1,5 +1,5 @@
 {
-  "extends": "../base.json",
+  "extends": "../../base.json",
 
   "verificationCase": {
     "name": "Robin2D",
@@ -13,17 +13,17 @@
       "ly": 1.0
     },
 
-    "discretization": {
-        "gradientScheme": "least_squares",
-        "reconstructionScheme": "secondOrderUpwind"
-    },
-
     "refinement": {
       "enabled": true,
       "levels": [16,32,64,128,256],
       "expected_order": 2.0
     },
 
+    "discretization": {
+        "gradientScheme": "least_squares",
+        "reconstructionScheme": "secondOrderUpwind"
+    },
+    
     "physics": {
       "type": "heat",
       "transferCoefficient": 100.0,

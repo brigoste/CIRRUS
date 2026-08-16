@@ -1,0 +1,26 @@
+{
+    "accuracy": {
+        "L2": 0.0003124999999678447,
+        "L2Tolerance": 0.05,
+        "Linf": 0.00031250002585636594,
+        "LinfTolerance": 0.05,
+        "passed": true
+    },
+    "passed": true,
+    "refinement": {
+        "L2Order": 2.0000000001443587,
+        "LinfOrder": 1.999999962726462,
+        "enabled": true,
+        "passed": true
+    },
+    "verification": {
+        "case": "Neumann2D",
+        "gradient": "green_gauss",
+        "mesh": {
+            "size": "200x200",
+            "type": "quad2D"
+        },
+        "reconstruction": "Gradient",
+        "solver": "CG"
+    }
+}

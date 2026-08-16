@@ -64,9 +64,21 @@ int main(int argc, char* argv[])
         {
             std::cout << "Loading verification suite: " << configPath << "\n";
 
+            
             VerificationSuite suite = loadVerificationSuite(configPath);
 
-            suite.case_directory = configPath.parent_path().string();
+            std::filesystem::path caseDirectory = suite.case_directory;
+
+            if (caseDirectory.is_relative())
+            {
+                caseDirectory = configPath.parent_path() / caseDirectory;
+            }
+
+            suite.case_directory = std::filesystem::weakly_canonical(caseDirectory).string();
+
+            std::cout << "Resolved case directory (main): "
+                    << suite.case_directory
+                    << "\n";
 
             std::cout << "Verification cases loaded:\n";
 
@@ -106,7 +118,8 @@ int main(int argc, char* argv[])
 
         SimulationRunner::run(
             cfg,
-            paths
+            paths,
+            VisualizationMode::Paraview
         );
 
         std::cout << "\n================ SIMULATION COMPLETE ================\n";
