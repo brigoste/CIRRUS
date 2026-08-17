@@ -11,11 +11,30 @@
         "value": 0.003656742376482418
     },
     "refinement": {
+        "GCI": {
+            "Absolute": {
+                "L2": 0.0007464801555822112,
+                "Linf": 0.001487441463983696,
+                "QoI": 0.004573574840636485
+            },
+            "Relative": {
+                "L2": 1.3026242307713378,
+                "Linf": 1.293317216212721,
+                "QoI": 1.2507238327891201
+            }
+        },
         "L2Order": 0.9499046576674323,
         "LinfOrder": 0.958397417001026,
         "QoIOrder": 0.9992496126956557,
+        "Richardson": {
+            "L2": -2.4125418855641093e-05,
+            "Linf": -3.985523284864433e-05,
+            "QoI": -2.11749602677027e-06
+        },
         "enabled": true,
-        "passed": true
+        "passed": true,
+        "refinementRatio": 2.0,
+        "safetyFactor": 1.25
     },
     "verification": {
         "case": "AdvectionDiffusion2D",
