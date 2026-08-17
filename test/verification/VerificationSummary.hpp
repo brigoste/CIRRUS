@@ -13,6 +13,7 @@ struct VerificationSummary
 
     double l2Error;
     double linfError;
+    double qoiValue = 0.0;
 
     double l2AcceptanceTol;
     double linfAcceptanceTol;
@@ -24,6 +25,7 @@ struct VerificationSummary
     bool refinementPassed = false;
     double l2Order = 0.0;
     double linfOrder = 0.0;
+    double qoiOrder = 0.0;
 
     // Overall case status
     bool passed() const
