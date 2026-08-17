@@ -14,7 +14,8 @@ struct RefinementLevel
     double l2;
     double linf;
 
-    double qoi = 0.0;
+    double qoiValue = 0.0;
+    double qoiError;
 };
 
 struct RegressionResult
@@ -40,12 +41,16 @@ struct GridConvergenceStudy
 
     RegressionResult l2Regression;
     RegressionResult linfRegression;
+    RegressionResult qoiRegression;
 
     std::vector<double> l2Orders;
     std::vector<double> linfOrders;
+    std::vector<double> qoiOrders;
 
     std::vector<GCIResult> l2GCI;
     std::vector<GCIResult> linfGCI;
+
+    double qoiRichardson = 0.0;
 
     bool passed = true;
 };
