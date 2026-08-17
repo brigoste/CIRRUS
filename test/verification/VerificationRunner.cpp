@@ -26,6 +26,7 @@
 #include <iostream>
 #include <filesystem>
 #include <iomanip>
+#include <cmath>
 
 #include "test/verification/VerificationTools.hpp"
 
@@ -224,6 +225,8 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             }
 
             const auto& verifCase = *sim.verificationCase();
+            const double exactQoi = verifCase.exact(qoi_eval_point);
+            const double qoiError = std::abs(qoiValue - exactQoi);
 
             for (std::size_t c = 0; c < mesh.ncells(); ++c)
             {
@@ -250,7 +253,8 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                 h,
                 norms.l2_rms,
                 norms.linf,
-                qoiValue
+                qoiValue,
+                qoiError
             });
 
             std::vector<double> residual;
@@ -271,8 +275,10 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                     << norms.l2_rms
                     << " Linf="
                     << norms.linf
-                    << " qoi"
+                    << " qoi="
                     << qoiValue
+                    << " qoiError="
+                    << qoiError
                     << "\n";
 
             // -------------------------------------------------
@@ -350,6 +356,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
 
                 finestSummary.l2Error = norms.l2_rms;
                 finestSummary.linfError = norms.linf;
+                finestSummary.qoiValue = qoiValue;
 
                 finestSummary.l2AcceptanceTol = l2_tol;
                 finestSummary.linfAcceptanceTol = linf_tol;
@@ -365,13 +372,15 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
 
         if (refinementEnabled)
         {
-            GridConvergenceStudy study = VerificationAnalyzer::analyzeRefinement(refinementLevels);
+            GridConvergenceStudy study =
+                VerificationAnalyzer::analyzeRefinement(refinementLevels);
 
             constexpr double orderTolerance = 0.1;
 
             const double l2Order = study.l2Regression.slope;
-
             const double linfOrder = study.linfRegression.slope;
+            const double qoiOrder = study.qoiRegression.slope;
+            const double qoiRichardson = study.qoiRichardson;
 
             const bool refinementPassed =
                 std::abs(l2Order - expectedOrder) <= orderTolerance &&
@@ -380,6 +389,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             finestSummary.refinementPassed = refinementPassed;
             finestSummary.l2Order = l2Order;
             finestSummary.linfOrder = linfOrder;
+            finestSummary.qoiOrder = qoiOrder;
 
             std::cout
                 << "\n================ REFINEMENT STUDY ================\n"
@@ -390,6 +400,8 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                 << "Status              : "
                 << (refinementPassed ? "PASS" : "FAIL")
                 << "\n"
+                << "Observed QoI Order  : " << qoiOrder << "\n"
+                << "Richardson QOI      : " << qoiRichardson << "\n"
                 << "==================================================\n";
         }
     
@@ -440,9 +452,10 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             << std::setw(14) << "Convergence"
             << std::setw(12) << "L2 Order"
             << std::setw(13) << "Linf Order"
+            << std::setw(10) << "QoI"
             << "\n";
 
-    std::cout << std::string(136, '-') << "\n";
+    std::cout << std::string(146, '-') << "\n";
 
     std::cout << std::scientific << std::setprecision(3);
 
@@ -464,7 +477,9 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                     << std::setw(12)
                     << s.l2Order
                     << std::setw(13)
-                    << s.linfOrder;
+                    << s.linfOrder
+                    << std::setw(10)
+                    << s.qoiValue;
         }
         else
         {
@@ -473,7 +488,9 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                     << std::setw(12)
                     << "--"
                     << std::setw(13)
-                    << "--";
+                    << "--"
+                    << std::setw(10)
+                    << s.qoiValue;
         }
 
         std::cout << "\n";
