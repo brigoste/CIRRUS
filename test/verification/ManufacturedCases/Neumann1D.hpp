@@ -43,11 +43,11 @@ public:
 
     void initialize(const MeshBase&) override {}
 
-    double exact(double x, double y = 0.0) const override;
+    double exact(Point p) const override;
 
-    double source(double x, double y = 0.0) const override;
+    double source(Point p) const override;
 
-    double laplacian(double x, double y = 0.0) const override;
+    double laplacian(Point p) const override;
 
     double l2AcceptanceThreshold() const override       { return 1e-3; }
     double linfAcceptanceThreshold() const override     { return 1e-3; }
