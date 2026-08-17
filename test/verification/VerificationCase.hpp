@@ -18,9 +18,9 @@ public:
 
     virtual void initialize(const MeshBase& mesh) = 0;
 
-    virtual double exact(double x, double y) const = 0;
-    virtual double laplacian(double x, double y) const = 0;
-    virtual double source(double x, double y) const = 0;
+    virtual double exact( Point p ) const = 0;
+    virtual double laplacian( Point p ) const = 0;
+    virtual double source( Point p ) const = 0;
 
     virtual double manufacturedBoundaryFlux(const Face&) const
     {
