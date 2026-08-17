@@ -1,6 +1,7 @@
 #pragma once
 
 #include "interpolators/Interpolator.hpp"
+#include "fields/ScalarField.hpp"
 
 class LinearInterpolator : public Interpolator
 {
