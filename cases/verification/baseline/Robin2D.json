@@ -11,11 +11,30 @@
         "value": 111.19467031954328
     },
     "refinement": {
+        "GCI": {
+            "Absolute": {
+                "L2": 8.006715750551464e-05,
+                "Linf": 0.0001491613615903975,
+                "QoI": 0.00014576171065628607
+            },
+            "Relative": {
+                "L2": 1.249307068995133,
+                "Linf": 1.2511620667994097,
+                "QoI": 1.3108695788872482e-06
+            }
+        },
         "L2Order": 2.0006332752485956,
         "LinfOrder": 1.998937441696608,
         "QoIOrder": 2.008325632053598,
+        "Richardson": {
+            "L2": 3.55275446903546e-08,
+            "Linf": -1.1083166324076747e-07,
+            "QoI": 111.1947869289118
+        },
         "enabled": true,
-        "passed": true
+        "passed": true,
+        "refinementRatio": 2.0,
+        "safetyFactor": 1.25
     },
     "verification": {
         "case": "Robin2D",
