@@ -69,7 +69,7 @@ void DiffusionFluxBuilder::apply(
                 {
                     double value = bc->value;
 
-                    if (verificationCase) { value = verificationCase->exact( face.center.x[0], face.center.x[1] ); }
+                    if (verificationCase) { value = verificationCase->exact( face.center ); }
 
                     BoundaryDiffusion contribution({P, Face::INVALID, f, D, value});
                     flux.addBoundaryDiffusion( contribution );
