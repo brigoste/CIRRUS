@@ -1,15 +1,19 @@
 {
     "accuracy": {
-        "L2": 0.000573058703754384,
+        "L2": 0.0005730587056101278,
         "L2Tolerance": 0.01,
-        "Linf": 0.0011500979130287803,
+        "Linf": 0.0011500979383383125,
         "LinfTolerance": 0.02,
         "passed": true
     },
     "passed": true,
+    "qoi": {
+        "value": 0.003656742376482418
+    },
     "refinement": {
-        "L2Order": 0.9499046595362729,
-        "LinfOrder": 0.9583974187838952,
+        "L2Order": 0.9499046576674323,
+        "LinfOrder": 0.958397417001026,
+        "QoIOrder": 0.9992496126956557,
         "enabled": true,
         "passed": true
     },
