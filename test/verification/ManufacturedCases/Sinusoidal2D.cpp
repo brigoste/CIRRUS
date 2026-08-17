@@ -2,23 +2,21 @@
 #include "utils/MathConstants.hpp"
 
 double Sinusoidal2D::exact(
-    double x,
-    double y) const
+    Point p) const
 {
-    return std::sin(math::PI * x) *
-           std::sin(math::PI * y);
+    return std::sin(math::PI * p.x[0]) *
+           std::sin(math::PI * p.x[1]);
 }
 
-double Sinusoidal2D::source(double x, double y) const
+double Sinusoidal2D::source(Point p) const
 {
-    return -k_ * laplacian(x, y);
+    return -k_ * laplacian(p);
 }
 
 double Sinusoidal2D::laplacian(
-    double x,
-    double y) const
+    Point p) const
 {
     return -2.0 * math::PI * math::PI *
-           std::sin(math::PI * x) *
-           std::sin(math::PI * y);
+           std::sin(math::PI * p.x[0]) *
+           std::sin(math::PI * p.x[1]);
 }
