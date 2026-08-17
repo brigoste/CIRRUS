@@ -93,6 +93,8 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
     // -------------------------------------------------
     
     std::vector<VerificationSummary> summary;
+    Point qoi_eval_point;
+    qoi_eval_point.x[0] = 0.2676;
 
     for (const auto& caseEntry : suite.cases)
     {
@@ -203,6 +205,8 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
 
             auto& solution = sim.solution();
 
+            const double qoiValue = solution(qoi_eval_point);
+
             // -------------------------------------------------
             // Exact solution evaluation
             // -------------------------------------------------
@@ -244,7 +248,8 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                 levelCfg.mesh.ny,
                 h,
                 norms.l2_rms,
-                norms.linf
+                norms.linf,
+                qoiValue
             });
 
             std::vector<double> residual;
