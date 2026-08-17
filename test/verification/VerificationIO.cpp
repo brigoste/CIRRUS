@@ -65,6 +65,8 @@ void VerificationIO::writeReport(
     j["accuracy"]["L2Tolerance"] = result.l2AcceptanceTol;
     j["accuracy"]["LinfTolerance"] = result.linfAcceptanceTol;
     j["accuracy"]["passed"] = result.accuracyPassed;
+    
+    j["qoi"]["value"] = result.qoiValue;
 
     j["refinement"]["enabled"] = result.refinementEnabled;
 
@@ -73,6 +75,7 @@ void VerificationIO::writeReport(
         j["refinement"]["L2Order"] = result.l2Order;
         j["refinement"]["LinfOrder"] = result.linfOrder;
         j["refinement"]["passed"] = result.refinementPassed;
+        j["refinement"]["QoIOrder"] = result.qoiOrder;
     }
 
     j["passed"] = result.passed();
