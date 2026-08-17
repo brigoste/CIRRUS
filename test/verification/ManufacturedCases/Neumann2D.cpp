@@ -1,20 +1,20 @@
 #include "test/verification/ManufacturedCases/Neumann2D.hpp"
 
-double Neumann2D::exact(double x, double y) const
+double Neumann2D::exact(Point p) const
 {
     return T0_
-         + a_*x
-         + b_*y
-         + c_*x*x
-         + d_*y*y;
+         + a_*p.x[0]
+         + b_*p.x[1]
+         + c_*(p.x[0]*p.x[0])
+         + d_*(p.x[1]*p.x[1]);
 }
 
-double Neumann2D::source(double x, double y) const
+double Neumann2D::source(Point p) const
 {
-    return -k_ * laplacian(x,y);
+    return -k_ * laplacian(p);
 }
 
-double Neumann2D::laplacian(double, double) const
+double Neumann2D::laplacian(Point) const
 {
     return 2.0*c_ + 2.0*d_;
 }
