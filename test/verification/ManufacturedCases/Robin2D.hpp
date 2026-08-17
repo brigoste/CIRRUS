@@ -25,11 +25,11 @@ public:
 
     void initialize(const MeshBase&) override {}
 
-    double exact(double x, double y) const override;
+    double exact(Point p) const override;
 
-    double laplacian(double x, double y) const override;
+    double laplacian(Point p) const override;
 
-    double source(double x, double y) const override;
+    double source(Point p) const override;
 
     double manufacturedBoundaryFlux(const Face& face) const override;
 
