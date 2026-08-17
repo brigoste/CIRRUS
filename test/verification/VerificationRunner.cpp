@@ -206,6 +206,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             auto& solution = sim.solution();
 
             const double qoiValue = solution(qoi_eval_point);
+            // std::cout << "Level " << level << ": QoI = " << qoiValue << "\n";
 
             // -------------------------------------------------
             // Exact solution evaluation
@@ -270,6 +271,8 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                     << norms.l2_rms
                     << " Linf="
                     << norms.linf
+                    << " qoi"
+                    << qoiValue
                     << "\n";
 
             // -------------------------------------------------
