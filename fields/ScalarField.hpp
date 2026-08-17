@@ -16,9 +16,12 @@ public:
         double initialValue = 0.0
     );
 
-    // value access
+    // Value access
     double& operator[](std::size_t i);
     const double& operator[](std::size_t i) const;
+
+    // Spatial evaluation
+    double operator()(const Point& position) const;
 
     // FieldBase interface
     std::size_t size() const override;
