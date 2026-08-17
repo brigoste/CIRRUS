@@ -7,9 +7,13 @@
         "passed": true
     },
     "passed": true,
+    "qoi": {
+        "value": 103.58020000000491
+    },
     "refinement": {
         "L2Order": 2.000000006445698,
         "LinfOrder": 1.9999999998497318,
+        "QoIOrder": 1.7541332968874686,
         "enabled": true,
         "passed": true
     },
