@@ -122,7 +122,8 @@ void SimulationRunner::run(
             case (VisualizationMode::Paraview):
             {
                 const std::string cmd = "paraview ./output/solution.vtu";
-                const int ct = std::system(cmd.c_str()); 
+                // const int ct = std::system(cmd.c_str()); 
+                std::system(cmd.c_str()); 
                 break;
             }
             case (VisualizationMode::None):
