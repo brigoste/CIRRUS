@@ -1,7 +1,9 @@
 #pragma once
 
-#include "fields/ScalarField.hpp"
+#include "mesh/MeshBase.hpp"
 #include "mesh/primitives/Point.hpp"
+
+class ScalarField;
 
 class Interpolator
 {
