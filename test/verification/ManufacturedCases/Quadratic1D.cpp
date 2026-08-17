@@ -1,19 +1,19 @@
 #include "test/verification/ManufacturedCases/Quadratic1D.hpp"
 #include <iostream>
 
-double Quadratic1D::exact(double x, double) const
+double Quadratic1D::exact(Point p) const
 {
     return TL_ 
-           + ((TR_ - TL_) / L_ + volumetricSource_ * L_ / (2.0 * k_)) * x 
-           - (volumetricSource_ / (2.0*k_)) * x * x;
+           + ((TR_ - TL_) / L_ + volumetricSource_ * L_ / (2.0 * k_)) * p.x[0] 
+           - (volumetricSource_ / (2.0*k_)) * p.x[0] * p.x[0];
 }
 
-double Quadratic1D::source(double , double ) const
+double Quadratic1D::source(Point) const
 {
     return volumetricSource_;
 }
 
-double Quadratic1D::laplacian( double, double) const
+double Quadratic1D::laplacian(Point) const
 {
     return -volumetricSource_/k_;
 }
