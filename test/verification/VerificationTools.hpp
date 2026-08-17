@@ -13,6 +13,8 @@ struct RefinementLevel
 
     double l2;
     double linf;
+
+    double qoi = 0.0;
 };
 
 struct RegressionResult
