@@ -11,11 +11,30 @@
         "value": 0.0058520760689337505
     },
     "refinement": {
+        "GCI": {
+            "Absolute": {
+                "L2": 1.2847317896890792e-05,
+                "Linf": 2.568860683432411e-05,
+                "QoI": 0.007316770592968382
+            },
+            "Relative": {
+                "L2": 1.2500203312012426,
+                "Linf": 1.249809530047256,
+                "QoI": 1.2502863098123569
+            }
+        },
         "L2Order": 2.000495820678637,
         "LinfOrder": 2.000417579885498,
         "QoIOrder": 0.9997452306460693,
+        "Richardson": {
+            "L2": -1.6716618062567062e-10,
+            "Linf": 3.1319381791623357e-09,
+            "QoI": -1.3404054409549629e-06
+        },
         "enabled": true,
-        "passed": true
+        "passed": true,
+        "refinementRatio": 2.0,
+        "safetyFactor": 1.25
     },
     "verification": {
         "case": "Sinusoidal2D",
