@@ -1,5 +1,7 @@
 #include "fields/ScalarField.hpp"
 
+#include "interpolators/LinearInterpolator.hpp"
+
 #include <stdexcept>
 #include <algorithm>
 #include <utility>
@@ -43,4 +45,11 @@ void ScalarField::fill(double value)
         values_.end(), 
         value
     ); 
+}
+
+double ScalarField::operator()(const Point& position) const
+{
+    LinearInterpolator interpolator;
+
+    return interpolator.interpolate(*this, position);
 }
