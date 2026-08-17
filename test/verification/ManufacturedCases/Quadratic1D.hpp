@@ -47,9 +47,9 @@ public:
 
     void initialize(const MeshBase& mesh) override { L_ = mesh.getLx(); }
 
-    double exact(double x, double y) const override;
-    double laplacian(double x, double y) const override;
-    double source(double x, double y) const override;
+    double exact(Point p) const override;
+    double laplacian(Point p) const override;
+    double source(Point p) const override;
     
     // Second-order diffusion discretization:
     // O(dx^2) error on 20 cells gives approximately 6.25e-2
