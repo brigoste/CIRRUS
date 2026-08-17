@@ -142,12 +142,14 @@ namespace VerificationAnalyzer
         }
 
         std::vector<double> h;
+        std::vector<double> eq;
         std::vector<double> l2;
         std::vector<double> linf;
 
         for (const auto& level : levels)
         {
             h.push_back(level.h);
+            eq.push_back(level.qoiError);
             l2.push_back(level.l2);
             linf.push_back(level.linf);
         }
@@ -156,8 +158,22 @@ namespace VerificationAnalyzer
 
         study.l2Regression = regression(h, l2);
         study.linfRegression = regression(h, linf);
+        study.qoiRegression = regression(h,eq);
         study.l2Orders = observedOrders(l2, h);
         study.linfOrders = observedOrders(linf, h);
+        study.qoiOrders = observedOrders(eq, h);
+
+        const auto& coarse = levels[levels.size() - 2];
+        const auto& fine   = levels[levels.size() - 1];
+
+        const double refinementRatio = coarse.h / fine.h;
+        const double qoiOrder = study.qoiRegression.slope;
+
+        study.qoiRichardson = richardsonExtrapolation( coarse.qoiValue,
+                                                       fine.qoiValue,
+                                                       refinementRatio,
+                                                       qoiOrder);
+        
 
         return study;
     }
