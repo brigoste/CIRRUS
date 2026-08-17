@@ -122,12 +122,18 @@ namespace VerificationAnalyzer
     {
         GCIResult result;
 
-        result.relativeError = std::abs( (phiFine - phiCoarse) / phiFine);
+        result.absoluteError = std::abs(phiFine - phiCoarse);
+
+        result.relativeError = std::abs((phiFine - phiCoarse) / phiFine);
 
         result.refinementRatio = refinementRatio;
         result.observedOrder = order;
 
-        result.gci = safetyFactor * result.relativeError / (std::pow(refinementRatio, order) - 1.0);
+        const double denominator = std::pow(refinementRatio, order) - 1.0;
+
+        result.relativeGCI = safetyFactor * result.relativeError / denominator;
+
+        result.absoluteGCI = safetyFactor * result.absoluteError / denominator;
 
         return result;
     }
