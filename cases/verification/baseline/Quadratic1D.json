@@ -7,6 +7,9 @@
         "passed": true
     },
     "passed": true,
+    "qoi": {
+        "value": 146.38999999999987
+    },
     "refinement": {
         "enabled": false
     },
