@@ -59,24 +59,61 @@ void VerificationIO::writeReport(
     j["verification"]["gradient"] = result.gradient;
     j["verification"]["reconstruction"] = result.reconstruction;
 
+    // -------------------------------------------------
+    // Accuracy
+    // -------------------------------------------------
+
     j["accuracy"]["L2"] = result.l2Error;
     j["accuracy"]["Linf"] = result.linfError;
 
     j["accuracy"]["L2Tolerance"] = result.l2AcceptanceTol;
     j["accuracy"]["LinfTolerance"] = result.linfAcceptanceTol;
+
     j["accuracy"]["passed"] = result.accuracyPassed;
-    
+
+    // -------------------------------------------------
+    // Quantity of Interest
+    // -------------------------------------------------
+
     j["qoi"]["value"] = result.qoiValue;
+
+    // -------------------------------------------------
+    // Refinement
+    // -------------------------------------------------
 
     j["refinement"]["enabled"] = result.refinementEnabled;
 
     if (result.refinementEnabled)
     {
+        j["refinement"]["refinementRatio"] = result.refinementRatio;
+        j["refinement"]["safetyFactor"] = result.safetyFactor;
+
+        // Observed order
         j["refinement"]["L2Order"] = result.l2Order;
         j["refinement"]["LinfOrder"] = result.linfOrder;
-        j["refinement"]["passed"] = result.refinementPassed;
         j["refinement"]["QoIOrder"] = result.qoiOrder;
+
+        // Richardson extrapolation
+        j["refinement"]["Richardson"]["L2"] = result.l2Richardson;
+        j["refinement"]["Richardson"]["Linf"] = result.linfRichardson;
+        j["refinement"]["Richardson"]["QoI"] = result.qoiRichardson;
+
+        // Grid Convergence Index
+        j["refinement"]["GCI"]["Relative"]["L2"] = result.l2RelativeGCI;
+        j["refinement"]["GCI"]["Relative"]["Linf"] = result.linfRelativeGCI;
+        j["refinement"]["GCI"]["Relative"]["QoI"] = result.qoiRelativeGCI;
+
+        j["refinement"]["GCI"]["Absolute"]["L2"] = result.l2AbsoluteGCI;
+        j["refinement"]["GCI"]["Absolute"]["Linf"] = result.linfAbsoluteGCI;
+        j["refinement"]["GCI"]["Absolute"]["QoI"] = result.qoiAbsoluteGCI;
+
+        // Refinement verification status
+        j["refinement"]["passed"] = result.refinementPassed;
     }
+
+    // -------------------------------------------------
+    // Overall result
+    // -------------------------------------------------
 
     j["passed"] = result.passed();
 
@@ -84,9 +121,7 @@ void VerificationIO::writeReport(
 
     if (!out.is_open())
     {
-        throw std::runtime_error(
-            "Failed to open verification summary JSON: "
-            + file.string());
+        throw std::runtime_error( "Failed to open verification summary JSON: " + file.string());
     }
 
     out << j.dump(4);
