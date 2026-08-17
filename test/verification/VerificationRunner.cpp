@@ -372,24 +372,82 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
 
         if (refinementEnabled)
         {
-            GridConvergenceStudy study =
-                VerificationAnalyzer::analyzeRefinement(refinementLevels);
+            GridConvergenceStudy study = VerificationAnalyzer::analyzeRefinement(refinementLevels);
 
             constexpr double orderTolerance = 0.1;
 
             const double l2Order = study.l2Regression.slope;
             const double linfOrder = study.linfRegression.slope;
             const double qoiOrder = study.qoiRegression.slope;
-            const double qoiRichardson = study.qoiRichardson;
 
+            const auto& coarse = refinementLevels[refinementLevels.size() - 2];
+            const auto& fine   = refinementLevels[refinementLevels.size() - 1];
+
+            constexpr double safetyFactor = 1.25;
+
+            const double refinementRatio = coarse.h / fine.h;
+
+            const double l2Richardson = VerificationAnalyzer::richardsonExtrapolation(
+                                        coarse.l2,
+                                        fine.l2,
+                                        refinementRatio,
+                                        l2Order);
+            const double linfRichardson = VerificationAnalyzer::richardsonExtrapolation(
+                                        coarse.linf,
+                                        fine.linf,
+                                        refinementRatio,
+                                        linfOrder);
+            const double qoiRichardson = VerificationAnalyzer::richardsonExtrapolation(
+                                        coarse.qoiValue,
+                                        fine.qoiValue,
+                                        refinementRatio,
+                                        qoiOrder);
+
+            const auto l2GCI = VerificationAnalyzer::gridConvergenceIndex(
+                                        coarse.l2,
+                                        fine.l2,
+                                        refinementRatio,
+                                        l2Order,
+                                        safetyFactor);
+
+            const auto linfGCI = VerificationAnalyzer::gridConvergenceIndex(
+                                        coarse.linf,
+                                        fine.linf,
+                                        refinementRatio,
+                                        linfOrder,
+                                        safetyFactor);
+
+            const auto qoiGCI = VerificationAnalyzer::gridConvergenceIndex(
+                                        coarse.qoiValue,
+                                        fine.qoiValue,
+                                        refinementRatio,
+                                        qoiOrder,
+                                        safetyFactor);
+                                        
             const bool refinementPassed =
                 std::abs(l2Order - expectedOrder) <= orderTolerance &&
                 std::abs(linfOrder - expectedOrder) <= orderTolerance;
 
             finestSummary.refinementPassed = refinementPassed;
+
             finestSummary.l2Order = l2Order;
             finestSummary.linfOrder = linfOrder;
             finestSummary.qoiOrder = qoiOrder;
+
+            finestSummary.l2Richardson = l2Richardson;
+            finestSummary.linfRichardson = linfRichardson;
+            finestSummary.qoiRichardson = qoiRichardson;
+
+            finestSummary.l2RelativeGCI = l2GCI.relativeGCI;
+            finestSummary.linfRelativeGCI = linfGCI.relativeGCI;
+            finestSummary.qoiRelativeGCI = qoiGCI.relativeGCI;
+
+            finestSummary.l2AbsoluteGCI = l2GCI.absoluteGCI;
+            finestSummary.linfAbsoluteGCI = linfGCI.absoluteGCI;
+            finestSummary.qoiAbsoluteGCI = qoiGCI.absoluteGCI;
+
+            finestSummary.refinementRatio = refinementRatio;
+            finestSummary.safetyFactor = safetyFactor;
 
             std::cout
                 << "\n================ REFINEMENT STUDY ================\n"
