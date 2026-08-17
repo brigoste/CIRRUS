@@ -25,11 +25,7 @@ void SourceFluxBuilder::apply(
         {
             const auto& xc = mesh.cellCenter(c);
 
-            const double manufacturedSource =
-                verificationCase->source(
-                    xc.x[0],
-                    xc.x[1]
-                );
+            const double manufacturedSource = verificationCase->source(xc);
 
             flux.addSource({
                 c,
