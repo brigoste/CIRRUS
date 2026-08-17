@@ -28,7 +28,11 @@ struct RegressionResult
 struct GCIResult
 {
     double relativeError = 0.0;
-    double gci = 0.0;
+    double relativeGCI = 0.0;
+
+    double absoluteError = 0.0;
+    double absoluteGCI = 0.0;
+
     double refinementRatio = 0.0;
     double observedOrder = 0.0;
 };
