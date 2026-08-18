@@ -2,5 +2,6 @@ enum class PreconditionerType
 {
     None,
     Jacobi,
-    ILU0
+    ILU0,
+    SSOR
 };
