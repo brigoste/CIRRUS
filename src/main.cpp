@@ -64,21 +64,17 @@ int main(int argc, char* argv[])
         {
             std::cout << "Loading verification suite: " << configPath << "\n";
 
-            
             VerificationSuite suite = loadVerificationSuite(configPath);
 
             std::filesystem::path caseDirectory = suite.case_directory;
 
-            if (caseDirectory.is_relative())
-            {
-                caseDirectory = configPath.parent_path() / caseDirectory;
-            }
+            if (caseDirectory.is_relative()) { caseDirectory = configPath.parent_path() / caseDirectory; }
 
             suite.case_directory = std::filesystem::weakly_canonical(caseDirectory).string();
 
             std::cout << "Resolved case directory (main): "
-                    << suite.case_directory
-                    << "\n";
+                      << suite.case_directory
+                      << "\n";
 
             std::cout << "Verification cases loaded:\n";
 
@@ -91,18 +87,15 @@ int main(int argc, char* argv[])
 
             if (plotOverride) { suite.plot_enabled = true; }
 
-            PathContext paths = buildPaths(cfg, projectRoot);            
+            PathContext paths = buildPaths(cfg, projectRoot);
 
-            VerificationRunner::run(
-                cfg,
-                suite,
-                paths
-            );
+            const bool verificationPassed = VerificationRunner::run(cfg,
+                                                                    suite,
+                                                                    paths);
 
             std::cout << "\n================ VERIFICATION COMPLETE ================\n";
 
-
-            return 0;
+            return verificationPassed ? 0 : 1;
         }
 
         // -------------------------------------------------
