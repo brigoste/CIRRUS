@@ -11,5 +11,5 @@ class VerificationRunner
 public:
     static VerificationCaseConfig loadVerificationCase(const std::filesystem::path& path);
     static SimulationConfig applyVerificationOverrides(const SimulationConfig& base, const VerificationCaseConfig& verif);
-    static void run( const SimulationConfig& baseCfg, const VerificationSuite& suite, const PathContext& paths);
+    static bool run( const SimulationConfig& baseCfg, const VerificationSuite& suite, const PathContext& paths);
 };
