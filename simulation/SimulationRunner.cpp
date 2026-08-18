@@ -101,6 +101,7 @@ void SimulationRunner::run(
     // -----------------------------
     {
         // Timer timer("Output Writing");
+        std::cout << "\n --------- Writing Solution ---------\n";
         OutputManager::write(
             output,
             paths.outputRoot);
@@ -112,6 +113,8 @@ void SimulationRunner::run(
     if (cfg.io.plot_enabled) {
         // Timer time("Plotting");
         auto csvPath = paths.outputRoot / "solution.csv";
+        
+        std::cout << "\n --------- Plotting Solution ---------\n";
 
         switch (graphics_backend){
             case (VisualizationMode::Pyplot):
