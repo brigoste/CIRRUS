@@ -16,19 +16,16 @@
 #include "io/OutputManager.hpp"
 #include "io/OutputBuilder.hpp"
 
-#include "diagnostics/MemoryDiagnostics.hpp"
-
 #include "utils/Timer.hpp"
-#include "fields/FieldNames.hpp"
 
 #include "equation_systems/Residual.hpp"
 
-#include <iostream>
-#include <filesystem>
-#include <iomanip>
+#include <algorithm>
 #include <cmath>
-
-#include "test/verification/VerificationTools.hpp"
+#include <filesystem>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
 
 SimulationConfig VerificationRunner::applyVerificationOverrides(
     const SimulationConfig& base,
@@ -75,10 +72,10 @@ VerificationCaseConfig VerificationRunner::loadVerificationCase( const std::file
     return j["verificationCase"].get<VerificationCaseConfig>();
 }
 
-void VerificationRunner::run( const SimulationConfig& baseCfg, const VerificationSuite& suite, const PathContext& paths)
+bool VerificationRunner::run( const SimulationConfig& baseCfg, const VerificationSuite& suite, const PathContext& paths)
 {
     Timer verificationTimer("Verification Suite");
-    if (!suite.enabled) { return; }
+    if (!suite.enabled) { return true; }
 
     std::cout << "\n================ VERIFICATION MODE ================\n";
     std::cout << "Verification enabled: " << suite.enabled << "\n";
@@ -99,7 +96,6 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
 
     for (const auto& caseEntry : suite.cases)
     {
-        // Timer caseTimer("Verification Case: " + caseEntry.name);
         const std::string caseName = caseEntry.name;
 
         // -------------------------------------------------
@@ -121,9 +117,9 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
         std::filesystem::create_directories(caseOutputDir);
 
         std::cout << "\n=================================\n"
-                << "Running verification case: "
-                << caseName
-                << "\n=================================\n";
+                  << "Running verification case: "
+                  << caseName
+                  << "\n=================================\n";
 
         // -------------------------------------------------
         // Build manufactured / verification case
@@ -142,13 +138,12 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             throw std::runtime_error( "Refinement is enabled for case '" + caseName + "' but fewer than two refinement levels were provided.");
         }
 
-        double exactQoi;
+        double exactQoi = 0.0;
 
         for (std::size_t level = 0; level < nLevels; ++level)
         {
             SimulationConfig levelCfg = caseCfg;
-            // Timer levelTimer(  "  Level " + std::to_string(level) +  " (" + std::to_string(levelCfg.mesh.nx) + "x" + std::to_string(levelCfg.mesh.ny) + ")" );
-            
+
             if (refinementEnabled)
             {
                 levelCfg.mesh.nx = refinementMeshSizes[level];
@@ -157,13 +152,11 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             }
 
             std::cout << "Creating simulation:"
-                        << "\n  mesh = " << levelCfg.mesh.type
-                        << "\n  nx = " << levelCfg.mesh.nx
-                        << "\n  ny = " << levelCfg.mesh.ny
-                        << "\n  physics = " << physics::to_string(levelCfg.physics.type)
-                        << "\n";
-
-            const auto levelStartMemory = MemoryDiagnostics::currentRSS();
+                      << "\n  mesh = " << levelCfg.mesh.type
+                      << "\n  nx = " << levelCfg.mesh.nx
+                      << "\n  ny = " << levelCfg.mesh.ny
+                      << "\n  physics = " << physics::to_string(levelCfg.physics.type)
+                      << "\n";
 
             Simulation sim(levelCfg);
 
@@ -171,45 +164,20 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
 
             sim.setVerificationCase(std::move(casePtr));
 
+            if (!sim.verificationCase()) 
+            { 
+                throw std::runtime_error( "Verification enabled but no verification case attached." ); 
+            }
+
             const MeshBase& mesh = sim.mesh();
             sim.verificationCase()->initialize(mesh); 
-            
-            {
-                // Timer timer("Assembly");
-                sim.assemble();
-            }
 
-            const auto afterAssemblyMemory = MemoryDiagnostics::currentRSS();
-
-            {
-                // Timer timer("Solver");
-                sim.solve();
-            }
-
-            {
-                const auto afterSolveMemory = MemoryDiagnostics::currentRSS(); 
-                const auto peakMemory = MemoryDiagnostics::peakRSS(); 
-                const double levelStartMB = static_cast<double>(levelStartMemory) / (1024.0 * 1024.0); 
-                const double assemblyMB = static_cast<double>(afterAssemblyMemory) / (1024.0 * 1024.0); 
-                const double solveMB = static_cast<double>(afterSolveMemory) / (1024.0 * 1024.0); 
-                const double peakMB = static_cast<double>(peakMemory) / (1024.0 * 1024.0); 
-                const double peakIncreaseMB = static_cast<double>(peakMemory - levelStartMemory) / (1024.0 * 1024.0); 
-                std::cout << "\n================ MEMORY DIAGNOSTICS ================\n" 
-                          << "Start RSS:           "  << levelStartMB                 << " MB\n" 
-                          << "After assembly:      "  << assemblyMB                   << " MB\n"
-                          << "After solve:         "  << solveMB                      << " MB\n"
-                          
-                          << "\nAssembly Increase:   "  << (assemblyMB - levelStartMB)  << " MB\n"
-                          << "Solver Increase:     "  << (solveMB - assemblyMB)       << " MB\n"
-                          << "Peak RSS:            "  << peakMB                       << " MB\n" 
-                          << "Peak increase:       "  << peakIncreaseMB               << " MB\n" 
-                          << "====================================================\n\n";
-            }   
+            sim.assemble();
+            sim.solve();
 
             auto& solution = sim.solution();
 
             const double qoiValue = solution(qoi_eval_point);
-            // std::cout << "Level " << level << ": QoI = " << qoiValue << "\n";
 
             // -------------------------------------------------
             // Exact solution evaluation
@@ -221,15 +189,11 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                 0.0
             );
 
-            if (!sim.verificationCase()) 
-            { 
-                throw std::runtime_error( "Verification enabled but no verification case attached." ); 
-            }
-
             const auto& verifCase = *sim.verificationCase();
-            // const double exactQoi = verifCase.exact(qoi_eval_point);
-            exactQoi = verifCase.exact(qoi_eval_point);
-            const double qoiError = std::abs(qoiValue - exactQoi);
+            const double exactQoiAtLevel = verifCase.exact(qoi_eval_point);
+            const double qoiError = std::abs(qoiValue - exactQoiAtLevel);
+
+            if (level == nLevels - 1) { exactQoi = exactQoiAtLevel; }
 
             for (std::size_t c = 0; c < mesh.ncells(); ++c)
             {
@@ -260,28 +224,24 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             });
 
             std::vector<double> residual;
-
-            {
-                // Timer timer("Residual calculation");
-                residual = computeResidual(sim.system(), solution);
-            }
+            residual = computeResidual(sim.system(), solution);
 
             // DEBUGGING
             std::cout << "REFINEMENT DATA: "
-                    << levelCfg.mesh.nx
-                    << "x"
-                    << levelCfg.mesh.ny
-                    << " h="
-                    << h
-                    << " L2="
-                    << norms.l2_rms
-                    << " Linf="
-                    << norms.linf
-                    << " qoi="
-                    << qoiValue
-                    << " qoiError="
-                    << qoiError
-                    << "\n";
+                      << levelCfg.mesh.nx
+                      << "x"
+                      << levelCfg.mesh.ny
+                      << " h="
+                      << h
+                      << " L2="
+                      << norms.l2_rms
+                      << " Linf="
+                      << norms.linf
+                      << " qoi="
+                      << qoiValue
+                      << " qoiError="
+                      << qoiError
+                      << "\n\n-----------------------------------\n\n";
 
             // -------------------------------------------------
             // Output paths
@@ -293,67 +253,46 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             std::filesystem::create_directories(levelOutputDir);
             // all .csv files are named solution.csv to simplify plotting. They are nested under their test, so this shouldn't be confusing.
             auto csvPath = levelOutputDir / ("solution.csv");       
-            auto vtkPath = levelOutputDir / (caseName + ".vtu");
-            // auto jsonPath = levelOutputDir / (caseName + ".json");
+            
             // -------------------------------------------------
             // Write outputs
             // -------------------------------------------------
-            {                
-                auto output =
-                    OutputBuilder::build(
-                        sim,
-                        solution,
-                        residual);
+            auto output =
+                OutputBuilder::build(
+                    sim,
+                    solution,
+                    residual);
 
-                OutputManager::write(
-                    output,
-                    levelOutputDir);
-
-                // VerificationIO::writeReport(
-                //     finestSummary,
-                //     jsonPath);
-            }
+            OutputManager::write(
+                output,
+                levelOutputDir);
             
             // -------------------------------------------------
             // Plotting
             // -------------------------------------------------
-            {
-                if (suite.plot_enabled) { runPlot(paths, csvPath); }
-            }
-
-            // -------------------------------------------------
-            // Report
-            // -------------------------------------------------
-            std::cout << "\n================ VERIFICATION ================\n"
-                    << "Case      : " << caseName  << "\n"
-                    << "L2 Norm   : " << norms.l2_rms << "\n"
-                    << "Linf Norm : " << norms.linf << "\n"
-                    << "CSV Output: " << csvPath << "\n"
-                    // << "JSON Output: " << jsonPath << "\n"
-                    << "VTK Output: " << vtkPath << "\n"
-                    << "=============================================\n";
+            if (suite.plot_enabled) { runPlot(paths, csvPath); }
             
-            std::string meshType = caseCfg.mesh.type;
-
+            const std::string meshType = levelCfg.mesh.type;
             std::string meshSize;
 
-            if (meshType == "line1D") { meshSize = std::to_string(caseCfg.mesh.nx) + "x1"; }
-            else if (meshType == "quad2D") { meshSize = std::to_string(caseCfg.mesh.nx) + "x" + std::to_string(caseCfg.mesh.ny); }
-            else { meshSize = std::to_string(mesh.ncells()) + " cells"; }
+            if (meshType == "line1D")      { meshSize = std::to_string(levelCfg.mesh.nx) + "x1"; }
+            else if (meshType == "quad2D") { meshSize = std::to_string(levelCfg.mesh.nx) + "x" + std::to_string(levelCfg.mesh.ny); }
+            else                           { meshSize = std::to_string(mesh.ncells()) + " cells"; }
 
-            double l2_tol = sim.verificationCase()->l2AcceptanceThreshold();
-            double linf_tol = sim.verificationCase()->linfAcceptanceThreshold();
-
-            bool passed = norms.l2_rms <= l2_tol && norms.linf <= linf_tol;
+            
 
             if (level == nLevels - 1)                       // Adjusted to be last level, not first.
             {
+                const double l2_tol   = sim.verificationCase()->l2AcceptanceThreshold();
+                const double linf_tol = sim.verificationCase()->linfAcceptanceThreshold();
+
+                const bool accuracyPassed = norms.l2_rms <= l2_tol && norms.linf <= linf_tol;
+
                 finestSummary.caseName = caseName;
                 finestSummary.solver = solver::to_string(levelCfg.solver.method);
                 finestSummary.meshType = meshType;
                 finestSummary.meshSize = meshSize;
                 finestSummary.gradient = gradientToString(levelCfg.discretization.gradientScheme);
-                // std::cout << "Reconstruction scheme: " << reconstructionToString(levelCfg.discretization.reconstructionScheme) << '\n';
                 finestSummary.reconstruction = reconstructionToString(levelCfg.discretization.reconstructionScheme);
 
                 finestSummary.l2Error = norms.l2_rms;
@@ -363,7 +302,7 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                 finestSummary.l2AcceptanceTol = l2_tol;
                 finestSummary.linfAcceptanceTol = linf_tol;
 
-                finestSummary.accuracyPassed = passed;
+                finestSummary.accuracyPassed = accuracyPassed;
 
                 finestSummary.refinementEnabled = refinementEnabled;
                 finestSummary.refinementPassed = false;
@@ -426,9 +365,8 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                                         qoiOrder,
                                         safetyFactor);
                                         
-            const bool refinementPassed =
-                std::abs(l2Order - expectedOrder) <= orderTolerance &&
-                std::abs(linfOrder - expectedOrder) <= orderTolerance;
+            const bool refinementPassed = (std::abs(l2Order - expectedOrder) <= orderTolerance) 
+                                       && (std::abs(linfOrder - expectedOrder) <= orderTolerance);
 
             finestSummary.refinementPassed = refinementPassed;
 
@@ -451,127 +389,93 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             finestSummary.refinementRatio = refinementRatio;
             finestSummary.safetyFactor = safetyFactor;
 
-            double expectedSmaller = abs(finestSummary.qoiRichardson - finestSummary.qoiAbsoluteGCI);
-            double expectedLarger = abs(finestSummary.qoiAbsoluteGCI - exactQoi); 
+            double richardsonGciDifference = abs(finestSummary.qoiRichardson - finestSummary.qoiAbsoluteGCI);
+            double gciExactDifference = abs(finestSummary.qoiAbsoluteGCI - exactQoi); 
 
-            std::cout
-                << "\n================ REFINEMENT STUDY ================\n"
-                << "Case                         : " << caseName << "\n"
-                << "Observed L2 Order            : " << l2Order << "\n"
-                << "Observed Linf Order          : " << linfOrder << "\n"
-                << "Expected Order               : " << expectedOrder << "\n"
-                << "Status                       : " << (refinementPassed ? "PASS" : "FAIL") << "\n"
-                << "Observed QoI Order           : " << qoiOrder << "\n"
-                << "Richardson QOI               : " << qoiRichardson << "\n"
-                << "|Richardson QoI - exact QoI| : " << expectedLarger << "\n"
-                << "|QoI Fine - exact QoI|       : " << expectedSmaller << "\n"
-                << "==================================================\n";
+            std::cout << "\n================ REFINEMENT STUDY ================\n"
+                      << "Case                         : " << caseName << "\n"
+                      << "Observed L2 Order            : " << l2Order << "\n"
+                      << "Observed Linf Order          : " << linfOrder << "\n"
+                      << "Expected Order               : " << expectedOrder << "\n"
+                      << "Status                       : " << (refinementPassed ? "PASS" : "FAIL") << "\n"
+                      << "Observed QoI Order           : " << qoiOrder << "\n"
+                      << "Richardson QOI               : " << qoiRichardson << "\n"
+                      << "|Richardson QoI - exact QoI| : " << richardsonGciDifference << "\n"
+                      << "|QoI Fine - exact QoI|       : " << gciExactDifference << "\n"
+                      << "==================================================\n";
         }
     
         const auto jsonPath = caseOutputDir / (caseName + ".json");
 
-        VerificationIO::writeReport(
-            finestSummary,
-            jsonPath);
+        VerificationIO::writeReport( finestSummary, jsonPath);
 
         std::cout << "JSON Output: " << jsonPath << "\n";
 
         summary.push_back(finestSummary);
     }
-    std::size_t l2PassedCount = 0;
-    std::size_t refinementPassedCount = 0;
 
-    std::size_t l2Total = summary.size();
-    std::size_t refinementTotal = 0;
+    std::size_t casesPassed = 0;
 
     for (const auto& s : summary)
     {
-        if (s.accuracyPassed) { ++l2PassedCount; }
-
-        if (s.refinementEnabled) 
-        {
-            ++refinementTotal;
-
-            if (s.refinementPassed) { ++refinementPassedCount; }
-        }
+        if (s.passed()) { ++casesPassed; }
     }
 
-    std::size_t totalChecks = l2Total + refinementTotal;
-
-    std::size_t passedChecks = l2PassedCount + refinementPassedCount;
+    const bool verificationPassed = (casesPassed == summary.size()); 
 
     std::cout << "\n================================================================================\n";
     std::cout << "Verification Summary\n";
     std::cout << "================================================================================\n\n";
 
     std::cout << std::left
-            << std::setw(22) << "Case"
-            << std::setw(10) << "Solver"
-            << std::setw(18) << "Reconstruction"
-            << std::setw(16) << "Gradient"
-            << std::setw(10) << "Mesh"
-            << std::setw(12) << "L2 Error"
-            << std::setw(10) << "Accuracy"
-            << std::setw(14) << "Convergence"
-            << std::setw(12) << "L2 Order"
-            << std::setw(13) << "Linf Order"
-            << std::setw(10) << "QoI"
-            << "\n";
+              << std::setw(22) << "Case"
+              << std::setw(10) << "Solver"
+              << std::setw(18) << "Reconstruction"
+              << std::setw(16) << "Gradient"
+              << std::setw(10) << "Mesh"
+              << std::setw(12) << "L2 Error"
+              << std::setw(12) << "L2 Tol"
+              << std::setw(16) << "Max Error/Tol"
+              << std::setw(14) << "Convergence"
+              << std::setw(12) << "Result"
+              << "\n";
 
-    std::cout << std::string(146, '-') << "\n";
+    std::cout << std::string(136, '-') << "\n";
 
     std::cout << std::scientific << std::setprecision(3);
 
     for (const auto& s : summary)
     {
+        const double l2Ratio   = s.l2Error / s.l2AcceptanceTol;
+        const double linfRatio = s.linfError / s.linfAcceptanceTol;
+
+        const double maxErrorRatio = std::max(l2Ratio, linfRatio);
+
         std::cout << std::left
-                << std::setw(22) << s.caseName
-                << std::setw(10) << s.solver
-                << std::setw(18) << s.reconstruction
-                << std::setw(16) << s.gradient
-                << std::setw(10) << s.meshSize
-                << std::setw(12) << s.l2Error
-                << std::setw(10) << (s.accuracyPassed ? "PASS" : "FAIL");
+                  << std::setw(22) << s.caseName
+                  << std::setw(10) << s.solver
+                  << std::setw(18) << s.reconstruction
+                  << std::setw(16) << s.gradient
+                  << std::setw(10) << s.meshSize
+                  << std::setw(12) << s.l2Error
+                  << std::setw(12) << s.l2AcceptanceTol
+                  << std::setw(16) << maxErrorRatio;
 
-        if (s.refinementEnabled)
-        {
-            std::cout << std::setw(14)
-                    << (s.refinementPassed ? "PASS" : "FAIL")
-                    << std::setw(12)
-                    << s.l2Order
-                    << std::setw(13)
-                    << s.linfOrder
-                    << std::setw(10)
-                    << s.qoiValue;
-        }
-        else
-        {
-            std::cout << std::setw(14)
-                    << "--"
-                    << std::setw(12)
-                    << "--"
-                    << std::setw(13)
-                    << "--"
-                    << std::setw(10)
-                    << s.qoiValue;
-        }
+        if (s.refinementEnabled) { std::cout << std::setw(14) << (s.refinementPassed ? "PASS" : "FAIL"); }
+        else { std::cout << std::setw(14) << "--"; }
 
+        std::cout << std::setw(12) << (verificationPassed ? "PASS" : "FAIL");
         std::cout << "\n";
     }
-    // std::cout << "\nVerification Result: " << passedCount << "/" << summary.size() << " cases passed, " << summary.size() - passedCount << " failed\n\n";
+    
     std::cout << "\n================ FINAL RESULT ================\n";
-    std::cout
-        << "Accuracy Checks : "
-        << l2PassedCount << "/" << l2Total
-        << "\n";
+    std::cout << "Verification Cases Passed: "
+              << casesPassed << "/" << summary.size()
+              << "\n";
 
-    std::cout
-        << "Mesh Refinement Checks : "
-        << refinementPassedCount << "/" << refinementTotal
-        << "\n";
+    std::cout << "Overall Verification: "
+              << (verificationPassed ? "PASS" : "FAIL")
+              << "\n";
 
-    std::cout
-        << "Overall Checks Passed: "
-        << passedChecks << "/" << totalChecks
-        << "\n";
+    return verificationPassed;
 }
