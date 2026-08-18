@@ -43,7 +43,6 @@ Optimization notes:
 * [x] Generic equation system abstraction
 * [x] Matrix/vector assembly interface
 * [x] Separate flux calculation from discretization
-
   * [x] Convection
   * [x] Diffusion
   * [x] Source terms
@@ -176,8 +175,8 @@ Optimization notes:
 * [x] Solver/preconditioner reporting
 * [x] Richardson extrapolation
 * [x] Grid Convergence Index (GCI)
-* [ ] Integrate Richardson extrapolation into verification reports
-* [ ] Integrate GCI into verification reports
+* [x] Integrate Richardson extrapolation into verification reports
+* [x] Integrate GCI into verification reports
 * [ ] Add GCI acceptance criteria
 * [ ] Refactor verification to consume Field objects
 * [ ] Automated regression verification
@@ -1039,10 +1038,10 @@ This establishes the current numerical infrastructure as a verified baseline for
 ## Immediate Development Worklist
 
 ### 1. Verification report integration
-* [ ] Integrate Richardson extrapolation into verification reports
-* [ ] Integrate GCI into verification reports
-* [ ] Add QoI Richardson extrapolation to reports
-* [ ] Add QoI GCI to reports
+* [x] Integrate Richardson extrapolation into verification reports
+* [x] Integrate GCI into verification reports
+* [x] Add QoI Richardson extrapolation to reports
+* [x] Add QoI GCI to reports
 * [ ] Validate reported Richardson/GCI values against existing cases
 
 ### 2. Vector field interpolation
