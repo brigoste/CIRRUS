@@ -162,6 +162,10 @@ Optimization notes:
 * [x] Manufactured solution verification (MMS)
 * [x] Mesh refinement studies
 * [x] Order-of-convergence calculations
+* [x] Regression analysis
+* [x] QoI evaluation
+* [x] QoI refinement studies
+* [x] QoI order/regression analysis
 * [x] CSV output
 * [x] JSON output
 * [x] Configurable gradient scheme
@@ -172,6 +176,9 @@ Optimization notes:
 * [x] Solver/preconditioner reporting
 * [x] Richardson extrapolation
 * [x] Grid Convergence Index (GCI)
+* [ ] Integrate Richardson extrapolation into verification reports
+* [ ] Integrate GCI into verification reports
+* [ ] Add GCI acceptance criteria
 * [ ] Refactor verification to consume Field objects
 * [ ] Automated regression verification
 * [ ] Improve verification diagnostics/reporting
@@ -191,6 +198,16 @@ Verification notes:
 * Add regression tests for previously verified numerical behavior
 * Verify expected order for each discretization independently
 * Distinguish discretization error from linear-solver convergence error
+
+QoI verification:
+
+* QoIs are evaluated from the interpolated numerical solution at a specified spatial location
+* QoI values are tracked across refinement levels
+* QoI error is computed against the exact manufactured solution at the evaluation point
+* QoI regression is used to determine observed QoI convergence order
+* QoI convergence is currently reported diagnostically and does not affect verification pass/fail status
+* Richardson extrapolation can be applied to QoI values
+* GCI can be applied to QoI values
 
 Current verified behavior:
 
@@ -304,7 +321,29 @@ The fallback is verified independently at the stencil level.
 * [x] FieldRegistry
 * [ ] TensorField
 * [ ] BoundaryField
-* [ ] Field interpolation
+* [x] Field interpolation
+    * [x] ScalarField spatial evaluation
+    * [x] Interpolator interface
+    * [x] Linear interpolation
+    * [x] Node-centered interpolation
+    * [x] Face-centered interpolation
+    * [x] Cell-centered interpolation
+    * [x] QoI evaluation through field interpolation
+    * [ ] Vector-field interpolation
+    * [ ] Higher-order interpolation
+* [ ] Verifciation Analysis
+    * [x] Error norms
+    * [x] Observed convergence order
+    * [x] Regression-based convergence order
+    * [x] Richardson extrapolation
+    * [x] Grid Convergence Index (GCI)
+    * [x] QoI evaluation
+    * [x] QoI error calculation
+    * [x] QoI convergence regression
+    * [ ] Richardson/GCI report integration
+    * [ ] GCI acceptance criteria
+    * [ ] Automated regression comparison
+    * [ ] Verification failure diagnostics
 
 Optimization notes:
 
@@ -372,6 +411,9 @@ Optimization notes:
 * [x] Verify TVD reconstruction stencil
 * [x] Verify Minmod flux limiter independently
 * [ ] Verify TVD solver-level behavior on a non-linear manufactured field
+* [ ] Verify TVD boundedness / overshoot behavior
+* [ ] Verify TVD accuracy on smooth non-linear fields
+* [ ] Verify TVD behavior near discontinuities / sharp gradients
 
 Architecture:
 ```
@@ -835,7 +877,7 @@ Optimization notes:
 * [x] Verify second-order convergence remains intact after refactoring
 * [x] Verify verification output paths and refinement-level organization
 * [ ] Add automated regression verification
-* [ ] Add Richardson extrapolation
+* [x] Add Richardson extrapolation
 * [ ] Add Grid Convergence Index (GCI)
 * [ ] Improve verification diagnostics/reporting
 
@@ -996,38 +1038,28 @@ This establishes the current numerical infrastructure as a verified baseline for
 
 ## Immediate Development Worklist
 
-### 1. Verification automation
+### 1. Verification report integration
+* [ ] Integrate Richardson extrapolation into verification reports
+* [ ] Integrate GCI into verification reports
+* [ ] Add QoI Richardson extrapolation to reports
+* [ ] Add QoI GCI to reports
+* [ ] Validate reported Richardson/GCI values against existing cases
 
-* [ ] Automated regression verification
-* [ ] Baseline result storage
-* [ ] Numerical regression thresholds
-* [ ] Automatic pass/fail criteria
-* [ ] Verification failure diagnostics
-* [ ] Verification summary improvements
+### 2. Vector field interpolation
+* [ ] Generalize interpolation interface for vector fields
+* [ ] Implement VectorField interpolation
+* [ ] Add vector interpolation unit tests
+* [ ] Add vector QoI support
+* [ ] Verify interpolation across supported field locations
 
-### 2. Verification analysis
-
-* [x] Observed order
-* [x] Regression analysis
-* [x] Richardson extrapolation
-* [x] Grid Convergence Index
-* [ ] Integrate Richardson/GCI into verification reports
-* [ ] Add GCI acceptance criteria
-* [ ] Add refinement-study diagnostics
-
-### 3. Visualization / execution
-
-* [x] Pyplot backend
-* [x] ParaView-compatible VTK output
-* [x] Visualization mode enum
-* [x] User simulation visualization selection
-* [ ] Configuration-based visualization selection
-* [ ] Cross-platform ParaView launching
-* [ ] Replace `std::system()` with robust process launching
-* [ ] Eventually integrate visualization into GUI
+### 3. Higher-order interpolation
+* [ ] Define higher-order interpolation requirements
+* [ ] Implement higher-order scalar interpolation
+* [ ] Implement higher-order vector interpolation
+* [ ] Verify interpolation order
+* [ ] Assess interpolation error contribution to QoI convergence
 
 ### 4. Nonlinear solver
-
 * [ ] Residual evaluation
 * [ ] Iteration controller
 * [ ] Convergence criteria
@@ -1035,16 +1067,6 @@ This establishes the current numerical infrastructure as a verified baseline for
 * [ ] Residual history
 * [ ] Solution-dependent reassembly
 * [ ] Nonlinear convergence diagnostics
-
-### 5. TVD verification
-
-* [ ] Nonlinear manufactured solution
-* [ ] TVD solver-level verification
-* [ ] Boundedness verification
-* [ ] Overshoot/undershoot analysis
-* [ ] Smooth-field accuracy verification
-* [ ] Discontinuity/sharp-gradient test
-* [ ] Additional flux limiters
 
 ---
 
@@ -1106,53 +1128,57 @@ This establishes the current numerical infrastructure as a verified baseline for
    * Configuration validation and diagnostics
    * Case discovery/listing
 
-9. **Add higher-order convection schemes**
+9. ~~Add higher-order convection schemes~~
 
    * ~~Second-order upwind~~
    * ~~QUICK~~
    * ~~MUSCL~~
-   * TVD / flux limiters
+   * ~~TVD / flux limiter infrastructure~~
 
-10. **Strengthen numerical verification**
+10. ~~Strengthen numerical verification~~
 
-* Component-level MMS
-* Richardson extrapolation
-* Grid Convergence Index (GCI)
-* Automated regression verification
-* Improved verification diagnostics/reporting
+   * ~~Component-level MMS~~
+   * ~~Mesh refinement studies~~
+   * ~~Observed-order analysis~~
+   * ~~Regression analysis~~
+   * ~~QoI evaluation~~
+   * ~~QoI convergence analysis~~
+   * ~~Richardson extrapolation~~
+   * ~~Grid Convergence Index (GCI)~~
+   * Verification report integration for Richardson/GCI
+   * Automated regression verification
+   * Improved verification diagnostics/reporting
 
 11. **Implement nonlinear iteration framework**
 
-12. **Assemble momentum equation system**
+12. **Complete TVD solver-level verification**
 
-13. **Implement pressure correction equation**
+   * Nonlinear manufactured solution
+   * Limiter activation verification
+   * Smooth-field accuracy
+   * Boundedness
+   * Overshoot/undershoot analysis
+   * Sharp-gradient/discontinuity behavior
 
-14. **Develop SIMPLE family algorithms**
+13. **Assemble momentum equation system**
 
-15. **Add transient solver framework**
+14. **Implement pressure correction equation**
 
-16. **Add turbulence models**
+15. **Develop SIMPLE family algorithms**
 
-17. **Expand multiphysics capability**
+16. **Add transient solver framework**
 
-18. **Profile and optimize representative workloads**
+17. **Add turbulence models**
 
-* Memory layout
-* Sparse matrix performance
-* Assembly kernels
-* Solver/preconditioner performance
-* SIMD/OpenMP
-* Matrix-free evaluation
+18. **Expand multiphysics capability**
 
-19. **Add parallel computing**
+19. **Profile and optimize representative workloads**
 
-* OpenMP
-* MPI
-* GPU acceleration
+20. **Add parallel computing**
 
-20. **Add engineering optimization capabilities**
+21. **Add engineering optimization capabilities**
 
-21. **Develop geometry and topology optimization**
+22. **Develop geometry and topology optimization**
 
 ---
 
