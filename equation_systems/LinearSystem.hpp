@@ -45,7 +45,7 @@ public:
     const std::vector<std::pair<std::size_t, double>>&
     row(std::size_t i) const;
 
-    double diagonal(std::size_t i) const;
+    double diagonal(std::size_t i) const override;
 
     std::size_t nnz() const;
 
