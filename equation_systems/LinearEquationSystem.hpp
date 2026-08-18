@@ -17,4 +17,6 @@ public:
     virtual const std::vector<std::pair<std::size_t, double>>& row(std::size_t i) const = 0;
 
     virtual void matvec( const std::vector<double>& x, std::vector<double>& y ) const = 0;
+
+    virtual double diagonal(std::size_t i) const = 0;
 };
