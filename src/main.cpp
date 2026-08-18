@@ -103,7 +103,10 @@ int main(int argc, char* argv[])
         // -------------------------------------------------
         SimulationConfig cfg = loadConfig(configPath);
         
-        if (plotOverride) { cfg.io.plot_enabled = true; }
+        if (plotOverride) 
+        { 
+            cfg.io.plot_enabled = true; 
+        }
         
         PathContext paths = buildPaths(cfg, projectRoot);
 
@@ -112,7 +115,7 @@ int main(int argc, char* argv[])
         SimulationRunner::run(
             cfg,
             paths,
-            VisualizationMode::Paraview
+            VisualizationMode::Pyplot
         );
 
         std::cout << "\n================ SIMULATION COMPLETE ================\n";
