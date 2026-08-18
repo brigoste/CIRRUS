@@ -50,7 +50,6 @@ struct VerificationSummary
 
     bool passed() const
     {
-        return accuracyPassed &&
-               (!refinementEnabled || refinementPassed);
+        return accuracyPassed && (!refinementEnabled || refinementPassed);
     }
 };
