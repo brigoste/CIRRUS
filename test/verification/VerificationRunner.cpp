@@ -142,6 +142,8 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             throw std::runtime_error( "Refinement is enabled for case '" + caseName + "' but fewer than two refinement levels were provided.");
         }
 
+        double exactQoi;
+
         for (std::size_t level = 0; level < nLevels; ++level)
         {
             SimulationConfig levelCfg = caseCfg;
@@ -225,7 +227,8 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             }
 
             const auto& verifCase = *sim.verificationCase();
-            const double exactQoi = verifCase.exact(qoi_eval_point);
+            // const double exactQoi = verifCase.exact(qoi_eval_point);
+            exactQoi = verifCase.exact(qoi_eval_point);
             const double qoiError = std::abs(qoiValue - exactQoi);
 
             for (std::size_t c = 0; c < mesh.ncells(); ++c)
@@ -233,7 +236,6 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                 const auto& xc = mesh.cellCenter(c);
 
                 exactField[c] = verifCase.exact(xc);       
-                // This should change such that exact() accepts points, not x,y,z. This makes it dimension agnositc.
             }
 
             // -------------------------------------------------
@@ -449,17 +451,20 @@ void VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             finestSummary.refinementRatio = refinementRatio;
             finestSummary.safetyFactor = safetyFactor;
 
+            double expectedSmaller = abs(finestSummary.qoiRichardson - finestSummary.qoiAbsoluteGCI);
+            double expectedLarger = abs(finestSummary.qoiAbsoluteGCI - exactQoi); 
+
             std::cout
                 << "\n================ REFINEMENT STUDY ================\n"
-                << "Case: " << caseName << "\n"
-                << "Observed L2 Order   : " << l2Order << "\n"
-                << "Observed Linf Order : " << linfOrder << "\n"
-                << "Expected Order      : " << expectedOrder << "\n"
-                << "Status              : "
-                << (refinementPassed ? "PASS" : "FAIL")
-                << "\n"
-                << "Observed QoI Order  : " << qoiOrder << "\n"
-                << "Richardson QOI      : " << qoiRichardson << "\n"
+                << "Case                         : " << caseName << "\n"
+                << "Observed L2 Order            : " << l2Order << "\n"
+                << "Observed Linf Order          : " << linfOrder << "\n"
+                << "Expected Order               : " << expectedOrder << "\n"
+                << "Status                       : " << (refinementPassed ? "PASS" : "FAIL") << "\n"
+                << "Observed QoI Order           : " << qoiOrder << "\n"
+                << "Richardson QOI               : " << qoiRichardson << "\n"
+                << "|Richardson QoI - exact QoI| : " << expectedLarger << "\n"
+                << "|QoI Fine - exact QoI|       : " << expectedSmaller << "\n"
                 << "==================================================\n";
         }
     
