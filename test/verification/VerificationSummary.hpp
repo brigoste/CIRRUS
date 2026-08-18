@@ -5,22 +5,25 @@
 struct VerificationSummary
 {
     std::string caseName;
+
+    // Configuration
     std::string solver;
     std::string meshType;
     std::string meshSize;
     std::string gradient;
     std::string reconstruction;
 
-    double l2Error;
-    double linfError;
+    // Accuracy
+    double l2Error = 0.0;
+    double linfError = 0.0;
     double qoiValue = 0.0;
 
-    double l2AcceptanceTol;
-    double linfAcceptanceTol;
+    double l2AcceptanceTol = 0.0;
+    double linfAcceptanceTol = 0.0;
 
-    // Individual verification checks
     bool accuracyPassed = false;
 
+    // Mesh refinement
     bool refinementEnabled = false;
     bool refinementPassed = false;
 
@@ -45,14 +48,9 @@ struct VerificationSummary
     double linfRelativeGCI = 0.0;
     double qoiRelativeGCI = 0.0;
 
-    // Overall case status
     bool passed() const
     {
-        if (refinementEnabled)
-        {
-            return accuracyPassed && refinementPassed;
-        }
-
-        return accuracyPassed;
+        return accuracyPassed &&
+               (!refinementEnabled || refinementPassed);
     }
 };
