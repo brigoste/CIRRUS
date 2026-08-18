@@ -12,6 +12,9 @@ void runMinmodLimiterTest();
 void runTVDReconstructionTest();
 void runInterpolatorTest();
 void runPointValueQoITest();
+void testSSORApplication();
+void testSSORInvalidOmega();
+void testSSORZeroDiagonal();
 
 int main()
 {
@@ -59,6 +62,16 @@ int main()
     runPointValueQoITest();
 
     std::cout << " ----- All Interpolator Tests Passed ------\n";
+
+    std::cout << "================================\n";
+    std::cout << " Running CIRRUS Preconditioner Unit Tests\n";
+    std::cout << "================================\n\n";
+
+    std::cout << "\n---- SSOR Preconditioner Test ----\n\n";
+
+    testSSORApplication();
+    testSSORInvalidOmega();
+    testSSORZeroDiagonal();
 
     std::cout << "\n==============================\n";
     std::cout << " COMPLETE\n";
