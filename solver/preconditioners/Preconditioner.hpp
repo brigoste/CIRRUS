@@ -23,6 +23,11 @@ inline PreconditionerType preconditioner_from_string(const std::string& s)
         return PreconditionerType::ILU0;
     }
 
+    if (s == "SSOR")   
+    {
+        return PreconditionerType::SSOR;
+    }
+
     throw std::runtime_error( "Unknown preconditioner: " + s);
 }
 
@@ -50,6 +55,10 @@ inline void to_json(
 
         case PreconditionerType::ILU0:
             j = "ILU0";
+            break;
+
+        case PreconditionerType::SSOR:
+            j = "SSOR";
             break;
     }
 }
