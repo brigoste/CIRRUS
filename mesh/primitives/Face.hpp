@@ -3,6 +3,13 @@
 #include "mesh/primitives/Vector.hpp"
 #include <cstddef>
 
+enum class FaceDirection
+{
+    X,
+    Y,
+    Z
+};
+
 struct Face
 {
     std::size_t owner;
