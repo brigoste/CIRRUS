@@ -8,8 +8,7 @@ double AdvectionDiffusion2D::exact(Point p) const
 
 double AdvectionDiffusion2D::laplacian(Point p) const
 {
-    const double pi2 = math::PI * math::PI;
-    return -2.0 * pi2 * exact(p);
+    return -2.0 * math::PI2 * exact(p);
 }
 double AdvectionDiffusion2D::source(Point p) const
 {
