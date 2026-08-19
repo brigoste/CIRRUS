@@ -93,6 +93,7 @@ bool VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
     std::vector<VerificationSummary> summary;
     Point qoi_eval_point;
     qoi_eval_point.x[0] = 0.2676;
+    qoi_eval_point.x[1] = 0.5;
 
     for (const auto& caseEntry : suite.cases)
     {
