@@ -1,9 +1,11 @@
 #include "interpolators/LinearInterpolator.hpp"
+#include "interpolators/BilinearInterpolator.hpp"
 
 #include "fields/ScalarField.hpp"
+#include "fields/VectorField.hpp"
 
 #include "mesh/Mesh1D.hpp"
-#include "mesh/primitives/Point.hpp"
+#include "mesh/QuadMesh2D.hpp"
 
 #include <cmath>
 #include <cstddef>
@@ -33,7 +35,7 @@ bool runInterpolatorTest()
 
     Mesh1D mesh(nCells, length);
 
-    LinearInterpolator interpolator;
+    LinearInterpolator linearInterpolator;
 
     bool allPassed = true;
 
@@ -75,7 +77,7 @@ bool runInterpolatorTest()
         const double x = 0.375;
 
         Point test{x, 0.0, 0.0};
-        const double interpolated = interpolator.interpolate( phi, test );
+        const double interpolated = linearInterpolator.interpolate( phi, test );
 
         const bool passed = nearlyEqual(interpolated, 5.0, tolerance);
 
@@ -117,7 +119,7 @@ bool runInterpolatorTest()
         const double exact = 2.0 * x + 1.0;
 
         Point test{x, 0.0, 0.0};
-        const double interpolated = interpolator.interpolate( phi, test );
+        const double interpolated = linearInterpolator.interpolate( phi, test );
 
         const bool passed = nearlyEqual( interpolated, exact, tolerance );
 
@@ -162,7 +164,7 @@ bool runInterpolatorTest()
         const double exact = x * x;
 
         Point test{x, 0.0, 0.0};
-        const double interpolated = interpolator.interpolate( phi, test );
+        const double interpolated = linearInterpolator.interpolate( phi, test );
 
         const bool passed = std::abs(interpolated - exact) > 1.0e-6;
 
@@ -202,7 +204,7 @@ bool runInterpolatorTest()
         const double exact = 2.0 * x + 1.0;
 
         Point test{x, 0.0, 0.0};
-        const double interpolated = interpolator.interpolate( phi, test );
+        const double interpolated = linearInterpolator.interpolate( phi, test );
 
         const bool passed = nearlyEqual( interpolated, exact, tolerance );
 
@@ -243,7 +245,7 @@ bool runInterpolatorTest()
         const double exact = 2.0 * x + 1.0;
 
         Point test{x, 0.0, 0.0};
-        const double interpolated = interpolator.interpolate( phi, test );
+        const double interpolated = linearInterpolator.interpolate( phi, test );
 
         const bool passed = nearlyEqual( interpolated, exact, tolerance );
 
@@ -285,7 +287,7 @@ bool runInterpolatorTest()
             const double x = mesh.node(i)[0];
 
             Point test{x, 0.0, 0.0};
-            const double interpolated = interpolator.interpolate( phi, test );
+            const double interpolated = linearInterpolator.interpolate( phi, test );
 
             if (!nearlyEqual( interpolated, phi[i], tolerance))
             {
@@ -320,7 +322,7 @@ bool runInterpolatorTest()
         try
         {
             Point test{-0.1, 0.0, 0.0};
-            interpolator.interpolate( phi, test );
+            linearInterpolator.interpolate( phi, test );
 
             passed = false;
         }
@@ -332,7 +334,7 @@ bool runInterpolatorTest()
         try
         {
             Point test{1.1, 0.0, 0.0};
-            interpolator.interpolate( phi, test );
+            linearInterpolator.interpolate( phi, test );
 
             passed = false;
         }
@@ -374,7 +376,7 @@ bool runInterpolatorTest()
         try
         {
             Point test{0.0, 0.0, 0.0};
-            interpolator.interpolate( phi, test );
+            linearInterpolator.interpolate( phi, test );
 
             passed = false;
         }
@@ -386,7 +388,7 @@ bool runInterpolatorTest()
         try
         {
             Point test{1.0, 0.0, 0.0};
-            interpolator.interpolate( phi, test );
+            linearInterpolator.interpolate( phi, test );
 
             passed = false;
         }
@@ -416,19 +418,277 @@ bool runInterpolatorTest()
      * Summary
      * ------------------------------------------------------------
      */
-    std::cout
-        << "\n"
-        << "------------------------------------------------------------\n"
-        << "Interpolator Test Results\n"
-        << "------------------------------------------------------------\n"
-        << "Tests passed              : " << testsPassed << "\n"
-        << "Tests failed              : " << testsFailed << "\n"
-        << "\n"
-        << "============================================================\n"
-        << "Linear Interpolator Test "
-        << (allPassed ? "PASS" : "FAIL")
-        << "\n"
-        << "============================================================\n";
+    std::cout << "\n"
+              << "------------------------------------------------------------\n"
+              << "Interpolator Test Results\n"
+              << "------------------------------------------------------------\n"
+              << "Tests passed              : " << testsPassed << "\n"
+              << "Tests failed              : " << testsFailed << "\n"
+              << "\n"
+              << "============================================================\n"
+              << "Linear Interpolator Test "
+              << (allPassed ? "PASS" : "FAIL")
+              << "\n"
+              << "============================================================\n";
+
+    return allPassed;
+}
+
+bool runBilinearInterpolatorTest()
+{
+    constexpr double lengthX = 1.0;
+    constexpr double lengthY = 1.0;
+
+    constexpr std::size_t nx = 10;
+    constexpr std::size_t ny = 10;
+
+    constexpr double tolerance = 1.0e-12;
+
+    QuadMesh2D mesh(nx, ny, lengthX, lengthY);
+
+    BilinearInterpolator bilinearInterpolator;
+
+    bool allPassed = true;
+
+    std::size_t testsPassed = 0;
+    std::size_t testsFailed = 0;
+
+    std::cout << "\n"
+              << "============================================================\n"
+              << "Bilinear Interpolator Test\n"
+              << "============================================================\n"
+              << "\n"
+              << "Mesh:\n"
+              << "  Cells X : " << nx << "\n"
+              << "  Cells Y : " << ny << "\n"
+              << "  Length X: " << lengthX << "\n"
+              << "  Length Y: " << lengthY << "\n"
+              << "\n"
+              << "Tolerance:\n"
+              << "  " << std::scientific << tolerance << "\n"
+              << "\n";
+
+    /*
+     * ------------------------------------------------------------
+     * Linear node-centered field
+     * ------------------------------------------------------------
+     *
+     *     phi(x,y) = 2x + 3y + 1
+     *
+     * Bilinear interpolation should reproduce a linear field
+     * exactly.
+     */
+    {
+        ScalarField phi(
+            "phi",
+            mesh,
+            FieldLocation::Node
+        );
+
+        for (std::size_t i = 0; i < mesh.nnodes(); ++i)
+        {
+            const Point& p = mesh.node(i);
+
+            phi[i] = 2.0 * p[0] + 3.0 * p[1] + 1.0;
+        }
+
+        Point test{0.2676, 0.5, 0.0};
+
+        const double exact =
+            2.0 * test[0] +
+            3.0 * test[1] +
+            1.0;
+
+        const double interpolated = bilinearInterpolator.interpolate(phi, test);
+
+        const bool passed = nearlyEqual(interpolated, exact, tolerance);
+
+        if (passed) { ++testsPassed; }
+        else
+        {
+            ++testsFailed;
+            allPassed = false;
+        }
+
+        std::cout << "Linear node scalar field : "
+                  << (passed ? "PASS" : "FAIL")
+                  << "\n";
+    }
+
+    /*
+     * ------------------------------------------------------------
+     * Bilinear node-centered field
+     * ------------------------------------------------------------
+     *
+     *     phi(x,y) = 1 + 2x + 3y + 4xy
+     *
+     * Bilinear interpolation should reproduce this exactly.
+     */
+    {
+        ScalarField phi(
+            "phi",
+            mesh,
+            FieldLocation::Node
+        );
+
+        for (std::size_t i = 0; i < mesh.nnodes(); ++i)
+        {
+            const Point& p = mesh.node(i);
+
+            const double x = p[0];
+            const double y = p[1];
+
+            phi[i] =
+                1.0 +
+                2.0 * x +
+                3.0 * y +
+                4.0 * x * y;
+        }
+
+        Point test{0.2676, 0.5, 0.0};
+
+        const double x = test[0];
+        const double y = test[1];
+
+        const double exact =
+            1.0 +
+            2.0 * x +
+            3.0 * y +
+            4.0 * x * y;
+
+        const double interpolated = bilinearInterpolator.interpolate(phi, test);
+
+        const bool passed = nearlyEqual(interpolated, exact, tolerance);
+
+        if (passed) { ++testsPassed; }
+        else
+        {
+            ++testsFailed;
+            allPassed = false;
+        }
+
+        std::cout << "Bilinear node scalar     : "
+                  << (passed ? "PASS" : "FAIL")
+                  << "\n";
+    }
+
+    /*
+     * ------------------------------------------------------------
+     * Bilinear node-centered vector field
+     * ------------------------------------------------------------
+     *
+     * Each component is bilinear in x and y.
+     */
+    {
+        VectorField field(
+            "vector",
+            mesh,
+            FieldLocation::Node
+        );
+
+        for (std::size_t i = 0; i < mesh.nnodes(); ++i)
+        {
+            const Point& p = mesh.node(i);
+
+            const double x = p[0];
+            const double y = p[1];
+
+            field[i] = Vector(
+                1.0 + x + 2.0 * y,
+                2.0 + 3.0 * x + y,
+                3.0 + 2.0 * x * y
+            );
+        }
+
+        Point test{0.2676, 0.5, 0.0};
+
+        const double x = test[0];
+        const double y = test[1];
+
+        const Vector exact(
+            1.0 + x + 2.0 * y,
+            2.0 + 3.0 * x + y,
+            3.0 + 2.0 * x * y
+        );
+
+        const Vector interpolated = bilinearInterpolator.interpolate(field, test);
+
+        const bool passed = nearlyEqual(interpolated[0], exact[0], tolerance) &&
+                            nearlyEqual(interpolated[1], exact[1], tolerance) &&
+                            nearlyEqual(interpolated[2], exact[2], tolerance);
+
+        if (passed) { ++testsPassed; }
+        else
+        {
+            ++testsFailed;
+            allPassed = false;
+        }
+
+        std::cout << "Bilinear node vector     : "
+                  << (passed ? "PASS" : "FAIL")
+                  << "\n";
+    }
+
+    
+    /*
+    * ------------------------------------------------------------
+    * 2D Face-Centered Scalar Field
+    * ------------------------------------------------------------
+    *
+    *     phi(x,y) = 2x + 3y + 1
+    *
+    * The face-centered values are sampled at the actual face
+    * centers. Bilinear interpolation should reproduce a linear
+    * field exactly.
+    */
+    {
+        QuadMesh2D mesh2D(
+            10,
+            10,
+            1.0,
+            1.0
+        );
+
+        ScalarField field(
+            "phi",
+            mesh2D,
+            FieldLocation::Face
+        );
+
+        for (std::size_t i = 0; i < mesh2D.nfaces(); ++i)
+        {
+            const double x = mesh2D.face(i).center[0];
+            const double y = mesh2D.face(i).center[1];
+
+            field[i] = 2.0 * x + 3.0 * y + 1.0;
+        }
+
+        const Point test{
+            0.375,
+            0.625,
+            0.0
+        };
+
+        const double expected =
+            2.0 * test[0]
+            + 3.0 * test[1]
+            + 1.0;
+
+        const double interpolated = bilinearInterpolator.interpolate(field, test);
+
+        const bool passed = nearlyEqual(interpolated, expected, tolerance);
+
+        if (passed) { ++testsPassed; }
+        else
+        {
+            ++testsFailed;
+            allPassed = false;
+        }
+
+        std::cout << "Face-centered scalar      : "
+                  << (passed ? "PASS" : "FAIL")
+                  << "\n";
+    }
 
     return allPassed;
 }
