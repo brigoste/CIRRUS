@@ -123,7 +123,7 @@ Performance notes:
 * [x] None
 * [x] Jacobi
 * [x] ILU(0)
-* [ ] SSOR
+* [x] SSOR
 * [ ] Algebraic Multigrid (AMG)
 
 Performance notes:
@@ -328,7 +328,7 @@ The fallback is verified independently at the stencil level.
     * [x] Face-centered interpolation
     * [x] Cell-centered interpolation
     * [x] QoI evaluation through field interpolation
-    * [ ] Vector-field interpolation
+    * [x] Vector-field interpolation
     * [ ] Higher-order interpolation
 * [ ] Verifciation Analysis
     * [x] Error norms
