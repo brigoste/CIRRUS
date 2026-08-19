@@ -37,6 +37,7 @@ public:
     double distance( const Point& a, const Point& b) const override;
 
     void cellNodes(std::size_t c, std::vector<std::size_t>& nodes) const override;
+    std::size_t findCell(const Point& position) const override;
 
     std::size_t dim() const override                                                { return 2; }
     int vtkCellType(std::size_t) const override                                     { return 9; }
