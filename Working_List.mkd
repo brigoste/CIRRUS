@@ -321,15 +321,16 @@ The fallback is verified independently at the stencil level.
 * [ ] TensorField
 * [ ] BoundaryField
 * [x] Field interpolation
-    * [x] ScalarField spatial evaluation
     * [x] Interpolator interface
-    * [x] Linear interpolation
+    * [x] 1D linear interpolation
+    * [x] 2D bilinear interpolation
     * [x] Node-centered interpolation
-    * [x] Face-centered interpolation
     * [x] Cell-centered interpolation
-    * [x] QoI evaluation through field interpolation
-    * [x] Vector-field interpolation
-    * [ ] Higher-order interpolation
+    * [x] 1D face-centered interpolation
+    * [x] 2D face-centered scalar interpolation
+    * [ ] 2D face-centered vector interpolation
+    * [x] Point-value QoI interpolation
+    * [x] Interpolator unit tests
 * [ ] Verifciation Analysis
     * [x] Error norms
     * [x] Observed convergence order
