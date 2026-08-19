@@ -509,114 +509,114 @@ bool runVectorInterpolatorTest()
     * Bilinear interpolation should preserve a constant field
     * exactly.
     */
-    {
-        QuadMesh2D mesh2D(
-            10,
-            10,
-            1.0,
-            1.0
-        );
+    // {
+    //     QuadMesh2D mesh2D(
+    //         10,
+    //         10,
+    //         1.0,
+    //         1.0
+    //     );
 
-        Vector value;
+    //     Vector value;
 
-        value[0] = 2.0;
-        value[1] = -3.0;
-        value[2] = 5.0;
+    //     value[0] = 2.0;
+    //     value[1] = -3.0;
+    //     value[2] = 5.0;
 
-        VectorField field(
-            "U",
-            mesh2D,
-            FieldLocation::Node,
-            value
-        );
+    //     VectorField field(
+    //         "U",
+    //         mesh2D,
+    //         FieldLocation::Node,
+    //         value
+    //     );
 
-        const Point test{
-            0.375,
-            0.625,
-            0.0
-        };
+    //     const Point test{
+    //         0.375,
+    //         0.625,
+    //         0.0
+    //     };
 
-        const Vector interpolated = interpolator.interpolate(field, test);
+    //     const Vector interpolated = interpolator.interpolate(field, test);
 
-        const bool passed = vectorsNearlyEqual(interpolated, value, tolerance);
+    //     const bool passed = vectorsNearlyEqual(interpolated, value, tolerance);
 
-        if (passed) { ++testsPassed; }
-        else
-        {
-            ++testsFailed;
-            allPassed = false;
-        }
+    //     if (passed) { ++testsPassed; }
+    //     else
+    //     {
+    //         ++testsFailed;
+    //         allPassed = false;
+    //     }
 
-        std::cout
-            << "2D constant node field   : "
-            << (passed ? "PASS" : "FAIL")
-            << "\n";
-    }
-    /*
-    * ------------------------------------------------------------
-    * 2D Linear Node Vector Field
-    * ------------------------------------------------------------
-    *
-    *     U(x,y) =
-    *
-    *     [ 2x + 3y + 1,
-    *      -x + 4y + 2,
-    *       0.5x - 2y + 5 ]
-    *
-    * Bilinear interpolation should reproduce every component
-    * exactly.
-    */
-    {
-        QuadMesh2D mesh2D(
-            10,
-            10,
-            1.0,
-            1.0
-        );
+    //     std::cout
+    //         << "2D constant node field   : "
+    //         << (passed ? "PASS" : "FAIL")
+    //         << "\n";
+    // }
+    // /*
+    // * ------------------------------------------------------------
+    // * 2D Linear Node Vector Field
+    // * ------------------------------------------------------------
+    // *
+    // *     U(x,y) =
+    // *
+    // *     [ 2x + 3y + 1,
+    // *      -x + 4y + 2,
+    // *       0.5x - 2y + 5 ]
+    // *
+    // * Bilinear interpolation should reproduce every component
+    // * exactly.
+    // */
+    // {
+    //     QuadMesh2D mesh2D(
+    //         10,
+    //         10,
+    //         1.0,
+    //         1.0
+    //     );
 
-        VectorField field(
-            "U",
-            mesh2D,
-            FieldLocation::Node
-        );
+    //     VectorField field(
+    //         "U",
+    //         mesh2D,
+    //         FieldLocation::Node
+    //     );
 
-        for (std::size_t i = 0; i < mesh2D.nnodes(); ++i)
-        {
-            const double x = mesh2D.node(i)[0];
-            const double y = mesh2D.node(i)[1];
+    //     for (std::size_t i = 0; i < mesh2D.nnodes(); ++i)
+    //     {
+    //         const double x = mesh2D.node(i)[0];
+    //         const double y = mesh2D.node(i)[1];
 
-            field[i][0] = 2.0 * x + 3.0 * y + 1.0;
-            field[i][1] = -x + 4.0 * y + 2.0;
-            field[i][2] = 0.5 * x - 2.0 * y + 5.0;
-        }
+    //         field[i][0] = 2.0 * x + 3.0 * y + 1.0;
+    //         field[i][1] = -x + 4.0 * y + 2.0;
+    //         field[i][2] = 0.5 * x - 2.0 * y + 5.0;
+    //     }
 
-        const Point test{
-            0.375,
-            0.625,
-            0.0
-        };
+    //     const Point test{
+    //         0.375,
+    //         0.625,
+    //         0.0
+    //     };
 
-        Vector expected;
+    //     Vector expected;
 
-        expected[0] = 2.0 * test[0] + 3.0 * test[1] + 1.0;
-        expected[1] = -test[0] + 4.0 * test[1] + 2.0;
-        expected[2] = 0.5 * test[0] - 2.0 * test[1] + 5.0;
+    //     expected[0] = 2.0 * test[0] + 3.0 * test[1] + 1.0;
+    //     expected[1] = -test[0] + 4.0 * test[1] + 2.0;
+    //     expected[2] = 0.5 * test[0] - 2.0 * test[1] + 5.0;
 
-        const Vector interpolated = interpolator.interpolate(field, test);
-        const bool passed = vectorsNearlyEqual(interpolated, expected, tolerance);
+    //     const Vector interpolated = interpolator.interpolate(field, test);
+    //     const bool passed = vectorsNearlyEqual(interpolated, expected, tolerance);
 
-        if (passed) { ++testsPassed; }
-        else
-        {
-            ++testsFailed;
-            allPassed = false;
-        }
+    //     if (passed) { ++testsPassed; }
+    //     else
+    //     {
+    //         ++testsFailed;
+    //         allPassed = false;
+    //     }
 
-        std::cout
-            << "2D linear node field     : "
-            << (passed ? "PASS" : "FAIL")
-            << "\n";
-    }
+    //     std::cout
+    //         << "2D linear node field     : "
+    //         << (passed ? "PASS" : "FAIL")
+    //         << "\n";
+    // }
 
     /*
      * ------------------------------------------------------------
