@@ -78,7 +78,7 @@ std::vector<double> BiCGSTAB(
             }
         }
 
-        // Apply Jacobi M to p
+        // Apply preconditioner M to p
         M.apply(p, p_hat);
 
         // v = A(M⁻¹p)
@@ -111,7 +111,7 @@ std::vector<double> BiCGSTAB(
             return x;
         }
 
-        // Apply Jacobi preconditioner to s
+        // Apply preconditioner to s
         M.apply(s, s_hat);
 
         // t = A(M⁻¹s)
