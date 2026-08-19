@@ -41,6 +41,7 @@ public:
 
     // cells
     virtual const Cell& cell(std::size_t i) const = 0;
+    virtual std::size_t findCell(const Point& position) const = 0;
 
     // for use in test case validation
     virtual double cellVolume(std::size_t c) const = 0;
