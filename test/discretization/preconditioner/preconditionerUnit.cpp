@@ -53,6 +53,22 @@ LinearSystem createTestSystem()
 
     return system;
 }
+LinearSystem createNonsymmetricTestSystem()
+{
+    LinearSystem system(3);
+
+    system.addCoeff(0, 0, 4.0);
+    system.addCoeff(0, 1, -2.0);
+
+    system.addCoeff(1, 0, -1.0);
+    system.addCoeff(1, 1, 5.0);
+    system.addCoeff(1, 2, -2.0);
+
+    system.addCoeff(2, 1, -1.0);
+    system.addCoeff(2, 2, 3.0);
+
+    return system;
+}
 
 std::vector<double> applySSORMatrix(
     const LinearSystem& system,
@@ -222,4 +238,110 @@ void testSSORZeroDiagonal()
     }
 
     std::cout << "Zero diagonal : PASS\n";
+}
+void testSSORSGSEquivalence()
+{
+    std::cout << "\n---- SSOR / SGS Equivalence Test ----\n";
+
+    LinearSystem system = createTestSystem();
+
+    const std::vector<double> rhs = {
+        1.0,
+        2.0,
+        3.0
+    };
+
+    SSORPreconditioner ssor(1.0);
+    ssor.setup(system);
+
+    std::vector<double> zSSOR;
+    ssor.apply(rhs, zSSOR);
+
+    // --------------------------------------------------------
+    // SGS:
+    //
+    //     (D + L)y = r
+    //     w = D y
+    //     (D + U)z = w
+    //
+    // --------------------------------------------------------
+
+    const std::size_t n = system.size();
+
+    std::vector<double> y(n, 0.0);
+
+    for (std::size_t i = 0; i < n; ++i)
+    {
+        double value = rhs[i];
+
+        for (const auto& [j, aij] : system.row(i))
+        {
+            if (j < i)
+            {
+                value -= aij * y[j];
+            }
+        }
+
+        y[i] = value / system.diagonal(i);
+    }
+
+    std::vector<double> w(n, 0.0);
+
+    for (std::size_t i = 0; i < n; ++i)
+    {
+        w[i] = system.diagonal(i) * y[i];
+    }
+
+    std::vector<double> zSGS(n, 0.0);
+
+    for (std::size_t i = n; i-- > 0;)
+    {
+        double value = w[i];
+
+        for (const auto& [j, aij] : system.row(i))
+        {
+            if (j > i)
+            {
+                value -= aij * zSGS[j];
+            }
+        }
+
+        zSGS[i] = value / system.diagonal(i);
+    }
+
+    assertVectorEqual(zSSOR, zSGS);
+
+    std::cout << "SSOR omega = 1 == SGS : PASS\n";
+}
+void testSSORNonsymmetric()
+{
+    std::cout << "\n---- SSOR Nonsymmetric Matrix Test ----\n";
+
+    LinearSystem system = createNonsymmetricTestSystem();
+
+    const std::vector<double> rhs = {
+        1.0,
+        2.0,
+        3.0
+    };
+
+    for (const double omega : {0.5, 1.0, 1.2, 1.8})
+    {
+        SSORPreconditioner preconditioner(omega);
+        preconditioner.setup(system);
+
+        std::vector<double> z;
+
+        preconditioner.apply(rhs, z);
+
+        const std::vector<double> reconstructed =
+            applySSORMatrix(system, omega, z);
+
+        assertVectorEqual(reconstructed, rhs);
+
+        std::cout
+            << "omega = "
+            << omega
+            << " : PASS\n";
+    }
 }
