@@ -4,6 +4,7 @@
 
 #include "fields/ScalarField.hpp"
 #include "fields/VectorField.hpp"
+#include <stdexcept>
 
 class LinearInterpolator : public Interpolator
 {
