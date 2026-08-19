@@ -14,6 +14,7 @@ void runTVDReconstructionTest();
 
 void runInterpolatorTest();
 void runVectorInterpolatorTest();
+void runBilinearInterpolatorTest();
 
 void runPointValueQoITest();
 
@@ -62,10 +63,12 @@ int main()
     std::cout << " Running CIRRUS Interpolator Unit Tests\n";
     std::cout << "================================\n\n";
 
-    std::cout << "\n---- Interpolator Test ----\n\n";
+    std::cout << "\n---- Linear Interpolator Test ----\n\n";
     runInterpolatorTest();
-    std::cout << "\n---- Vector Interpolator Test ----\n\n";
+    std::cout << "\n---- Vector Linear Interpolator Test ----\n\n";
     runVectorInterpolatorTest();
+    std::cout << "\n---- Bilinear Interpolator Test ----\n\n";
+    runBilinearInterpolatorTest();
 
     std::cout << "\n---- PointValueQoI Test ----\n\n";
     runPointValueQoITest();
