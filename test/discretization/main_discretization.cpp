@@ -3,6 +3,7 @@
 void runGreenGaussTest();
 void runLeastSquaresTest();
 void runCubicGradientTest();
+
 void runGradientReconstructionTest();
 void runCentralReconstructionTest();
 void runSecondOrderUpwindFallbackTest();
@@ -10,8 +11,12 @@ void runQuickReconstructionTest();
 void runMusclReconstructionTest();
 void runMinmodLimiterTest();
 void runTVDReconstructionTest();
+
 void runInterpolatorTest();
+void runVectorInterpolatorTest();
+
 void runPointValueQoITest();
+
 void testSSORApplication();
 void testSSORInvalidOmega();
 void testSSORZeroDiagonal();
@@ -59,6 +64,8 @@ int main()
 
     std::cout << "\n---- Interpolator Test ----\n\n";
     runInterpolatorTest();
+    std::cout << "\n---- Vector Interpolator Test ----\n\n";
+    runVectorInterpolatorTest();
 
     std::cout << "\n---- PointValueQoI Test ----\n\n";
     runPointValueQoITest();
