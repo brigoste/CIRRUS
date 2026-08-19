@@ -15,6 +15,8 @@ void runPointValueQoITest();
 void testSSORApplication();
 void testSSORInvalidOmega();
 void testSSORZeroDiagonal();
+void testSSORSGSEquivalence();
+void testSSORNonsymmetric();
 
 int main()
 {
@@ -72,6 +74,8 @@ int main()
     testSSORApplication();
     testSSORInvalidOmega();
     testSSORZeroDiagonal();
+    testSSORSGSEquivalence();
+    testSSORNonsymmetric();
 
     std::cout << "\n==============================\n";
     std::cout << " COMPLETE\n";
