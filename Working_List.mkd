@@ -1045,11 +1045,11 @@ This establishes the current numerical infrastructure as a verified baseline for
 * [ ] Validate reported Richardson/GCI values against existing cases
 
 ### 2. Vector field interpolation
-* [ ] Generalize interpolation interface for vector fields
-* [ ] Implement VectorField interpolation
-* [ ] Add vector interpolation unit tests
+* [x] Generalize interpolation interface for vector fields
+* [x] Implement VectorField interpolation
+* [x] Add vector interpolation unit tests
 * [ ] Add vector QoI support
-* [ ] Verify interpolation across supported field locations
+* [x] Verify interpolation across supported field locations
 
 ### 3. Higher-order interpolation
 * [ ] Define higher-order interpolation requirements
