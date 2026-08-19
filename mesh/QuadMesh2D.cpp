@@ -1,10 +1,11 @@
 #include "mesh/QuadMesh2D.hpp"
 #include <stdexcept>
 #include <cmath>
+#include <algorithm>
 
 QuadMesh2D::QuadMesh2D(std::size_t nx, std::size_t ny,
                        double lx, double ly)
-: nx_(nx), ny_(ny)
+: nx_(nx), ny_(ny), Lx_(lx), Ly_(ly)
 {
     if (nx < 2 || ny < 2)
         throw std::runtime_error("Invalid mesh size");
@@ -219,6 +220,22 @@ void QuadMesh2D::cellNodes( std::size_t c,
     std::size_t n3 = n0 + (nx_ + 1);
 
     nodes = {n0, n1, n2, n3};
+}
+
+std::size_t QuadMesh2D::findCell(const Point& position) const
+{
+    const double x = position[0];
+    const double y = position[1];
+
+    if (x < 0.0 || x > getLx() || y < 0.0 || y > getLy())
+    {
+        throw std::out_of_range("QuadMesh2D::findCell: position lies outside mesh.");
+    }
+
+    std::size_t i = std::min( static_cast<std::size_t>(x / dx_), nx_ - 1 );
+    std::size_t j = std::min( static_cast<std::size_t>(y / dy_), ny_ - 1 );
+
+    return idx(i, j);
 }
 
 #ifdef DEBUG
