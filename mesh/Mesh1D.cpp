@@ -132,3 +132,26 @@ void Mesh1D::cellNodes(std::size_t c, std::vector<std::size_t>& nodes) const   {
 const Cell& Mesh1D::cell(std::size_t i) const                                  { return cells_.at(i); }
 
 int Mesh1D::vtkCellType(std::size_t) const                                     { return 3; } // VTK_LINE 
+
+
+std::size_t Mesh1D::findCell(const Point& position) const
+{
+    const double x = position[0];
+    const double length = ncells() * dx_;
+
+    constexpr double eps = 1.0e-12;
+
+    if (x < -eps || x > length + eps)
+    {
+        throw std::out_of_range(
+            "Mesh1D::findCell: position lies outside mesh."
+        );
+    }
+
+    if (x >= length - eps)
+    {
+        return ncells() - 1;
+    }
+
+    return static_cast<std::size_t>(x / dx_);
+}
