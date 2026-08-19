@@ -45,4 +45,6 @@ public:
 
     // for use in test case validation
     virtual double cellVolume(std::size_t c) const = 0;
+    
+    static constexpr std::size_t INVALID = static_cast<std::size_t>(-1);    
 };
