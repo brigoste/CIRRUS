@@ -4,6 +4,7 @@
 #include "ManufacturedCases/Quadratic1D.hpp"
 #include "ManufacturedCases/Sinusoidal2D.hpp"
 #include "ManufacturedCases/AdvectionDiffusion2D.hpp"
+#include "ManufacturedCases/StressAdvectionDiffusion2D.hpp"
 #include "ManufacturedCases/Neumann1D.hpp"
 #include "ManufacturedCases/Neumann2D.hpp"
 #include "ManufacturedCases/Robin1D.hpp"
@@ -20,6 +21,8 @@ std::unique_ptr<VerificationCase> VerificationCaseFactory::create(
     if (name == "Sinusoidal2D") { return std::make_unique<Sinusoidal2D>(config); }
 
     if (name == "AdvectionDiffusion2D") { return std::make_unique<AdvectionDiffusion2D>(config); }
+
+    if (name == "StressAdvectionDiffusion2D") { return std::make_unique<StressAdvectionDiffusion2D>(config); }
 
     if (name == "Neumann1D") { return std::make_unique<Neumann1D>(config); }
 
