@@ -42,6 +42,7 @@ public:
     std::size_t nBoundaryGroups() const override;
 
     const std::vector<std::size_t>& boundaryFaces(std::size_t group) const override;
+    virtual std::size_t findCell(const Point& position) const override;
 
     // optional helper (mesh-specific convenience)
     std::size_t toGroup(Patch p) const                                      { return static_cast<std::size_t>(p); }
