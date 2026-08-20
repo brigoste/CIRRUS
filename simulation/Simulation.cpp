@@ -41,7 +41,7 @@ void Simulation::initializeFields()
 
 Simulation::Simulation(const SimulationConfig& cfg)
     : gradientScheme_(makeGradientScheme(cfg.discretization.gradientScheme)),
-      reconstructionScheme_(makeReconstructionScheme(cfg.discretization.reconstructionScheme)),  
+      reconstructionScheme_(makeReconstructionScheme(cfg.discretization.reconstructionScheme, cfg.discretization.flux_limiter)),  
       convection_(*reconstructionScheme_),
       diffusion_(diffusionScheme_),
       fvOperator_(convection_, diffusion_),
