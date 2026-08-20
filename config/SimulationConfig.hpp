@@ -268,6 +268,7 @@ inline void from_json(const nlohmann::json& j, DiscretizationConfig& d)
 {
     d.gradientScheme      = gradientFromString( j.value( "gradientScheme", "green_gauss" ));
     d.reconstructionScheme = reconstructionTypeFromString( j.value("reconstructionScheme", "Gradient"));
+    d.flux_limiter = fluxLimiterTypeFromString (j.value("flux_limiter", "minmod"));
 }
 
 // ------------------------- Read Config for Verification ------------
