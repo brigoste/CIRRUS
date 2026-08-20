@@ -24,6 +24,8 @@ void testSSORZeroDiagonal();
 void testSSORSGSEquivalence();
 void testSSORNonsymmetric();
 
+void runFluxLimiterTest();
+
 int main()
 {
     std::cout << "==============================\n";
@@ -86,6 +88,12 @@ int main()
     testSSORZeroDiagonal();
     testSSORSGSEquivalence();
     testSSORNonsymmetric();
+
+    std::cout << "\n================================\n";
+    std::cout << " Running Flux Limiter Unit Tests\n";
+    std::cout << "================================\n\n";
+
+    runFluxLimiterTest();
 
     std::cout << "\n==============================\n";
     std::cout << " COMPLETE\n";
