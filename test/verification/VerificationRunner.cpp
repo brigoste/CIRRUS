@@ -429,11 +429,11 @@ bool VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
     std::cout << "================================================================================\n\n";
 
     std::cout << std::left
-              << std::setw(22) << "Case"
+              << std::setw(28) << "Case"
               << std::setw(10) << "Solver"
               << std::setw(18) << "Reconstruction"
               << std::setw(16) << "Gradient"
-              << std::setw(10) << "Mesh"
+              << std::setw(12) << "Mesh"
               << std::setw(12) << "L2 Error"
               << std::setw(12) << "L2 Tol"
               << std::setw(16) << "Max Error/Tol"
@@ -441,7 +441,7 @@ bool VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
               << std::setw(12) << "Result"
               << "\n";
 
-    std::cout << std::string(136, '-') << "\n";
+    std::cout << std::string(144, '-') << "\n";
 
     std::cout << std::scientific << std::setprecision(3);
 
@@ -453,11 +453,11 @@ bool VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
         const double maxErrorRatio = std::max(l2Ratio, linfRatio);
 
         std::cout << std::left
-                  << std::setw(22) << s.caseName
+                  << std::setw(28) << s.caseName
                   << std::setw(10) << s.solver
                   << std::setw(18) << s.reconstruction
                   << std::setw(16) << s.gradient
-                  << std::setw(10) << s.meshSize
+                  << std::setw(12) << s.meshSize
                   << std::setw(12) << s.l2Error
                   << std::setw(12) << s.l2AcceptanceTol
                   << std::setw(16) << maxErrorRatio;
