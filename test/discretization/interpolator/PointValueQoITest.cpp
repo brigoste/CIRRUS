@@ -129,27 +129,11 @@ void runPointValueQoITest()
      * Position
      * ------------------------------------------------------------
      */
-    const Point& storedPosition =
-        qoi.position();
+    const Point& storedPosition = qoi.position();
 
-    const bool positionPassed =
-        nearlyEqual(
-            storedPosition[0],
-            position[0],
-            tolerance
-        )
-        &&
-        nearlyEqual(
-            storedPosition[1],
-            position[1],
-            tolerance
-        )
-        &&
-        nearlyEqual(
-            storedPosition[2],
-            position[2],
-            tolerance
-        );
+    const bool positionPassed = nearlyEqual( storedPosition[0], position[0], tolerance )
+                             && nearlyEqual( storedPosition[1], position[1], tolerance )
+                             && nearlyEqual( storedPosition[2], position[2], tolerance );
 
     if (positionPassed) { ++testsPassed; }
     else
