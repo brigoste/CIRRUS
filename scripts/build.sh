@@ -62,6 +62,10 @@ while [[ $# -gt 0 ]]; do
             CONFIG_PATH="$PROJECT_DIR/cases/verification/verification_suite.json"
             ;;
 
+        -v)
+            CONFIG_PATH="$PROJECT_DIR/cases/verification/verification_suite.json"
+            ;;
+
         --config)
             shift
             if [[ $# -eq 0 ]]; then
