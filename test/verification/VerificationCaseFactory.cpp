@@ -1,14 +1,14 @@
 #include "VerificationCaseFactory.hpp"
 
-#include "ManufacturedCases/1DLinear.hpp"
-#include "ManufacturedCases/Quadratic1D.hpp"
-#include "ManufacturedCases/Sinusoidal2D.hpp"
-#include "ManufacturedCases/AdvectionDiffusion2D.hpp"
-#include "ManufacturedCases/StressAdvectionDiffusion2D.hpp"
-#include "ManufacturedCases/Neumann1D.hpp"
-#include "ManufacturedCases/Neumann2D.hpp"
-#include "ManufacturedCases/Robin1D.hpp"
-#include "ManufacturedCases/Robin2D.hpp"
+#include "test/verification/ManufacturedCases/1DLinear.hpp"
+#include "test/verification/ManufacturedCases/Quadratic1D.hpp"
+#include "test/verification/ManufacturedCases/Sinusoidal2D.hpp"
+#include "test/verification/ManufacturedCases/AdvectionDiffusion2D.hpp"
+#include "test/verification/ManufacturedCases/StressAdvectionDiffusion2D.hpp"
+#include "test/verification/ManufacturedCases/Neumann1D.hpp"
+#include "test/verification/ManufacturedCases/Neumann2D.hpp"
+#include "test/verification/ManufacturedCases/Robin1D.hpp"
+#include "test/verification/ManufacturedCases/Robin2D.hpp"
 
 std::unique_ptr<VerificationCase> VerificationCaseFactory::create(
     const std::string& name,
