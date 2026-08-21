@@ -1,6 +1,7 @@
 #include "fields/ScalarField.hpp"
 
 #include "interpolators/LinearInterpolator.hpp"
+#include "interpolators/BilinearInterpolator.hpp"
 
 #include <stdexcept>
 #include <algorithm>
@@ -47,9 +48,24 @@ void ScalarField::fill(double value)
     ); 
 }
 
+// Determining intra-mesh point values via interpolation from nearby points.
 double ScalarField::operator()(const Point& position) const
 {
-    LinearInterpolator interpolator;
+    // This will only work for strucutred meshes. For unstructed, we'll want to use properties of the mesh.
+    switch (mesh_.dim())
+    {
+        case 1:
+        {
+            LinearInterpolator interpolator;
+            return interpolator.interpolate(*this, position);
+        }
+        case 2:
+        {
+            BilinearInterpolator interpolator;
+            return interpolator.interpolate(*this, position);
+        }
 
-    return interpolator.interpolate(*this, position);
+        default:
+            throw std::runtime_error("ScalarField interpolation is not supported for mesh type: " + mesh_.dim());
+    }
 }

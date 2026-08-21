@@ -35,13 +35,7 @@ ReconstructionStencil TVDReconstruction::stencil(
     // Determine upwind stencil cells
     // -------------------------------------------------
 
-    const UpwindStencilCells cells =
-        findUpwindStencilCells(
-            mesh,
-            owner,
-            f,
-            flux
-        );
+    const UpwindStencilCells cells = findUpwindStencilCells( mesh, owner, f, flux );
 
     // -------------------------------------------------
     // Boundary fallback
@@ -147,15 +141,7 @@ double TVDReconstruction::reconstruct(
     double flux
 ) const
 {
-    const ReconstructionStencil s =
-        stencil(
-            mesh,
-            owner,
-            f,
-            field,
-            gradient,
-            flux
-        );
+    const ReconstructionStencil s = stencil( mesh, owner, f, field, gradient, flux );
 
     double value = 0.0;
 

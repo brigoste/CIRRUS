@@ -8,10 +8,12 @@
 #include "discretization/reconstructors/tvd/TVDReconstruction.hpp"
 #include "discretization/reconstructors/tvd/MinmodLimiter.hpp"
 
+#include "discretization/reconstructors/tvd/FluxLimiterType.hpp"
+#include "discretization/reconstructors/tvd/FluxLimiterFactory.hpp"
+
 #include <stdexcept>
 
-
-std::unique_ptr<ReconstructionScheme> makeReconstructionScheme(ReconstructionType type)
+std::unique_ptr<ReconstructionScheme> makeReconstructionScheme(ReconstructionType type, FluxLimiterType limiterType)
 {
     switch (type)
     {
@@ -35,7 +37,7 @@ std::unique_ptr<ReconstructionScheme> makeReconstructionScheme(ReconstructionTyp
 
         case ReconstructionType::TVD:
             return std::make_unique<TVDReconstruction>( 
-                std::make_unique<MinmodLimiter>() 
+                makeLimiter(limiterType)                        // There is another way to do this, but I don't love it.
             );
     }
 
