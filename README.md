@@ -29,7 +29,7 @@ Ubuntu:
   
         sudo apt install nlohmann-json3-dev
 
-Futhermore, for plotting purposes, the package requires a python interpreter or a .vtk viewer such paraview. However, if not provided, no automatic plotting will occur. The produced .csv and .vtk files are stored in the projects output/ folder and can be used for viewing externally to the package using tools such as excel, MATLAB, python and paraview. 
+Futhermore, for plotting purposes, the package requires a python interpreter or a .vtk viewer such as paraview. However, if not provided, no automatic plotting will occur. The produced .csv and .vtk files are stored in the projects output/ folder and can be used for viewing externally to the package using tools such as excel, MATLAB, python and paraview. 
 
 # DISCLAIMER
 
