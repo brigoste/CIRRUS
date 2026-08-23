@@ -110,7 +110,7 @@ The primary inheritance relationship is:
                 │ inherits
                 ▼
 ┌───────────────────────────────┐
-│         LinearSystem         │
+│         LinearSystem          │
 │                               │
 │  Explicit sparse matrix       │
 │  implementation               │
@@ -483,8 +483,8 @@ Or visually:
 ┌─────────────────────────────────────────────┐
 │ EquationSystem                              │
 │                                             │
-│ General equation assembly                  │
-│ size()                                     │
+│ General equation assembly                   │
+│ size()                                      │
 │ addCoeff()                                  │
 │ addRHS()                                    │
 │ clear()                                     │

@@ -1,0 +1,296 @@
+# CIRRUS
+
+## **C**omputational **I**nfrastructure for **R**econfigurable **R**egimes and **U**nified **S**olvers
+
+CIRRUS is a lightweight, open-source computational fluid dynamics (CFD) framework designed to provide a flexible foundation for finite-volume-based numerical simulation. The package emphasizes a modular solver architecture, lightweight configuration, and efficient computation while providing a framework that can be extended with additional physics, discretization methods, meshes, and numerical solvers.
+
+The current implementation provides structured 1D and 2D meshes, finite-volume discretization, configurable boundary conditions, multiple reconstruction and gradient schemes, linear-system solvers, field interpolation, solution output, and automated verification cases.
+
+## General Workflow
+
+A CIRRUS simulation follows the workflow:
+
+```text
+                         User Input (JSON)
+                                │
+                                ▼
+                Parse Simulation Configuration
+                       (SimulationConfig)
+                                │
+                                ▼
+                     Build Simulation Model
+                  ┌─────────────┴─────────────┐
+                  │                           │
+              Mesh Setup                Physics / BCs
+                  │                           │
+                  └─────────────┬─────────────┘
+                                ▼
+                    Assemble Discrete System
+                                │
+                                ▼
+                     Solve Linear System
+                                │
+                                ▼
+                   Reconstruct Solution Field
+                                │
+                                ▼
+                       Write Solution Data
+                         JSON / CSV / VTK
+                                │
+                                ▼
+                    Optional Visualization
+                         PyPlot / ParaView
+```
+
+Simulation inputs are specified through JSON configuration files. The default user case is:
+
+```text
+CIRRUS/cases/user/User_default.json
+```
+
+This case is executed by default when the corresponding build/run target is invoked.
+
+Verification cases use the same simulation workflow. The verification runner executes the requested cases, compares the numerical solution against the expected or analytical solution, reports error metrics and tolerances, and summarizes the overall verification status.
+
+# Brief Overview of Package Components
+
+## Meshes
+
+CIRRUS currently supports two structured mesh types:
+
+* **1D linear meshes**
+* **2D quadrilateral meshes**
+
+Both derive from the common `MeshBase` interface, which provides shared mesh functionality and supports geometric information in up to three spatial dimensions.
+
+The fundamental mesh entities are:
+
+* **Cells** — control volumes over which the governing equations are discretized.
+* **Faces** — interfaces between neighboring cells or between a cell and a boundary.
+* **Vertices** — geometric points defining the mesh.
+
+CIRRUS uses a cell-centered finite-volume formulation, with solution variables associated primarily with control volumes.
+
+### 1D Linear Mesh
+
+A 1D mesh is defined by:
+
+* Domain length, `L`
+* Number of cells, `nx`
+
+The mesh is aligned with the x-axis and uses uniform cell spacing. Boundary faces are located at the ends of the domain.
+
+```text
+1D Mesh: nx = 3
+
+    ┌────────────────────┐
+    |      |      |      |
+    o      o      o      o
+    |      |      |      |
+    └────────────────────┘
+```
+
+### 2D Quadrilateral Mesh
+
+A 2D quadrilateral mesh is defined by:
+
+* Domain length in x, `Lx`
+* Domain length in y, `Ly`
+* Number of cells in x, `nx`
+* Number of cells in y, `ny`
+
+The current implementation uses a structured, uniform quadrilateral topology.
+
+```text
+
+Each cell consists of 1 node and 4 faces. 
+
+2D Mesh: nx = 3, ny = 3
+
+          (Faces)                 (Nodes)           (Cell)
+
+    ┌──F──┬──F──┬──F──┐     ┌─────┬─────┬─────┐
+    │     │     │     │     │     │     │     │
+    F     F     F     F     |  o  |  o  |  o  |
+    │     │     │     │     │     │     │     │
+    ├──F──┼──F──┼──F──┤     ├─────┼─────┼─────┤     ┌─────┐
+    │     │     │     │     |     │     │     │     |     |
+    F     F     F     F     |  o  |  o  |  o  |     |     |
+    │     │     │     │     │     │     │     │     |     |
+    └──F──┴──F──┴──F──┘     └─────┴─────┴─────┘     └─────┘
+    │     │     │     │     |     │     │     │
+    F     F     F     F     |  o  |  o  |  o  |
+    │     │     │     │     │     │     │     │
+    └──F──┴──F──┴──F──┘     └─────┴─────┴─────┘
+
+
+```
+
+## Equation Systems
+
+Equation systems provide the numerical representation of the governing equations after discretization.
+
+The current framework supports assembly of sparse linear systems consisting of:
+
+* System matrix coefficients
+* Source/right-hand-side terms
+* Cell-based unknowns
+* Boundary-condition contributions
+
+The equation-system abstraction separates the physical model and discretization from the numerical linear-system solver.
+
+## Discretization
+
+CIRRUS uses a finite-volume formulation in which governing equations are integrated over individual control volumes and converted into algebraic equations through face fluxes.
+
+Current discretization capabilities include:
+
+* Cell-centered finite-volume discretization
+* Face-based diffusion terms
+* Configurable gradient reconstruction
+* Solution reconstruction at faces
+* Flux-limited TVD reconstruction
+* Configurable flux limiters
+
+Supported gradient/reconstruction methods and limiters are selected through the simulation configuration.
+
+Current flux limiters include:
+
+* Minmod
+* Superbee
+* Van Leer
+* MC
+* Van Albada
+
+## Solvers
+
+CIRRUS separates equation assembly from the numerical solution of the resulting linear system.
+
+Current linear-system solver capabilities include:
+
+* Tridiagnoal Matrix Algorithm (TDMA) (1D only)
+* Gauss-Seidel Method (GS)
+* Successive Over-relaxation (SOR)
+* Conjugate Gradient (CG)
+* BiCGSTAB
+* GMRES
+
+The solver framework is intended to allow additional linear-system methods to be added without changing the governing-physics implementation.
+
+### Preconditioners
+
+Some solvers, like BiCGSTAB and GMRES, benefit from implmenting matrix preconditioners. The use of a preconditioner helps create an equivalent matrix system with a smaller condition number. These systems are able to be solved in fewer iterations and can greatly increase the speed of convergence. This is mathemtically done by introducing the preconditioner matrix, M, into our system as follows:
+
+    M^-1 Ax = M^-1 b 
+
+Several algorithms exist in order to create the matrix preconditioner, M^-1. The preconditioners implmented in this package include:
+
+* Identity
+* Jacobi
+* ILU0
+* SSOR
+
+Preconditioners can be implmented in a left-hand (as shown above), right-hand and centralized forms. All cases in this package use left-hand applications.
+
+## Fields
+
+Fields represent physical quantities associated with the computational mesh.
+
+The field framework supports quantities associated with mesh entities and provides the data representation used by the discretization, reconstruction, and output systems.
+
+Fields are used for quantities such as:
+
+* Temperature
+* Scalar concentration
+* Velocity components
+* Other physical or derived quantities
+
+## Interpolators
+
+Interpolators provide a common mechanism for obtaining field values at locations where a direct field value is not available.
+
+Current interpolation functionality includes:
+
+* Linear interpolation
+* Bilinear interpolation
+* Interpolation between cell- and face-associated quantities
+* Interpolation of node/cell data for postprocessing and numerical operations
+
+## Physics
+
+The physics layer defines the governing equations and physical models used by the solver.
+
+The current implementation is primarily focused on scalar transport and diffusion problems, providing the foundation for additional physics models.
+
+Current capabilities include:
+
+* Diffusion
+* Advection
+* Advection-diffusion systems
+* Thermal/temperature-based problems
+* Dirichlet boundary conditions
+* Neumann boundary conditions
+* Robin boundary conditions
+
+Boundary conditions are associated with mesh faces and are configured through the JSON simulation input.
+
+## Postprocessing
+
+CIRRUS provides several output formats for inspecting and analyzing simulation results.
+
+Current output capabilities include:
+
+* **JSON** — configuration and structured simulation data
+* **CSV** — numerical/debug output and field data
+* **VTK** — visualization of mesh and solution fields
+
+VTK output can be opened with visualization software such as ParaView.
+
+Python-based plotting can also be used to inspect selected solution data.
+
+## Verification Tests
+
+CIRRUS includes a verification framework for testing numerical solutions against known analytical or expected results.
+
+Verification cases can evaluate:
+
+* Numerical error
+* L2 error norms
+* Maximum error
+* Error tolerances
+* Convergence behavior
+* Solver/reconstruction combinations
+
+The verification runner executes configured cases and reports the results collectively, allowing numerical changes to be evaluated against a repeatable test suite.
+
+## Memory Diagnostics
+
+CIRRUS includes memory diagnostics intended to identify memory-management problems during development and testing.
+
+These diagnostics can be used to detect issues such as:
+
+* Memory leaks
+* Invalid allocations
+* Incorrect memory ownership
+* Resource-management problems
+
+They are primarily intended as development and debugging tools rather than as part of the normal simulation workflow.
+
+## Current Scope
+
+At its current stage, CIRRUS provides a modular foundation for structured finite-volume CFD simulations with configurable numerical methods, boundary conditions, linear solvers, and output/verification tools.
+
+The architecture is intentionally designed to allow additional capabilities to be introduced incrementally, particularly in:
+
+* Physics models
+* Mesh types
+* Discretization schemes
+* Reconstruction methods
+* Linear and nonlinear solvers
+* Boundary conditions
+* Postprocessing tools
+
+
+## Further notes:
+
+Futher information on how each step is implmented can be found in documentation related to each field. More documentation will be created as the need arises for additional package capability.

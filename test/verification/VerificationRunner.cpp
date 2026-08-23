@@ -174,6 +174,65 @@ bool VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             sim.verificationCase()->initialize(mesh); 
 
             sim.assemble();
+
+            // VVVVVVVVVVVVVVVVVV DEBUG SECTION VVVVVVVVVVVVVVVVVV
+
+            std::vector<double> constantSolution( sim.system().size(), 400.0 );
+
+            auto constantResidual = computeResidual( sim.system(), constantSolution );
+            double maxResidual = 0.0;
+            std::size_t maxCell = 0;
+
+            for (std::size_t i = 0; i < constantResidual.size(); ++i)
+            {
+                const double magnitude = std::abs(constantResidual[i]);
+
+                if (magnitude > maxResidual)
+                {
+                    maxResidual = magnitude;
+                    maxCell = i;
+                }
+            }
+
+            const auto& maxCenter = sim.mesh().cellCenter(maxCell);
+
+            std::cout << "Max residual cell = " << maxCell << '\n'
+                      << "Cell center       = ("
+                      << maxCenter.x[0] << ", "
+                      << maxCenter.x[1] << ")\n"
+                      << "Residual          = " << constantResidual[maxCell] << '\n'
+                      << "Abs residual      = " << std::abs(constantResidual[maxCell]) << '\n';
+
+            double l2Residual = 0.0;
+
+            for (double r : constantResidual)
+            {
+                maxResidual = std::max(maxResidual, std::abs(r));
+                l2Residual += r * r;
+            }
+
+            l2Residual = std::sqrt(l2Residual);
+
+            std::size_t badCells = 0;
+
+            for (double r : constantResidual)
+            {
+                if (std::abs(r) > 1e-10) { ++badCells; }
+            }
+
+            std::cout << "Cells with |residual| > 1e-10: "
+                      << badCells << " / "
+                      << constantResidual.size()
+                      << '\n';
+              
+            std::cout << "\n================ CONSTANT SOLUTION TEST ================\n"
+                      << "Assumed solution : T = 400\n"
+                      << "Residual L2      : " << l2Residual << '\n'
+                      << "Residual Linf    : " << maxResidual << '\n'
+                      << "=========================================================\n";
+
+            // ^^^^^^^^^^^^^^^^^ DEBUG SECTION ^^^^^^^^^^^^^^^^^
+
             sim.solve();
 
             auto& solution = sim.solution();

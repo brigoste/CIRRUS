@@ -265,7 +265,9 @@ The observed convergence rates are:
 | $L_2$ | 2.00037 | 2.0 | PASS |
 | $L_\infty$ | 2.00040 | 2.0 | PASS |
 
-The refinement study confirms that the two-dimensional diffusion operator maintains the expected second-order spatial accuracy.
+The refinement study confirms that the two-dimensional diffusion operator maintains the expected second-order spatial accuracy. An image at the finest mesh is shown below.
+
+![](..\images\Sinusoidal2D_L4.png)
 
 ---
 

@@ -1,0 +1,77 @@
+{
+  "extends": "../../base.json",
+
+  "verificationCase": {
+    "name": "AdvectionDiffusionChannel2D",
+    "type": "constant",
+
+    "mesh": {
+      "type": "quad2D",
+      "nx": 100,
+      "ny": 20,
+      "lx": 4.0,
+      "ly": 1.0
+    },
+
+    "discretization": {
+      "gradientScheme": "least_squares",
+      "reconstructionScheme": "Central",
+      "flux_limiter": "minmod"
+    },
+
+    "refinement": {
+      "enabled": false,
+      "levels": [25, 50, 100, 200],
+      "expected_order": 0.0
+    },
+
+    "physics": {
+      "type": "advection-diffusion",
+      "gamma": 1.0,
+      "rho": 1.0,
+      "ux": 15.0,
+      "uy": 0.0,
+      "uz": 0.0
+    },
+
+    "solver": {
+      "method": "GMRES",
+      "tol": 1e-8,
+      "max_iter": 5000,
+      "preconditioner": "SSOR"
+    },
+
+    "boundary_conditions": [
+      {
+        "group": 0,
+        "type": "Dirichlet",
+        "value": 400.0
+      },
+      {
+        "group": 1,
+        "type": "Neumann",
+        "flux": 0.0
+      },
+      {
+        "group": 2,
+        "type": "Neumann",
+        "value": -6000.0
+      },
+      {
+        "group": 3,
+        "type": "Neumann",
+        "value": 0.0
+      }
+    ],
+
+    "norms": {
+      "l2": true,
+      "linf": true
+    },
+
+    "output": {
+      "csv": "AdvectionDiffusionChannel2D.csv",
+      "summary": "AdvectionDiffusionChannel2D.json"
+    }
+  }
+}
