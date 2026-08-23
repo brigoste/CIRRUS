@@ -204,7 +204,9 @@ $$
 L_{\infty}=3.125\times10^{-4}
 $$
 
-Both accuracy and refinement criteria were satisfied.
+Both accuracy and refinement criteria were satisfied. An image at the finest mesh is shown below.
+
+![](..\images\Neumann2D.png)
 
 The final error is more than two orders of magnitude below the acceptance threshold, confirming the correct implementation of the Neumann boundary flux treatment, volumetric source contribution, and second-order spatial discretization.
 

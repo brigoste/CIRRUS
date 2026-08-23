@@ -8,7 +8,7 @@
 
       "cases":
       [
-        "AdvectionDiffusionChannel2D"
+        "Neumann2D"
       ],
 
       "case_directory": "./case_setup",

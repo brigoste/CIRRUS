@@ -259,7 +259,9 @@ $$
 
 The observed convergence is consistent with first-order accuracy.
 
-The results satisfy the accuracy criteria and confirm that the advection-diffusion operator, source implementation, boundary conditions, and iterative solver are functioning correctly.
+The results satisfy the accuracy criteria and confirm that the advection-diffusion operator, source implementation, boundary conditions, and iterative solver are functioning correctly. An image at the finest mesh is shown below.
+
+![](..\images\AD2D_L4.png)
 
 ---
 

@@ -35,7 +35,7 @@
     },
 
     "solver": {
-      "method": "GS",
+      "method": "GMRES",
       "tol": 1e-8,
       "max_iter": 5000,
       "preconditioner": "SSOR"
@@ -49,13 +49,13 @@
       },
       {
         "group": 1,
-        "type": "Dirichlet",
-        "value": 300
+        "type": "Neumann",
+        "flux": 0.0
       },
       {
         "group": 2,
         "type": "Neumann",
-        "value": 0.0
+        "value": -6000.0
       },
       {
         "group": 3,
