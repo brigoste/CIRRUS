@@ -46,6 +46,8 @@ int main()
     std::cout << "---- Central Reconstruction Test ----\n\n";
     runCentralReconstructionTest();
 
+    std::cout << "\n===================================\n Misc. Reconstructor Checks \n===================================\n\n";
+
     std::cout << "---- Second-Order Upwind Fallback Test ----\n\n";
     runSecondOrderUpwindFallbackTest();
 
@@ -75,11 +77,11 @@ int main()
     std::cout << "\n---- PointValueQoI Test ----\n\n";
     runPointValueQoITest();
 
-    std::cout << " ----- All Interpolator Tests Passed ------\n";
+    std::cout << " \n----- All Interpolator Tests Passed ------\n\n";
 
     std::cout << "================================\n";
     std::cout << " Running CIRRUS Preconditioner Unit Tests\n";
-    std::cout << "================================\n\n";
+    std::cout << "================================\n";
 
     std::cout << "\n---- SSOR Preconditioner Test ----\n\n";
 

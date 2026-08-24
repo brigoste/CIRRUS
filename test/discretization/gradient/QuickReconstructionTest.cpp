@@ -161,5 +161,5 @@ void runQuickReconstructionTest()
     // Result
     // -------------------------------------------------
 
-    std::cout << "QuickReconstruction test passed.\n";
+    std::cout << "QuickReconstruction test       : PASS\n";
 }

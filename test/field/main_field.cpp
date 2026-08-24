@@ -17,7 +17,7 @@ int main()
 
     std::cout << "\n================================\n";
     std::cout << " All Field Tests Passed\n";
-    std::cout << "================================\n";
+    std::cout << "================================\n\n";
 
     return 0;
 }

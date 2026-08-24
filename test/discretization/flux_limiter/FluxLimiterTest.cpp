@@ -110,7 +110,7 @@ bool runFluxLimiterTest()
             allPassed = false;
         }
 
-        std::cout << "Linear region (r = 1)    : "
+        std::cout << "Linear region  (r = 1)    : "
                   << (passed ? "PASS" : "FAIL")
                   << "\n";
     }
@@ -151,7 +151,7 @@ bool runFluxLimiterTest()
             allPassed = false;
         }
 
-        std::cout << "Limiter values (r = 0.5): "
+        std::cout << "Limiter values (r = 0.5)  : "
                   << (passed ? "PASS" : "FAIL")
                   << "\n";
     }
@@ -192,7 +192,7 @@ bool runFluxLimiterTest()
             allPassed = false;
         }
 
-        std::cout << "Limiter values (r = 0.25): "
+        std::cout << "Limiter values (r = 0.25) : "
                   << (passed ? "PASS" : "FAIL")
                   << "\n";
     }
@@ -233,7 +233,7 @@ bool runFluxLimiterTest()
             allPassed = false;
         }
 
-        std::cout << "Limiter values (r = 2.0) : "
+        std::cout << "Limiter values (r = 2.0)  : "
                   << (passed ? "PASS" : "FAIL")
                   << "\n";
     }
@@ -276,7 +276,7 @@ bool runFluxLimiterTest()
             allPassed = false;
         }
 
-        std::cout << "Limiter values (r = 4.0) : "
+        std::cout << "Limiter values (r = 4.0)  : "
                   << (passed ? "PASS" : "FAIL")
                   << "\n";
     }

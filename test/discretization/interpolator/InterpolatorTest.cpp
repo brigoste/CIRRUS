@@ -685,7 +685,7 @@ bool runBilinearInterpolatorTest()
             allPassed = false;
         }
 
-        std::cout << "Face-centered scalar      : "
+        std::cout << "Face-centered scalar     : "
                   << (passed ? "PASS" : "FAIL")
                   << "\n";
     }

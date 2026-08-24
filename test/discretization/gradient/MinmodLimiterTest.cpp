@@ -59,5 +59,5 @@ void runMinmodLimiterTest()
     // Result
     // -------------------------------------------------
 
-    std::cout << "MinmodLimiter test passed.\n";
+    std::cout << "MinmodLimiter test             : PASS\n";
 }
