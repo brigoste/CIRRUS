@@ -19,57 +19,49 @@ This separation keeps the discretization logic independent of the details of the
 discretization/
 │
 ├── builders/
-│   ├── ConvectionFluxBuilder.cpp
-│   ├── ConvectionFluxBuilder.hpp
-│   ├── DiffusionFluxBuilder.cpp
-│   ├── DiffusionFluxBuilder.hpp
-│   ├── SourceFluxBuilder.cpp
-│   └── SourceFluxBuilder.hpp
+│   ├── ConvectionFluxBuilder.cpp/.hpp
+│   ├── DiffusionFluxBuilder.cpp/.hpp
+│   └── SourceFluxBuilder.cpp/.hpp
 │
 ├── diffusion/
 │   ├── DiffusionScheme.hpp
-│   ├── StandardDiffusionScheme.cpp
-│   └── StandardDiffusionScheme.hpp
+│   └── StandardDiffusionScheme.cpp/.hpp
 │
 ├── gradient/
-│   ├── GradientFactory.cpp
-│   ├── GradientFactory.hpp
+│   ├── GradientFactory.cpp/.hpp
 │   ├── GradientScheme.hpp
 │   ├── GradientType.hpp
-│   ├── GreenGaussGradient.cpp
-│   ├── GreenGaussGradient.hpp
-│   ├── LeastSquaresGradient.cpp
-│   └── LeastSquaresGradient.hpp
+│   ├── GreenGaussGradient.cpp/.hpp
+│   └── LeastSquaresGradient.cpp/.hpp
 │
 ├── operators/
-│   ├── ConvectionOperator.cpp
-│   ├── ConvectionOperator.hpp
-│   ├── DiffusionOperator.cpp
-│   ├── DiffusionOperator.hpp
+│   ├── ConvectionOperator.cpp/.hpp
+│   ├── DiffusionOperator.cpp/.hpp
 │   └── Operator.hpp
 │
 ├── reconstructors/
 |   ├── basic/
-│   │   ├── CentralReconstruction.cpp
-│   │   ├── CentralReconstruction.hpp
-│   │   ├── GradientReconstruction.cpp
-│   │   ├── GradientReconstruction.hpp
-|   │   ├── UpwindReconstruction.cpp
-|   │   └── UpwindReconstruction.hpp
+│   │   ├── CentralReconstruction.cpp/.hpp
+│   │   ├── GradientReconstruction.cpp/.hpp
+|   │   └── UpwindReconstruction.cpp/.hpp
 │   ├── higher_order/
-│   │   ├── MusclReconstruction.cpp
-│   │   ├── MusclReconstruction.hpp
-│   │   ├── QuickReconstruction.cpp
-│   │   ├── QuickReconstruction.hpp
-|   │   ├── SecondOrderUpwindReconstruction.cpp
-|   │   └── SecondOrderUpwindReconstruction.hpp
-│   ├── ReconstructionFactory.cpp
-│   ├── ReconstructionFactory.hpp
+│   │   ├── MusclReconstruction.cpp/.hpp
+│   │   ├── QuickReconstruction.cpp/.hpp
+|   │   └── SecondOrderUpwindReconstruction.cpp/.hpp
+│   ├── tvd/
+│   │   ├── FluxLimiter.hpp
+│   │   ├── FluxLimiterFactory.cpp/.hpp
+│   │   ├── FluxLimiterType.hpp
+│   │   ├── MCLimiter.cpp/.hpp
+│   │   ├── SuperbeeLimiter.cpp/.hpp
+│   │   ├── TVDReconstruction.cpp/.hpp
+│   │   ├── VanAlabadaLimiter.cpp/.hpp
+│   │   └── VanLeerLimiter.cpp/.hpp
+│   ├── ReconstructionFactory.cpp/.hpp
 │   ├── ReconstructionScheme.hpp
 │   ├── ReconstructionStencil.hpp
 │   ├── ReconstructionType.hpp
-│   ├── ReconstructionUtils.cpp
-│   └── ReconstructionUtils.hpp
+│   └── ReconstructionUtils.cpp/.hpp
 │
 ├── CellResidual.hpp
 ├── FaceContribution.hpp
@@ -78,11 +70,9 @@ discretization/
 ├── BoundaryDiffusion.hpp
 ├── MatrixContribution.hpp
 ├── SourceContribution.hpp
-├── FiniteVolumeAssembler.cpp
-├── FiniteVolumeAssembler.hpp
+├── FiniteVolumeAssembler.cpp/.hpp
 ├── FluxAccumulator.hpp
-├── FluxBuilder.cpp
-└── FluxBuilder.hpp
+└── FluxBuilder.cpp/.hpp
 ```
 
 The important architectural changes are:
@@ -633,7 +623,7 @@ The class also provides a default `reconstruct()` implementation that evaluates 
 ReconstructionStencil
         │
         ▼
-Σ w_i φ_i
+  Σ (w_i φ_i)
         │
         ▼
       φ_f
@@ -986,13 +976,13 @@ For example:
 GradientScheme
       │
       ▼
-∇φ_P
+    ∇φ_P
       │
       ▼
 GradientReconstruction
       │
       ▼
-φ_f
+     φ_f
 ```
 
 Gradient calculation is therefore a dependency of specific reconstruction strategies rather than an unconditional operation performed by the finite-volume assembler.
