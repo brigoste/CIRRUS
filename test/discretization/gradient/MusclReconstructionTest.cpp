@@ -297,5 +297,5 @@ void runMusclReconstructionTest()
     // -------------------------------------------------
 
     std::cout
-        << "MUSCL Reconstruction test passed.\n";
+        << "MUSCL Reconstruction test      : PASS\n";
 }

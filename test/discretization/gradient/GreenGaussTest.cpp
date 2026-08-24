@@ -74,7 +74,7 @@ bool runGreenGaussTest()
     const bool passed = l2 < tolerance;
 
     std::cout
-        << "  Green-Gauss   "
+        << "  Green-Gauss     "
         << (passed ? "PASS" : "FAIL")
         << "   L2 Error = "
         << l2

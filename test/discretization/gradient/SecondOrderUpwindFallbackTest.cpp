@@ -132,5 +132,5 @@ void runSecondOrderUpwindFallbackTest()
     // Result
     // -------------------------------------------------
 
-    std::cout << "SecondOrderUpwindFallback test passed.\n";
+    std::cout << "SecondOrderUpwindFallback test : PASS\n";
 }
