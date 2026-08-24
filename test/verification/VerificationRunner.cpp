@@ -237,6 +237,46 @@ bool VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
 
             auto& solution = sim.solution();
 
+            // VVVVVVVVVVVVVVVVVV DEBUG SECTION VVVVVVVVVVVVVVVVVV
+            const std::size_t c = 0;
+
+            std::cout << "\nROW " << c << '\n';
+
+            for (std::size_t j = 0; j < sim.system().size(); ++j)
+            {
+                const double a = sim.system().coeff(c, j);
+
+                if (std::abs(a) > 1e-14)
+                {
+                    std::cout
+                        << "  A[" << c << "," << j << "] = "
+                        << a << '\n';
+                }
+            }
+
+            std::cout
+                << "  RHS[" << c << "] = "
+                << sim.system().rhs(c)
+                << '\n';
+
+            for (std::size_t f = 0; f < mesh.nfaces(); ++f)
+            {
+                const auto& face = mesh.face(f);
+
+                if (face.owner != 0 && face.neighbor != 1)
+                    continue;
+
+                std::cout
+                    << "Face " << f
+                    << " owner=" << face.owner
+                    << " neighbor=" << face.neighbor
+                    << " area=" << face.area
+                    << '\n';
+            }
+
+            // ^^^^^^^^^^^^^^^^^ DEBUG SECTION ^^^^^^^^^^^^^^^^^
+
+
             const double qoiValue = solution(qoi_eval_point);
 
             // -------------------------------------------------
