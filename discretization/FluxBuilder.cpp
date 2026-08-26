@@ -29,6 +29,7 @@ void FluxBuilder::buildFlux(
     convectionFlux_.apply(
         mesh,
         model,
+        boundary,
         flux
     );
 
