@@ -8,7 +8,7 @@ This document describes how to build, validate, and run CIRRUS.
 
 CIRRUS uses CMake and Ninja as its build system.
 
-From the root of the CIRRUS repository:
+From the root of the CIRRUS repository, the system can be built and run the default user case with the following:
 
 ```bash
 ./scripts/build.sh
