@@ -22,10 +22,7 @@ double HeatPhysicsModel::diffusionFaceCoefficient(const Face& face) const
 {
     const double d_eff = std::abs(LA::dot(face.dPN, face.normal));
 
-    if (d_eff <= 0.0) 
-    { 
-        throw std::runtime_error("Invalid face spacing"); 
-    }
+    if (d_eff <= 0.0) { throw std::runtime_error("Invalid face spacing"); }
 
     return k_ * face.area / d_eff;
 }
@@ -41,8 +38,7 @@ double HeatPhysicsModel::reconstructBoundaryValue(
     const double k = diffusionCoefficient();
     
     switch (bc.type)
-    {
-        
+    {        
         case bc::Type::Dirichlet:
             return bc.value;
 
