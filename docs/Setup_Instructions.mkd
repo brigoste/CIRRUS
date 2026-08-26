@@ -156,6 +156,8 @@ Plots are generated using:
 scripts/Plot.py
 ```
 
+or the .vtk files can be viewed using the paraview backend, if that is available to you and on your system path.
+
 The Python executable is selected automatically by the build script:
 
 * Linux / WSL → `python3`
