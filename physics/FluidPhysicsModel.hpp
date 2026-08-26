@@ -1,3 +1,14 @@
+#pragma once
+
+#include "mesh/primitives/Face.hpp"
+#include "mesh/BoundaryPatchSystem.hpp"
+#include "discretization/FluxAccumulator.hpp"
+#include "fields/FieldNames.hpp"
+
+class VerificationCase; // forward declare
+class FieldRegistry;
+class MeshBase;
+
 class FluidPhysicsModel
 {
 public:
