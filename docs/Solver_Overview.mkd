@@ -1,6 +1,6 @@
 # CIRRUS
 
-**C**omputational **I**nfrastructure for **R**econfigurable **R**egimes and **U**nified **S**olvers
+## ***C***omputational ***I***nfrastructure for ***R***econfigurable ***R***egimes and ***U***nified ***S***olvers
 
 CIRRUS is a lightweight, open-source computational fluid dynamics (CFD) framework designed to provide a flexible foundation for finite-volume-based numerical simulation. The package emphasizes a modular solver architecture, lightweight configuration, and efficient computation while providing a framework that can be extended with additional physics, discretization methods, meshes, and numerical solvers.
 
