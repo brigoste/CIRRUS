@@ -16,10 +16,7 @@ UpwindStencilCells findUpwindStencilCells(
 {
     const Face& face = mesh.face(faceIndex);
 
-    if (face.neighbor == Face::INVALID)
-    {
-        throw std::runtime_error( "ReconstructionUtils: boundary face encountered." );
-    }
+    if (face.neighbor == Face::INVALID) { throw std::runtime_error( "ReconstructionUtils: boundary face encountered." ); }
 
     const std::size_t upwind = flux >= 0.0 ? owner : face.neighbor;
     const std::size_t downwind = flux >= 0.0 ? face.neighbor : owner;
@@ -31,10 +28,7 @@ UpwindStencilCells findUpwindStencilCells(
 
     const double direction2 = direction.magnitudeSquared();
 
-    if (direction2 <= 0.0)
-    {
-        throw std::runtime_error( "ReconstructionUtils: invalid upwind/downwind spacing." );
-    }
+    if (direction2 <= 0.0) { throw std::runtime_error( "ReconstructionUtils: invalid upwind/downwind spacing." ); }
 
     const auto& upwindCell = mesh.cell(upwind);
 
