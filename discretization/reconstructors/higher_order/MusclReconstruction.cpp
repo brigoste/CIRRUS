@@ -18,13 +18,7 @@ ReconstructionStencil MusclReconstruction::stencil(
     double flux
 ) const
 {
-    const UpwindStencilCells cells =
-        findUpwindStencilCells(
-            mesh,
-            owner,
-            f,
-            flux
-        );
+    const UpwindStencilCells cells = findUpwindStencilCells( mesh, owner, f, flux );
 
     // -------------------------------------------------
     // Boundary fallback
@@ -33,11 +27,7 @@ ReconstructionStencil MusclReconstruction::stencil(
     if (cells.upstream == Face::INVALID)
     {
         // Fall back to first-order upwind reconstruction.
-        return ReconstructionStencil{
-            {
-                {cells.upwind, 1.0}
-            }
-        };
+        return ReconstructionStencil{ { {cells.upwind, 1.0} } };
     }
 
     // -------------------------------------------------
@@ -69,15 +59,7 @@ double MusclReconstruction::reconstruct(
     double flux
 ) const
 {
-    const ReconstructionStencil s =
-        stencil(
-            mesh,
-            owner,
-            f,
-            field,
-            gradient,
-            flux
-        );
+    const ReconstructionStencil s = stencil( mesh, owner, f, field, gradient, flux );
 
     double value = 0.0;
 
