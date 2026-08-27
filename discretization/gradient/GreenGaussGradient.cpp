@@ -20,14 +20,8 @@ void GreenGaussGradient::compute(
 
         double phi_f;
 
-        if (N != Face::INVALID)
-        {
-            phi_f = 0.5 * (field[P] + field[N]);
-        }
-        else
-        {
-            phi_f = field[P];
-        }
+        if (N != Face::INVALID) { phi_f = 0.5 * (field[P] + field[N]); }
+        else { phi_f = field[P]; }
 
         Vector contribution(
             face.normal[0] * phi_f * face.area,
@@ -37,10 +31,7 @@ void GreenGaussGradient::compute(
 
         gradient[P] += contribution;
 
-        if (N != Face::INVALID)
-        {
-            gradient[N] -= contribution;
-        }
+        if (N != Face::INVALID) { gradient[N] -= contribution; }
     }
 
     for (std::size_t c = 0; c < mesh.ncells(); ++c)
