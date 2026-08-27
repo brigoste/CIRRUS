@@ -10,10 +10,7 @@ double LinearInterpolator::interpolate(
     const Point& position
 ) const
 {
-    if (field.mesh().dim() != 1)
-    {
-        throw std::runtime_error( "LinearInterpolator: only 1D meshes are supported." );
-    }
+    if (field.mesh().dim() != 1) { throw std::runtime_error( "LinearInterpolator: only 1D meshes are supported." ); }
 
     return interpolate1D(field, position);
 }
@@ -23,10 +20,7 @@ Vector LinearInterpolator::interpolate(
     const Point& position
 ) const
 {
-    if (field.mesh().dim() != 1)
-    {
-        throw std::runtime_error( "LinearInterpolator: only 1D meshes are supported." );
-    }
+    if (field.mesh().dim() != 1) { throw std::runtime_error( "LinearInterpolator: only 1D meshes are supported." ); }
 
     return interpolate1D(field, position);
 }
@@ -99,7 +93,6 @@ double LinearInterpolator::interpolate1D(
         if (x >= x0 && x <= x1)
         {
             const double alpha = (x - x0) / (x1 - x0);
-
             return (1.0 - alpha) * field[i] + alpha * field[i + 1];
         }
     }
@@ -169,11 +162,9 @@ Vector LinearInterpolator::interpolate1D(
         if (x >= x0 && x <= x1)
         {
             const double alpha = (x - x0) / (x1 - x0);
-
             return (1.0 - alpha) * field[i] + alpha * field[i + 1];
         }
     }
 
-    throw std::runtime_error(
-        "LinearInterpolator: failed to locate interpolation interval.");
+    throw std::runtime_error( "LinearInterpolator: failed to locate interpolation interval.");
 }
