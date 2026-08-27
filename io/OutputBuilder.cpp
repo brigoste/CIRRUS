@@ -17,13 +17,7 @@ OutputData OutputBuilder::build(
     const ScalarField& field,
     const std::vector<double>& residual)
 {
-    auto reconstructed =
-        std::make_shared<PointField>(
-            BoundaryReconstructor::reconstruct(
-                sim.mesh(),
-                sim.boundary(),
-                sim.model(),
-                field));
+    auto reconstructed = std::make_shared<PointField>( BoundaryReconstructor::reconstruct( sim.mesh(), sim.boundary(), sim.model(), field));
     
     const auto& sys = sim.system();
 
@@ -36,13 +30,7 @@ OutputData OutputBuilder::build(
 
     return OutputData{
         sim.mesh(),
-        {
-            FieldOutput{
-                field.name(),
-                &field,
-                nullptr
-            }
-        },
+        { FieldOutput{ field.name(), &field, nullptr } },
         reconstructed,
         std::move(rhs),
         residual
