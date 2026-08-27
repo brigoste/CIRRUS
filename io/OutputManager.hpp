@@ -8,7 +8,5 @@ class OutputManager
 {
 public:
 
-    static void write(
-        const OutputData& output,
-        const std::filesystem::path& outputDirectory);
+    static void write( const OutputData& output, const std::filesystem::path& outputDirectory);
 };
