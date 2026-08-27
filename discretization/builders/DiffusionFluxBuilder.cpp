@@ -18,9 +18,7 @@ void DiffusionFluxBuilder::apply(
 {
     if (flux.size() != mesh.ncells())
     {
-        throw std::runtime_error(
-            "DiffusionFluxBuilder: FluxAccumulator size mismatch"
-        );
+        throw std::runtime_error( "DiffusionFluxBuilder: FluxAccumulator size mismatch" );
     }
 
     // =====================================================
@@ -49,10 +47,7 @@ void DiffusionFluxBuilder::apply(
     {
         const auto* bc = boundary.getGroup(g);
 
-        if (!bc)
-        {
-            continue;
-        }
+        if (!bc) { continue; }
 
         const auto& faces = mesh.boundaryFaces(g);
 
