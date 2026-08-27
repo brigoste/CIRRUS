@@ -36,9 +36,7 @@ std::unique_ptr<ReconstructionScheme> makeReconstructionScheme(ReconstructionTyp
             return std::make_unique<MusclReconstruction>();
 
         case ReconstructionType::TVD:
-            return std::make_unique<TVDReconstruction>( 
-                makeLimiter(limiterType)                        // There is another way to do this, but I don't love it.
-            );
+            return std::make_unique<TVDReconstruction>( makeLimiter(limiterType) );
     }
 
     throw std::runtime_error( "Unsupported reconstruction scheme." );
