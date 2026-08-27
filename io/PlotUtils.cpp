@@ -18,20 +18,11 @@ void runPlot(
     std::replace(csv.begin(), csv.end(), '\\', '/');
 #endif
 
-    const std::string cmd =
-        paths.pythonExecutable.string() + " "
-        "\"" + script + "\" "
-        "\"" + csv + "\"";
+    const std::string cmd = paths.pythonExecutable.string() + " \"" + script + "\" \"" + csv + "\"";
 
     // std::cout << "PLOT COMMAND: " << cmd << '\n';
 
     const int rc = std::system(cmd.c_str());
 
-    if (rc != 0)
-    {
-        std::cerr
-            << "WARNING: Plotting failed (return code "
-            << rc
-            << ")\n";
-    }
+    if (rc != 0) { std::cerr << "WARNING: Plotting failed (return code " << rc << ")\n"; }
 }
