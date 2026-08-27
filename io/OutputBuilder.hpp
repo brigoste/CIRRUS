@@ -11,8 +11,5 @@ class OutputBuilder
 {
 public:
 
-    static OutputData build(
-        const Simulation& sim,
-        const ScalarField& field,
-        const std::vector<double>& residual = {});
+    static OutputData build( const Simulation& sim, const ScalarField& field, const std::vector<double>& residual = {});
 };
