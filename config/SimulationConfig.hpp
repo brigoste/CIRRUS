@@ -346,9 +346,7 @@ inline void from_json(const nlohmann::json& j, VerificationSuite& v)
         for (auto& [name, cfg] : j["caseConfigs"].items())
         {
             VerificationCaseConfig entry = cfg.get<VerificationCaseConfig>();
-
             entry.name = name;
-
             v.caseConfigs[name] = entry;
         }
     }
@@ -371,13 +369,13 @@ inline void from_json( const nlohmann::json& j, SimulationConfig& cfg)
         cfg.io.python_executable = j.at("paths").value("python_executable", "python");
     }
     if (j.contains("boundary_conditions")) { cfg.boundary = j.at("boundary_conditions").get<std::vector<BoundaryConfig>>(); }
-    if (j.contains("discretization")) { cfg.discretization = j.at("discretization") .get<DiscretizationConfig>(); }
+    if (j.contains("discretization"))      { cfg.discretization = j.at("discretization") .get<DiscretizationConfig>(); }
 
 }
 
 inline void to_json( nlohmann::json& j, const DiscretizationConfig& d )
 {
-    j["gradientScheme"] = gradientToString(d.gradientScheme);
+    j["gradientScheme"]       = gradientToString(d.gradientScheme);
     j["reconstructionScheme"] = reconstructionToString(d.reconstructionScheme);
-    j["flux_limiter"] = fluxLimiterToString(d.flux_limiter);
+    j["flux_limiter"]         = fluxLimiterToString(d.flux_limiter);
 }
