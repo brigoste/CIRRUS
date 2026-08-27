@@ -38,20 +38,11 @@ void LeastSquaresGradient::compute(
 
             std::size_t neighbor;
 
-            if (face.owner == c)
-            {
-                neighbor = face.neighbor;
-            }
-            else
-            {
-                neighbor = face.owner;
-            }
+            if (face.owner == c) { neighbor = face.neighbor; }
+            else { neighbor = face.owner; }
 
             // Boundary face
-            if (neighbor == Face::INVALID)
-            {
-                continue;
-            }
+            if (neighbor == Face::INVALID) { continue; }
 
             const Point& xN = mesh.cellCenter(neighbor);
 
@@ -72,18 +63,12 @@ void LeastSquaresGradient::compute(
 
         if (std::abs(determinant) < 1e-14)
         {
-            throw std::runtime_error(
-                "LeastSquaresGradient: singular matrix"
-            );
+            throw std::runtime_error( "LeastSquaresGradient: singular matrix" );
         }
 
-        const double gx =
-            (d * rhs_x - b * rhs_y)
-            / determinant;
+        const double gx = (d * rhs_x - b * rhs_y) / determinant;
 
-        const double gy =
-            (a * rhs_y - b * rhs_x)
-            / determinant;
+        const double gy = (a * rhs_y - b * rhs_x) / determinant;
 
         gradient[c] = Vector(gx, gy, 0.0);
     }
