@@ -19,29 +19,19 @@ ReconstructionStencil SecondOrderUpwindReconstruction::stencil(
     double flux
 ) const
 {
-    const UpwindStencilCells cells =
-        findUpwindStencilCells(
-            mesh,
-            owner,
-            f,
-            flux
-        );
+    const UpwindStencilCells cells = findUpwindStencilCells( mesh, owner, f, flux );
 
     if (cells.upstream == Face::INVALID)
     {
         // Fall back to first-order upwind reconstruction.
-        return ReconstructionStencil{
-            {
-                {cells.upwind, 1.0}
-            }
-        };
+        return ReconstructionStencil{ { {cells.upwind, 1.0} } };
     }
 
     return ReconstructionStencil{
         {
             {cells.upwind, 1.5},
             {cells.upstream, -0.5}
-        }
+        } 
     };
 }
 
@@ -56,10 +46,7 @@ double SecondOrderUpwindReconstruction::reconstruct(
 {
     const Face& face = mesh.face(f);
 
-    if (face.neighbor == Face::INVALID)
-    {
-        throw std::runtime_error( "SecondOrderUpwindReconstruction: boundary face encountered." );
-    }
+    if (face.neighbor == Face::INVALID) { throw std::runtime_error( "SecondOrderUpwindReconstruction: boundary face encountered." ); }
 
     const std::size_t upwind = flux >= 0.0 ? owner : face.neighbor;
 
