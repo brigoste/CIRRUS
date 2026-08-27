@@ -10,15 +10,9 @@ void OutputManager::write(
     const OutputData& data,
     const std::filesystem::path& outputDirectory)
 {
-    CSVWriter::write(
-        data,
-        outputDirectory / "solution.csv");
+    CSVWriter::write( data, outputDirectory / "solution.csv");
 
-    VTKWriter::write(
-        data,
-        outputDirectory / "solution.vtu");
+    VTKWriter::write( data, outputDirectory / "solution.vtu");
 
-    MetadataWriter::write(
-        data,
-        outputDirectory / "metadata.json");
+    MetadataWriter::write( data, outputDirectory / "metadata.json");
 }
