@@ -16,7 +16,5 @@ std::unique_ptr<GradientScheme> makeGradientScheme(GradientType type)
             return std::make_unique<LeastSquaresGradient>();
     }
 
-    throw std::runtime_error(
-        "Unsupported gradient scheme."
-    );
+    throw std::runtime_error( "Unsupported gradient scheme." );
 }
