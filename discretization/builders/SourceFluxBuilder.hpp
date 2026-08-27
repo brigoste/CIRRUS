@@ -3,7 +3,7 @@
 #include "discretization/FluxAccumulator.hpp"
 
 class MeshBase;
-class PhysicsModel;
+class ScalarTransportModel;
 class VerificationCase;
 
 class SourceFluxBuilder
@@ -11,7 +11,7 @@ class SourceFluxBuilder
 public:
     void apply(
         const MeshBase& mesh,
-        const PhysicsModel& model,
+        const ScalarTransportModel& model,
         FluxAccumulator& flux,
         const VerificationCase* verificationCase
     ) const;

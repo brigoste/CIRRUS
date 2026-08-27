@@ -1,11 +1,11 @@
 #include "discretization/FluxAccumulator.hpp"
-#include "physics/PhysicsModel.hpp"
+#include "physics/ScalarTransport/ScalarTransportModel.hpp"
 #include "mesh/BoundaryPatchSystem.hpp"
 #include "discretization/FluxBuilder.hpp"
 
 void FluxBuilder::buildFlux(
     const MeshBase& mesh,
-    const PhysicsModel& model,
+    const ScalarTransportModel& model,
     const BoundaryPatchSystem& boundary,
     FluxAccumulator& flux,
     const VerificationCase* verificationCase

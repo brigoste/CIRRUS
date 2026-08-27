@@ -6,7 +6,7 @@
 #include "discretization/builders/SourceFluxBuilder.hpp"
 
 class MeshBase;
-class PhysicsModel;
+class ScalarTransportModel;
 class BoundaryPatchSystem;
 class VerificationCase;
 
@@ -16,7 +16,7 @@ public:
 
     void buildFlux(
         const MeshBase& mesh,
-        const PhysicsModel& model,
+        const ScalarTransportModel& model,
         const BoundaryPatchSystem& boundary,
         FluxAccumulator& flux,
         const VerificationCase* verificationCase = nullptr

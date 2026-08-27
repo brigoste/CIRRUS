@@ -3,7 +3,7 @@
 #include "mesh/MeshBase.hpp"
 #include "mesh/BoundaryPatchSystem.hpp"
 #include "mesh/MeshGeometry.hpp"
-#include "physics/PhysicsModel.hpp"
+#include "physics/ScalarTransport/ScalarTransportModel.hpp"
 #include "fields/ScalarField.hpp"
 #include "io/PointField.hpp"
 
@@ -14,7 +14,7 @@ public:
     static PointField reconstruct(
         const MeshBase& mesh,
         const BoundaryPatchSystem& boundary,
-        const PhysicsModel& model,
+        const ScalarTransportModel& model,
         const ScalarField& phi);
 
 };

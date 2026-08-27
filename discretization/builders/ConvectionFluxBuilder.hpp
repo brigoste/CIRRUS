@@ -2,7 +2,7 @@
 
 #include "mesh/BoundaryPatchSystem.hpp"
 #include "mesh/MeshBase.hpp"
-#include "physics/PhysicsModel.hpp"
+#include "physics/ScalarTransport/ScalarTransportModel.hpp"
 #include "discretization/FluxAccumulator.hpp"
 
 class ConvectionFluxBuilder
@@ -10,7 +10,7 @@ class ConvectionFluxBuilder
 public:
     void apply(
         const MeshBase& mesh,
-        const PhysicsModel& model,
+        const ScalarTransportModel& model,
         const BoundaryPatchSystem& boundary,
         FluxAccumulator& flux
     ) const;

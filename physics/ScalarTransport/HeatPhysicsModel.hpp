@@ -1,12 +1,12 @@
 #pragma once
 
-#include "physics/PhysicsModel.hpp"
+#include "physics/ScalarTransport/ScalarTransportModel.hpp"
 #include "mesh/primitives/Face.hpp"
 #include "fields/FieldNames.hpp"
 
 class FieldRegistry;
 
-class HeatPhysicsModel : public PhysicsModel
+class HeatPhysicsModel : public ScalarTransportModel
 {
 public:
     explicit HeatPhysicsModel(double k)

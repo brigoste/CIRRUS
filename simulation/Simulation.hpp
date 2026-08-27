@@ -10,6 +10,7 @@
 #include "mesh/BoundaryPatchSystem.hpp"
 #include "physics/PhysicsModel.hpp"
 #include "physics/PhysicsFactory.hpp"
+#include "physics/ScalarTransport/ScalarTransportModel.hpp"
 #include "equation_systems/LinearSystem.hpp"
 #include "bc/BoundaryFace.hpp"
 
@@ -55,7 +56,7 @@ public:
     const MeshBase& mesh() const                                        { return *mesh_; }
     const LinearEquationSystem& system() const                                  { return sys_; }
     const BoundaryPatchSystem& boundary() const                         { return boundary_; }
-    const PhysicsModel& model() const noexcept                          { return *physics_; }
+    const ScalarTransportModel& model() const noexcept                          { return *physics_; }
 
     VerificationCase* verificationCase()                                { return verificationCase_.get(); }
     const VerificationCase* verificationCase() const                    { return verificationCase_.get(); }
@@ -84,7 +85,7 @@ private:
     std::unique_ptr<MeshBase> mesh_;
 
     BoundaryPatchSystem boundary_;
-    std::unique_ptr<PhysicsModel> physics_;
+    std::unique_ptr<ScalarTransportModel> physics_;
 
     LinearSystem sys_;
     std::unique_ptr<FluxAccumulator> flux_;

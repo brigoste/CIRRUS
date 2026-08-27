@@ -1,4 +1,4 @@
-#include "physics/AdvectionDiffusionPhysicsModel.hpp"
+#include "physics/ScalarTransport/AdvectionDiffusionPhysicsModel.hpp"
 #include "utils/MathConstants.hpp"
 
 #include <cmath>

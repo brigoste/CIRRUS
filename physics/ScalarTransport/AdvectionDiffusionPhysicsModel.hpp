@@ -1,11 +1,11 @@
 #pragma once
 
-#include "physics/PhysicsModel.hpp"
+#include "physics/ScalarTransport/ScalarTransportModel.hpp"
 #include "mesh/primitives/Face.hpp"
 #include "utils/LinearAlgebraUtils.hpp"
 #include "fields/FieldNames.hpp"
 
-class AdvectionDiffusionPhysicsModel : public PhysicsModel
+class AdvectionDiffusionPhysicsModel : public ScalarTransportModel
 {
 public:
     AdvectionDiffusionPhysicsModel(

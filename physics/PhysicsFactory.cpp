@@ -1,11 +1,12 @@
+#include "physics/ScalarTransport/ScalarTransportModel.hpp"
+#include "physics/ScalarTransport/HeatPhysicsModel.hpp"
+#include "physics/ScalarTransport/AdvectionDiffusionPhysicsModel.hpp"
 #include "physics/PhysicsFactory.hpp"
-#include "physics/HeatPhysicsModel.hpp"
-#include "physics/AdvectionDiffusionPhysicsModel.hpp"
 
 #include <stdexcept>
 #include <nlohmann/json.hpp>
 
-std::unique_ptr<PhysicsModel>
+std::unique_ptr<ScalarTransportModel>
 PhysicsFactory::create(const PhysicsConfig& cfg)
 {
     switch (cfg.type)

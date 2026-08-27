@@ -6,7 +6,7 @@
 PointField BoundaryReconstructor::reconstruct(
     const MeshBase& mesh,
     const BoundaryPatchSystem& boundary,
-    const PhysicsModel& model,
+    const ScalarTransportModel& model,
     const ScalarField& field)
 {
     PointField out;

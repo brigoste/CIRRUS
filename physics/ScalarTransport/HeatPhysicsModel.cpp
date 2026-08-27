@@ -1,4 +1,4 @@
-#include "physics/HeatPhysicsModel.hpp"
+#include "physics/ScalarTransport/HeatPhysicsModel.hpp"
 #include "mesh/primitives/Face.hpp"
 #include "utils/LinearAlgebraUtils.hpp"
 #include "mesh/MeshBase.hpp"
@@ -22,10 +22,7 @@ double HeatPhysicsModel::diffusionFaceCoefficient(const Face& face) const
 {
     const double d_eff = std::abs(LA::dot(face.dPN, face.normal));
 
-    if (d_eff <= 0.0) 
-    { 
-        throw std::runtime_error("Invalid face spacing"); 
-    }
+    if (d_eff <= 0.0) { throw std::runtime_error("Invalid face spacing"); }
 
     return k_ * face.area / d_eff;
 }

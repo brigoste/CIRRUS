@@ -1,19 +1,9 @@
-#include "PhysicsModel.hpp"
-
-#include "fields/FieldRegistry.hpp"
-#include "fields/FieldLocation.hpp"
-#include "mesh/MeshBase.hpp"
-#include "fields/FieldLocation.hpp"
+#include "physics/PhysicsModel.hpp"
 
 void PhysicsModel::initializeFields(
-    FieldRegistry& fields,
-    const MeshBase& mesh
+    FieldRegistry&,
+    const MeshBase&
 ) const
 {
-    fields.createScalar(
-        solutionField(),
-        mesh,
-        FieldLocation::Cell,
-        initialSolutionValue()
-    );
+    // Default implementation intentionally empty.
 }

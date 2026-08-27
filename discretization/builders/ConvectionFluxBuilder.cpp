@@ -4,7 +4,7 @@
 
 void ConvectionFluxBuilder::apply(
     const MeshBase& mesh,
-    const PhysicsModel& model,
+    const ScalarTransportModel& model,
     const BoundaryPatchSystem& boundary,
     FluxAccumulator& flux
 ) const

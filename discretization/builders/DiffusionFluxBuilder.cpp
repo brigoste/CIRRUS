@@ -2,7 +2,7 @@
 
 #include "mesh/MeshBase.hpp"
 #include "mesh/primitives/Face.hpp"
-#include "physics/PhysicsModel.hpp"
+#include "physics/ScalarTransport/ScalarTransportModel.hpp"
 #include "mesh/BoundaryPatchSystem.hpp"
 #include "test/verification/VerificationCase.hpp"
 #include <stdexcept>
@@ -10,7 +10,7 @@
 
 void DiffusionFluxBuilder::apply(
     const MeshBase& mesh,
-    const PhysicsModel& model,
+    const ScalarTransportModel& model,
     const BoundaryPatchSystem& boundary,
     FluxAccumulator& flux,
     const VerificationCase* verificationCase
@@ -18,9 +18,7 @@ void DiffusionFluxBuilder::apply(
 {
     if (flux.size() != mesh.ncells())
     {
-        throw std::runtime_error(
-            "DiffusionFluxBuilder: FluxAccumulator size mismatch"
-        );
+        throw std::runtime_error( "DiffusionFluxBuilder: FluxAccumulator size mismatch" );
     }
 
     // =====================================================
@@ -49,10 +47,7 @@ void DiffusionFluxBuilder::apply(
     {
         const auto* bc = boundary.getGroup(g);
 
-        if (!bc)
-        {
-            continue;
-        }
+        if (!bc) { continue; }
 
         const auto& faces = mesh.boundaryFaces(g);
 

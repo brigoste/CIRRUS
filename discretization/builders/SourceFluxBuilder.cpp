@@ -1,11 +1,11 @@
 #include "discretization/builders/SourceFluxBuilder.hpp"
 #include "mesh/MeshBase.hpp"
-#include "physics/PhysicsModel.hpp"
+#include "physics/ScalarTransport/ScalarTransportModel.hpp"
 #include "test/verification/VerificationCase.hpp"
 
 void SourceFluxBuilder::apply(
     const MeshBase& mesh,
-    const PhysicsModel& model,
+    const ScalarTransportModel& model,
     FluxAccumulator& flux,
     const VerificationCase* verificationCase
 ) const
