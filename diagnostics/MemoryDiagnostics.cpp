@@ -22,14 +22,9 @@ std::size_t MemoryDiagnostics::currentRSS()
 
     PROCESS_MEMORY_COUNTERS counters{};
 
-    if (!GetProcessMemoryInfo(
-            GetCurrentProcess(),
-            &counters,
-            sizeof(counters)))
+    if (!GetProcessMemoryInfo(GetCurrentProcess(), &counters, sizeof(counters)))
     {
-        throw std::runtime_error(
-            "MemoryDiagnostics: failed to query current RSS."
-        );
+        throw std::runtime_error("MemoryDiagnostics: failed to query current RSS." );
     }
 
     return static_cast<std::size_t>(counters.WorkingSetSize);
@@ -83,19 +78,12 @@ std::size_t MemoryDiagnostics::peakRSS()
 
     PROCESS_MEMORY_COUNTERS counters{};
 
-    if (!GetProcessMemoryInfo(
-            GetCurrentProcess(),
-            &counters,
-            sizeof(counters)))
+    if (!GetProcessMemoryInfo( GetCurrentProcess(), &counters, sizeof(counters)))
     {
-        throw std::runtime_error(
-            "MemoryDiagnostics: failed to query peak RSS."
-        );
+        throw std::runtime_error("MemoryDiagnostics: failed to query peak RSS.");
     }
 
-    return static_cast<std::size_t>(
-        counters.PeakWorkingSetSize
-    );
+    return static_cast<std::size_t>( counters.PeakWorkingSetSize );
 
 #else
 
