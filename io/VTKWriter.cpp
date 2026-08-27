@@ -14,23 +14,13 @@
 // --------------------------------------------------
 // MAIN WRITER
 // --------------------------------------------------
-void VTKWriter::write(
-    const OutputData& data,
-    const std::filesystem::path& filename)
+void VTKWriter::write( const OutputData& data, const std::filesystem::path& filename)
 {
-    if (filename.has_parent_path())
-    {
-        std::filesystem::create_directories(
-            filename.parent_path());
-    }
+    if (filename.has_parent_path()) { std::filesystem::create_directories(filename.parent_path()); }
 
     std::ofstream f(filename);
 
-    if (!f.is_open())
-    {
-        throw std::runtime_error(
-            "Failed to open VTU file: " + filename.string());
-    }
+    if (!f.is_open()) { throw std::runtime_error( "Failed to open VTU file: " + filename.string()); }
 
     const auto& mesh  = data.mesh;
 
@@ -41,8 +31,7 @@ void VTKWriter::write(
     f << "<VTKFile type=\"UnstructuredGrid\" version=\"1.0\">\n";
     f << "<UnstructuredGrid>\n";
 
-    f << "<Piece NumberOfPoints=\"" << Nnodes
-      << "\" NumberOfCells=\"" << Ncells << "\">\n";
+    f << "<Piece NumberOfPoints=\"" << Nnodes << "\" NumberOfCells=\"" << Ncells << "\">\n";
 
 
     // =========================================================
@@ -54,10 +43,7 @@ void VTKWriter::write(
     for (std::size_t i = 0; i < Nnodes; ++i)
     {
         const Point& p = mesh.node(i);
-
-        f << p.x[0] << " "
-          << p.x[1] << " "
-          << p.x[2] << "\n";
+        f << p.x[0] << " " << p.x[1] << " " << p.x[2] << "\n";
     }
 
     f << "</DataArray>\n";
@@ -113,7 +99,6 @@ void VTKWriter::write(
 
     f << "\n</DataArray>\n";
 
-
     // -------------------------
     // Offsets
     // -------------------------
@@ -126,7 +111,6 @@ void VTKWriter::write(
 
     f << "</DataArray>\n";
 
-
     // -------------------------
     // Types
     // -------------------------
@@ -138,9 +122,7 @@ void VTKWriter::write(
     }
 
     f << "</DataArray>\n";
-
     f << "</Cells>\n";
-
 
     // =========================================================
     // CELL DATA
@@ -150,16 +132,11 @@ void VTKWriter::write(
 
     for (const auto& outputField : data.fields)
     {
-        if (outputField.cellField == nullptr)
-        {
-            continue;
-        }
+        if (outputField.cellField == nullptr) { continue; }
 
         const auto& field = *outputField.cellField;
 
-        f << "<DataArray type=\"Float64\" Name=\""
-        << outputField.name
-        << "\" format=\"ascii\">\n";
+        f << "<DataArray type=\"Float64\" Name=\"" << outputField.name << "\" format=\"ascii\">\n";
 
         for (std::size_t c = 0; c < Ncells; ++c)
         {
@@ -179,16 +156,11 @@ void VTKWriter::write(
 
     for (const auto& outputField : data.fields)
     {
-        if (outputField.pointField == nullptr)
-        {
-            continue;
-        }
+        if (outputField.pointField == nullptr) { continue; }
 
         const auto& field = *outputField.pointField;
 
-        f << "<DataArray type=\"Float64\" Name=\""
-        << outputField.name
-        << "\" format=\"ascii\">\n";
+        f << "<DataArray type=\"Float64\" Name=\"" << outputField.name << "\" format=\"ascii\">\n";
 
         for (std::size_t i = 0; i < field.phi.size(); ++i)
         {
@@ -199,7 +171,6 @@ void VTKWriter::write(
     }
 
     f << "</PointData>\n";
-
 
     f << "</Piece>\n";
     f << "</UnstructuredGrid>\n";
