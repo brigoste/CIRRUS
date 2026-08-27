@@ -8,7 +8,5 @@ class MetadataWriter
 {
 public:
 
-    static void write(
-        const OutputData& data,
-        const std::filesystem::path& filename);
+    static void write( const OutputData& data, const std::filesystem::path& filename);
 };
