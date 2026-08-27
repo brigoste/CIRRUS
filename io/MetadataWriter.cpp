@@ -18,11 +18,7 @@ void MetadataWriter::write(
     const OutputData& data,
     const std::filesystem::path& filename)
 {
-    if (filename.has_parent_path())
-    {
-        std::filesystem::create_directories(
-            filename.parent_path());
-    }
+    if (filename.has_parent_path()) { std::filesystem::create_directories(filename.parent_path()); }
 
     nlohmann::json j;
 
@@ -71,18 +67,10 @@ void MetadataWriter::write(
     for (double r : data.residual)
     {
         residualL2 += r * r;
-        residualLinf = std::max(
-            residualLinf,
-            std::abs(r));
+        residualLinf = std::max( residualLinf, std::abs(r));
     }
 
-    if (!data.residual.empty())
-    {
-        residualL2 =
-            std::sqrt(
-                residualL2 /
-                static_cast<double>(data.residual.size()));
-    }
+    if (!data.residual.empty()) { residualL2 = std::sqrt( residualL2 / static_cast<double>(data.residual.size())); }
 
     j["residual"]["l2_norm"] = residualL2;
     j["residual"]["linf_norm"] = residualLinf;
@@ -92,12 +80,7 @@ void MetadataWriter::write(
     // ------------------------------------
     std::ofstream out(filename);
 
-    if (!out.is_open())
-    {
-        throw std::runtime_error(
-            "Failed to open metadata output: "
-            + filename.string());
-    }
+    if (!out.is_open()) { throw std::runtime_error( "Failed to open metadata output: " + filename.string()); }
 
     out << j.dump(4);
 }
