@@ -12,13 +12,7 @@ class Interpolator
 public:
     virtual ~Interpolator() = default;
 
-    virtual double interpolate(
-        const ScalarField& field,
-        const Point& position
-    ) const = 0;
+    virtual double interpolate( const ScalarField& field, const Point& position ) const = 0;
 
-    virtual Vector interpolate(
-        const VectorField& field,
-        const Point& position
-    ) const = 0;
+    virtual Vector interpolate( const VectorField& field, const Point& position ) const = 0;
 };
