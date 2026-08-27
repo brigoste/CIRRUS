@@ -23,11 +23,7 @@ void FiniteVolumeAssembler::assemble(
 
     for (const auto& contribution : flux.matrixContributions())
     {
-        sys.addCoeff(
-            contribution.row,
-            contribution.column,
-            contribution.coefficient
-        );
+        sys.addCoeff( contribution.row, contribution.column, contribution.coefficient );
     }
 
     // =========================================================
@@ -36,15 +32,7 @@ void FiniteVolumeAssembler::assemble(
 
     for (const auto& contribution : flux.sourceContributions())
     {
-        sys.addRHS(
-            contribution.cell,
-            contribution.Su
-        );
-
-        sys.addCoeff(
-            contribution.cell,
-            contribution.cell,
-            -contribution.Sp
-        );
+        sys.addRHS( contribution.cell, contribution.Su );
+        sys.addCoeff( contribution.cell, contribution.cell, -contribution.Sp );
     }
 }
