@@ -18,9 +18,7 @@ inline GradientType gradientFromString(const std::string& name)
     if (name == "least_squares")
         return GradientType::LeastSquares;
 
-    throw std::runtime_error(
-        "Unknown gradient scheme: " + name
-    );
+    throw std::runtime_error( "Unknown gradient scheme: " + name );
 }
 
 
