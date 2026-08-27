@@ -14,11 +14,7 @@ void SourceFluxBuilder::apply(
     {
         const double source = model.cellSource(mesh, c);
         // Physical model source
-        flux.addSource({
-            c,
-            source * mesh.cellVolume(c),
-            0.0
-        });
+        flux.addSource({ c, source * mesh.cellVolume(c), 0.0 });
 
         // Manufactured verification forcing
         if (verificationCase)
@@ -27,11 +23,7 @@ void SourceFluxBuilder::apply(
 
             const double manufacturedSource = verificationCase->source(xc);
 
-            flux.addSource({
-                c,
-                manufacturedSource * mesh.cellVolume(c),
-                0.0
-            });
+            flux.addSource({ c, manufacturedSource * mesh.cellVolume(c), 0.0 });
         }
     }
 }
