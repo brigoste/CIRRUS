@@ -199,7 +199,7 @@ SimulationConfig fromJson(const nlohmann::json& j)
     cfg.physics.type    = physics::physicsFromString(j.at("physics").at("type").get<std::string>());
 
     cfg.physics.transferCoefficient       = j.at("physics").value("transferCoefficient", 0.0);
-    cfg.physics.gamma   = j.at("physics").value("gamma", 0.0);
+    cfg.physics.gamma                     = j.at("physics").value("gamma", 0.0);
 
     cfg.physics.rho     = j.at("physics").value("rho", 1.0);
     cfg.physics.ux      = j.at("physics").value("ux", 0.0);
@@ -216,9 +216,9 @@ SimulationConfig fromJson(const nlohmann::json& j)
     {
         const auto& paths = j.at("paths");
 
-        cfg.io.output_root = paths.value("output_root", cfg.io.output_root);
+        cfg.io.output_root       = paths.value("output_root", cfg.io.output_root);
         cfg.io.python_executable = paths.value("python_executable", "python");
-        cfg.io.plot_enabled = paths.value("plot_enabled", false);
+        cfg.io.plot_enabled      = paths.value("plot_enabled", false);
     }
 
     // -------------------------------------------------
@@ -232,22 +232,21 @@ SimulationConfig fromJson(const nlohmann::json& j)
     {        
         BoundaryConfig bc{};
 
-        bc.group = bcJson.at("group").get<std::size_t>();
+        bc.group           = bcJson.at("group").get<std::size_t>();
 
         bc.condition.type  = bc::from_string(bcJson.at("type").get<std::string>());
 
-        bc.condition.value = 0.0;
-        bc.condition.flux  = 0.0;
-        bc.condition.transferCoefficient     = 0.0;
-        bc.condition.referenceValue  = 0.0;
+        bc.condition.value               = 0.0;
+        bc.condition.flux                = 0.0;
+        bc.condition.transferCoefficient = 0.0;
+        bc.condition.referenceValue      = 0.0;
 
         switch (bc.condition.type)
         {
             case bc::Type::Dirichlet:
                 if (!bcJson.contains("value"))
                 {
-                    throw std::runtime_error(
-                        "Dirichlet boundary condition requires 'value'");
+                    throw std::runtime_error("Dirichlet boundary condition requires 'value'");
                 }
                 bc.condition.value = bcJson.at("value").get<double>();
                 break;
@@ -255,8 +254,7 @@ SimulationConfig fromJson(const nlohmann::json& j)
             case bc::Type::Neumann:
                 if (!bcJson.contains("flux"))
                 {
-                    throw std::runtime_error(
-                        "Neumann boundary condition requires 'flux'");
+                    throw std::runtime_error("Neumann boundary condition requires 'flux'");
                 }
                 bc.condition.flux = bcJson.at("flux").get<double>();
                 break;
