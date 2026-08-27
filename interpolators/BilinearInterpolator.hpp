@@ -23,23 +23,11 @@ public:
 
 private:
 
-    double interpolate2D(
-        const ScalarField& field,
-        const Point& position
-    ) const;
+    double interpolate2D( const ScalarField& field, const Point& position ) const;
 
-    Vector interpolate2D(
-        const VectorField& field,
-        const Point& position
-    ) const;
+    Vector interpolate2D( const VectorField& field, const Point& position ) const;
 
-    double interpolate2DFace(
-        const ScalarField& field,
-        const Point& position
-    ) const;
+    double interpolate2DFace( const ScalarField& field, const Point& position ) const;
 
-    Vector interpolate2DFace(
-        const VectorField& field,
-        const Point& position
-    ) const;
+    Vector interpolate2DFace( const VectorField& field, const Point& position ) const;
 };
