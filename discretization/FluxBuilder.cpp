@@ -11,31 +11,9 @@ void FluxBuilder::buildFlux(
     const VerificationCase* verificationCase
 ) const
 {
-    if (flux.size() != mesh.ncells())
-    {
-        throw std::runtime_error(
-            "FluxAccumulator size mismatch"
-        );
-    }
+    if (flux.size() != mesh.ncells()) { throw std::runtime_error( "FluxAccumulator size mismatch" ); }
 
-    diffusionFlux_.apply(
-        mesh,
-        model,
-        boundary,
-        flux,
-        verificationCase
-    );
-
-    convectionFlux_.apply(
-        mesh,
-        model,
-        flux
-    );
-
-    sourceFlux_.apply(
-        mesh,
-        model,
-        flux,
-        verificationCase
-    );
+    diffusionFlux_.apply( mesh, model, boundary, flux, verificationCase );
+    convectionFlux_.apply( mesh, model, flux );
+    sourceFlux_.apply( mesh, model, flux, verificationCase );
 }
