@@ -42,11 +42,7 @@ ReconstructionStencil TVDReconstruction::stencil(
     // -------------------------------------------------
     if (cells.upstream == Face::INVALID)
     {
-        return ReconstructionStencil{
-            {
-                {cells.upwind, 1.0}
-            }
-        };
+        return ReconstructionStencil{ { {cells.upwind, 1.0} } };
     }
 
 
@@ -78,20 +74,12 @@ ReconstructionStencil TVDReconstruction::stencil(
 
     if (std::abs(deltaUD) < 1e-14)
     {
-        return ReconstructionStencil{
-            {
-                {cells.upwind, 1.0}
-            }
-        };
+        return ReconstructionStencil{ { {cells.upwind, 1.0} } };
     }
 
     if (std::abs(deltaUD) < 1e-14)
     {
-        return ReconstructionStencil{
-            {
-                {cells.upwind, 1.0}
-            }
-        };
+        return ReconstructionStencil{ { {cells.upwind, 1.0} } };
     }
 
     // -------------------------------------------------
