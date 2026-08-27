@@ -29,12 +29,7 @@ ScalarField& FieldRegistry::createScalar(
 {
     if (name == FieldName::Invalid) { throw std::runtime_error( "Cannot create scalar field with invalid FieldName"); }
 
-    return createScalar(
-        std::string(to_string(name)),
-        mesh,
-        location,
-        initialValue
-    );
+    return createScalar( std::string(to_string(name)), mesh, location, initialValue );
 }
 
 VectorField& FieldRegistry::createVector(
@@ -44,26 +39,13 @@ VectorField& FieldRegistry::createVector(
     const Vector& initialValue
 )
 {
-    if (contains(name))
-    {
-        throw std::runtime_error(
-            "Field already exists: " + name
-        );
-    }
+    if (contains(name)) { throw std::runtime_error( "Field already exists: " + name ); }
 
-    auto field = std::make_unique<VectorField>(
-        name,
-        mesh,
-        location,
-        initialValue
-    );
+    auto field = std::make_unique<VectorField>( name, mesh, location, initialValue );
 
     VectorField& ref = *field;
 
-    fields_.emplace(
-        name,
-        std::move(field)
-    );
+    fields_.emplace( name, std::move(field) );
 
     return ref;
 }
@@ -75,19 +57,9 @@ VectorField& FieldRegistry::createVector(
     const Vector& initialValue
 )
 {
-    if (name == FieldName::Invalid)
-    {
-        throw std::runtime_error(
-            "Cannot create vector field with invalid FieldName"
-        );
-    }
+    if (name == FieldName::Invalid) { throw std::runtime_error( "Cannot create vector field with invalid FieldName" ); }
 
-    return createVector(
-        std::string(to_string(name)),
-        mesh,
-        location,
-        initialValue
-    );
+    return createVector( std::string(to_string(name)), mesh, location, initialValue );
 }
 bool FieldRegistry::contains( const std::string& name ) const { return fields_.find(name) != fields_.end(); }
 
