@@ -342,11 +342,10 @@ double BilinearInterpolator::interpolate2DFace(
         const double w11 = xi * eta;
         const double w01 = (1.0 - xi) * eta;
 
-        return
-            w00 * field[stencil.f00] +
-            w10 * field[stencil.f10] +
-            w11 * field[stencil.f11] +
-            w01 * field[stencil.f01];
+        return w00 * field[stencil.f00] 
+             + w10 * field[stencil.f10] 
+             + w11 * field[stencil.f11] 
+             + w01 * field[stencil.f01];
     };
 
     const FaceStencil xStencil = buildStencil(true);
@@ -397,8 +396,7 @@ Vector BilinearInterpolator::interpolate2DFace(
         {
             const Face& face = mesh.face(f);
 
-            const bool isXNormal =
-                std::abs(face.normal[0]) > 0.5;
+            const bool isXNormal = std::abs(face.normal[0]) > 0.5;
 
             if (isXNormal != xNormal) { continue; }
 
@@ -446,7 +444,7 @@ Vector BilinearInterpolator::interpolate2DFace(
             const double x = face.center[0];
             const double y = face.center[1];
 
-            if (std::abs(x - stencil.x0) < coordinateTolerance && std::abs(y - stencil.y0) < coordinateTolerance)       { stencil.f00 = f; }
+            if      (std::abs(x - stencil.x0) < coordinateTolerance && std::abs(y - stencil.y0) < coordinateTolerance)  { stencil.f00 = f; }
             else if ( std::abs(x - stencil.x1) < coordinateTolerance && std::abs(y - stencil.y0) < coordinateTolerance) { stencil.f10 = f; }
             else if ( std::abs(x - stencil.x1) < coordinateTolerance && std::abs(y - stencil.y1) < coordinateTolerance) { stencil.f11 = f; }
             else if ( std::abs(x - stencil.x0) < coordinateTolerance && std::abs(y - stencil.y1) < coordinateTolerance) { stencil.f01 = f; }
@@ -471,7 +469,10 @@ Vector BilinearInterpolator::interpolate2DFace(
         const double w11 = xi * eta;
         const double w01 = (1.0 - xi) * eta;
 
-        return w00 * field[stencil.f00] + w10 * field[stencil.f10] + w11 * field[stencil.f11] + w01 * field[stencil.f01];
+        return w00 * field[stencil.f00] 
+             + w10 * field[stencil.f10] 
+             + w11 * field[stencil.f11] 
+             + w01 * field[stencil.f01];
     };
 
     const FaceStencil xStencil = buildStencil(true);
