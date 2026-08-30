@@ -48,8 +48,12 @@ struct VerificationSummary
     double linfRelativeGCI = 0.0;
     double qoiRelativeGCI = 0.0;
 
+    // GCI acceptance
+    double qoiGciAcceptanceTol = 0.05;
+    bool qoiGciPassed = false;
+
     bool passed() const
     {
-        return accuracyPassed && (!refinementEnabled || refinementPassed);
+        return accuracyPassed && (!refinementEnabled || refinementPassed) && (!refinementEnabled || qoiGciPassed);
     }
 };

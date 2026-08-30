@@ -17,6 +17,10 @@
         "expected_order": 2.0
     },
 
+    "acceptance": {
+      "qoiGciTolerance": 0.05
+    },
+
     "physics": {
       "type": "heat",
       "transferCoefficient": 100.0,

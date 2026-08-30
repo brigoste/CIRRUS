@@ -878,7 +878,7 @@ Optimization notes:
 * [x] Verify verification output paths and refinement-level organization
 * [ ] Add automated regression verification
 * [x] Add Richardson extrapolation
-* [ ] Add Grid Convergence Index (GCI)
+* [x] Add Grid Convergence Index (GCI)
 * [ ] Improve verification diagnostics/reporting
 
 **Important:** The recent verification run demonstrated:

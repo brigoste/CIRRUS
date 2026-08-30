@@ -19,6 +19,10 @@
       "expected_order": 2.0
     },
 
+    "acceptance": {
+      "qoiGciTolerance": 0.05
+    },
+
     "discretization": {
         "gradientScheme": "least_squares",
         "reconstructionScheme": "Upwind"

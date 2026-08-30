@@ -112,6 +112,11 @@ struct RefinementConfig
     double expected_order = 2.0;
 };
 
+struct VerificationAcceptanceConfig
+{
+    double qoiGciTolerance = 0.05;
+};
+
 struct VerificationCaseConfig
 {
     std::string name;
@@ -127,6 +132,7 @@ struct VerificationCaseConfig
     std::vector<BoundaryConfig> boundary;
     RefinementConfig refinement;
     DiscretizationConfig discretization;
+    VerificationAcceptanceConfig acceptance;
 
     bool overrideMesh = false;
     bool overridePhysics = false;
@@ -134,6 +140,7 @@ struct VerificationCaseConfig
     bool overrideBoundary = false;
     bool overrideRefinement = false;
     bool overrideDiscretization = false;
+    bool overrideAcceptance = false;
 
     nlohmann::json params;
 };
@@ -166,6 +173,7 @@ struct SimulationConfig
     SolverConfig solver;
     IOConfig io;
     DiscretizationConfig discretization;
+    VerificationAcceptanceConfig acceptance;
 
     std::vector<BoundaryConfig> boundary;
 };
@@ -271,6 +279,11 @@ inline void from_json(const nlohmann::json& j, DiscretizationConfig& d)
     d.flux_limiter = fluxLimiterTypeFromString (j.value("flux_limiter", "minmod"));
 }
 
+inline void from_json(const nlohmann::json& j, VerificationAcceptanceConfig& v)
+{
+    v.qoiGciTolerance = j.value("qoiGciTolerance",0.05);
+}
+
 // ------------------------- Read Config for Verification ------------
 inline void from_json(const nlohmann::json& j, VerificationCaseConfig& v)
 {
@@ -317,6 +330,12 @@ inline void from_json(const nlohmann::json& j, VerificationCaseConfig& v)
         v.overrideDiscretization = true;
     }
 
+    if (j.contains("acceptance"))
+    {
+        v.acceptance = j.at("acceptance").get<VerificationAcceptanceConfig>();
+        v.overrideAcceptance = true;
+    }
+
     v.params = j.value("params", nlohmann::json::object());
 }
 
@@ -346,9 +365,7 @@ inline void from_json(const nlohmann::json& j, VerificationSuite& v)
         for (auto& [name, cfg] : j["caseConfigs"].items())
         {
             VerificationCaseConfig entry = cfg.get<VerificationCaseConfig>();
-
             entry.name = name;
-
             v.caseConfigs[name] = entry;
         }
     }

@@ -33,11 +33,12 @@ SimulationConfig VerificationRunner::applyVerificationOverrides(
 {
     SimulationConfig cfg = base;
 
-    if (verif.overrideMesh) { cfg.mesh = verif.mesh; }
-    if (verif.overridePhysics) { cfg.physics = verif.physics; }
-    if (verif.overrideSolver) { cfg.solver = verif.solver; }
-    if (verif.overrideBoundary) { cfg.boundary = verif.boundary; }
+    if (verif.overrideMesh)           { cfg.mesh = verif.mesh; }
+    if (verif.overridePhysics)        { cfg.physics = verif.physics; }
+    if (verif.overrideSolver)         { cfg.solver = verif.solver; }
+    if (verif.overrideBoundary)       { cfg.boundary = verif.boundary; }
     if (verif.overrideDiscretization) { cfg.discretization = verif.discretization; }
+    if (verif.overrideAcceptance)     { cfg.acceptance = verif.acceptance; }
 
     return cfg;
 }
@@ -380,6 +381,7 @@ bool VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             const double l2Order = study.l2Regression.slope;
             const double linfOrder = study.linfRegression.slope;
             const double qoiOrder = study.qoiRegression.slope;
+            const double gciTolerance = verificationCase.acceptance.qoiGciTolerance;
 
             const auto& coarse = refinementLevels[refinementLevels.size() - 2];
             const auto& fine   = refinementLevels[refinementLevels.size() - 1];
@@ -428,6 +430,8 @@ bool VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             const bool refinementPassed = (std::abs(l2Order - expectedOrder) <= orderTolerance) 
                                        && (std::abs(linfOrder - expectedOrder) <= orderTolerance);
 
+            const bool gciPassed = std::abs(qoiGCI.relativeGCI) <= gciTolerance;
+        
             finestSummary.refinementPassed = refinementPassed;
 
             finestSummary.l2Order = l2Order;
@@ -446,6 +450,9 @@ bool VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
             finestSummary.linfAbsoluteGCI = linfGCI.absoluteGCI;
             finestSummary.qoiAbsoluteGCI = qoiGCI.absoluteGCI;
 
+            finestSummary.qoiGciAcceptanceTol = gciTolerance;
+            finestSummary.qoiGciPassed = gciPassed;
+
             finestSummary.refinementRatio = refinementRatio;
             finestSummary.safetyFactor = safetyFactor;
 
@@ -462,6 +469,7 @@ bool VerificationRunner::run( const SimulationConfig& baseCfg, const Verificatio
                       << "Richardson QOI               : " << qoiRichardson << "\n"
                       << "|Richardson QoI - exact QoI| : " << richardsonGciDifference << "\n"
                       << "|QoI Fine - exact QoI|       : " << gciExactDifference << "\n"
+                      << "GCI Comparison               : " << (gciPassed ? "PASS" : "FAIL") << "\n"
                       << "==================================================\n";
         }
     
