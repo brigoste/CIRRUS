@@ -20,10 +20,9 @@ double AdvectionDiffusionPhysicsModel::convectionFaceFlux(
 {
     // Constant velocity field
     // Assumes face.normal is unit normal from owner -> neighbor
-    const double un =
-          ux_ * face.normal.x
-        + uy_ * face.normal.y
-        + uz_ * face.normal.z;
+    const double un = ux_ * face.normal.x
+                    + uy_ * face.normal.y
+                    + uz_ * face.normal.z;
 
     return rho_ * un * face.area;
 }
