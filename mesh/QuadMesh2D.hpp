@@ -21,7 +21,7 @@ public:
 
     const Point& cellCenter(std::size_t i) const override                           { return cells_[i].center; }
 
-    const std::vector<std::size_t>& boundaryFaces(std::size_t group) const override {return boundaryGroups_.at(group);}
+    const std::vector<std::size_t>& boundaryFaces(std::size_t group) const override { return boundaryGroups_.at(group); }
     std::size_t nBoundaryGroups() const override                                    { return boundaryGroups_.size(); }
     std::size_t toGroup(Patch p) const                                              { return static_cast<std::size_t>(p);}
 
