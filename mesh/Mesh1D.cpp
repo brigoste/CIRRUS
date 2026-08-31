@@ -12,10 +12,7 @@
 Mesh1D::Mesh1D(std::size_t N, double L)
     : N_(N), L_(L)
 {
-    if (N_ == 0) 
-    { 
-        throw std::runtime_error("Mesh1D: N must be > 0"); 
-    }
+    if (N_ == 0)  { throw std::runtime_error("Mesh1D: N must be > 0"); }
 
     dx_ = L_ / static_cast<double>(N_);
 
@@ -85,10 +82,7 @@ Mesh1D::Mesh1D(std::size_t N, double L)
     // ---------------------------
     // Sanity check
     // ---------------------------
-    if (faces_.size() != N_ + 1) 
-    { 
-        throw std::runtime_error("Invalid 1D mesh topology"); 
-    }
+    if (faces_.size() != N_ + 1) { throw std::runtime_error("Invalid 1D mesh topology"); }
 
     for (std::size_t f = 1; f < N_; ++f)
     {
@@ -141,17 +135,9 @@ std::size_t Mesh1D::findCell(const Point& position) const
 
     constexpr double eps = 1.0e-12;
 
-    if (x < -eps || x > length + eps)
-    {
-        throw std::out_of_range(
-            "Mesh1D::findCell: position lies outside mesh."
-        );
-    }
+    if (x < -eps || x > length + eps) { throw std::out_of_range( "Mesh1D::findCell: position lies outside mesh."); }
 
-    if (x >= length - eps)
-    {
-        return ncells() - 1;
-    }
+    if (x >= length - eps) { return ncells() - 1; }
 
     return static_cast<std::size_t>(x / dx_);
 }
