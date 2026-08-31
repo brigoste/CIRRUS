@@ -28,31 +28,13 @@ int main(int argc, char* argv[])
         {
             std::string arg = argv[i];
 
-            if (arg == "--config" && i + 1 < argc)
-            {
-                configPath = argv[++i];
-            }
-            else if (arg == "--plot")
-            {
-                plotOverride = true;
-            }
+            if (arg == "--config" && i + 1 < argc) { configPath = argv[++i]; }
+            else if (arg == "--plot")              { plotOverride = true; }
         }
 
-        if (argc < 2)
-        {
-            throw std::runtime_error(
-                "No configuration file provided.\n"
-                "Usage: CIRRUS --config <config_file.json>"
-            );
-        }
+        if (argc < 2) { throw std::runtime_error( "No configuration file provided.\n Usage: CIRRUS --config <config_file.json>" ); }
 
-        if (!std::filesystem::exists(configPath))
-        {
-            throw std::runtime_error(
-                "Configuration file not found: "
-                + configPath.string()
-            );
-        }        
+        if (!std::filesystem::exists(configPath)) { throw std::runtime_error( "Configuration file not found: " + configPath.string() );         
 
         const std::filesystem::path projectRoot = std::filesystem::current_path();
 
@@ -103,20 +85,15 @@ int main(int argc, char* argv[])
         // -------------------------------------------------
         SimulationConfig cfg = loadConfig(configPath);
         
-        if (plotOverride) 
-        { 
-            cfg.io.plot_enabled = true; 
-        }
+        if (plotOverride) { cfg.io.plot_enabled = true; }
         
         PathContext paths = buildPaths(cfg, projectRoot);
 
         std::cout << "\n================ USER SIMULATION MODE ================\n";
 
-        SimulationRunner::run(
-            cfg,
-            paths,
-            VisualizationMode::Pyplot
-        );
+        SimulationRunner::run( cfg,
+                               paths,
+                               VisualizationMode::Pyplot );
 
         std::cout << "\n================ SIMULATION COMPLETE ================\n";
     }
