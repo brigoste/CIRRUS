@@ -24,15 +24,11 @@ public:
 
     virtual double manufacturedBoundaryFlux(const Face&) const
     {
-        throw std::runtime_error(
-            "Neumann boundary flux not implemented for this verification case."
-        );
+        throw std::runtime_error( "Neumann boundary flux not implemented for this verification case." );
     }
     virtual RobinData manufacturedRobinBoundary(const Face&) const
     {
-        throw std::runtime_error(
-            "Robin boundary data not implemented for this verification case."
-        );
+        throw std::runtime_error( "Robin boundary data not implemented for this verification case." );
     }
 
     virtual double l2AcceptanceThreshold() const = 0;
