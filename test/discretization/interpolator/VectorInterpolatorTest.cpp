@@ -33,10 +33,7 @@ bool vectorsNearlyEqual(
 {
     for (std::size_t i = 0; i < 3; ++i)
     {
-        if (!nearlyEqual(a[i], b[i], tolerance))
-        {
-            return false;
-        }
+        if (!nearlyEqual(a[i], b[i], tolerance)) { return false; }
     }
 
     return true;
@@ -59,19 +56,18 @@ bool runVectorInterpolatorTest()
     std::size_t testsPassed = 0;
     std::size_t testsFailed = 0;
 
-    std::cout
-        << "\n"
-        << "============================================================\n"
-        << "Vector Linear Interpolator Test\n"
-        << "============================================================\n"
-        << "\n"
-        << "Mesh:\n"
-        << "  Cells : " << mesh.ncells() << "\n"
-        << "  Length: " << length << "\n"
-        << "\n"
-        << "Tolerance:\n"
-        << "  " << std::scientific << tolerance << "\n"
-        << "\n";
+    std::cout << "\n"
+              << "============================================================\n"
+              << "Vector Linear Interpolator Test\n"
+              << "============================================================\n"
+              << "\n"
+              << "Mesh:\n"
+              << "  Cells : " << mesh.ncells() << "\n"
+              << "  Length: " << length << "\n"
+              << "\n"
+              << "Tolerance:\n"
+              << "  " << std::scientific << tolerance << "\n"
+              << "\n";
 
     /*
      * ------------------------------------------------------------
@@ -90,22 +86,18 @@ bool runVectorInterpolatorTest()
         value[1] = -3.0;
         value[2] = 5.0;
 
-        VectorField field(
-            "U",
-            mesh,
-            FieldLocation::Node,
-            value
-        );
+        VectorField field( "U",
+                           mesh,
+                           FieldLocation::Node,
+                           value );
 
         const double x = 0.375;
 
         Point test{x, 0.0, 0.0};
 
-        const Vector interpolated =
-            interpolator.interpolate(field, test);
+        const Vector interpolated = interpolator.interpolate(field, test);
 
-        const bool passed =
-            vectorsNearlyEqual(interpolated, value, tolerance);
+        const bool passed = vectorsNearlyEqual(interpolated, value, tolerance);
 
         if (passed) { ++testsPassed; }
         else
@@ -114,10 +106,9 @@ bool runVectorInterpolatorTest()
             allPassed = false;
         }
 
-        std::cout
-            << "Constant node field       : "
-            << (passed ? "PASS" : "FAIL")
-            << "\n";
+        std::cout << "Constant node field       : "
+                  << (passed ? "PASS" : "FAIL")
+                  << "\n";
     }
 
     /*
@@ -135,11 +126,9 @@ bool runVectorInterpolatorTest()
      * exactly.
      */
     {
-        VectorField field(
-            "U",
-            mesh,
-            FieldLocation::Node
-        );
+        VectorField field( "U",
+                           mesh,
+                           FieldLocation::Node );
 
         for (std::size_t i = 0; i < mesh.nnodes(); ++i)
         {
@@ -171,10 +160,9 @@ bool runVectorInterpolatorTest()
             allPassed = false;
         }
 
-        std::cout
-            << "Linear node field         : "
-            << (passed ? "PASS" : "FAIL")
-            << "\n";
+        std::cout << "Linear node field         : "
+                  << (passed ? "PASS" : "FAIL")
+                  << "\n";
     }
 
     /*
@@ -192,11 +180,9 @@ bool runVectorInterpolatorTest()
      * quadratic field exactly.
      */
     {
-        VectorField field(
-            "U",
-            mesh,
-            FieldLocation::Node
-        );
+        VectorField field( "U",
+                           mesh,
+                           FieldLocation::Node );
 
         for (std::size_t i = 0; i < mesh.nnodes(); ++i)
         {
@@ -228,10 +214,9 @@ bool runVectorInterpolatorTest()
             allPassed = false;
         }
 
-        std::cout
-            << "Quadratic node field      : "
-            << (passed ? "PASS" : "FAIL")
-            << "\n";
+        std::cout << "Quadratic node field      : "
+                  << (passed ? "PASS" : "FAIL")
+                  << "\n";
     }
 
     /*
@@ -240,10 +225,9 @@ bool runVectorInterpolatorTest()
      * ------------------------------------------------------------
      */
     {
-        VectorField field(
-            "U",
-            mesh,
-            FieldLocation::Face
+        VectorField field( "U",
+                           mesh,
+                           FieldLocation::Face
         );
 
         for (std::size_t i = 0; i < mesh.nfaces(); ++i)
@@ -265,11 +249,9 @@ bool runVectorInterpolatorTest()
 
         Point test{x, 0.0, 0.0};
 
-        const Vector interpolated =
-            interpolator.interpolate(field, test);
+        const Vector interpolated = interpolator.interpolate(field, test);
 
-        const bool passed =
-            vectorsNearlyEqual(interpolated, expected, tolerance);
+        const bool passed = vectorsNearlyEqual(interpolated, expected, tolerance);
 
         if (passed) { ++testsPassed; }
         else
@@ -278,10 +260,9 @@ bool runVectorInterpolatorTest()
             allPassed = false;
         }
 
-        std::cout
-            << "Face-centered field       : "
-            << (passed ? "PASS" : "FAIL")
-            << "\n";
+        std::cout << "Face-centered field       : "
+                  << (passed ? "PASS" : "FAIL")
+                  << "\n";
     }
 
     /*
@@ -290,10 +271,9 @@ bool runVectorInterpolatorTest()
      * ------------------------------------------------------------
      */
     {
-        VectorField field(
-            "U",
-            mesh,
-            FieldLocation::Cell
+        VectorField field( "U",
+                           mesh,
+                           FieldLocation::Cell
         );
 
         for (std::size_t i = 0; i < mesh.ncells(); ++i)
@@ -326,10 +306,9 @@ bool runVectorInterpolatorTest()
             allPassed = false;
         }
 
-        std::cout
-            << "Cell-centered field       : "
-            << (passed ? "PASS" : "FAIL")
-            << "\n";
+        std::cout << "Cell-centered field       : "
+                  << (passed ? "PASS" : "FAIL")
+                  << "\n";
     }
 
     /*
@@ -338,11 +317,9 @@ bool runVectorInterpolatorTest()
      * ------------------------------------------------------------
      */
     {
-        VectorField field(
-            "U",
-            mesh,
-            FieldLocation::Node
-        );
+        VectorField field( "U",
+                           mesh,
+                           FieldLocation::Node );
 
         for (std::size_t i = 0; i < mesh.nnodes(); ++i)
         {
@@ -377,10 +354,9 @@ bool runVectorInterpolatorTest()
             allPassed = false;
         }
 
-        std::cout
-            << "Exact field locations     : "
-            << (passed ? "PASS" : "FAIL")
-            << "\n";
+        std::cout << "Exact field locations     : "
+                  << (passed ? "PASS" : "FAIL")
+                  << "\n";
     }
 
     /*
@@ -395,12 +371,10 @@ bool runVectorInterpolatorTest()
         value[1] = 2.0;
         value[2] = 3.0;
 
-        VectorField field(
-            "U",
-            mesh,
-            FieldLocation::Node,
-            value
-        );
+        VectorField field( "U",
+                           mesh,
+                           FieldLocation::Node,
+                           value );
 
         bool passed = true;
 
@@ -411,8 +385,8 @@ bool runVectorInterpolatorTest()
 
             passed = false;
         }
-        catch (const std::out_of_range&)
-        {
+        catch (const std::out_of_range&) 
+        { 
             // Expected.
         }
 
@@ -435,10 +409,9 @@ bool runVectorInterpolatorTest()
             allPassed = false;
         }
 
-        std::cout
-            << "Outside interpolation     : "
-            << (passed ? "PASS" : "FAIL")
-            << "\n";
+        std::cout << "Outside interpolation     : "
+                  << (passed ? "PASS" : "FAIL")
+                  << "\n";
     }
 
     /*
@@ -453,12 +426,10 @@ bool runVectorInterpolatorTest()
         value[1] = 2.0;
         value[2] = 3.0;
 
-        VectorField field(
-            "U",
-            mesh,
-            FieldLocation::Cell,
-            value
-        );
+        VectorField field( "U",
+                           mesh,
+                           FieldLocation::Cell,
+                           value );
 
         bool passed = true;
 
@@ -493,10 +464,9 @@ bool runVectorInterpolatorTest()
             allPassed = false;
         }
 
-        std::cout
-            << "Cell boundary rejection   : "
-            << (passed ? "PASS" : "FAIL")
-            << "\n";
+        std::cout << "Cell boundary rejection   : "
+                  << (passed ? "PASS" : "FAIL")
+                << "\n";
     }
 
     /*
@@ -504,19 +474,18 @@ bool runVectorInterpolatorTest()
      * Summary
      * ------------------------------------------------------------
      */
-    std::cout
-        << "\n"
-        << "------------------------------------------------------------\n"
-        << "Vector Interpolator Test Results\n"
-        << "------------------------------------------------------------\n"
-        << "Tests passed              : " << testsPassed << "\n"
-        << "Tests failed              : " << testsFailed << "\n"
-        << "\n"
-        << "============================================================\n"
-        << "Vector Linear Interpolator Test "
-        << (allPassed ? "PASS" : "FAIL")
-        << "\n"
-        << "============================================================\n";
+    std::cout << "\n"
+              << "------------------------------------------------------------\n"
+              << "Vector Interpolator Test Results\n"
+              << "------------------------------------------------------------\n"
+              << "Tests passed              : " << testsPassed << "\n"
+              << "Tests failed              : " << testsFailed << "\n"
+              << "\n"
+              << "============================================================\n"
+              << "Vector Linear Interpolator Test "
+              << (allPassed ? "PASS" : "FAIL")
+              << "\n"
+              << "============================================================\n";
 
     return allPassed;
 }
