@@ -59,15 +59,9 @@ std::vector<double> BiCGSTAB(
 
         // std::cout << "iter " << iter << " rho = " << rho_new << '\n';
 
-        if (std::abs(rho_new) < 1e-30) 
-        { 
-            throw std::runtime_error("BiCGSTAB breakdown: rho ~ 0"); 
-        }
+        if (std::abs(rho_new) < 1e-30) { throw std::runtime_error("BiCGSTAB breakdown: rho ~ 0"); }
 
-        if (iter == 0) 
-        { 
-            p = r; 
-        }
+        if (iter == 0) { p = r; }
         else 
         {
             double beta = (rho_new / rho_old) * (alpha / omega);
@@ -85,10 +79,7 @@ std::vector<double> BiCGSTAB(
         sys.matvec(p_hat, v);
 
         const double r0v = LA::dot(r0_hat, v);
-        if (std::abs(r0v) < 1e-30) 
-        { 
-            throw std::runtime_error("BiCGSTAB breakdown: <r0_hat,v> ~ 0"); 
-        }
+        if (std::abs(r0v) < 1e-30) { throw std::runtime_error("BiCGSTAB breakdown: <r0_hat,v> ~ 0"); }
 
         alpha = rho_new / r0v;
 
@@ -117,16 +108,10 @@ std::vector<double> BiCGSTAB(
         // t = A(M⁻¹s)
         sys.matvec(s_hat, t);
         const double tt = LA::dot(t, t);
-        if (std::abs(tt) < 1e-30) 
-        { 
-            throw std::runtime_error("BiCGSTAB breakdown: <t,t> ~ 0"); 
-        }
+        if (std::abs(tt) < 1e-30) { throw std::runtime_error("BiCGSTAB breakdown: <t,t> ~ 0"); }
 
         omega = LA::dot(t, s) / tt;
-        if (std::abs(omega) < 1e-30) 
-        { 
-            throw std::runtime_error("BiCGSTAB breakdown: omega ~ 0"); 
-        }
+        if (std::abs(omega) < 1e-30) { throw std::runtime_error("BiCGSTAB breakdown: omega ~ 0"); }
 
         // update x
         for (std::size_t i = 0; i < N; ++i) 
