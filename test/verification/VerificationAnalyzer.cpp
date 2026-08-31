@@ -75,10 +75,7 @@ namespace VerificationAnalyzer
 
         const double denominator = n * sumX2 - sumX * sumX;
 
-        if (denominator == 0.0)
-        {
-            throw std::invalid_argument( "Cannot perform regression: h values are identical");
-        }
+        if (denominator == 0.0) { throw std::invalid_argument( "Cannot perform regression: h values are identical"); }
 
         RegressionResult result;
 
@@ -142,9 +139,7 @@ namespace VerificationAnalyzer
     {
         if (levels.size() < 2)
         {
-            throw std::invalid_argument(
-                "At least two refinement levels are required"
-            );
+            throw std::invalid_argument( "At least two refinement levels are required" );
         }
 
         std::vector<double> h;
