@@ -19,7 +19,7 @@ public:
     
     double exact( Point p ) const override;
     double laplacian( Point p) const override;
-    double source( Point ) const override                  { return 0.0; }
+    double source( Point ) const override                           { return 0.0; }
 
     double l2AcceptanceThreshold() const override                   { return 1e-10; }
     double linfAcceptanceThreshold() const override                 { return 1e-10; }
