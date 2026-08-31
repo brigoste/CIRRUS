@@ -21,25 +21,13 @@ std::vector<double> GMRES(
 
     const std::size_t N = sys.size();
 
-    if (restart <= 0)
-    {
-        throw std::runtime_error( "GMRES: restart must be greater than zero");
-    }
+    if (restart <= 0) { throw std::runtime_error( "GMRES: restart must be greater than zero"); }
 
-    if (max_iter <= 0)
-    {
-        throw std::runtime_error( "GMRES: max_iter must be greater than zero");
-    }
+    if (max_iter <= 0) { throw std::runtime_error( "GMRES: max_iter must be greater than zero"); }
 
-    if (tol <= 0.0)
-    {
-        throw std::runtime_error( "GMRES: tolerance must be greater than zero");
-    }
+    if (tol <= 0.0) { throw std::runtime_error( "GMRES: tolerance must be greater than zero"); }
 
-    if (N == 0)
-    {
-        return {};
-    }
+    if (N == 0) { return {}; }
 
     // ---------------------------------------------------------
     // Initial guess: zero field
@@ -60,15 +48,13 @@ std::vector<double> GMRES(
 
     const double norm_r0 = LA::norm2(r);
 
-    std::cout
-        << "Initial residual = "
-        << norm_r0
-        << '\n';
+    std::cout << "Initial residual = "
+              << norm_r0
+              << '\n';
 
     if (norm_r0 < tol)
     {
         std::cout << "Initial guess already satisfies system.\n";
-
         return x;
     }
 
@@ -83,13 +69,10 @@ std::vector<double> GMRES(
     // v_{j+1} from v_j.
     // ---------------------------------------------------------
 
-    const int m = std::min(
-        restart,
-        static_cast<int>(N));
+    const int m = std::min( restart,
+                            static_cast<int>(N));
 
-    std::vector<std::vector<double>> V(
-        m + 1,
-        std::vector<double>(N, 0.0));
+    std::vector<std::vector<double>> V( m + 1, std::vector<double>(N, 0.0));
 
     // ---------------------------------------------------------
     // Upper Hessenberg matrix H
@@ -97,9 +80,7 @@ std::vector<double> GMRES(
     // H has dimensions (m + 1) x m
     // ---------------------------------------------------------
 
-    std::vector<std::vector<double>> H(
-        m + 1,
-        std::vector<double>(m, 0.0));
+    std::vector<std::vector<double>> H( m + 1, std::vector<double>(m, 0.0));
 
     // ---------------------------------------------------------
     // Givens rotation storage
@@ -137,12 +118,11 @@ std::vector<double> GMRES(
 
         if (beta < convergenceTolerance)
         {
-            std::cout
-                << "GMRES converged in "
-                << totalIterations
-                << " iterations. Residual = "
-                << beta
-                << '\n';
+            std::cout << "GMRES converged in "
+                      << totalIterations
+                      << " iterations. Residual = "
+                      << beta
+                      << '\n';
 
             return x;
         }
@@ -157,10 +137,7 @@ std::vector<double> GMRES(
 
         const double betaPreconditioned = LA::norm2(z);
 
-        if (betaPreconditioned < 1e-30)
-        {
-            throw std::runtime_error( "GMRES breakdown: preconditioned residual is zero");
-        }
+        if (betaPreconditioned < 1e-30) { throw std::runtime_error( "GMRES breakdown: preconditioned residual is zero"); }
 
         // -----------------------------------------------------
         // Normalize first Krylov vector
@@ -189,9 +166,7 @@ std::vector<double> GMRES(
         // Arnoldi process
         // -----------------------------------------------------
 
-        for (int j = 0;
-             j < m && totalIterations < max_iter;
-             ++j)
+        for (int j = 0; j < m && totalIterations < max_iter; ++j)
         {
             ++totalIterations;
             ++innerIterations;
@@ -254,10 +229,7 @@ std::vector<double> GMRES(
 
             const double denom = std::hypot(h1, h2);
 
-            if (denom < 1e-30)
-            {
-                throw std::runtime_error( "GMRES breakdown: zero Hessenberg column");
-            }
+            if (denom < 1e-30) { throw std::runtime_error( "GMRES breakdown: zero Hessenberg column"); }
 
             const bool happyBreakdown = (std::abs(h2) < 1e-30);
 
@@ -308,10 +280,7 @@ std::vector<double> GMRES(
                         sum -= H[row][col] * y[col];
                     }
 
-                    if (std::abs(H[row][row]) < 1e-30)
-                    {
-                        throw std::runtime_error( "GMRES breakdown: singular Hessenberg system");
-                    }
+                    if (std::abs(H[row][row]) < 1e-30) { throw std::runtime_error( "GMRES breakdown: singular Hessenberg system"); }
 
                     y[row] = sum / H[row][row];
                 }
@@ -352,20 +321,16 @@ std::vector<double> GMRES(
 
                 if (trueResidual < convergenceTolerance)
                 {
-                    std::cout
-                        << "GMRES converged in "
-                        << totalIterations
-                        << " iterations. Residual = "
-                        << trueResidual
-                        << '\n';
-
+                    std::cout << "GMRES converged in "
+                              << totalIterations
+                              << " iterations. Residual = "
+                              << trueResidual
+                              << '\n';
+                    
                     return x;
                 }
 
-                if (happyBreakdown)
-                {
-                    throw std::runtime_error("GMRES breakdown: Krylov space terminated before convergence");
-                }
+                if (happyBreakdown) { throw std::runtime_error("GMRES breakdown: Krylov space terminated before convergence"); }
 
                 break;
             }
@@ -381,10 +346,7 @@ std::vector<double> GMRES(
 
         const int k = innerIterations;
 
-        if (k == 0)
-        {
-            break;
-        }
+        if (k == 0) { break; }
 
         std::vector<double> y(k, 0.0);
 
@@ -397,10 +359,7 @@ std::vector<double> GMRES(
                 sum -= H[row][col] * y[col];
             }
 
-            if (std::abs(H[row][row]) < 1e-30)
-            {
-                throw std::runtime_error( "GMRES breakdown: singular Hessenberg system");
-            }
+            if (std::abs(H[row][row]) < 1e-30) { throw std::runtime_error( "GMRES breakdown: singular Hessenberg system"); }
 
             y[row] = sum / H[row][row];
         }
@@ -446,12 +405,11 @@ std::vector<double> GMRES(
 
         if (trueResidual < convergenceTolerance)
         {
-            std::cout
-                << "GMRES converged in "
-                << totalIterations
-                << " iterations. Residual = "
-                << trueResidual
-                << '\n';
+            std::cout << "GMRES converged in "
+                      << totalIterations
+                      << " iterations. Residual = "
+                      << trueResidual
+                      << '\n';
 
             return x;
         }
@@ -470,12 +428,11 @@ std::vector<double> GMRES(
 
     const double finalResidual = LA::norm2(r);
 
-    std::cerr
-        << "[WARN] GMRES failed to converge after "
-        << totalIterations
-        << " iterations. Residual = "
-        << finalResidual
-        << '\n';
+    std::cerr << "[WARN] GMRES failed to converge after "
+              << totalIterations
+              << " iterations. Residual = "
+              << finalResidual
+              << '\n';
 
     return x;
 }
