@@ -22,18 +22,14 @@ Simulation::~Simulation() = default;
 
 void Simulation::initializeFields()
 {
-    fields_.createScalar(
-        physics_->solutionField(),
-        *mesh_,
-        FieldLocation::Cell,
-        physics_->initialSolutionValue()
-    );
-    gradient_ = std::make_unique<VectorField>(
-        "SolutionGradient",
-        *mesh_,
-        FieldLocation::Cell,
-        Vector{}
-    );
+    fields_.createScalar( physics_->solutionField(),
+                         *mesh_,
+                         FieldLocation::Cell,
+                         physics_->initialSolutionValue() );
+    gradient_ = std::make_unique<VectorField>( "SolutionGradient",
+                                                *mesh_,
+                                                FieldLocation::Cell,
+                                                Vector{} );
 }
 // ============================================================
 // Constructor
@@ -89,29 +85,23 @@ void Simulation::assemble()
 
     FluxBuilder fluxBuilder;
 
-    fluxBuilder.buildFlux(
-        *mesh_,
-        *physics_,
-        boundary_,
-        *flux_,
-        verificationCase_.get()
-    );
+    fluxBuilder.buildFlux( *mesh_,
+                           *physics_,
+                           boundary_,
+                           *flux_,
+                           verificationCase_.get() );
 
     auto& solutionField = fields_.scalar(physics_->solutionField());
 
-    gradientScheme_->compute(
-        *mesh_,
-        solutionField,
-        *gradient_
-    );
+    gradientScheme_->compute( *mesh_,
+                              solutionField,
+                              *gradient_ );
 
-    fvOperator_.assemble(
-        *mesh_,
-        *flux_,
-        solutionField,
-        *gradient_,
-        sys_
-    );
+    fvOperator_.assemble( *mesh_,
+                          *flux_,
+                          solutionField,
+                          *gradient_,
+                          sys_ );
 
     assembled_ = true;
 }
@@ -124,10 +114,7 @@ void Simulation::solve()
 {
     const auto& solverCfg = cfg_.solver;
 
-    if (!assembled_) 
-    { 
-        throw std::runtime_error("System not assembled"); 
-    }
+    if (!assembled_) { throw std::runtime_error("System not assembled"); }
 
     std::cout << "System Type: " << physics::to_string(cfg_.physics.type) << "\n";
     // std::cout << "Convection: " << convectionToString(cfg_.discretization.convectionScheme) << "\n";
@@ -183,10 +170,7 @@ void Simulation::solve()
     // ---------------------------------------
     auto& solutionField = fields_.scalar(physics_->solutionField());
 
-    if (solutionField.size() != phi.size())
-    {
-        throw std::runtime_error( "Solution size does not match solution field size." );
-    }
+    if (solutionField.size() != phi.size()) { throw std::runtime_error( "Solution size does not match solution field size." ); }
 
     for (std::size_t i = 0; i < phi.size(); ++i) { solutionField[i] = phi[i]; }
 }
