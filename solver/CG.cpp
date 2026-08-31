@@ -109,10 +109,7 @@ std::vector<double> CG(
             alpha_den += p[i] * Ap[i]; 
         }
 
-        if (std::abs(alpha_den) < 1e-14) 
-        { 
-            break; 
-        }
+        if (std::abs(alpha_den) < 1e-14) { break; }
 
         double alpha = alpha_num / alpha_den;
 
