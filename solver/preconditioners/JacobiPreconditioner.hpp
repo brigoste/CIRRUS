@@ -11,11 +11,9 @@ public:
 
     void setup(const LinearEquationSystem& sys) override;
 
-    void apply(
-        const std::vector<double>& r,
-        std::vector<double>& z) const override;
+    void apply( const std::vector<double>& r, std::vector<double>& z) const override;
 
-        std::string name() const override { return "Jacobi"; }
+    std::string name() const override { return "Jacobi"; }
 
 private:
 
