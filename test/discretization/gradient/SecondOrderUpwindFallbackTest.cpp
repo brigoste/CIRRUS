@@ -26,19 +26,15 @@ void runSecondOrderUpwindFallbackTest()
         3.0     // ly
     );
 
-    ScalarField field(
-        "Temperature",
-        mesh,
-        FieldLocation::Cell,
-        0.0
-    );
+    ScalarField field( "Temperature",
+                        mesh,
+                        FieldLocation::Cell,
+                        0.0 );
 
-    VectorField gradient(
-        "Gradient",
-        mesh,
-        FieldLocation::Cell,
-        Vector{0.0, 0.0, 0.0}
-    );
+    VectorField gradient( "Gradient",
+                          mesh,
+                          FieldLocation::Cell,
+                          Vector{0.0, 0.0, 0.0} );
 
     SecondOrderUpwindReconstruction reconstruction;
 
@@ -81,15 +77,12 @@ void runSecondOrderUpwindFallbackTest()
     {
         const double flux = 1.0;
 
-        const ReconstructionStencil stencil =
-            reconstruction.stencil(
-                mesh,
-                face.owner,
-                testFace,
-                field,
-                gradient,
-                flux
-            );
+        const ReconstructionStencil stencil = reconstruction.stencil( mesh,
+                                                                      face.owner,
+                                                                      testFace,
+                                                                      field,
+                                                                      gradient,
+                                                                      flux );
 
         assert(stencil.weights.size() == 1);
 
@@ -110,15 +103,12 @@ void runSecondOrderUpwindFallbackTest()
     {
         const double flux = -1.0;
 
-        const ReconstructionStencil stencil =
-            reconstruction.stencil(
-                mesh,
-                face.owner,
-                testFace,
-                field,
-                gradient,
-                flux 
-            );
+        const ReconstructionStencil stencil = reconstruction.stencil( mesh,
+                                                                      face.owner,
+                                                                      testFace,
+                                                                      field,
+                                                                      gradient,
+                                                                      flux  );
 
         assert(stencil.weights.size() == 2);
 
