@@ -22,41 +22,26 @@ void ILU0Preconditioner::factorize()
     {
         for (auto& [j,aij] : LU_[i])
         {
-            if (j >= i) 
-            { 
-                continue; 
-            }
+            if (j >= i)  { continue; }
 
             auto diagIt = LU_[j].find(j);
 
-            if (diagIt == LU_[j].end()) 
-            { 
-                throw std::runtime_error("ILU0: missing diagonal."); 
-            }
+            if (diagIt == LU_[j].end()) { throw std::runtime_error("ILU0: missing diagonal."); }
 
             double diag = diagIt->second;
 
-            if (std::abs(diag) < 1e-30) 
-            {
-                throw std::runtime_error("ILU0: zero pivot."); 
-            }
+            if (std::abs(diag) < 1e-30) { throw std::runtime_error("ILU0: zero pivot."); }
 
             aij /= diag;
 
             for (auto [k,ujk] : LU_[j])
             {
-                if (k <= j) 
-                { 
-                    continue; 
-                }
+                if (k <= j) { continue; }
 
                 auto it = LU_[i].find(k);
 
                 // ILU(0): only existing entries
-                if (it != LU_[i].end()) 
-                { 
-                    it->second -= aij * ujk; 
-                }
+                if (it != LU_[i].end()) { it->second -= aij * ujk; }
             }
         }
     }
@@ -96,10 +81,7 @@ void ILU0Preconditioner::apply( const std::vector<double>& r, std::vector<double
         double sum = y[ii];
         auto diagIt = LU_[ii].find(ii);
 
-        if (diagIt == LU_[ii].end()) 
-        { 
-            throw std::runtime_error("ILU0: missing diagonal during solve."); 
-        }
+        if (diagIt == LU_[ii].end()) { throw std::runtime_error("ILU0: missing diagonal during solve."); }
 
         double diag = diagIt->second;
 
