@@ -30,19 +30,15 @@ void runMusclReconstructionTest()
         4.0     // ly
     );
 
-    ScalarField field(
-        "Temperature",
-        mesh,
-        FieldLocation::Cell,
-        0.0
-    );
+    ScalarField field( "Temperature",
+                       mesh,
+                       FieldLocation::Cell,
+                       0.0 );
 
-    VectorField gradient(
-        "Gradient",
-        mesh,
-        FieldLocation::Cell,
-        Vector{0.0, 0.0, 0.0}
-    );
+    VectorField gradient( "Gradient",
+                          mesh,
+                          FieldLocation::Cell,
+                          Vector{0.0, 0.0, 0.0} );
 
     MusclReconstruction reconstruction;
 
@@ -89,15 +85,12 @@ void runMusclReconstructionTest()
 
     const double positiveFlux = 1.0;
 
-    const ReconstructionStencil positiveStencil =
-        reconstruction.stencil(
-            mesh,
-            face.owner,
-            testFace,
-            field,
-            gradient,
-            positiveFlux
-        );
+    const ReconstructionStencil positiveStencil = reconstruction.stencil( mesh,
+                                                                          face.owner,
+                                                                          testFace,
+                                                                          field,
+                                                                          gradient,
+                                                                          positiveFlux );
 
     // -------------------------------------------------
     // Verify stencil contains three cells
@@ -153,15 +146,12 @@ void runMusclReconstructionTest()
 
     const double negativeFlux = -1.0;
 
-    const ReconstructionStencil negativeStencil =
-        reconstruction.stencil(
-            mesh,
-            face.owner,
-            testFace,
-            field,
-            gradient,
-            negativeFlux
-        );
+    const ReconstructionStencil negativeStencil = reconstruction.stencil( mesh,
+                                                                          face.owner,
+                                                                          testFace,
+                                                                          field,
+                                                                          gradient,
+                                                                          negativeFlux );
 
     TEST_ASSERT(negativeStencil.weights.size() == 3);
 
@@ -212,15 +202,12 @@ void runMusclReconstructionTest()
     // -------------------------------------------------
 
     {
-        const double reconstructed =
-            reconstruction.reconstruct(
-                mesh,
-                face.owner,
-                testFace,
-                field,
-                gradient,
-                positiveFlux
-            );
+        const double reconstructed = reconstruction.reconstruct( mesh,
+                                                                 face.owner,
+                                                                 testFace,
+                                                                 field,
+                                                                 gradient,
+                                                                 positiveFlux );
 
         const double exact = face.center.x[0];
 
@@ -232,22 +219,16 @@ void runMusclReconstructionTest()
     // -------------------------------------------------
 
     {
-        const double reconstructed =
-            reconstruction.reconstruct(
-                mesh,
-                face.owner,
-                testFace,
-                field,
-                gradient,
-                negativeFlux
-            );
+        const double reconstructed = reconstruction.reconstruct( mesh,
+                                                                 face.owner,
+                                                                 testFace,
+                                                                 field,
+                                                                 gradient,
+                                                                 negativeFlux );
 
         const double exact = face.center.x[0];
 
-        TEST_ASSERT(
-            std::abs(reconstructed - exact)
-            < 1e-12
-        );
+        TEST_ASSERT( std::abs(reconstructed - exact) < 1e-12 );
     }
 
     // -------------------------------------------------
@@ -259,15 +240,12 @@ void runMusclReconstructionTest()
     // -------------------------------------------------
 
     {
-        const ReconstructionStencil stencil =
-            reconstruction.stencil(
-                mesh,
-                face.owner,
-                testFace,
-                field,
-                gradient,
-                positiveFlux
-            );
+        const ReconstructionStencil stencil = reconstruction.stencil( mesh,
+                                                                      face.owner,
+                                                                      testFace,
+                                                                      field,
+                                                                      gradient,
+                                                                      positiveFlux );
 
         double expected = 0.0;
 
@@ -276,26 +254,19 @@ void runMusclReconstructionTest()
             expected += weight * field[cell];
         }
 
-        const double reconstructed =
-            reconstruction.reconstruct(
-                mesh,
-                face.owner,
-                testFace,
-                field,
-                gradient,
-                positiveFlux
-            );
+        const double reconstructed = reconstruction.reconstruct( mesh,
+                                                                 face.owner,
+                                                                 testFace,
+                                                                 field,
+                                                                 gradient,
+                                                                 positiveFlux );
 
-        TEST_ASSERT(
-            std::abs(reconstructed - expected)
-            < 1e-12
-        );
+        TEST_ASSERT( std::abs(reconstructed - expected) < 1e-12 );
     }
 
     // -------------------------------------------------
     // Result
     // -------------------------------------------------
 
-    std::cout
-        << "MUSCL Reconstruction test      : PASS\n";
+    std::cout << "MUSCL Reconstruction test      : PASS\n";
 }
