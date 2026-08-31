@@ -22,10 +22,7 @@ public:
 
     void stop()
     {
-        if (!running_)
-        {
-            return;
-        }
+        if (!running_) { return; }
         auto end = std::chrono::high_resolution_clock::now();
 
         double elapsed = std::chrono::duration<double>(end - start_).count();
