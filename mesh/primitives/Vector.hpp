@@ -19,25 +19,13 @@ struct Vector
     x(x_), y(y_), z(z_)
     {}
 
-    double magnitude() const
-    {
-        return std::sqrt(x*x + y*y + z*z);
-    }
+    double magnitude() const { return std::sqrt(x*x + y*y + z*z); }
 
-    double magnitudeSquared() const
-    {
-        return x*x + y*y + z*z;
-    }
+    double magnitudeSquared() { return x*x + y*y + z*z; }
 
-    double& operator[](std::size_t i)
-    {
-        return (&x)[i];
-    }
+    double& operator[](std::size_t i) { return (&x)[i]; }
 
-    double operator[](std::size_t i) const
-    {
-        return (&x)[i];
-    }
+    double operator[](std::size_t i) const { return (&x)[i]; }
 
     Vector& operator+=(const Vector& other)
     {
