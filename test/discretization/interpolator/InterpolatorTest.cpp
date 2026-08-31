@@ -42,19 +42,18 @@ bool runInterpolatorTest()
     std::size_t testsPassed = 0;
     std::size_t testsFailed = 0;
 
-    std::cout
-        << "\n"
-        << "============================================================\n"
-        << "Linear Interpolator Test\n"
-        << "============================================================\n"
-        << "\n"
-        << "Mesh:\n"
-        << "  Cells : " << mesh.ncells() << "\n"
-        << "  Length: " << length << "\n"
-        << "\n"
-        << "Tolerance:\n"
-        << "  " << std::scientific << tolerance << "\n"
-        << "\n";
+    std::cout << "\n"
+              << "============================================================\n"
+              << "Linear Interpolator Test\n"
+              << "============================================================\n"
+              << "\n"
+              << "Mesh:\n"
+              << "  Cells : " << mesh.ncells() << "\n"
+              << "  Length: " << length << "\n"
+              << "\n"
+              << "Tolerance:\n"
+              << "  " << std::scientific << tolerance << "\n"
+              << "\n";
 
     /*
      * ------------------------------------------------------------
@@ -67,12 +66,10 @@ bool runInterpolatorTest()
      * exactly.
      */
     {
-        ScalarField phi(
-            "phi",
-            mesh,
-            FieldLocation::Node,
-            5.0
-        );
+        ScalarField phi( "phi",
+                         mesh,
+                         FieldLocation::Node,
+                         5.0 );
 
         const double x = 0.375;
 
@@ -88,10 +85,9 @@ bool runInterpolatorTest()
             allPassed = false;
         }
 
-        std::cout
-            << "Constant node field       : "
-            << (passed ? "PASS" : "FAIL")
-            << "\n";
+        std::cout << "Constant node field       : "
+                  << (passed ? "PASS" : "FAIL")
+                  << "\n";
     }
 
     /*
@@ -130,10 +126,9 @@ bool runInterpolatorTest()
             allPassed = false;
         }
 
-        std::cout
-            << "Linear node field         : "
-            << (passed ? "PASS" : "FAIL")
-            << "\n";
+        std::cout << "Linear node field         : "
+                  << (passed ? "PASS" : "FAIL")
+                  << "\n";
     }
 
     /*
@@ -175,10 +170,9 @@ bool runInterpolatorTest()
             allPassed = false;
         }
 
-        std::cout
-            << "Quadratic node field      : "
-            << (passed ? "PASS" : "FAIL")
-            << "\n";
+        std::cout << "Quadratic node field      : "
+                  << (passed ? "PASS" : "FAIL")
+                  << "\n";
     }
 
     /*
@@ -215,10 +209,9 @@ bool runInterpolatorTest()
             allPassed = false;
         }
 
-        std::cout
-            << "Face-centered field       : "
-            << (passed ? "PASS" : "FAIL")
-            << "\n";
+        std::cout << "Face-centered field       : "
+                  << (passed ? "PASS" : "FAIL")
+                  << "\n";
     }
 
     /*
@@ -256,10 +249,9 @@ bool runInterpolatorTest()
             allPassed = false;
         }
 
-        std::cout
-            << "Cell-centered field       : "
-            << (passed ? "PASS" : "FAIL")
-            << "\n";
+        std::cout << "Cell-centered field       : "
+                  << (passed ? "PASS" : "FAIL")
+                  << "\n";
     }
 
     /*
@@ -303,10 +295,9 @@ bool runInterpolatorTest()
             allPassed = false;
         }
 
-        std::cout
-            << "Exact field locations     : "
-            << (passed ? "PASS" : "FAIL")
-            << "\n";
+        std::cout << "Exact field locations     : "
+                  << (passed ? "PASS" : "FAIL")
+                  << "\n";
     }
 
     /*
@@ -343,20 +334,16 @@ bool runInterpolatorTest()
             // Expected.
         }
 
-        if (passed)
-        {
-            ++testsPassed;
-        }
+        if (passed) { ++testsPassed; }
         else
         {
             ++testsFailed;
             allPassed = false;
         }
 
-        std::cout
-            << "Outside interpolation     : "
-            << (passed ? "PASS" : "FAIL")
-            << "\n";
+        std::cout << "Outside interpolation     : "
+                  << (passed ? "PASS" : "FAIL")
+                  << "\n";
     }
 
     /*
@@ -397,20 +384,16 @@ bool runInterpolatorTest()
             // Expected.
         }
 
-        if (passed)
-        {
-            ++testsPassed;
-        }
+        if (passed) { ++testsPassed; }
         else
         {
             ++testsFailed;
             allPassed = false;
         }
 
-        std::cout
-            << "Cell boundary rejection   : "
-            << (passed ? "PASS" : "FAIL")
-            << "\n";
+        std::cout << "Cell boundary rejection   : "
+                  << (passed ? "PASS" : "FAIL")
+                  << "\n";
     }
 
     /*
@@ -479,11 +462,9 @@ bool runBilinearInterpolatorTest()
      * exactly.
      */
     {
-        ScalarField phi(
-            "phi",
-            mesh,
-            FieldLocation::Node
-        );
+        ScalarField phi( "phi",
+                         mesh,
+                         FieldLocation::Node );
 
         for (std::size_t i = 0; i < mesh.nnodes(); ++i)
         {
@@ -494,10 +475,9 @@ bool runBilinearInterpolatorTest()
 
         Point test{0.2676, 0.5, 0.0};
 
-        const double exact =
-            2.0 * test[0] +
-            3.0 * test[1] +
-            1.0;
+        const double exact = 2.0 * test[0] +
+                             3.0 * test[1] +
+                             1.0;
 
         const double interpolated = bilinearInterpolator.interpolate(phi, test);
 
@@ -525,11 +505,9 @@ bool runBilinearInterpolatorTest()
      * Bilinear interpolation should reproduce this exactly.
      */
     {
-        ScalarField phi(
-            "phi",
-            mesh,
-            FieldLocation::Node
-        );
+        ScalarField phi( "phi",
+                         mesh,
+                         FieldLocation::Node );
 
         for (std::size_t i = 0; i < mesh.nnodes(); ++i)
         {
@@ -538,11 +516,10 @@ bool runBilinearInterpolatorTest()
             const double x = p[0];
             const double y = p[1];
 
-            phi[i] =
-                1.0 +
-                2.0 * x +
-                3.0 * y +
-                4.0 * x * y;
+            phi[i] = 1.0 +
+                     2.0 * x +
+                     3.0 * y +
+                     4.0 * x * y;
         }
 
         Point test{0.2676, 0.5, 0.0};
@@ -550,11 +527,10 @@ bool runBilinearInterpolatorTest()
         const double x = test[0];
         const double y = test[1];
 
-        const double exact =
-            1.0 +
-            2.0 * x +
-            3.0 * y +
-            4.0 * x * y;
+        const double exact = 1.0 +
+                             2.0 * x +
+                             3.0 * y +
+                             4.0 * x * y;
 
         const double interpolated = bilinearInterpolator.interpolate(phi, test);
 
@@ -580,11 +556,9 @@ bool runBilinearInterpolatorTest()
      * Each component is bilinear in x and y.
      */
     {
-        VectorField field(
-            "vector",
-            mesh,
-            FieldLocation::Node
-        );
+        VectorField field( "vector",
+                           mesh,
+                           FieldLocation::Node );
 
         for (std::size_t i = 0; i < mesh.nnodes(); ++i)
         {
@@ -593,11 +567,9 @@ bool runBilinearInterpolatorTest()
             const double x = p[0];
             const double y = p[1];
 
-            field[i] = Vector(
-                1.0 + x + 2.0 * y,
-                2.0 + 3.0 * x + y,
-                3.0 + 2.0 * x * y
-            );
+            field[i] = Vector( 1.0 + x + 2.0 * y,
+                               2.0 + 3.0 * x + y,
+                               3.0 + 2.0 * x * y );
         }
 
         Point test{0.2676, 0.5, 0.0};
@@ -605,10 +577,9 @@ bool runBilinearInterpolatorTest()
         const double x = test[0];
         const double y = test[1];
 
-        const Vector exact(
-            1.0 + x + 2.0 * y,
-            2.0 + 3.0 * x + y,
-            3.0 + 2.0 * x * y
+        const Vector exact( 1.0 + x + 2.0 * y,
+                            2.0 + 3.0 * x + y,
+                            3.0 + 2.0 * x * y
         );
 
         const Vector interpolated = bilinearInterpolator.interpolate(field, test);
@@ -642,18 +613,14 @@ bool runBilinearInterpolatorTest()
     * field exactly.
     */
     {
-        QuadMesh2D mesh2D(
-            10,
-            10,
-            1.0,
-            1.0
-        );
+        QuadMesh2D mesh2D( 10,
+                           10,
+                           1.0,
+                           1.0 );
 
-        ScalarField field(
-            "phi",
-            mesh2D,
-            FieldLocation::Face
-        );
+        ScalarField field( "phi",
+                           mesh2D,
+                           FieldLocation::Face );
 
         for (std::size_t i = 0; i < mesh2D.nfaces(); ++i)
         {
@@ -663,16 +630,11 @@ bool runBilinearInterpolatorTest()
             field[i] = 2.0 * x + 3.0 * y + 1.0;
         }
 
-        const Point test{
-            0.375,
-            0.625,
-            0.0
-        };
+        const Point test{ 0.375, 0.625, 0.0 };
 
-        const double expected =
-            2.0 * test[0]
-            + 3.0 * test[1]
-            + 1.0;
+        const double expected = 2.0 * test[0]
+                              + 3.0 * test[1]
+                              + 1.0;
 
         const double interpolated = bilinearInterpolator.interpolate(field, test);
 
