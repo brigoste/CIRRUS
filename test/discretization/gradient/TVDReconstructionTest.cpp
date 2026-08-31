@@ -88,15 +88,12 @@ void runTVDReconstructionTest()
 
         const double flux = 1.0;
 
-        const double reconstructed =
-            reconstruction.reconstruct(
-                mesh,
-                face.owner,
-                testFace,
-                field,
-                gradient,
-                flux
-            );
+        const double reconstructed = reconstruction.reconstruct( mesh,
+                                                                 face.owner,
+                                                                 testFace,
+                                                                 field,
+                                                                 gradient,
+                                                                 flux );
 
         TEST_ASSERT(std::abs(reconstructed - 5.0) < 1e-12);
     }
@@ -129,15 +126,12 @@ void runTVDReconstructionTest()
 
         const double flux = 1.0;
 
-        const double reconstructed =
-            reconstruction.reconstruct(
-                mesh,
-                face.owner,
-                testFace,
-                field,
-                gradient,
-                flux
-            );
+        const double reconstructed = reconstruction.reconstruct(mesh,
+                                                                face.owner,
+                                                                testFace,
+                                                                field,
+                                                                gradient,
+                                                                flux);
 
         const std::size_t upwind = face.owner;
         const std::size_t downwind = face.neighbor;
@@ -218,15 +212,12 @@ void runTVDReconstructionTest()
         field[upwind]   = 3.0;
         field[face.neighbor] = 2.0;
 
-        const double reconstructed =
-            reconstruction.reconstruct(
-                mesh,
-                face.owner,
-                testFace,
-                field,
-                gradient,
-                1.0
-            );
+        const double reconstructed = reconstruction.reconstruct(mesh,
+                                                                face.owner,
+                                                                testFace,
+                                                                field,
+                                                                gradient,
+                                                                1.0 );
 
         TEST_ASSERT( std::abs(reconstructed - field[upwind]) < 1e-12 );
     }
@@ -249,15 +240,12 @@ void runTVDReconstructionTest()
 
         const double flux = -1.0;
 
-        const double reconstructed =
-            reconstruction.reconstruct(
-                mesh,
-                face.owner,
-                testFace,
-                field,
-                gradient,
-                flux
-            );
+        const double reconstructed = reconstruction.reconstruct(mesh,
+                                                                face.owner,
+                                                                testFace,
+                                                                field,
+                                                                gradient,
+                                                                flux);
 
         const double exact = face.center.x[0];
 
@@ -283,15 +271,12 @@ void runTVDReconstructionTest()
             field[c] = mesh.cellCenter(c).x[0];
         }
 
-        const ReconstructionStencil stencil =
-            reconstruction.stencil(
-                mesh,
-                face.owner,
-                testFace,
-                field,
-                gradient,
-                1.0
-            );
+        const ReconstructionStencil stencil = reconstruction.stencil( mesh,
+                                                                      face.owner,
+                                                                      testFace,
+                                                                      field,
+                                                                      gradient,
+                                                                      1.0 );
 
         TEST_ASSERT(stencil.weights.size() == 2);
 
