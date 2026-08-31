@@ -18,10 +18,7 @@ void assertVectorEqual(
     const std::vector<double>& actual,
     const std::vector<double>& expected)
 {
-    if (actual.size() != expected.size())
-    {
-        throw std::runtime_error("Vector size mismatch");
-    }
+    if (actual.size() != expected.size()) { throw std::runtime_error("Vector size mismatch"); }
 
     for (std::size_t i = 0; i < actual.size(); ++i)
     {
@@ -77,9 +74,8 @@ std::vector<double> applySSORMatrix(
 {
     const std::size_t n = system.size();
 
-    std::vector<std::vector<double>> M(
-        n,
-        std::vector<double>(n, 0.0));
+    std::vector<std::vector<double>> M( n,
+                                        std::vector<double>(n, 0.0));
 
     // --------------------------------------------------------
     // Construct:
@@ -93,13 +89,11 @@ std::vector<double> applySSORMatrix(
     const double scale = 1.0 / (omega * (2.0 - omega));
 
     // Build the two triangular matrices.
-    std::vector<std::vector<double>> lower(
-        n,
-        std::vector<double>(n, 0.0));
+    std::vector<std::vector<double>> lower( n,
+                                            std::vector<double>(n, 0.0));
 
-    std::vector<std::vector<double>> upper(
-        n,
-        std::vector<double>(n, 0.0));
+    std::vector<std::vector<double>> upper( n,
+                                            std::vector<double>(n, 0.0));
 
     for (std::size_t i = 0; i < n; ++i)
     {
@@ -112,14 +106,8 @@ std::vector<double> applySSORMatrix(
                 lower[i][j] = aij;
                 upper[i][j] = aij;
             }
-            else if (j < i)
-            {
-                lower[i][j] = omega * aij;
-            }
-            else
-            {
-                upper[i][j] = omega * aij;
-            }
+            else if (j < i) { lower[i][j] = omega * aij; }
+            else            { upper[i][j] = omega * aij; }
         }
     }
 
@@ -127,9 +115,8 @@ std::vector<double> applySSORMatrix(
     //
     //     M = scale * Lw * D^-1 * Uw
     //
-    std::vector<std::vector<double>> Mscaled(
-        n,
-        std::vector<double>(n, 0.0));
+    std::vector<std::vector<double>> Mscaled( n,
+                                              std::vector<double>(n, 0.0));
 
     for (std::size_t i = 0; i < n; ++i)
     {
@@ -180,10 +167,9 @@ void testSSORApplication()
 
         assertVectorEqual(reconstructed, rhs);
 
-        std::cout
-            << "omega = "
-            << omega
-            << " : PASS\n";
+        std::cout << "omega = "
+                  << omega
+                  << " : PASS\n";
     }
 }
 
@@ -200,9 +186,7 @@ void testSSORInvalidOmega()
             SSORPreconditioner preconditioner(omega);
             passed = false;
         }
-        catch (const std::invalid_argument&)
-        {
-        }
+        catch (const std::invalid_argument&) {}
     }
 
     if (!passed) { throw std::runtime_error( "Invalid omega was not rejected"); }
@@ -223,19 +207,10 @@ void testSSORZeroDiagonal()
 
     bool threw = false;
 
-    try
-    {
-        preconditioner.setup(system);
-    }
-    catch (const std::runtime_error&)
-    {
-        threw = true;
-    }
+    try                               { preconditioner.setup(system); }
+    catch (const std::runtime_error&) { threw = true; }
 
-    if (!threw)
-    {
-        throw std::runtime_error("Zero diagonal was not rejected");
-    }
+    if (!threw) { throw std::runtime_error("Zero diagonal was not rejected"); }
 
     std::cout << "Zero diagonal : PASS\n";
 }
@@ -276,10 +251,7 @@ void testSSORSGSEquivalence()
 
         for (const auto& [j, aij] : system.row(i))
         {
-            if (j < i)
-            {
-                value -= aij * y[j];
-            }
+            if (j < i) { value -= aij * y[j]; }
         }
 
         y[i] = value / system.diagonal(i);
@@ -300,10 +272,7 @@ void testSSORSGSEquivalence()
 
         for (const auto& [j, aij] : system.row(i))
         {
-            if (j > i)
-            {
-                value -= aij * zSGS[j];
-            }
+            if (j > i) { value -= aij * zSGS[j]; }
         }
 
         zSGS[i] = value / system.diagonal(i);
@@ -334,14 +303,12 @@ void testSSORNonsymmetric()
 
         preconditioner.apply(rhs, z);
 
-        const std::vector<double> reconstructed =
-            applySSORMatrix(system, omega, z);
+        const std::vector<double> reconstructed = applySSORMatrix(system, omega, z);
 
         assertVectorEqual(reconstructed, rhs);
 
-        std::cout
-            << "omega = "
-            << omega
-            << " : PASS\n";
+        std::cout << "omega = "
+                  << omega
+                  << " : PASS\n";
     }
 }
