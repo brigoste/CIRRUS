@@ -22,9 +22,10 @@ public:
         L_ = cfg.mesh.lx;
         nx_ = cfg.mesh.nx;
 
-         for (const auto& bc : cfg.boundary)
+        for (const auto& bc : cfg.boundary)
         {
-            if(bc.group == 0) { 
+            if(bc.group == 0) 
+            { 
                 TL_ = bc.condition.value; 
                 foundLeft = true;
             }
@@ -35,10 +36,7 @@ public:
             }
         }
 
-        if(!foundLeft || !foundRight)
-        {
-            throw std::runtime_error("Neumann1D requires Dirichlet group 0 and Neumann group 1.");
-        }
+        if(!foundLeft || !foundRight) { throw std::runtime_error("Neumann1D requires Dirichlet group 0 and Neumann group 1."); }
     }
 
     void initialize(const MeshBase&) override {}
