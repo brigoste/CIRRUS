@@ -16,10 +16,7 @@ void DiffusionFluxBuilder::apply(
     const VerificationCase* verificationCase
 ) const
 {
-    if (flux.size() != mesh.ncells())
-    {
-        throw std::runtime_error( "DiffusionFluxBuilder: FluxAccumulator size mismatch" );
-    }
+    if (flux.size() != mesh.ncells()) { throw std::runtime_error( "DiffusionFluxBuilder: FluxAccumulator size mismatch" ); }
 
     // =====================================================
     // 1. INTERIOR FACES
