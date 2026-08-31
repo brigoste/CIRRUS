@@ -38,9 +38,7 @@ const Vector& VectorField::operator[](std::size_t i) const { return values_[i]; 
 
 void VectorField::fill(const Vector& value)
 {
-    std::fill(
-        values_.begin(),
-        values_.end(),
-        value
-    );
+    std::fill( values_.begin(),
+               values_.end(),
+               value );
 }
