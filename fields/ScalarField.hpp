@@ -9,12 +9,10 @@ class ScalarField : public FieldBase
 {
 public:
 
-    ScalarField(
-        std::string name,
-        const MeshBase& mesh,
-        FieldLocation location,
-        double initialValue = 0.0
-    );
+    ScalarField( std::string name,
+                 const MeshBase& mesh,
+                 FieldLocation location,
+                 double initialValue = 0.0 );
 
     // Value access
     double& operator[](std::size_t i);
