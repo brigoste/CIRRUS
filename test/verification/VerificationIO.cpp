@@ -131,10 +131,7 @@ void VerificationIO::writeReport(
 
     std::ofstream out(file);
 
-    if (!out.is_open())
-    {
-        throw std::runtime_error( "Failed to open verification summary JSON: " + file.string());
-    }
+    if (!out.is_open()) { throw std::runtime_error( "Failed to open verification summary JSON: " + file.string()); }
 
     out << j.dump(4);
 }
@@ -144,10 +141,7 @@ VerificationSummary VerificationIO::readBaseline(
 {
     std::ifstream in(file);
 
-    if (!in.is_open())
-    {
-        throw std::runtime_error( "Failed to open verification baseline JSON: " + file.string());
-    }
+    if (!in.is_open()) { throw std::runtime_error( "Failed to open verification baseline JSON: " + file.string()); }
 
     nlohmann::json j;
     in >> j;
@@ -228,17 +222,15 @@ VerificationComparison VerificationIO::compare(
 
     result.linfDifference = current.linfError - baseline.linfError;
 
-    result.l2Passed = approximatelyEqual(
-                                        current.l2Error,
-                                        baseline.l2Error,
-                                        relativeTolerance,
-                                        absoluteTolerance);
+    result.l2Passed = approximatelyEqual( current.l2Error,
+                                          baseline.l2Error,
+                                          relativeTolerance,
+                                          absoluteTolerance );
 
-    result.linfPassed = approximatelyEqual(
-                                        current.linfError,
-                                        baseline.linfError,
-                                        relativeTolerance,
-                                        absoluteTolerance);
+    result.linfPassed = approximatelyEqual( current.linfError,
+                                            baseline.linfError,
+                                            relativeTolerance,
+                                            absoluteTolerance );
 
     // -------------------------------------------------
     // QoI
@@ -246,24 +238,22 @@ VerificationComparison VerificationIO::compare(
 
     result.qoiDifference = current.qoiValue - baseline.qoiValue;
 
-    result.qoiPassed = approximatelyEqual(
-                                        current.qoiValue,
-                                        baseline.qoiValue,
-                                        relativeTolerance,
-                                        absoluteTolerance);
+    result.qoiPassed = approximatelyEqual( current.qoiValue,
+                                           baseline.qoiValue,
+                                           relativeTolerance,
+                                           absoluteTolerance );
 
     result.refinementEnabledMatch = (current.refinementEnabled == baseline.refinementEnabled);
 
-    result.passed =
-        result.caseMatch &&
-        result.solverMatch &&
-        result.meshMatch &&
-        result.gradientMatch &&
-        result.reconstructionMatch &&
-        result.l2Passed &&
-        result.linfPassed &&
-        result.qoiPassed &&
-        result.refinementEnabledMatch;                                   
+    result.passed = result.caseMatch &&
+                    result.solverMatch &&
+                    result.meshMatch &&
+                    result.gradientMatch &&
+                    result.reconstructionMatch &&
+                    result.l2Passed &&
+                    result.linfPassed &&
+                    result.qoiPassed &&
+                    result.refinementEnabledMatch;                                   
 
     if (current.refinementEnabled && baseline.refinementEnabled)
     {
@@ -271,23 +261,20 @@ VerificationComparison VerificationIO::compare(
         result.linfOrderDifference = current.linfOrder - baseline.linfOrder;
         result.qoiOrderDifference = current.qoiOrder - baseline.qoiOrder;
 
-        result.l2OrderPassed = approximatelyEqual(
-                                                current.l2Order,
-                                                baseline.l2Order,
-                                                1e-3,
-                                                1e-6);
+        result.l2OrderPassed = approximatelyEqual( current.l2Order,
+                                                   baseline.l2Order,
+                                                   1e-3,
+                                                   1e-6);
 
-        result.linfOrderPassed = approximatelyEqual(
-                                                current.linfOrder,
-                                                baseline.linfOrder,
-                                                1e-3,
-                                                1e-6);
+        result.linfOrderPassed = approximatelyEqual( current.linfOrder,
+                                                     baseline.linfOrder,
+                                                     1e-3,
+                                                     1e-6);
 
-        result.qoiOrderPassed = approximatelyEqual(
-                                                current.qoiOrder,
-                                                baseline.qoiOrder,
-                                                1e-3,
-                                                1e-6);
+        result.qoiOrderPassed = approximatelyEqual( current.qoiOrder,
+                                                    baseline.qoiOrder,
+                                                    1e-3,
+                                                    1e-6);
 
         // -------------------------------------------------
         // Richardson extrapolation
@@ -299,23 +286,20 @@ VerificationComparison VerificationIO::compare(
 
         result.qoiRichardsonDifference = (current.qoiRichardson - baseline.qoiRichardson);
 
-        result.l2RichardsonPassed = approximatelyEqual(
-                                                    current.l2Richardson,
-                                                    baseline.l2Richardson,
-                                                    1e-3,
-                                                    1e-8);
+        result.l2RichardsonPassed = approximatelyEqual( current.l2Richardson,
+                                                        baseline.l2Richardson,
+                                                        1e-3,
+                                                        1e-8);
 
-        result.linfRichardsonPassed = approximatelyEqual(
-                                                    current.linfRichardson,
-                                                    baseline.linfRichardson,
-                                                    1e-3,
-                                                    1e-8);
+        result.linfRichardsonPassed = approximatelyEqual( current.linfRichardson,
+                                                          baseline.linfRichardson,
+                                                          1e-3,
+                                                          1e-8);
 
-        result.qoiRichardsonPassed = approximatelyEqual(
-                                                    current.qoiRichardson,
-                                                    baseline.qoiRichardson,
-                                                    1e-3,
-                                                    1e-8);
+        result.qoiRichardsonPassed = approximatelyEqual( current.qoiRichardson,
+                                                         baseline.qoiRichardson,
+                                                         1e-3,
+                                                         1e-8);
 
         // -------------------------------------------------
         // Grid Convergence Index
@@ -327,35 +311,31 @@ VerificationComparison VerificationIO::compare(
 
         result.qoiGCIDifference = current.qoiRelativeGCI - baseline.qoiRelativeGCI;
 
-        result.l2GCIPassed = approximatelyEqual(
-                                            current.l2RelativeGCI,
-                                            baseline.l2RelativeGCI,
-                                            1e-2,
-                                            1e-8);
+        result.l2GCIPassed = approximatelyEqual( current.l2RelativeGCI,
+                                                 baseline.l2RelativeGCI,
+                                                 1e-2,
+                                                 1e-8);
 
-        result.linfGCIPassed = approximatelyEqual(
-                                            current.linfRelativeGCI,
-                                            baseline.linfRelativeGCI,
-                                            1e-2,
-                                            1e-8);
+        result.linfGCIPassed = approximatelyEqual( current.linfRelativeGCI,
+                                                   baseline.linfRelativeGCI,
+                                                   1e-2,
+                                                   1e-8);
 
-        result.qoiGCIPassed = approximatelyEqual(
-                                            current.qoiRelativeGCI,
-                                            baseline.qoiRelativeGCI,
-                                            1e-2,
-                                            1e-8);
+        result.qoiGCIPassed = approximatelyEqual( current.qoiRelativeGCI,
+                                                  baseline.qoiRelativeGCI,
+                                                  1e-2,
+                                                  1e-8);
 
-        result.passed =
-                result.passed &&
-                result.l2OrderPassed &&
-                result.linfOrderPassed &&
-                result.qoiOrderPassed &&
-                result.l2RichardsonPassed &&
-                result.linfRichardsonPassed &&
-                result.qoiRichardsonPassed &&
-                result.l2GCIPassed &&
-                result.linfGCIPassed &&
-                result.qoiGCIPassed;
+        result.passed = result.passed &&
+                        result.l2OrderPassed &&
+                        result.linfOrderPassed &&
+                        result.qoiOrderPassed &&
+                        result.l2RichardsonPassed &&
+                        result.linfRichardsonPassed &&
+                        result.qoiRichardsonPassed &&
+                        result.l2GCIPassed &&
+                        result.linfGCIPassed &&
+                        result.qoiGCIPassed;
     }    
 
     return result;
