@@ -12,12 +12,10 @@ class VectorField : public FieldBase
 {
 public:
 
-    VectorField(
-        std::string name,
-        const MeshBase& mesh,
-        FieldLocation location,
-        const Vector& initialValue = Vector()
-    );
+    VectorField( std::string name,
+                 const MeshBase& mesh,
+                 FieldLocation location,
+                 const Vector& initialValue = Vector() );
 
     std::size_t size() const override;
 
