@@ -31,16 +31,11 @@ void runPointValueQoITest()
     constexpr std::size_t nCells = 10;
     constexpr double tolerance = 1.0e-12;
 
-    Mesh1D mesh(
-        nCells,
-        length
-    );
+    Mesh1D mesh( nCells, length );
 
-    ScalarField phi(
-        "phi",
-        mesh,
-        FieldLocation::Node
-    );
+    ScalarField phi( "phi",
+                     mesh,
+                     FieldLocation::Node );
 
     /*
      * ------------------------------------------------------------
@@ -58,11 +53,7 @@ void runPointValueQoITest()
         phi[i] = 2.0 * x + 1.0;
     }
 
-    const Point position({
-        0.375,
-        0.0,
-        0.0
-    });
+    const Point position({ 0.375, 0.0, 0.0 });
 
     const double exact = 2.0 * position[0] + 1.0;
 
@@ -75,42 +66,34 @@ void runPointValueQoITest()
     std::size_t testsPassed = 0;
     std::size_t testsFailed = 0;
 
-    std::cout
-        << "\n"
-        << "============================================================\n"
-        << "Point Value QoI Test\n"
-        << "============================================================\n"
-        << "\n"
-        << "Manufactured field:\n"
-        << "  phi(x) = 2x + 1\n"
-        << "\n"
-        << "Evaluation point:\n"
-        << "  x = " << position[0] << "\n"
-        << "\n"
-        << "Expected value:\n"
-        << "  phi(x) = " << exact << "\n"
-        << "\n"
-        << "Tolerance:\n"
-        << "  " << std::scientific << tolerance << "\n"
-        << "\n";
+    std::cout << "\n"
+              << "============================================================\n"
+              << "Point Value QoI Test\n"
+              << "============================================================\n"
+              << "\n"
+              << "Manufactured field:\n"
+              << "  phi(x) = 2x + 1\n"
+              << "\n"
+              << "Evaluation point:\n"
+              << "  x = " << position[0] << "\n"
+              << "\n"
+              << "Expected value:\n"
+              << "  phi(x) = " << exact << "\n"
+              << "\n"
+              << "Tolerance:\n"
+              << "  " << std::scientific << tolerance << "\n"
+              << "\n";
 
     /*
      * ------------------------------------------------------------
      * QoI evaluation
      * ------------------------------------------------------------
      */
-    const double value =
-        qoi.evaluate(
-            phi,
-            interpolator
-        );
+    const double value = qoi.evaluate( phi, interpolator );
 
-    const bool evaluationPassed =
-        nearlyEqual(
-            value,
-            exact,
-            tolerance
-        );
+    const bool evaluationPassed = nearlyEqual( value,
+                                               exact,
+                                               tolerance );
 
     if (evaluationPassed) { ++testsPassed; }
     else
@@ -119,10 +102,9 @@ void runPointValueQoITest()
         allPassed = false;
     }
 
-    std::cout
-        << "QoI evaluation            : "
-        << (evaluationPassed ? "PASS" : "FAIL")
-        << "\n";
+    std::cout << "QoI evaluation            : "
+              << (evaluationPassed ? "PASS" : "FAIL")
+              << "\n";
 
     /*
      * ------------------------------------------------------------
@@ -142,27 +124,25 @@ void runPointValueQoITest()
         allPassed = false;
     }
 
-    std::cout
-        << "Position storage          : "
-        << (positionPassed ? "PASS" : "FAIL")
-        << "\n";
+    std::cout << "Position storage          : "
+              << (positionPassed ? "PASS" : "FAIL")
+              << "\n";
 
     /*
      * ------------------------------------------------------------
      * Summary
      * ------------------------------------------------------------
      */
-    std::cout
-        << "\n"
-        << "------------------------------------------------------------\n"
-        << "Point Value QoI Results\n"
-        << "------------------------------------------------------------\n"
-        << "Tests passed              : " << testsPassed << "\n"
-        << "Tests failed              : " << testsFailed << "\n"
-        << "\n"
-        << "============================================================\n"
-        << "Point Value QoI Test "
-        << (allPassed ? "PASS" : "FAIL")
-        << "\n"
-        << "============================================================\n";
+    std::cout << "\n"
+              << "------------------------------------------------------------\n"
+              << "Point Value QoI Results\n"
+              << "------------------------------------------------------------\n"
+              << "Tests passed              : " << testsPassed << "\n"
+              << "Tests failed              : " << testsFailed << "\n"
+              << "\n"
+              << "============================================================\n"
+              << "Point Value QoI Test "
+              << (allPassed ? "PASS" : "FAIL")
+              << "\n"
+              << "============================================================\n";
 }
