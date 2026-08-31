@@ -9,10 +9,7 @@
 SSORPreconditioner::SSORPreconditioner(double omega)
     : omega_(omega)
 {
-    if (omega_ <= 0.0 || omega_ >= 2.0)
-    {
-        throw std::invalid_argument("SSORPreconditioner: omega must satisfy 0 < omega < 2");
-    }
+    if (omega_ <= 0.0 || omega_ >= 2.0) { throw std::invalid_argument("SSORPreconditioner: omega must satisfy 0 < omega < 2"); }
 }
 
 // ============================================================
@@ -24,10 +21,7 @@ void SSORPreconditioner::setup(
 {
     const std::size_t n = sys.size();
 
-    if (n == 0)
-    {
-        throw std::invalid_argument("SSORPreconditioner::setup: system is empty");
-    }
+    if (n == 0) { throw std::invalid_argument("SSORPreconditioner::setup: system is empty"); }
 
     diagonal_.resize(n);
 
@@ -35,10 +29,7 @@ void SSORPreconditioner::setup(
     {
         diagonal_[i] = sys.diagonal(i);
 
-        if (diagonal_[i] == 0.0)
-        {
-            throw std::runtime_error("SSORPreconditioner::setup: zero diagonal coefficient");
-        }
+        if (diagonal_[i] == 0.0) { throw std::runtime_error("SSORPreconditioner::setup: zero diagonal coefficient"); }
     }
 
     system_ = &sys;
@@ -68,19 +59,11 @@ void SSORPreconditioner::apply(
     const std::vector<double>& r,
     std::vector<double>& z) const
 {
-    if (system_ == nullptr)
-    {
-        throw std::runtime_error(
-            "SSORPreconditioner::apply: preconditioner has not been setup");
-    }
+    if (system_ == nullptr) { throw std::runtime_error( "SSORPreconditioner::apply: preconditioner has not been setup"); }
 
     const std::size_t n = system_->size();
 
-    if (r.size() != n)
-    {
-        throw std::runtime_error(
-            "SSORPreconditioner::apply: vector size mismatch");
-    }
+    if (r.size() != n) { throw std::runtime_error( "SSORPreconditioner::apply: vector size mismatch"); }
 
     const double scale = omega_ * (2.0 - omega_);
 
@@ -103,10 +86,7 @@ void SSORPreconditioner::apply(
 
         for (const auto& [j, aij] : system_->row(i))
         {
-            if (j < i)
-            {
-                value -= omega_ * aij * w[j];
-            }
+            if (j < i) { value -= omega_ * aij * w[j]; }
         }
 
         w[i] = value / diagonal_[i];
@@ -144,10 +124,7 @@ void SSORPreconditioner::apply(
 
         for (const auto& [j, aij] : system_->row(i))
         {
-            if (j > i)
-            {
-                value -= omega_ * aij * z[j];
-            }
+            if (j > i) { value -= omega_ * aij * z[j]; }
         }
 
         z[i] = value / diagonal_[i];
