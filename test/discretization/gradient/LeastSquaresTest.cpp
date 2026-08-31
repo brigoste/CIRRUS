@@ -15,17 +15,13 @@ bool runLeastSquaresTest()
 
     QuadMesh2D mesh(nx, ny, 1.0, 1.0);
 
-    ScalarField phi(
-        "phi",
-        mesh,
-        FieldLocation::Cell
-    );
+    ScalarField phi( "phi",
+                     mesh,
+                     FieldLocation::Cell );
 
-    VectorField gradient(
-        "gradient",
-        mesh,
-        FieldLocation::Cell
-    );
+    VectorField gradient( "gradient",
+                           mesh,
+                           FieldLocation::Cell );
 
     // Manufactured solution:
     //
@@ -45,11 +41,9 @@ bool runLeastSquaresTest()
 
     LeastSquaresGradient scheme;
 
-    scheme.compute(
-        mesh,
-        phi,
-        gradient
-    );
+    scheme.compute( mesh,
+                    phi,
+                    gradient );
 
     double error = 0.0;
     double reference = 0.0;
@@ -73,12 +67,11 @@ bool runLeastSquaresTest()
     constexpr double tolerance = 1e-12;
     const bool passed = l2 < tolerance;
 
-    std::cout
-        << "  Least-Squares   "
-        << (passed ? "PASS" : "FAIL")
-        << "   L2 Error = "
-        << l2
-        << "\n";
+    std::cout << "  Least-Squares   "
+              << (passed ? "PASS" : "FAIL")
+              << "   L2 Error = "
+              << l2
+              << "\n";
 
     return passed;
 }
