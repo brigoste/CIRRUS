@@ -41,11 +41,9 @@ const double& ScalarField::operator[](std::size_t i) const { return values_[i]; 
 
 void ScalarField::fill(double value) 
 { 
-    std::fill(
-        values_.begin(), 
-        values_.end(), 
-        value
-    ); 
+    std::fill( values_.begin(), 
+               values_.end(), 
+               value ); 
 }
 
 // Determining intra-mesh point values via interpolation from nearby points.
