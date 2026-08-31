@@ -43,11 +43,11 @@ void SimulationRunner::run(
     }
 
     std::cout << "USER CONFIG:\n"
-          << "  mesh.type = " << cfg.mesh.type << '\n'
-          << "  mesh.nx   = " << cfg.mesh.nx << '\n'
-          << "  mesh.ny   = " << cfg.mesh.ny << '\n'
-          << "  physics   = " << physics::to_string(cfg.physics.type) << '\n'
-          << "  solver    = " << solver::to_string(cfg.solver.method) << '\n';
+              << "  mesh.type = " << cfg.mesh.type << '\n'
+              << "  mesh.nx   = " << cfg.mesh.nx << '\n'
+              << "  mesh.ny   = " << cfg.mesh.ny << '\n'
+              << "  physics   = " << physics::to_string(cfg.physics.type) << '\n'
+              << "  solver    = " << solver::to_string(cfg.solver.method) << '\n';
 
     Simulation sim(cfg);
 
@@ -90,11 +90,9 @@ void SimulationRunner::run(
     // -----------------------------
     // Organize outputs
     // -----------------------------
-    auto output =
-        OutputBuilder::build(
-            sim,
-            solution,
-            residual);
+    auto output = OutputBuilder::build( sim,
+                                        solution,
+                                        residual);
     
     // -----------------------------
     // Write outputs
@@ -102,9 +100,7 @@ void SimulationRunner::run(
     {
         // Timer timer("Output Writing");
         std::cout << "\n --------- Writing Solution ---------\n";
-        OutputManager::write(
-            output,
-            paths.outputRoot);
+        OutputManager::write( output, paths.outputRoot);
     }
 
     // -----------------------------
