@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <iostream>
 
 // Verficiation Case Summary
 struct VerificationSummary
@@ -54,6 +55,10 @@ struct VerificationSummary
 
     bool passed() const
     {
+        std::cout << "\ncase: " << caseName << "\n";
+        std::cout << "Accuracy Passed: " << accuracyPassed << "\n";
+        std::cout << "Refinement Passed: " << (!refinementEnabled || refinementPassed) << "\n";
+        std::cout << "QoI Passed: " << (!refinementEnabled || qoiGciPassed) << "\n";
         return accuracyPassed && (!refinementEnabled || refinementPassed) && (!refinementEnabled || qoiGciPassed);
     }
 };

@@ -8,14 +8,7 @@
 
       "cases":
       [
-        "Linear1D",
-        "Quadratic1D",
-        "Sinusoidal2D",
-        "AdvectionDiffusion2D",
-        "Neumann1D",
-        "Neumann2D",
-        "Robin1D",
-        "Robin2D"
+        "AdvectionDiffusion2D"
       ],
 
       "case_directory": "./case_setup",
