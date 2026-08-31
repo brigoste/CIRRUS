@@ -14,10 +14,7 @@ void JacobiPreconditioner::setup(
     {
         const double aii = sys.coeff(i,i);
 
-        if (std::abs(aii) < 1e-30) 
-        { 
-            throw std::runtime_error( "Jacobi preconditioner: zero diagonal."); 
-        }
+        if (std::abs(aii) < 1e-30) { throw std::runtime_error( "Jacobi preconditioner: zero diagonal."); }
 
         diagInv_[i] = 1.0 / aii;
     }
