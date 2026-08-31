@@ -156,31 +156,16 @@ std::size_t Mesh2D::nfaces() const { return faces_.size(); }
 
 std::size_t Mesh2D::nnodes() const { return nodes_.size(); }
 
-const Point& Mesh2D::node(std::size_t i) const
-{
-    return nodes_.at(i);
-}
+const Point& Mesh2D::node(std::size_t i) const { return nodes_.at(i); }
 
-const Point& Mesh2D::cellCenter(std::size_t i) const
-{
-    return centers_.at(i);
-}
+const Point& Mesh2D::cellCenter(std::size_t i) const { return centers_.at(i); }
 
-const Face& Mesh2D::face(std::size_t i) const
-{
-    return faces_.at(i);
-}
+const Face& Mesh2D::face(std::size_t i) const { return faces_.at(i); }
 
 // iterators
-std::vector<Face>::const_iterator Mesh2D::facesBegin() const
-{
-    return faces_.begin();
-}
+std::vector<Face>::const_iterator Mesh2D::facesBegin() const { return faces_.begin(); }
 
-std::vector<Face>::const_iterator Mesh2D::facesEnd() const
-{
-    return faces_.end();
-}
+std::vector<Face>::const_iterator Mesh2D::facesEnd() const { return faces_.end(); }
 
 // =========================================================
 // VTK INTERFACE
@@ -194,10 +179,8 @@ void Mesh2D::cellNodes(std::size_t c, std::vector<std::size_t>& nodes) const
     int i = c % Nx_;
     int j = c / Nx_;
 
-    nodes = {
-        static_cast<std::size_t>(i + j * (Nx_ + 1)),
-        static_cast<std::size_t>((i + 1) + j * (Nx_ + 1)),
-        static_cast<std::size_t>((i + 1) + (j + 1) * (Nx_ + 1)),
-        static_cast<std::size_t>(i + (j + 1) * (Nx_ + 1))
-    };
+    nodes = { static_cast<std::size_t>(i + j * (Nx_ + 1)),
+              static_cast<std::size_t>((i + 1) + j * (Nx_ + 1)),
+              static_cast<std::size_t>((i + 1) + (j + 1) * (Nx_ + 1)),
+              static_cast<std::size_t>(i + (j + 1) * (Nx_ + 1)) };
 }
