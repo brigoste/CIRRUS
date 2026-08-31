@@ -10,23 +10,10 @@ class LinearEquationSystem;
 
 inline PreconditionerType preconditioner_from_string(const std::string& s)
 {
-    if (s == "None")   
-    {
-        return PreconditionerType::None;
-    }
-    if (s == "Jacobi") 
-    {
-        return PreconditionerType::Jacobi;
-    }
-    if (s == "ILU0")   
-    {
-        return PreconditionerType::ILU0;
-    }
-
-    if (s == "SSOR")   
-    {
-        return PreconditionerType::SSOR;
-    }
+    if (s == "None") { return PreconditionerType::None; }
+    if (s == "Jacobi") { return PreconditionerType::Jacobi; }
+    if (s == "ILU0") { return PreconditionerType::ILU0; }
+    if (s == "SSOR") { return PreconditionerType::SSOR; }
 
     throw std::runtime_error( "Unknown preconditioner: " + s);
 }
@@ -69,12 +56,9 @@ public:
 
     virtual ~Preconditioner() = default;
 
-    virtual void setup(
-        const LinearEquationSystem& sys) = 0;
+    virtual void setup(const LinearEquationSystem& sys) = 0;
 
-    virtual void apply(
-        const std::vector<double>& r,
-        std::vector<double>& z) const = 0;
+    virtual void apply(const std::vector<double>& r, std::vector<double>& z) const = 0;
 
     virtual std::string name() const = 0;
 };
