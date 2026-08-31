@@ -7,8 +7,7 @@ QuadMesh2D::QuadMesh2D(std::size_t nx, std::size_t ny,
                        double lx, double ly)
 : nx_(nx), ny_(ny), Lx_(lx), Ly_(ly)
 {
-    if (nx < 2 || ny < 2)
-        throw std::runtime_error("Invalid mesh size");
+    if (nx < 2 || ny < 2) { throw std::runtime_error("Invalid mesh size"); }
 
     dx_ = lx / nx;
     dy_ = ly / ny;
@@ -227,10 +226,7 @@ std::size_t QuadMesh2D::findCell(const Point& position) const
     const double x = position[0];
     const double y = position[1];
 
-    if (x < 0.0 || x > getLx() || y < 0.0 || y > getLy())
-    {
-        throw std::out_of_range("QuadMesh2D::findCell: position lies outside mesh.");
-    }
+    if (x < 0.0 || x > getLx() || y < 0.0 || y > getLy()) { throw std::out_of_range("QuadMesh2D::findCell: position lies outside mesh."); }
 
     std::size_t i = std::min( static_cast<std::size_t>(x / dx_), nx_ - 1 );
     std::size_t j = std::min( static_cast<std::size_t>(y / dy_), ny_ - 1 );
@@ -241,10 +237,8 @@ std::size_t QuadMesh2D::findCell(const Point& position) const
 #ifdef DEBUG
 for (const auto& face : faces_)
 {
-    double d_eff =
-        std::abs(LA::dot(face.dPN, face.normal));
+    double d_eff = std::abs(LA::dot(face.dPN, face.normal));
 
-    if (d_eff <= 0.0)
-        throw std::runtime_error("Invalid face spacing");
+    if (d_eff <= 0.0) { throw std::runtime_error("Invalid face spacing"); }
 }
 #endif
