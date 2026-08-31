@@ -22,10 +22,7 @@ std::size_t MemoryDiagnostics::currentRSS()
 
     PROCESS_MEMORY_COUNTERS counters{};
 
-    if (!GetProcessMemoryInfo(GetCurrentProcess(), &counters, sizeof(counters)))
-    {
-        throw std::runtime_error("MemoryDiagnostics: failed to query current RSS." );
-    }
+    if (!GetProcessMemoryInfo(GetCurrentProcess(), &counters, sizeof(counters))) { throw std::runtime_error("MemoryDiagnostics: failed to query current RSS." ); }
 
     return static_cast<std::size_t>(counters.WorkingSetSize);
 
@@ -33,12 +30,7 @@ std::size_t MemoryDiagnostics::currentRSS()
 
     std::ifstream status("/proc/self/status");
 
-    if (!status)
-    {
-        throw std::runtime_error(
-            "MemoryDiagnostics: failed to open /proc/self/status."
-        );
-    }
+    if (!status) { throw std::runtime_error( "MemoryDiagnostics: failed to open /proc/self/status." ); }
 
     std::string line;
 
@@ -53,20 +45,13 @@ std::size_t MemoryDiagnostics::currentRSS()
 
             stream >> value >> unit;
 
-            if (!stream)
-            {
-                throw std::runtime_error(
-                    "MemoryDiagnostics: failed to parse VmRSS."
-                );
-            }
+            if (!stream) { throw std::runtime_error( "MemoryDiagnostics: failed to parse VmRSS." ); }
 
             return value * 1024;
         }
     }
 
-    throw std::runtime_error(
-        "MemoryDiagnostics: VmRSS not found."
-    );
+    throw std::runtime_error( "MemoryDiagnostics: VmRSS not found." );
 
 #endif
 }
@@ -78,10 +63,7 @@ std::size_t MemoryDiagnostics::peakRSS()
 
     PROCESS_MEMORY_COUNTERS counters{};
 
-    if (!GetProcessMemoryInfo( GetCurrentProcess(), &counters, sizeof(counters)))
-    {
-        throw std::runtime_error("MemoryDiagnostics: failed to query peak RSS.");
-    }
+    if (!GetProcessMemoryInfo( GetCurrentProcess(), &counters, sizeof(counters))) { throw std::runtime_error("MemoryDiagnostics: failed to query peak RSS."); }
 
     return static_cast<std::size_t>( counters.PeakWorkingSetSize );
 
@@ -89,12 +71,7 @@ std::size_t MemoryDiagnostics::peakRSS()
 
     std::ifstream status("/proc/self/status");
 
-    if (!status)
-    {
-        throw std::runtime_error(
-            "MemoryDiagnostics: failed to open /proc/self/status."
-        );
-    }
+    if (!status) { throw std::runtime_error( "MemoryDiagnostics: failed to open /proc/self/status." ); }
 
     std::string line;
 
@@ -109,20 +86,13 @@ std::size_t MemoryDiagnostics::peakRSS()
 
             stream >> value >> unit;
 
-            if (!stream)
-            {
-                throw std::runtime_error(
-                    "MemoryDiagnostics: failed to parse VmHWM."
-                );
-            }
+            if (!stream) { throw std::runtime_error( "MemoryDiagnostics: failed to parse VmHWM." ); }
 
             return value * 1024;
         }
     }
 
-    throw std::runtime_error(
-        "MemoryDiagnostics: VmHWM not found."
-    );
+    throw std::runtime_error( "MemoryDiagnostics: VmHWM not found." );
 
 #endif
 }
