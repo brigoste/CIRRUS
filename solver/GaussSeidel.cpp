@@ -29,37 +29,20 @@ std::vector<double> GaussSeidel(
 
             for (const auto& [j, aij] : row)
             {
-                if (j == i)
-                {
-                    diag = aij;
-                }
-                else
-                {
-                    sum += aij * x[j];
-                }
+                if (j == i) { diag = aij; }
+                else { sum += aij * x[j]; }
             }
 
-            if (std::abs(diag) < 1e-14)
-            {
-                throw std::runtime_error(
-                    "Zero diagonal in GS"
-                );
-            }
+            if (std::abs(diag) < 1e-14) { throw std::runtime_error( "Zero diagonal in GS" ); }
 
             double x_new = (sys.rhs(i) - sum) / diag;
 
-            maxRes = std::max(
-                maxRes,
-                std::abs(x_new - x[i])
-            );
+            maxRes = std::max( maxRes, std::abs(x_new - x[i]) );
 
             x[i] = x_new;
         }
 
-        if (maxRes < tol)
-        {
-            break;
-        }
+        if (maxRes < tol) { break; }
     }
 
     return x;
